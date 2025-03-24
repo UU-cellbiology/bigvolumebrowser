@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>40.0.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>nl.uu.science.cellbiology</groupId>
+	<artifactId>bigvolumebrowser</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<name>BigVolumeBrowser</name>
+	<description>browsing large volumetric data</description>
+	<url>https://github.com/ekatrukha/bigvolumebrowser</url>
+	<inceptionYear>2025</inceptionYear>
+	<organization>
+		<name>Cell Biology, Neurobiology and Biophysics Department of Utrecht University</name>
+		<url>https://cellbiology.science.uu.nl/</url>
+	</organization>
+	
+	<licenses>
+		<license>
+			<name>Simplified BSD License</name>
+			<url>https://opensource.org/licenses/BSD-2-Clause</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+    <developers>
+        <developer>
+            <id>ekatrukha</id>
+            <name>Eugene Katrukha</name>
+            <url>https://imagej.net/people/ekatrukha</url>
+            <roles>
+       			<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
+    
+	<contributors>
+		<contributor>
+			<name>TODO</name>
+		</contributor>
+	</contributors>	
+	
+	<mailingLists>
+		<mailingList>
+			<name>Image.sc Forum</name>
+			<archive>https://forum.image.sc/tags/imglib2</archive>
+		</mailingList>
+	</mailingLists>
+
+    <scm>
+        <connection>scm:git:git://github.com/ekatrukha/bigvolumebrowser</connection>
+        <developerConnection>scm:git:git@github.com/ekatrukha/bigvolumebrowser</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/ekatrukha/bigvolumebrowser</url>
+    </scm>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>http://github.com/ekatrukha/bigvolumebrowser/issues</url>
+    </issueManagement>
+    <ciManagement>
+		<system>GitHub Actions</system>
+		<url>https://github.com/ekatrukha/bigvolumebrowser/actions</url>
+    </ciManagement>
+
+	<properties>
+		<package-name>bvb</package-name>    
+		<license.licenseName>bsd_2</license.licenseName>
+        <license.copyrightOwners>Cell Biology, Neurobiology and Biophysics Department of Utrecht University.</license.copyrightOwners>  			
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<!--  releaseProfiles>sign,deploy-to-scijava</releaseProfiles -->
+	</properties>
+
+	<dependencies>
+		<dependency>
+		  <groupId>nl.uu.science.cellbiology</groupId>
+		  <artifactId>bvv-playground</artifactId>
+		  <version>0.3.5-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- BIOFORMATS -->
+		<dependency>
+			<groupId>ome</groupId>
+			<artifactId>bio-formats_plugins</artifactId>
+			<exclusions>
+				<exclusion><!-- NB: Exclude problematic uber-JAR that bundles commons-io. -->
+					<groupId>ch.systems.cisd</groupId>
+					<artifactId>jhdf5</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!--dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-mesh</artifactId>
+		</dependency -->
+		<dependency>
+		    <groupId>com.github.imglib</groupId>
+		    <artifactId>imglib2-mesh</artifactId>
+		    <version>e7d4e89</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.formdev</groupId>
+			<artifactId>flatlaf</artifactId>
+		</dependency>
+
+		<!-- SCIFIO dependencies -->
+		<dependency>
+			<groupId>io.scif</groupId>
+			<artifactId>scifio</artifactId>
+		</dependency>
+		
+		<!-- Bioformats opener -->
+		<dependency>
+			<groupId>ch.epfl.biop</groupId>
+			<artifactId>bigdataviewer-image-loaders</artifactId>
+			<version>0.6.4</version> 
+		</dependency>
+  		
+		<!-- ImgLib2 dependencies -->
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-algorithm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-algorithm-gpl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-realtransform</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-roi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-ij</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>ui-behaviour</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.joml</groupId>
+			<artifactId>joml</artifactId>
+		</dependency>
+		
+		<!-- BDV dependencies -->
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-core</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>sc.fiji</groupId>
+  			<artifactId>bigdataviewer_fiji</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+		</dependency>
+		
+		<dependency>
+        	<groupId>gov.nist.math</groupId>
+        	<artifactId>jama</artifactId>
+        </dependency>
+	</dependencies>
+	
+	<repositories>		
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
+	
+</project>
