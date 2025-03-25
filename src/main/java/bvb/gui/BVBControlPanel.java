@@ -24,18 +24,19 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 	public JFrame cpFrame;
 	JTabbedPane tabPane;
 	public ClipPanel clipPanel;
+	final SelectedSources selectedSources;
 	
 	public BVBControlPanel(final BigVolumeBrowser<T> bvb_) 
 	{
 		super(new GridBagLayout());
 		bvb = bvb_;
-		
+		selectedSources = new SelectedSources(bvb.bvvViewer);
 		
 		tabPane = new JTabbedPane(SwingConstants.LEFT);
 		URL icon_path = this.getClass().getResource("/icons/cube_icon.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 
-	    clipPanel = new ClipPanel(bvb.bvvViewer);
+	    clipPanel = new ClipPanel(bvb.bvvViewer, selectedSources);
 	    tabPane.addTab("",tabIcon, clipPanel, "View/Clip");
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);

@@ -30,6 +30,7 @@ import bdv.viewer.SourceToConverterSetupBimap;
 import bdv.viewer.ViewerState;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.pgcards.sourcetable.SourceSelectionState;
+import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
 import bvvpg.pgcards.sourcetable.SourceTableModelPG.StateModel;
 import bvvpg.source.converters.ConverterSetupsPG;
 
@@ -47,6 +48,8 @@ public class ClipPanel extends JPanel {
 
 	public JCheckBox cbClipEnabled;
 	private StateModel model;
+	private int nActiveWindow = -1;
+
 
 //	public JButton butExtractClipped;
 //	public JCheckBox showClippedBox;
@@ -59,34 +62,28 @@ public class ClipPanel extends JPanel {
 	
 	private void test (int nSource, int nNumber)
 	{
-		System.out.println(nSource+ " " + nNumber);
+
+			System.out.println(nSource+ " " + nNumber);
+		
 	}
 	
 	//public ClipPanel(int nW, int nH, int nSl) {
-	public ClipPanel(final VolumeViewerPanel viewer) 
+	public ClipPanel(final VolumeViewerPanel viewer, SelectedSources sourceSelection) 
 	{
 		super();
+		sourceSelection.addSourceSelectionListener(  new SelectedSources.Listener()
+		{
+			
+			@Override
+			public void selectedSourcesChanged(int nWindow, List< ConverterSetup > csList)
+			{
+				//System.out.println(csList.size());
+				test(nWindow, csList.size());
+			}
+		} );
 
-		viewer.sourceSelection.addSourceSelectionStateListener( new SourceSelectionState.Listener()
-		{
-			
-			@Override
-			public void selectionCSChanged( List< ConverterSetup > csList )
-			{
-				//System.out.println(csList.size());
-				test(0, csList.size());
-			}
-		} );
-		viewer.sourceGroupSelection.addSourceSelectionStateListener( new SourceSelectionState.Listener()
-		{
-			
-			@Override
-			public void selectionCSChanged( List< ConverterSetup > csList )
-			{
-				//System.out.println(csList.size());
-				test(1, csList.size());
-			}
-		} );
+		
+		
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints cd = new GridBagConstraints();
 
