@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.ValuePair;
@@ -141,11 +142,15 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 			List< BvvStackSource< ? > > sourcesSPIM = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
 			
 			spimDataTobvvSourceList.put( spimData, sourcesSPIM );
-			for (BvvStackSource< ? > bvvSourve : sourcesSPIM) 
+			for (BvvStackSource< ? > bvvSource : sourcesSPIM) 
 			{
-				bvvSourceToSpimData.put( bvvSourve, spimData );
+				bvvSourceToSpimData.put( bvvSource, spimData );
 			}
-			
+			double [] minI = new double[3];
+			double [] maxI = new double[3];
+			for(int i=0;i<3;i++)
+				maxI[i]=30;
+			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
 			
 			
 		}

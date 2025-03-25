@@ -55,6 +55,12 @@ public class NumberField extends JPanel {
 		for(Listener l : listener)
 			l.valueChanged(v);
 	}
+	
+	@Override
+	public void setEnabled (boolean bEnabled)
+	{
+		textfield.setEnabled( bEnabled );
+	}
 
 	public static void main(String[] args) {
 		NumberField nf = new NumberField(8);

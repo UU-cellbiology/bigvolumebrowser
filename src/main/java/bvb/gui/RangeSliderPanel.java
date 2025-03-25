@@ -97,6 +97,14 @@ public class RangeSliderPanel extends JPanel implements FocusListener, NumberFie
 
 		updateTextfieldsFromSliders();
 	}
+	
+	@Override
+	public void setEnabled (boolean bEnabled)
+	{
+		slider.setEnabled( bEnabled );
+		minTF.setEnabled( bEnabled );
+		maxTF.setEnabled( bEnabled );
+	}
 	public NumberField getMinField() {
 		return minTF;
 	}

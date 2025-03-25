@@ -1,73 +1,127 @@
 package bvb.gui;
 
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.lang.reflect.InvocationTargetException;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
-import com.formdev.flatlaf.FlatIntelliJLaf;
 
 import net.imglib2.Interval;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.util.InvokeOnEDT;
-import bdv.viewer.AbstractViewerPanel;
-import bdv.viewer.ConverterSetups;
-import bdv.viewer.SourceToConverterSetupBimap;
-import bdv.viewer.ViewerState;
+import bdv.ui.UIUtils;
 import bvvpg.core.VolumeViewerPanel;
-import bvvpg.pgcards.sourcetable.SourceSelectionState;
-import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
-import bvvpg.pgcards.sourcetable.SourceTableModelPG.StateModel;
-import bvvpg.source.converters.ConverterSetupsPG;
+import bvvpg.source.converters.GammaConverterSetup;
 
 
-public class ClipPanel extends JPanel {
-		
-	/**
-	 * 
-	 */
-	
+public class ClipPanel extends JPanel implements ItemListener 
+{
 
 	private static final long serialVersionUID = 1885320351623882576L;
 	private RangeSliderPanel [] bbAxes = new RangeSliderPanel[3];
 	private ArrayList<Listener> listeners =	new ArrayList<>();
 
 	public JCheckBox cbClipEnabled;
-	private StateModel model;
+	public JLabel selectionWindow;
+	
 	private int nActiveWindow = -1;
+	private List< ConverterSetup > csList = new ArrayList<>();
+	
+	/**
+	 * Panel background if color reflects a set of sources all having the same color
+	 */
+	private Color consistentBg = Color.WHITE;
 
-
-//	public JButton butExtractClipped;
-//	public JCheckBox showClippedBox;
-//	public JCheckBox clipROIBox;
+	/**
+	 * Panel background if color reflects a set of sources with different colors
+	 */
+	private Color inConsistentBg = Color.WHITE;
 	
 	public static interface Listener {
 		public void boundingBoxChanged(long [][] box);
 
 	}
-	
-	private void test (int nSource, int nNumber)
+	private synchronized void updateCS(int nSource, List< ConverterSetup > converterSetupList)
 	{
-
-			System.out.println(nSource+ " " + nNumber);
+		nActiveWindow = nSource;
+		csList = converterSetupList;
+		updateGUI();
+	}
+	
+	@Override
+	public void setEnabled(boolean bEnabled)
+	{
+		setEnabledSliders(bEnabled);
+		cbClipEnabled.setEnabled( bEnabled );
 		
 	}
 	
-	//public ClipPanel(int nW, int nH, int nSl) {
+	public void setEnabledSliders(boolean bEnabled)
+	{
+		for(int i=0;i<3;i++)
+		{
+			bbAxes[i].setEnabled( bEnabled );
+		}
+	}
+	
+	private synchronized void updateGUI()
+	{
+		updateColors();
+		switch (nActiveWindow)
+		{
+		case 0:
+			selectionWindow.setText( "Sources");
+			break;
+		case 1:
+			selectionWindow.setText( "Groups");
+			break;
+		default:
+			selectionWindow.setText( "None");
+		}	
+		if(csList.size()==0)
+		{
+			setEnabled(false);
+			return;
+		}
+		setEnabled(true);	
+		//consistent clipping
+		boolean bClipConsistent = true;
+		int bClipEnabled = -1;
+		for ( final ConverterSetup cs: csList)
+		{
+			 
+			if(bClipEnabled<0)
+			{
+				bClipEnabled = ((GammaConverterSetup)cs).clipActive()?1:0;	
+			}
+			else
+			{
+				bClipConsistent &= (bClipEnabled==(((GammaConverterSetup)cs).clipActive()?1:0));
+			}
+			
+		}
+		if(bClipConsistent)
+		{
+			cbClipEnabled.setBackground( consistentBg );
+			cbClipEnabled.setSelected( bClipEnabled !=0 );
+			setEnabledSliders(bClipEnabled !=0);
+		}
+		else
+		{
+			setEnabledSliders(true);
+			cbClipEnabled.setBackground(inConsistentBg );
+		}
+	}
+	
+
 	public ClipPanel(final VolumeViewerPanel viewer, SelectedSources sourceSelection) 
 	{
 		super();
@@ -75,13 +129,11 @@ public class ClipPanel extends JPanel {
 		{
 			
 			@Override
-			public void selectedSourcesChanged(int nWindow, List< ConverterSetup > csList)
+			public void selectedSourcesChanged(int nWindow, List< ConverterSetup > converterSetupList )
 			{
-				//System.out.println(csList.size());
-				test(nWindow, csList.size());
+				updateCS(nWindow, converterSetupList );
 			}
 		} );
-
 		
 		
 		GridBagLayout gridbag = new GridBagLayout();
@@ -106,31 +158,24 @@ public class ClipPanel extends JPanel {
 		cd.fill = GridBagConstraints.NONE;
 		cd.anchor = GridBagConstraints.WEST;
 		cbClipEnabled = new JCheckBox("Clipping", false);
-		cd.gridx=1;
+		cbClipEnabled.addItemListener( this );
+		cd.gridx = 1;
 		this.add(cbClipEnabled,cd);
-//		showClippedBox = new JCheckBox("Box", false);
-//		
-//		clipROIBox = new JCheckBox("Clip ROIs", false);
-//		cd.gridx=1;
-//		//c.gridy++;
-//		this.add(showClippedBox,cd);
-//		cd.gridx=2;
-//		this.add(clipROIBox,cd);
-//		cd.gridx=3;
-//		cd.anchor = GridBagConstraints.EAST;
-//		butExtractClipped = new JButton("Extract");
-//		this.add(butExtractClipped,cd);
+		selectionWindow = new JLabel("None");
+		cd.gridx = 2;
+		this.add(selectionWindow,cd);
+
 
 
 		RangeSliderPanel.Listener bbListener = new RangeSliderPanel.Listener() {
 			@Override
-			public void sliderChanged() {
+			public void sliderChanged() 
+			{
 				long [][] new_box = new long [2][3];
 				for(int d=0;d<3;d++)
 				{
-					new_box [0][d]=bbAxes[d].getMin();
-					new_box [1][d]=bbAxes[d].getMax();
-					
+					new_box [0][d] = bbAxes[d].getMin();
+					new_box [1][d] = bbAxes[d].getMax();					
 				}
 				fireBoundingBoxChanged(new_box);
 			}
@@ -138,9 +183,10 @@ public class ClipPanel extends JPanel {
 		for(int d=0;d<3;d++)
 		{
 			bbAxes[d].addSliderChangeListener(bbListener);
-		}
-
+		}		
+		updateGUI();
 	}
+	
 	private RangeSliderPanel addRangeSlider(String label, int[] realMinMax, int[] setMinMax, GridBagConstraints c) {
 		RangeSliderPanel slider = new RangeSliderPanel(realMinMax, setMinMax);
 
@@ -213,18 +259,26 @@ public class ClipPanel extends JPanel {
 		for(Listener l : listeners)
 			l.boundingBoxChanged(box);
 	}
-	public static void main(String[] args) {
-		
-//		try {
-//		    UIManager.setLookAndFeel( new FlatIntelliJLaf() );
-//		} catch( Exception ex ) {
-//		    System.err.println( "Failed to initialize LaF" );
-//		}
-//		JFrame frame = new JFrame();
-//
-//		ClipPanel slider = new ClipPanel(new long[] {60,80,100});
-//		frame.getContentPane().add(slider);
-//		frame.pack();
-//		frame.setVisible(true);
+	private void updateColors()
+	{
+		consistentBg = UIManager.getColor( "Panel.background" );
+		inConsistentBg = UIUtils.mix( consistentBg, Color.red, 0.9 );
 	}
+
+	private void updateClipEnabled()
+	{
+		boolean bEnabled = cbClipEnabled.isSelected();
+		for ( final ConverterSetup cs: csList)
+		{
+			  ((GammaConverterSetup)cs).setClipActive( bEnabled );
+		}
+	}
+	@Override
+	public void itemStateChanged( ItemEvent arg0 )
+	{
+		if(arg0.getSource() == cbClipEnabled)
+			updateClipEnabled();
+		updateGUI();
+	}
+
 }
