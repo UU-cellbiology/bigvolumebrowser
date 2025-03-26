@@ -8,6 +8,9 @@ import bvvpg.core.VolumeViewerPanel;
 import bvvpg.pgcards.sourcetable.SourceSelectionState;
 import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
 
+/** Class that keeps track on sources currently selected in BVV (Cards panel).
+ *  Fires an event on selection change or focus change
+ *  between the Sources and Groups panels switch. **/
 
 public class SelectedSources implements SourceSelectionWindowState.Listener, SourceSelectionState.Listener
 {
@@ -19,15 +22,13 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
 	public static interface Listener 
 	{
 		public void selectedSourcesChanged(int nWindow, List< ConverterSetup > csList);
-
 	}
 	
 	public SelectedSources(final VolumeViewerPanel viewer)
 	{
 		viewer.sourceSelection.addSourceSelectionStateListener( this );
 		viewer.sourceGroupSelection.addSourceSelectionStateListener( this );
-		viewer.sourceSelectionWindowState.addSourceSelectionWindowStateListener( this );
-				
+		viewer.sourceSelectionWindowState.addSourceSelectionWindowStateListener( this );				
 	}
 
 	@Override
@@ -38,14 +39,14 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
 				l.selectedSourcesChanged(nActiveWindow,csList );
 
 	}
+	
 	@Override
 	public void selectionCSChanged( List< ConverterSetup > csList )
 	{
 		for(Listener l : listeners)
-				l.selectedSourcesChanged(nActiveWindow,csList );
-
-		
+				l.selectedSourcesChanged(nActiveWindow,csList );		
 	}
+	
 	public void addSourceSelectionListener(Listener l) 
 	{
         listeners.add(l);

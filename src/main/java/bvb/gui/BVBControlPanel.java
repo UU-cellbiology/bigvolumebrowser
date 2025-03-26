@@ -13,7 +13,6 @@ import javax.swing.SwingConstants;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-
 import bvb.core.BigVolumeBrowser;
 
 
@@ -23,7 +22,7 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 	BigVolumeBrowser<T> bvb;
 	public JFrame cpFrame;
 	JTabbedPane tabPane;
-	public ClipPanel clipPanel;
+	public ClipPanelNew clipPanel;
 	final SelectedSources selectedSources;
 	
 	public BVBControlPanel(final BigVolumeBrowser<T> bvb_) 
@@ -36,7 +35,8 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 		URL icon_path = this.getClass().getResource("/icons/cube_icon.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 
-	    clipPanel = new ClipPanel(bvb.bvvViewer, selectedSources);
+	    clipPanel = new ClipPanelNew(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
+	    clipPanel.setBorder(new PanelTitle(" Clipping "));
 	    tabPane.addTab("",tabIcon, clipPanel, "View/Clip");
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);

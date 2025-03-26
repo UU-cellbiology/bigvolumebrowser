@@ -1,5 +1,7 @@
 package bvb.utils;
 
+import net.imglib2.FinalRealInterval;
+
 public class Bounds3D
 {
 	private final double [] minBound;
@@ -16,6 +18,14 @@ public class Bounds3D
 		}
 		this.minBound = minBound;
 		this.maxBound = maxBound;
+	}
+	public Bounds3D( FinalRealInterval bounds3D)
+	{
+		if(bounds3D.numDimensions() != 3)
+			throw new IllegalArgumentException();
+		this.minBound = bounds3D.minAsDoubleArray();
+		this.maxBound = bounds3D.maxAsDoubleArray();
+
 	}
 	public double [] getMinBound()
 	{
@@ -69,5 +79,17 @@ public class Bounds3D
 				return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		int hash = 17;
+		for(int d=0; d<3; d++)
+		{
+			hash = hash * 23 + Double.hashCode(minBound[d]);
+			hash = hash * 23 + Double.hashCode(maxBound[d]);
+		}
+		return hash;
 	}
 }
