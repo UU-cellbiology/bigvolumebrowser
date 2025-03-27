@@ -146,12 +146,22 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 			{
 				bvvSourceToSpimData.put( bvvSource, spimData );
 			}
-			double [] minI = new double[3];
-			double [] maxI = new double[3];
-			for(int i=0;i<3;i++)
-				maxI[i]=30;
-			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
+//			double [] minI = new double[3];
+//			double [] maxI = new double[3];
+//			for(int i=0;i<3;i++)
+//				maxI[i]=30;
+//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
 			
+//			double [] minI = new double[3];
+//			double [] maxI = new double[3];
+//			for(int i=0;i<3;i++)
+//			{
+//				minI[i]=225;
+//				maxI[i]=275;
+//			}
+//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
+//			sourcesSPIM.get( 0 ).setCurrent();
+		
 			
 		}
 		catch ( SpimDataException exc )
@@ -171,6 +181,10 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 
 		
 		testBVB.run("");
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 	}
 }

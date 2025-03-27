@@ -16,26 +16,20 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+
 
 import net.imglib2.FinalRealInterval;
-import net.imglib2.Interval;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bdv.util.BoundedRange;
-import bdv.util.Bounds;
 import bdv.viewer.ConverterSetups;
 import bvb.utils.Bounds3D;
 import bvb.utils.ClipAxesBounds;
-import bvvpg.core.VolumeViewerPanel;
 import bvvpg.source.converters.GammaConverterSetup;
-import bvvpg.ui.panels.BoundedRangeEditorPG;
 import bvvpg.ui.panels.BoundedRangePanelPG;
-import bvvpg.vistools.Bvv;
 
-public class ClipPanel extends JPanel implements ItemListener
+public class ClipRangePanel extends JPanel implements ItemListener
 {
 
 	private static final long serialVersionUID = 1885320351623882576L;
@@ -60,10 +54,10 @@ public class ClipPanel extends JPanel implements ItemListener
 	private Color inConsistentBg = Color.WHITE;
 	
 
-	public ClipPanel(final ConverterSetups converterSetups, SelectedSources sourceSelection) 
+	public ClipRangePanel(final ConverterSetups converterSetups, SelectedSources sourceSelection) 
 	{
 		super();
-		
+
 		clipAxesBounds = new ClipAxesBounds(converterSetups);
 
 		GridBagLayout gridbag = new GridBagLayout();
@@ -89,39 +83,29 @@ public class ClipPanel extends JPanel implements ItemListener
 		cd.gridx = 0;
 		cd.fill = GridBagConstraints.BOTH;
 		cd.weightx = 1.0;
+		final JPopupMenu [] menus = new JPopupMenu[3];
 		for(int d=0;d<3;d++)
 		{
 			cd.gridy++;
 			clipAxesPanels[d] = new BoundedRangePanelPG();
+			menus[d] = new JPopupMenu();
+			menus[d].add( runnableItem(  "set bounds ...", clipAxesPanels[d]::setBoundsDialog ) );
+			menus[d].add( runnableItem(  "shrink bounds to selection", clipAxesPanels[d]::shrinkBoundsToRange ) );
+
 			this.add(clipAxesPanels[d],cd);
 		}
-		clipAxesPanels[0].changeListeners().add(new BoundedRangePanelPG.ChangeListener()
-		{
-			
-			@Override
-			public void boundedRangeChanged()
-			{
-				updateAxisClipRange(0);				
-			}
-		});
-		clipAxesPanels[1].changeListeners().add(new BoundedRangePanelPG.ChangeListener()
-		{
-			
-			@Override
-			public void boundedRangeChanged()
-			{
-				updateAxisClipRange(1);				
-			}
-		});
-		clipAxesPanels[2].changeListeners().add(new BoundedRangePanelPG.ChangeListener()
-		{
-			
-			@Override
-			public void boundedRangeChanged()
-			{
-				updateAxisClipRange(2);				
-			}
-		});
+		menus[0].add( runnableItem(  "reset bounds", () -> resetBounds(0)));
+		menus[1].add( runnableItem(  "reset bounds", () -> resetBounds(1)));
+		menus[2].add( runnableItem(  "reset bounds", () -> resetBounds(2)));
+	
+		clipAxesPanels[0].setPopup( () -> menus[0] );
+		clipAxesPanels[1].setPopup( () -> menus[1] );
+		clipAxesPanels[2].setPopup( () -> menus[2] );
+
+		clipAxesPanels[0].changeListeners().add( () -> updateClipAxisRangeBounds(0));
+		clipAxesPanels[1].changeListeners().add( () -> updateClipAxisRangeBounds(1));
+		clipAxesPanels[2].changeListeners().add( () -> updateClipAxisRangeBounds(2));
+
 		//add source selection listener
 		sourceSelection.addSourceSelectionListener(  new SelectedSources.Listener()
 		{
@@ -132,12 +116,12 @@ public class ClipPanel extends JPanel implements ItemListener
 				updateCS(nWindow, converterSetupList );
 			}
 		} );
+		
+		//add listener in case number of sources, etc change
+		converterSetups.listeners().add( s -> updateGUI() );
 
 		updateGUI();
 	}
-	
-
-
 
 
 	private void updateColors()
@@ -223,8 +207,8 @@ public class ClipPanel extends JPanel implements ItemListener
 		if(bClipConsistent)
 		{
 			cbClipEnabled.setBackground( consistentBg );
-			cbClipEnabled.setSelected( bClipEnabled !=0 );
-			setEnabledSliders(bClipEnabled !=0);
+			cbClipEnabled.setSelected( bClipEnabled != 0 );
+			setEnabledSliders(bClipEnabled != 0);
 		}
 		else
 		{
@@ -284,7 +268,7 @@ public class ClipPanel extends JPanel implements ItemListener
 		final BoundedRange [] finalRange = range;
 		final boolean [] isConsistent = allRangesEqual;
 		SwingUtilities.invokeLater( () -> {
-			synchronized ( ClipPanel.this )
+			synchronized ( ClipRangePanel.this )
 			{
 				blockUpdates = true;
 				for (int d=0;d<3;d++)
@@ -292,16 +276,13 @@ public class ClipPanel extends JPanel implements ItemListener
 
 					clipAxesPanels[d].setConsistent( isConsistent[d] );
 					clipAxesPanels[d].setRange( finalRange[d] );
-					//rangeAlphaPanel.setEnabled( true );
-					//rangeAlphaPanel.setRange( finalRange );
-					//rangeAlphaPanel.setConsistent( isConsistent );
 				}
 				blockUpdates = false;
 			}
 		} );
 	}
 	
-	public void updateAxisClipRange( int nAxis)
+	public void updateClipAxisRangeBounds(int nAxis)
 	{
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
@@ -311,12 +292,19 @@ public class ClipPanel extends JPanel implements ItemListener
 		for ( final ConverterSetup cs : csList )
 		{
 			FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
-
+			final Bounds3D bounds = clipAxesBounds.getBounds( cs );
 			if(clipInt == null)
 			{
-				final Bounds3D bounds = clipAxesBounds.getBounds( cs );
+				//final Bounds3D bounds = clipAxesBounds.getBounds( cs );
 				clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
 			}
+			if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
+			{
+				bounds.getMinBound()[nAxis] = range.getMinBound();
+				bounds.getMaxBound()[nAxis] = range.getMaxBound();
+				clipAxesBounds.setBounds( cs, bounds );
+			}
+			
 			final double [] min = clipInt.minAsDoubleArray();
 			final double [] max = clipInt.maxAsDoubleArray();
 			min[nAxis] = range.getMin();
@@ -324,5 +312,40 @@ public class ClipPanel extends JPanel implements ItemListener
 			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
 		}
 		updateGUI();
+	}
+	
+	/** sets bounds along the axis including all selected sources **/
+	public void resetBounds(int nAxis)
+	{
+		if ( blockUpdates || csList== null || csList.isEmpty() )
+			return;
+		Bounds3D range3D = null;
+		for ( final ConverterSetup cs : csList )
+		{
+			if(range3D == null)
+				range3D = clipAxesBounds.getDefaultBounds( cs );
+			else
+				range3D = range3D.join( clipAxesBounds.getDefaultBounds( cs ) );			
+		}
+		if(range3D != null)
+		{
+			final BoundedRange currRangeAxis = clipAxesPanels[nAxis].getRange();
+			double bmin = range3D.getMinBound()[nAxis];
+			double bmax = range3D.getMaxBound()[nAxis];
+			double max = Math.min( bmax, currRangeAxis.getMax() );
+			max = Math.max( max, bmin );
+			double min = Math.max( bmin, currRangeAxis.getMin() );
+			min = Math.min( max, min );
+			final BoundedRange newRange = new BoundedRange (bmin,bmax, min, max);
+			clipAxesPanels[nAxis].setRange( newRange );
+			updateClipAxisRangeBounds(nAxis);
+		}
+	}
+	
+	private JMenuItem runnableItem( final String text, final Runnable action )
+	{
+		final JMenuItem item = new JMenuItem( text );
+		item.addActionListener( e -> action.run() );
+		return item;
 	}
 }

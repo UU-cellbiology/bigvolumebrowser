@@ -4,17 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.imglib2.FinalRealInterval;
-import net.imglib2.realtransform.AffineTransform3D;
-
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedRange;
 
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
 import bvvpg.source.converters.GammaConverterSetup;
 
+/** a set of 3D bounds defining clipping volumes **/
 public class ClipAxesBounds
 {
 	private final SourceToConverterSetupBimap bimap;
@@ -65,32 +63,32 @@ public class ClipAxesBounds
 		}
 	}
 
-	private Bounds3D getDefaultBounds( final ConverterSetup setup )
+	public Bounds3D getDefaultBounds( final ConverterSetup setup )
 	{
-		Bounds3D bounds;
+		Bounds3D bounds = null;
 
 		final SourceAndConverter< ? > source = bimap.getSource( setup );
 		if ( source != null )
 		{
-			//get transform
-			AffineTransform3D transformSource = new AffineTransform3D();
-			(( TransformedSource< ? > ) source.getSpimSource() ).getSourceTransform(0, 0, transformSource);
-			double [] min = source.getSpimSource().getSource( 0, 0 ).minAsDoubleArray();
-			double [] max = source.getSpimSource().getSource( 0, 0 ).maxAsDoubleArray();
-			//extend to include all range
-			for(int d=0; d<3; d++)
+			//get the range over all timepoints
+			int t = 0;
+			while(source.getSpimSource().isPresent( t ))
 			{
-				min[d] -= 0.5;
-				max[d] += 0.5;
+				if(bounds == null)
+				{
+					bounds = new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0));
+				}
+				else
+				{
+					bounds = bounds.join( new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0)) );
+				}
+					
+				t++;
 			}
-			FinalRealInterval interval = new FinalRealInterval(min, max);
-			interval = transformSource.estimateBounds( interval );
-			bounds = new Bounds3D(interval);
 		}
 		else
 		{
-			System.out.println("error in estimation of cliping bounds, no source found");
-			bounds = null;
+			System.out.println("error in estimation of clipping bounds, no source found");
 		}
 		return bounds;
 	}

@@ -2,6 +2,7 @@ package bvb.gui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -22,7 +23,7 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 	BigVolumeBrowser<T> bvb;
 	public JFrame cpFrame;
 	JTabbedPane tabPane;
-	public ClipPanel clipPanel;
+	public ClipRangePanel clipRangePanel;
 	final SelectedSources selectedSources;
 	
 	public BVBControlPanel(final BigVolumeBrowser<T> bvb_) 
@@ -33,23 +34,56 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 		
 		tabPane = new JTabbedPane(SwingConstants.LEFT);
 		URL icon_path = this.getClass().getResource("/icons/cube_icon.png");
-	    ImageIcon tabIcon = new ImageIcon(icon_path);
-
-	    clipPanel = new ClipPanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
-	    clipPanel.setBorder(new PanelTitle(" Clipping "));
-	    tabPane.addTab("",tabIcon, clipPanel, "View/Clip");
+	    ImageIcon tabIcon = new ImageIcon(icon_path);   
+		tabPane.addTab("",tabIcon, panelView(), "View/Clip");
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
-	    GridBagConstraints cv = new GridBagConstraints();
-	    cv.gridx = 0;
-	    cv.gridy = 0;	    
-	    cv.weightx = 0.5;
-	    cv.weighty = 1.0;
-	    cv.anchor = GridBagConstraints.NORTHWEST;
-	    cv.gridwidth = GridBagConstraints.REMAINDER;
-	    cv.fill = GridBagConstraints.HORIZONTAL;
-	    cv.fill = GridBagConstraints.BOTH;
+	    final GridBagConstraints gbc = new GridBagConstraints();
+	    gbc.gridx = 0;
+	    gbc.gridy = 0;	    
+	    gbc.weightx = 0.5;
+	    gbc.weighty = 1.0;
+	    gbc.anchor = GridBagConstraints.NORTHWEST;
+	    gbc.gridwidth = GridBagConstraints.REMAINDER;
+	    gbc.fill = GridBagConstraints.HORIZONTAL;
+	    gbc.fill = GridBagConstraints.BOTH;
 	  
-	    this.add(tabPane,cv);
+	    this.add(tabPane,gbc);
+	}
+	
+	JPanel panelView()
+	{
+		JPanel panTabView = new JPanel(new GridBagLayout());
+		
+	    final GridBagConstraints gbc = new GridBagConstraints();
+
+	    clipRangePanel = new ClipRangePanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
+	    ClipRotationPanel clipRotationPanel = new ClipRotationPanel(selectedSources); 
+		
+	    //Clipping Panel
+		JPanel panClip = new JPanel(new GridBagLayout()); 
+		panClip.setBorder(new PanelTitle(" Clipping "));
+
+		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
+		tabClipPane.addTab( "Range", clipRangePanel );
+		tabClipPane.addTab( "Rotation", clipRotationPanel );
+	    gbc.gridx = 0;
+	    gbc.gridy = 0;
+	    gbc.weightx = 1.0;
+	    gbc.fill = GridBagConstraints.HORIZONTAL;
+	    panClip.add(tabClipPane,gbc);
+		
+	    //add panels to Navigation
+	    gbc.insets = new Insets(4,4,2,2);
+	    //View
+	    gbc.gridx = 0;
+	    gbc.gridy = 0;
+	    gbc.weightx = 1.0;
+	    gbc.gridwidth = 1;
+	    gbc.anchor = GridBagConstraints.WEST;
+		
+	    panTabView.add(panClip,gbc);
+	    
+	    return panTabView;
 	}
 }
