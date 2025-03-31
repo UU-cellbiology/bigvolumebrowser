@@ -3,7 +3,6 @@ package bvb.utils;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.util.Intervals;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
@@ -12,20 +11,24 @@ public class Misc
 {
 	public static FinalRealInterval getSourceBoundingBox(final Source<?> source, int nTimePoint, int baseLevel)
 	{
-		AffineTransform3D transformSource = new AffineTransform3D();
+		final AffineTransform3D transformSource = new AffineTransform3D();
 		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
-		double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
-		double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
 		//extend to include all range
 		for(int d=0; d<3; d++)
 		{
 			min[d] -= 0.5;
 			max[d] += 0.5;
 		}
-		FinalRealInterval interval = new FinalRealInterval(min, max);
+		final FinalRealInterval interval = new FinalRealInterval(min, max);
 		return transformSource.estimateBounds( interval );
 	}
 	
+	/** depending on nAxis value, extracts Euler angle (rotation around nAxis)
+	 * value (in radians) from the quaternion q.
+	 * Follows the formula/code from wiki 
+	 * https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles **/
 	public static double quaternionToAngle(int nAxis, double [] q)
 	{
 		double sin;
@@ -37,8 +40,8 @@ public class Misc
 			cos = 1 - 2 * (q[1] * q[1] + q[2] * q[2]);
 			return Math.atan2( sin, cos);
 		case 1:
-			sin = Math.sqrt(1 + 2 * (q[0] * q[2] - q[1] * q[3]));
-			cos = Math.sqrt(1 - 2 * (q[0] * q[2] - q[1] * q[3]));
+			sin = Math.sqrt(1.0 + 2.0 * (q[0] * q[2] - q[1] * q[3]));
+			cos = Math.sqrt(1.0 - 2.0 * (q[0] * q[2] - q[1] * q[3]));
 			return 2.0*Math.atan2(sin, cos) - Math.PI*0.5;
 		case 2:
 			sin = 2 * (q[0] * q[3] + q[1] * q[2]);
@@ -49,6 +52,78 @@ public class Misc
 		}
 	}
 	
+	/** https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/ **/
+	public static double quaternionToAngleSecond(int nAxis, double [] q)
+	{
+	    		//heading Y axis 
+				//attitude Z axis
+				//bank X asis
+			double test = q[1]*q[2] + q[3]*q[0];
+			// singularity at north pole
+			if (test > 0.4999) 
+			{ 
+				switch (nAxis)
+				{
+				case 0:
+					return 0.0;
+				case 1:
+					return 2.0 * Math.atan2(q[1],q[0]);
+				case 2:
+					return Math.PI/2;
+				default:
+					return 0.0;
+				}
+			}
+			// singularity at south pole
+			if (test < -0.4999) 
+			{ 
+				switch (nAxis)
+				{
+				case 0:
+					return 0.0;
+				case 1:
+					return -2.0 * Math.atan2(q[1],q[0]);
+				case 2:
+					return - Math.PI/2;
+				default:
+					return 0.0;
+				}
+
+			}
+			double [] sq = new double[3];
+			for(int d=0;d<3;d++)
+			{
+				sq[d] = q[d+1]*q[d+1];
+			}
+			switch (nAxis)
+			{
+			case 0:
+				return Math.atan2(2.0*q[1]*q[0]-2.0*q[2]*q[3] , 1.0 - 2.0*sq[1] - 2.0*sq[3]);
+			case 1:
+				return Math.atan2(2.0*q[2]*q[0]-2.0*q[1]*q[3] , 1.0 - 2.0*sq[2] - 2.0*sq[3]);
+			case 2:
+				return Math.asin(2.0*test);
+			default:
+				return 0.0;
+			}	
+
+	}
+	
+	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/
+	public static double[]  quaternionToEulerAngles(double [] q)
+	{
+		final double [] eAngles = new double[3];
+		
+		for (int d=0;d<3;d++)
+		{
+			eAngles[d] = quaternionToAngle(d,q);
+		}
+		return eAngles;
+	}
+	
+	/** returns the center of an interval where all coordinates
+	 * were multiplied by -1.
+	 * Return zero vector if the interval is null **/	
 	public static double [] getIntervalCenterShift(RealInterval interval)
 	{
 		if(interval == null)

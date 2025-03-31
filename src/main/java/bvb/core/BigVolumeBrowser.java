@@ -13,9 +13,6 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import net.imglib2.FinalRealInterval;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.ValuePair;
 
 import bvb.gui.BVBControlPanel;
 import bvb.io.BDVHDF5Loader;
@@ -30,7 +27,7 @@ import bvvpg.vistools.BvvStackSource;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
 
-public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > implements PlugIn
+public class BigVolumeBrowser  implements PlugIn
 {
 	/** Bvv instance **/
 	public Bvv bvv = null;
@@ -41,10 +38,11 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 	/** Frame of BigVolumeViewer **/
 	public VolumeViewerFrame bvvFrame;
 	
-	public BVBControlPanel<T> controlPanel;
+	public BVBControlPanel controlPanel;
 	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
+	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataTobvvSourceList;
 	
 	public BigVolumeBrowser()
@@ -152,15 +150,18 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 //				maxI[i]=30;
 //			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
 			
-//			double [] minI = new double[3];
-//			double [] maxI = new double[3];
-//			for(int i=0;i<3;i++)
-//			{
-//				minI[i]=225;
-//				maxI[i]=275;
-//			}
-//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-//			sourcesSPIM.get( 0 ).setCurrent();
+			double [] minI = new double[3];
+			double [] maxI = new double[3];
+			for(int i=0;i<2;i++)
+			{
+				minI[i] = 225;
+				maxI[i] = 275;
+			}
+			minI[2] = 200;
+			maxI[2] = 300;
+
+			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
+			sourcesSPIM.get( 0 ).setCurrent();
 		
 			
 		}
@@ -173,7 +174,6 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 		
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public static void main(String... args) throws Exception
 	{
 		
@@ -181,9 +181,9 @@ public class BigVolumeBrowser < T extends RealType< T > & NativeType< T > > impl
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 
 		
 		testBVB.run("");
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 	}

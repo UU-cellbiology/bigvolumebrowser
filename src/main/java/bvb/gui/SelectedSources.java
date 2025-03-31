@@ -17,11 +17,13 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
 	/** -1 - none focused, 0 - source window, 1 - group window**/
 	private int nActiveWindow = -1;
 	
+	private List< ConverterSetup > csList = new ArrayList<>();
+	
 	private ArrayList<Listener> listeners =	new ArrayList<>();
 	
 	public static interface Listener 
 	{
-		public void selectedSourcesChanged(int nWindow, List< ConverterSetup > csList);
+		public void selectedSourcesChanged();
 	}
 	
 	public SelectedSources(final VolumeViewerPanel viewer)
@@ -32,23 +34,34 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
 	}
 
 	@Override
-	public void selectionWindowChanged( int nWindow, List< ConverterSetup > csList )
+	public void selectionWindowChanged( int nWindow, List< ConverterSetup > csList_ )
 	{
 		nActiveWindow = nWindow;
+		this.csList = csList_;
 		for(Listener l : listeners)
-				l.selectedSourcesChanged(nActiveWindow,csList );
-
+				l.selectedSourcesChanged();
 	}
 	
 	@Override
-	public void selectionCSChanged( List< ConverterSetup > csList )
+	public void selectionCSChanged( List< ConverterSetup > csList_ )
 	{
+		this.csList = csList_;
 		for(Listener l : listeners)
-				l.selectedSourcesChanged(nActiveWindow,csList );		
+				l.selectedSourcesChanged();		
 	}
 	
 	public void addSourceSelectionListener(Listener l) 
 	{
         listeners.add(l);
     }
+	
+	public List< ConverterSetup > getSelectedSources()
+	{
+		return csList;
+	}
+	
+	public int getActiveWindow()
+	{
+		return nActiveWindow;
+	}
 }

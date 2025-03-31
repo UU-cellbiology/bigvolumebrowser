@@ -11,22 +11,19 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-
 import bvb.core.BigVolumeBrowser;
 
 
 
-public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extends JPanel
+public class BVBControlPanel extends JPanel
 {
-	BigVolumeBrowser<T> bvb;
+	BigVolumeBrowser bvb;
 	public JFrame cpFrame;
 	JTabbedPane tabPane;
-	public ClipRangePanel clipRangePanel;
+
 	final SelectedSources selectedSources;
 	
-	public BVBControlPanel(final BigVolumeBrowser<T> bvb_) 
+	public BVBControlPanel(final BigVolumeBrowser bvb_) 
 	{
 		super(new GridBagLayout());
 		bvb = bvb_;
@@ -57,22 +54,7 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 		
 	    final GridBagConstraints gbc = new GridBagConstraints();
 
-	    clipRangePanel = new ClipRangePanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
-	    ClipRotationPanel clipRotationPanel = new ClipRotationPanel(selectedSources); 
-		
-	    //Clipping Panel
-		JPanel panClip = new JPanel(new GridBagLayout()); 
-		panClip.setBorder(new PanelTitle(" Clipping "));
-
-		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
-		tabClipPane.addTab( "Range", clipRangePanel );
-		tabClipPane.addTab( "Rotation", clipRotationPanel );
-	    gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-	    panClip.add(tabClipPane,gbc);
-		
+	    ClipPanel clipPanel = new ClipPanel(bvb, selectedSources);		
 	    //add panels to Navigation
 	    gbc.insets = new Insets(4,4,2,2);
 	    //View
@@ -81,8 +63,8 @@ public class BVBControlPanel< T extends RealType< T > & NativeType< T > > extend
 	    gbc.weightx = 1.0;
 	    gbc.gridwidth = 1;
 	    gbc.anchor = GridBagConstraints.WEST;
-		
-	    panTabView.add(panClip,gbc);
+	    gbc.fill = GridBagConstraints.HORIZONTAL;
+	    panTabView.add(clipPanel,gbc);
 	    
 	    return panTabView;
 	}

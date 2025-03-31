@@ -1,85 +1,55 @@
 package bvb.gui;
 
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
+
 import java.util.List;
 
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 
 import net.imglib2.FinalRealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.ui.UIUtils;
 import bdv.util.BoundedRange;
-import bdv.viewer.ConverterSetups;
 import bvb.utils.Bounds3D;
-import bvb.utils.ClipAxesBounds;
+import bvb.utils.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedRangePanelPG;
 
-public class ClipRangePanel extends JPanel implements ItemListener
+public class ClipRangePanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1885320351623882576L;
-	private BoundedRangePanelPG [] clipAxesPanels = new BoundedRangePanelPG[3];
+	
+	final SelectedSources sourceSelection;
 
-	public JCheckBox cbClipEnabled;
-	public JLabel selectionWindow;
-	private final ClipAxesBounds clipAxesBounds;
-	private int nActiveWindow = -1;
-	private List< ConverterSetup > csList = new ArrayList<>();
+	final ClipSetups clipSetups;
+	
+	private BoundedRangePanelPG [] clipAxesPanels = new BoundedRangePanelPG[3];
 
 	private boolean blockUpdates = false;
 	
-	/**
-	 * Panel background if color reflects a set of sources all having the same color
-	 */
-	private Color consistentBg = Color.WHITE;
 
-	/**
-	 * Panel background if color reflects a set of sources with different colors
-	 */
-	private Color inConsistentBg = Color.WHITE;
-	
-
-	public ClipRangePanel(final ConverterSetups converterSetups, SelectedSources sourceSelection) 
+	public ClipRangePanel(SelectedSources sourceSelection_, final ClipSetups clipSetups_) 
 	{
 		super();
-
-		clipAxesBounds = new ClipAxesBounds(converterSetups);
+		
+		sourceSelection = sourceSelection_;
+		
+		clipSetups = clipSetups_;
 
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints cd = new GridBagConstraints();
 
 		setLayout(gridbag);
 
+
 		cd.gridy = 0;
-		cd.gridwidth = 1;
-		cd.weightx = 0.1;
-		cd.fill = GridBagConstraints.NONE;
-		cd.anchor = GridBagConstraints.WEST;
-		cbClipEnabled = new JCheckBox("Clipping", false);
-		cbClipEnabled.addItemListener( this );
-		cd.gridx = 0;
-		this.add(cbClipEnabled,cd);
-		selectionWindow = new JLabel("Selected: None");
-		cd.gridx++;
-		this.add(selectionWindow,cd);
-		
-		cd.gridwidth = 3;
-		cd.gridy = 1;
 		cd.gridx = 0;
 		cd.fill = GridBagConstraints.BOTH;
 		cd.weightx = 1.0;
@@ -111,56 +81,20 @@ public class ClipRangePanel extends JPanel implements ItemListener
 		{
 			
 			@Override
-			public void selectedSourcesChanged(int nWindow, List< ConverterSetup > converterSetupList )
+			public void selectedSourcesChanged()
 			{
-				updateCS(nWindow, converterSetupList );
+				updateGUI();
 			}
 		} );
 		
 		//add listener in case number of sources, etc change
-		converterSetups.listeners().add( s -> updateGUI() );
+		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
 
-		updateGUI();
-	}
-
-
-	private void updateColors()
-	{
-		consistentBg = UIManager.getColor( "Panel.background" );
-		inConsistentBg = UIUtils.mix( consistentBg, Color.red, 0.9 );
-	}
-
-	private void updateClipEnabled()
-	{
-		boolean bEnabled = cbClipEnabled.isSelected();
-		for ( final ConverterSetup cs: csList)
-		{
-			  ((GammaConverterSetup)cs).setClipActive( bEnabled );
-		}
-	}
-	@Override
-	public void itemStateChanged( ItemEvent arg0 )
-	{
-		if(arg0.getSource() == cbClipEnabled)
-			updateClipEnabled();
-		updateGUI();
-	}
-	private synchronized void updateCS(int nSource, List< ConverterSetup > converterSetupList)
-	{
-		nActiveWindow = nSource;
-		csList = converterSetupList;
 		updateGUI();
 	}
 	
 	@Override
 	public void setEnabled(boolean bEnabled)
-	{
-		setEnabledSliders(bEnabled);
-		cbClipEnabled.setEnabled( bEnabled );
-		
-	}
-	
-	public void setEnabledSliders(boolean bEnabled)
 	{
 		for(int i=0;i<3;i++)
 		{
@@ -170,51 +104,9 @@ public class ClipRangePanel extends JPanel implements ItemListener
 	
 	private synchronized void updateGUI()
 	{
-		updateColors();
-		switch (nActiveWindow)
-		{
-		case 0:
-			selectionWindow.setText( "Selected: Sources");
-			break;
-		case 1:
-			selectionWindow.setText( "Selected: Groups");
-			break;
-		default:
-			selectionWindow.setText( "Selected: None");
-		}	
-		if(csList.size()==0)
-		{
-			setEnabled(false);
-			return;
-		}
-		setEnabled(true);	
-		//consistent clipping
-		boolean bClipConsistent = true;
-		int bClipEnabled = -1;
-		for ( final ConverterSetup cs: csList)
-		{
-			 
-			if(bClipEnabled<0)
-			{
-				bClipEnabled = ((GammaConverterSetup)cs).clipActive()?1:0;	
-			}
-			else
-			{
-				bClipConsistent &= (bClipEnabled==(((GammaConverterSetup)cs).clipActive()?1:0));
-			}
-			
-		}
-		if(bClipConsistent)
-		{
-			cbClipEnabled.setBackground( consistentBg );
-			cbClipEnabled.setSelected( bClipEnabled != 0 );
-			setEnabledSliders(bClipEnabled != 0);
-		}
-		else
-		{
-			setEnabledSliders(cbClipEnabled.isSelected());
-			cbClipEnabled.setBackground(inConsistentBg );
-		}
+		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		if ( blockUpdates || csList== null || csList.isEmpty() )
+			return;	
 		
 		BoundedRange [] range = new BoundedRange[3];
 		boolean bFirstCS = true;
@@ -230,7 +122,7 @@ public class ClipRangePanel extends JPanel implements ItemListener
 
 		for ( final ConverterSetup cs: csList)
 		{
-			final Bounds3D bounds = clipAxesBounds.getBounds( cs );
+			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
 			final double [] minBound = bounds.getMinBound();
 			final double [] maxBound = bounds.getMaxBound();
 			final FinalRealInterval clipInterval = ((GammaConverterSetup)cs).getClipInterval();
@@ -284,6 +176,7 @@ public class ClipRangePanel extends JPanel implements ItemListener
 	
 	public void updateClipAxisRangeBounds(int nAxis)
 	{
+		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		//System.out.println(nAxis);
@@ -292,7 +185,7 @@ public class ClipRangePanel extends JPanel implements ItemListener
 		for ( final ConverterSetup cs : csList )
 		{
 			FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
-			final Bounds3D bounds = clipAxesBounds.getBounds( cs );
+			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
 			if(clipInt == null)
 			{
 				//final Bounds3D bounds = clipAxesBounds.getBounds( cs );
@@ -302,7 +195,7 @@ public class ClipRangePanel extends JPanel implements ItemListener
 			{
 				bounds.getMinBound()[nAxis] = range.getMinBound();
 				bounds.getMaxBound()[nAxis] = range.getMaxBound();
-				clipAxesBounds.setBounds( cs, bounds );
+				clipSetups.clipAxesBounds.setBounds( cs, bounds );
 			}
 			
 			final double [] min = clipInt.minAsDoubleArray();
@@ -310,6 +203,14 @@ public class ClipRangePanel extends JPanel implements ItemListener
 			min[nAxis] = range.getMin();
 			max[nAxis] = range.getMax();
 			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
+			
+			double [] a1 = clipSetups.clipRotationAngles.getCurrentEulerAngles( cs );
+			double [] a2 = clipSetups.clipRotationAngles.getAngles( cs );
+			clipSetups.clipRotationAngles.setAngles( cs, a1 );
+			clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
+			min[nAxis]++;
+			//clipSetups.clipRotationAngles.setAngles( cs, clipSetups.clipRotationAngles.getCurrentEulerAngles( cs ) );
+
 		}
 		updateGUI();
 	}
@@ -317,15 +218,16 @@ public class ClipRangePanel extends JPanel implements ItemListener
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
+		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;
 		for ( final ConverterSetup cs : csList )
 		{
 			if(range3D == null)
-				range3D = clipAxesBounds.getDefaultBounds( cs );
+				range3D = clipSetups.clipAxesBounds.getDefaultBounds( cs );
 			else
-				range3D = range3D.join( clipAxesBounds.getDefaultBounds( cs ) );			
+				range3D = range3D.join( clipSetups.clipAxesBounds.getDefaultBounds( cs ) );			
 		}
 		if(range3D != null)
 		{
