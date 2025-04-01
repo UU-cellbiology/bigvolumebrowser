@@ -37,26 +37,7 @@ public class ClipCenters
 	
 	public void updateCenters(final ConverterSetup setup)
 	{
-		double [] out =  setupToCenters.get( setup );
-		String s = "";
-		if(out!=null)
-		{
-			for (int d=0;d<3;d++)
-				s = s + Double.toString( out[d] )+" ";
-			System.out.println("Old: " +s);
-		}
-		out = getCurrentOrDefaultCenters(setup);
-//		double [] corr = Misc.getIntervalCenter( ((GammaConverterSetup)setup).getClipInterval() ); 
-//		for (int d=0;d<3;d++)
-//			out[d]+=corr[d];
-
-		s = "";
-		for (int d=0;d<3;d++)
-			s = s + Double.toString( out[d] )+" ";
-
-		System.out.println("New: " +s);
-
-		setCenters( setup, out);
+		setCenters( setup, getCurrentOrDefaultCenters(setup));
 	}
 	
 	public void setCenters( final ConverterSetup setup, final double[] centers)
@@ -94,50 +75,11 @@ public class ClipCenters
 		}
 		if(interval == null)
 			return null;
-		
-		//clipTr = clipTr.inverse();
-		
+			
 		final double [] center = Misc.getIntervalCenter(interval);
+		
 		clipTr.apply( center, center );
-		//clipTr.apply( center, center );
-		String s = "";
-		for (int d=0;d<3;d++)
-			s = s + Double.toString( center[d] )+" ";
 
-		System.out.println("center: " +s);
-		
-//		double [] min = interval.minAsDoubleArray();
-//		double [] max = interval.maxAsDoubleArray();
-//
-//		double [] out = new double[3];
-//		clipTr.apply( min, min );
-//		clipTr.apply( max, max );
-		
-//		s = "";
-//		for (int d=0;d<3;d++)
-//			s = s + Double.toString( min[d] )+" ";
-//		System.out.println("min: " +s);
-//
-//		s = "";
-//		for (int d=0;d<3;d++)
-//			s = s + Double.toString( max[d] )+" ";
-//		System.out.println("max: " +s);
-//
-//		
-//		for(int d=0;d<3;d++)
-//		{
-//			out[d] = 0.5*(max[d]+min[d]);
-//		}
-//		s = "";
-//		for (int d=0;d<3;d++)
-//			s = s + Double.toString( out[d] )+" ";
-//		System.out.println("min max: " +s);
-//		
-//		out = Misc.getIntervalCenter(clipTr.estimateBounds( interval ));
-//		s = "";
-//		for (int d=0;d<3;d++)
-//			s = s + Double.toString( out[d] )+" ";
-//		System.out.println("bounding box: " +s);
 		return center;
 		
 	}
