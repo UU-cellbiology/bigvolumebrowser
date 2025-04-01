@@ -124,7 +124,7 @@ public class Misc
 	/** returns the center of an interval where all coordinates
 	 * were multiplied by -1.
 	 * Return zero vector if the interval is null **/	
-	public static double [] getIntervalCenterShift(RealInterval interval)
+	public static double [] getIntervalCenterNegative(RealInterval interval)
 	{
 		if(interval == null)
 			return new double [3];
@@ -135,6 +135,22 @@ public class Misc
 		for(int d=0;d<3;d++)
 		{
 			min[d] = -0.5*(max[d]+min[d]);
+		}
+		
+		return min;
+		
+	}
+	
+	public static double [] getIntervalCenter(RealInterval interval)
+	{
+		if(interval == null)
+			return new double [3];
+		final double [] min = interval.minAsDoubleArray();
+		final double [] max = interval.maxAsDoubleArray();
+		
+		for(int d=0;d<3;d++)
+		{
+			min[d] = 0.5*(max[d]+min[d]);
 		}
 		
 		return min;

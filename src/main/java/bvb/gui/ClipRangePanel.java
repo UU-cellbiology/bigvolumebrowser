@@ -202,12 +202,14 @@ public class ClipRangePanel extends JPanel
 			final double [] max = clipInt.maxAsDoubleArray();
 			min[nAxis] = range.getMin();
 			max[nAxis] = range.getMax();
+			
 			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
 			
-			double [] a1 = clipSetups.clipRotationAngles.getCurrentEulerAngles( cs );
-			double [] a2 = clipSetups.clipRotationAngles.getAngles( cs );
-			clipSetups.clipRotationAngles.setAngles( cs, a1 );
-			clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
+			//double [] a1 = clipSetups.clipRotationAngles.getCurrentEulerAngles( cs );
+			//double [] a2 = clipSetups.clipRotationAngles.getAngles( cs );
+			//clipSetups.clipRotationAngles.setAngles( cs, a1 );
+			clipSetups.clipCenters.updateCenters( cs );
+			//clipSetups.updateClipTransform( (GammaConverterSetup)cs );
 			min[nAxis]++;
 			//clipSetups.clipRotationAngles.setAngles( cs, clipSetups.clipRotationAngles.getCurrentEulerAngles( cs ) );
 

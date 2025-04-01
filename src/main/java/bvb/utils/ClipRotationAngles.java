@@ -26,7 +26,9 @@ public class ClipRotationAngles
 		if(out == null)
 		{
 			out = getCurrentEulerAngles(setup);
+			setAngles(setup, out);
 		}
+		
 		return out;
 	}
 	
@@ -47,7 +49,7 @@ public class ClipRotationAngles
 		}
 		else
 		{
-			center = Misc.getIntervalCenterShift( interval);
+			center = Misc.getIntervalCenterNegative( interval);
 		}
 		clipTr.translate( center );
 		final double[] qRotation = new double[4];

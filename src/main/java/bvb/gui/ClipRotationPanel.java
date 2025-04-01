@@ -25,7 +25,6 @@ public class ClipRotationPanel extends JPanel
 	private boolean blockUpdates = false;
 	
 	private double dRange = 180.;
-
 	
 	public ClipRotationPanel(SelectedSources sourceSelection_, final ClipSetups clipSetups_) 
 	{
@@ -134,7 +133,7 @@ public class ClipRotationPanel extends JPanel
 		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
-		
+		blockUpdates = true;
 		for ( final ConverterSetup cs : csList )
 		{
 			
@@ -145,6 +144,7 @@ public class ClipRotationPanel extends JPanel
 			clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
 
 		}
+		blockUpdates = false;
 		updateGUI();
 	}
 		

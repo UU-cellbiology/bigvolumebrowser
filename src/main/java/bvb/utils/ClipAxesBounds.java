@@ -23,7 +23,6 @@ public class ClipAxesBounds
 	public ClipAxesBounds( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
-
 	}
 	
 	public Bounds3D getBounds( final ConverterSetup setup )
