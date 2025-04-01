@@ -95,7 +95,7 @@ public class ClipCenters
 		if(interval == null)
 			return null;
 		
-		clipTr = clipTr.inverse();
+		//clipTr = clipTr.inverse();
 		
 		final double [] center = Misc.getIntervalCenter(interval);
 		clipTr.apply( center, center );

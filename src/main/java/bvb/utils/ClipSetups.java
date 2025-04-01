@@ -105,7 +105,7 @@ public class ClipSetups
 //		tr.translate( diff );
 		//clipTr.translate( diff );
 		//clipTr = clipTr.preConcatenate( tr);
-		cs.setClipTransform(clipTr.inverse());
+		cs.setClipTransform(clipTr);
 
 		final double [] centerInt = Misc.getIntervalCenter( cs.getClipInterval() );
 	
