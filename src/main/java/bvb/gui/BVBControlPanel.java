@@ -17,7 +17,7 @@ import bvb.core.BigVolumeBrowser;
 
 public class BVBControlPanel extends JPanel
 {
-	BigVolumeBrowser bvb;
+	final BigVolumeBrowser bvb;
 	public JFrame cpFrame;
 	JTabbedPane tabPane;
 

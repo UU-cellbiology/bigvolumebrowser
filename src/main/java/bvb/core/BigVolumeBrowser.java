@@ -12,20 +12,22 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-import net.imglib2.FinalRealInterval;
-
-import bvb.gui.BVBControlPanel;
-import bvb.io.BDVHDF5Loader;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.SpimDataException;
+
+import ij.ImageJ;
+import ij.plugin.PlugIn;
+
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
-import ij.ImageJ;
-import ij.plugin.PlugIn;
+
+import bvb.gui.BVBControlPanel;
+import bvb.io.BDVHDF5Loader;
+
 
 public class BigVolumeBrowser  implements PlugIn
 {
@@ -38,10 +40,15 @@ public class BigVolumeBrowser  implements PlugIn
 	/** Frame of BigVolumeViewer **/
 	public VolumeViewerFrame bvvFrame;
 	
+	/** control panel **/
 	public BVBControlPanel controlPanel;
+	
+	/** actions and behaviors **/
+	public BVBActions bvbActions;
 	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
+	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataTobvvSourceList;
 	
@@ -57,6 +64,7 @@ public class BigVolumeBrowser  implements PlugIn
 	{
 		
 		startBVB();
+		bvbActions = new BVBActions(this);
 	}
 	
 	
@@ -150,20 +158,20 @@ public class BigVolumeBrowser  implements PlugIn
 //				maxI[i]=30;
 //			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
 			
-			double [] minI = new double[3];
-			double [] maxI = new double[3];
-			for(int i=0;i<2;i++)
-			{
-				minI[i] = 225;
-				maxI[i] = 275;
-			}
-			minI[2] = 200;
-			maxI[2] = 300;
-
-			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-			sourcesSPIM.get( 1 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-			sourcesSPIM.get( 0 ).setLUT( "Green" );
-			sourcesSPIM.get( 1 ).setLUT( "Red" );	
+//			double [] minI = new double[3];
+//			double [] maxI = new double[3];
+//			for(int i=0;i<2;i++)
+//			{
+//				minI[i] = 225;
+//				maxI[i] = 275;
+//			}
+//			minI[2] = 200;
+//			maxI[2] = 300;
+//
+//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
+//			sourcesSPIM.get( 1 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
+//			sourcesSPIM.get( 0 ).setLUT( "Green" );
+//			sourcesSPIM.get( 1 ).setLUT( "Red" );	
 		}
 		catch ( SpimDataException exc )
 		{
@@ -182,10 +190,10 @@ public class BigVolumeBrowser  implements PlugIn
 		
 		testBVB.run("");
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 	}
