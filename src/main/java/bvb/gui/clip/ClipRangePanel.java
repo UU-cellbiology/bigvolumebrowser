@@ -1,4 +1,4 @@
-package bvb.gui;
+package bvb.gui.clip;
 
 
 import java.awt.GridBagConstraints;
@@ -16,8 +16,9 @@ import net.imglib2.FinalRealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedRange;
+import bvb.gui.SelectedSources;
 import bvb.utils.Bounds3D;
-import bvb.utils.ClipSetups;
+import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedRangePanelPG;
 
@@ -102,7 +103,7 @@ public class ClipRangePanel extends JPanel
 		}
 	}
 	
-	private synchronized void updateGUI()
+	synchronized void updateGUI()
 	{
 		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
@@ -157,6 +158,8 @@ public class ClipRangePanel extends JPanel
 				}
 			}
 		}
+		
+		
 		final BoundedRange [] finalRange = range;
 		final boolean [] isConsistent = allRangesEqual;
 		SwingUtilities.invokeLater( () -> {

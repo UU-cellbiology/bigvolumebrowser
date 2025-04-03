@@ -12,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.imglib2.FinalRealInterval;
+
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.SpimDataException;
 
@@ -158,20 +160,20 @@ public class BigVolumeBrowser  implements PlugIn
 //				maxI[i]=30;
 //			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
 			
-//			double [] minI = new double[3];
-//			double [] maxI = new double[3];
-//			for(int i=0;i<2;i++)
-//			{
-//				minI[i] = 225;
-//				maxI[i] = 275;
-//			}
-//			minI[2] = 200;
-//			maxI[2] = 300;
-//
-//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-//			sourcesSPIM.get( 1 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-//			sourcesSPIM.get( 0 ).setLUT( "Green" );
-//			sourcesSPIM.get( 1 ).setLUT( "Red" );	
+			double [] minI = new double[3];
+			double [] maxI = new double[3];
+			for(int i=0;i<2;i++)
+			{
+				minI[i] = 225;
+				maxI[i] = 275;
+			}
+			minI[2] = 200;
+			maxI[2] = 300;
+
+			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
+			sourcesSPIM.get( 1 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
+			sourcesSPIM.get( 0 ).setLUT( "Green" );
+			sourcesSPIM.get( 1 ).setLUT( "Red" );	
 		}
 		catch ( SpimDataException exc )
 		{
@@ -190,10 +192,10 @@ public class BigVolumeBrowser  implements PlugIn
 		
 		testBVB.run("");
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 	}

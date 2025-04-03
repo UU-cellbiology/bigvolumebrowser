@@ -1,4 +1,4 @@
-package bvb.utils;
+package bvb.utils.clip;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Affine3DHelpers;
+import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipRotationAngles

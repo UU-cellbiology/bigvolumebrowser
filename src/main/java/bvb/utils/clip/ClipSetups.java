@@ -1,9 +1,10 @@
-package bvb.utils;
+package bvb.utils.clip;
 
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
 import bdv.viewer.ConverterSetups;
+import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipSetups
@@ -14,6 +15,8 @@ public class ClipSetups
 	
 	final public ClipCenters clipCenters;
 	
+	final public ClipCenterBounds clipCenterBounds;
+	
 	final public ConverterSetups converterSetups;
 	
 	public ClipSetups (final ConverterSetups converterSetups_)
@@ -21,6 +24,7 @@ public class ClipSetups
 		converterSetups = converterSetups_;
 		clipAxesBounds = new ClipAxesBounds(converterSetups);
 		clipCenters = new ClipCenters(converterSetups);
+		clipCenterBounds = new ClipCenterBounds(converterSetups);
 	}
 	
 	public synchronized void updateClipTransform( final GammaConverterSetup cs)

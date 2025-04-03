@@ -1,4 +1,4 @@
-package bvb.gui;
+package bvb.gui.clip;
 
 import java.awt.Color;
 import java.awt.GridBagConstraints;
@@ -13,24 +13,32 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bvb.core.BigVolumeBrowser;
-import bvb.utils.ClipSetups;
+import bvb.gui.PanelTitle;
+import bvb.gui.SelectedSources;
+import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 
-public class ClipPanel extends JPanel implements ItemListener
+public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 {
 	final BigVolumeBrowser bvb;
+
+	
+	final ClipSetups clipSetups;
+	
 	final SelectedSources selectedSources;
 	public JCheckBox cbClipEnabled;
 	public JLabel selectionWindow;
 	
 	final ClipRangePanel clipRangePanel;
 	final ClipRotationPanel clipRotationPanel;
-	final ClipSetups clipSetups;
-	
+	final ClipCenterPanel clipCenterPanel;
+
 	/**
 	 * Panel background if color reflects a set of sources all having the same color
 	 */
@@ -55,11 +63,15 @@ public class ClipPanel extends JPanel implements ItemListener
 		
 		clipRangePanel = new ClipRangePanel(selectedSources, clipSetups);
 	    clipRotationPanel = new ClipRotationPanel(selectedSources, clipSetups); 
+	    clipCenterPanel = new ClipCenterPanel(selectedSources, clipSetups); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
 		tabClipPane.addTab( "Range", clipRangePanel );
 		tabClipPane.addTab( "Rotation", clipRotationPanel );
+		tabClipPane.addTab( "Center", clipCenterPanel );
 		
+		tabClipPane.addChangeListener((e) -> updateGUI());
+
 		GridBagConstraints gbc = new GridBagConstraints();
 	
 		gbc.gridx = 0;
@@ -92,6 +104,9 @@ public class ClipPanel extends JPanel implements ItemListener
 				updateGUI();
 			}
 		} );
+	    
+	    //add listener in case number of sources, etc change
+		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
 	    updateGUI();
 	}
 	
@@ -113,12 +128,10 @@ public class ClipPanel extends JPanel implements ItemListener
 		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
 		if(csList.size()==0)
 		{
-			clipRangePanel.setEnabled( false );
-			clipRotationPanel.setEnabled( false );
+			setPanelsEnabled(false);
 			return;
 		}
-		clipRangePanel.setEnabled( true );
-		clipRotationPanel.setEnabled( true );
+		setPanelsEnabled(true);
 		
 		//consistent clipping
 		boolean bClipConsistent = true;
@@ -140,16 +153,24 @@ public class ClipPanel extends JPanel implements ItemListener
 		{
 			cbClipEnabled.setBackground( consistentBg );
 			cbClipEnabled.setSelected( bClipEnabled != 0 );
-			clipRangePanel.setEnabled(bClipEnabled != 0);
-			clipRotationPanel.setEnabled(bClipEnabled != 0);
+			setPanelsEnabled(bClipEnabled != 0);
 		}
 		else
 		{
-			clipRangePanel.setEnabled(cbClipEnabled.isSelected());
-			clipRotationPanel.setEnabled(cbClipEnabled.isSelected());
+			setPanelsEnabled(cbClipEnabled.isSelected());
 			cbClipEnabled.setBackground( inConsistentBg );
 		}
+		clipRangePanel.updateGUI();
+		clipRotationPanel.updateGUI();
+		clipCenterPanel.updateGUI();
 		
+	}
+	
+	private void setPanelsEnabled(boolean bEnabled)
+	{
+		clipRangePanel.setEnabled(bEnabled);
+		clipRotationPanel.setEnabled(bEnabled);
+		clipCenterPanel.setEnabled( bEnabled );
 	}
 	
 	private void updateColors()
@@ -174,6 +195,13 @@ public class ClipPanel extends JPanel implements ItemListener
 	{
 		if(arg0.getSource() == cbClipEnabled)
 			updateClipEnabled();
+		updateGUI();
+	}
+
+
+	@Override
+	public void stateChanged( ChangeEvent arg0 )
+	{
 		updateGUI();
 	}
 }

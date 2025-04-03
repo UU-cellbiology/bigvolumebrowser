@@ -1,4 +1,4 @@
-package bvb.utils;
+package bvb.utils.clip;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +11,7 @@ import bdv.tools.brightness.ConverterSetup;
 
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
+import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipCenters

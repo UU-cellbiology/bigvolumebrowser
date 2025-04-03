@@ -1,4 +1,4 @@
-package bvb.utils;
+package bvb.utils.clip;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +10,8 @@ import bdv.util.BoundedRange;
 
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
+import bvb.utils.Bounds3D;
+import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 /** a set of 3D bounds defining clipping volumes **/
@@ -29,6 +31,7 @@ public class ClipAxesBounds
 	{
 		return setupToBounds.compute( setup, this::getExtendedBounds );
 	}
+	
 	public void setBounds( final ConverterSetup setup, final Bounds3D bounds )
 	{
 		setupToBounds.put( setup, bounds );

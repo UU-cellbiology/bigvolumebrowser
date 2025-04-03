@@ -1,4 +1,4 @@
-package bvb.gui;
+package bvb.gui.clip;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,7 +10,8 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
-import bvb.utils.ClipSetups;
+import bvb.gui.SelectedSources;
+import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -66,6 +67,10 @@ public class ClipRotationPanel extends JPanel
 				updateGUI();
 			}
 		} );
+		
+		//add listener in case number of sources, etc change
+		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
+		
 		updateGUI();
 	}
 	
@@ -79,7 +84,7 @@ public class ClipRotationPanel extends JPanel
 	}
 	
 	
-	private synchronized void updateGUI()
+	synchronized void updateGUI()
 	{
 		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )

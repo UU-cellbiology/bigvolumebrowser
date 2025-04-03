@@ -12,6 +12,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.clip.ClipPanel;
 
 
 
