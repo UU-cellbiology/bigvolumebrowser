@@ -187,7 +187,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		
 		if(bRenderConsistent)
 		{
-			butRender[nInterpM].setSelected( true );
+			butRender[nRenderM].setSelected( true );
 			panRender.setBackground( consistentBg );
 		}
 		else
@@ -218,7 +218,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	}
 
 	@Override
-	public void actionPerformed( ActionEvent arg0 )
+	public synchronized void actionPerformed( ActionEvent arg0 )
 	{
 		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
 		
