@@ -126,7 +126,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 			selectionWindow.setText( "Selected: None");
 		}	
 		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
-		if(csList.size()==0)
+		if(csList== null || csList.isEmpty())
 		{
 			setPanelsEnabled(false);
 			return;
@@ -139,7 +139,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		for ( final ConverterSetup cs: csList)
 		{
 			 
-			if(bClipEnabled<0)
+			if(bClipEnabled < 0)
 			{
 				bClipEnabled = ((GammaConverterSetup)cs).clipActive()?1:0;	
 			}
@@ -184,7 +184,8 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		boolean bEnabled = cbClipEnabled.isSelected();
 		
 		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
-		
+		if(csList== null || csList.isEmpty())
+			return;
 		for ( final ConverterSetup cs: csList)
 		{
 			  ((GammaConverterSetup)cs).setClipActive( bEnabled );
