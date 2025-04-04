@@ -25,6 +25,8 @@ public class BVBControlPanel extends JPanel
 
 	final SelectedSources selectedSources;
 	
+	final TabPanelView tabPanelView;
+	
 	public BVBControlPanel(final BigVolumeBrowser bvb_) 
 	{
 		super(new GridBagLayout());
@@ -32,11 +34,15 @@ public class BVBControlPanel extends JPanel
 		selectedSources = new SelectedSources(bvb.bvvViewer);
 		
 		tabPane = new JTabbedPane(SwingConstants.LEFT);
+		
 		URL icon_path = this.getClass().getResource("/icons/cube_icon.png");
-	    ImageIcon tabIcon = new ImageIcon(icon_path);   
-		tabPane.addTab("",tabIcon, panelView(), "View/Clip");
+	    ImageIcon tabIcon = new ImageIcon(icon_path);
+	    tabPanelView = new TabPanelView(bvb, selectedSources);
+		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
+	    
+	    
 	    final GridBagConstraints gbc = new GridBagConstraints();
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;	    
@@ -50,47 +56,4 @@ public class BVBControlPanel extends JPanel
 	    this.add(tabPane,gbc);
 	}
 	
-	JPanel panelView()
-	{
-		JPanel panTabView = new JPanel(new GridBagLayout());
-		
-	    GridBagConstraints gbc = new GridBagConstraints();
-	    
-	    SourcesRenderPanel sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
-	    
-		//Sources render method panel
-	    JPanel panRender = new JPanel(new GridBagLayout()); 
-	    panRender.setBorder(new PanelTitle(" Sources render "));
-	    gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-	    panRender.add(sourcesRenderPanel,gbc);
-	    
-	    gbc = new GridBagConstraints();
-	    
-	    ClipPanel clipPanel = new ClipPanel(bvb, selectedSources);		
-	    //add panels to Navigation
-	    gbc.insets = new Insets(4,2,4,2);
-	    //View
-	    gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
-	    gbc.gridwidth = 1;
-	    gbc.anchor = GridBagConstraints.NORTHWEST;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-	    
-	    panTabView.add(panRender,gbc);
-	    
-	    gbc.gridy++;
-	    panTabView.add(clipPanel,gbc);
-	    
-        // Blank/filler component
-	    gbc.gridy++;
-	    gbc.weightx = 0.01;
-	    gbc.weighty = 0.01;
-	    panTabView.add(new JLabel(), gbc);
-	    
-	    return panTabView;
-	}
 }
