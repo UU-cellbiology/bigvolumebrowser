@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
@@ -13,7 +14,9 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -58,7 +61,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		
 		selectedSources = selectedSources_;
 		
-		this.setBorder(new PanelTitle(" Render "));
+		//this.setBorder(new PanelTitle(" Sources "));
 
 		String[] sMethods = new String[2];
 		sMethods[0] = "Max intensity";
@@ -107,18 +110,34 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 			panInterpolation.add( butInter[i] );
 		}
 		
+		gbc.insets =  new Insets(1,10,1,10);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+	//	gbc.gridwidth = 2;
+	//	GBCHelper.alighLoose(gbc);
+		this.add(new JLabel("Render"),gbc);
 		
-		gbc.gridx=0;
-		gbc.gridy=0;
-		GBCHelper.alighLoose(gbc);
-		this.add(new JLabel("Render:"),gbc);
 		gbc.gridx++;
+		gbc.gridheight = 2;
+		gbc.fill = SwingConstants.VERTICAL;
+		//gbc.anchor = SwingConstants.CENTER;
+		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
+		//sp.setPreferredSize(new Dimension((int) (nButtonSize*0.5),nButtonSize));
+		this.add(sp,gbc);
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.gridheight = 1;
+		gbc.gridx++;
+		this.add(new JLabel("Voxels"),gbc);
+
+		//gbc.gridwidth = 1;
+		gbc.gridx=0;
+		gbc.gridy++;
 		this.add(panRender,gbc);			
 		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add(new JLabel("Voxels:"),gbc);
-		gbc.gridx++;
+		gbc.gridx+=2;
+		//gbc.gridy++;
+		//this.add(new JLabel("Voxels:"),gbc);
+		//gbc.gridx++;
 		this.add( panInterpolation, gbc );
 		
 	    selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
