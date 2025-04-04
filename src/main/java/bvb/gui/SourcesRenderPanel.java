@@ -57,12 +57,10 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		
 		super(new GridBagLayout());
 		
-		int nButtonSize = 45;
+		int nButtonSize = 50;
 		
 		selectedSources = selectedSources_;
 		
-		//this.setBorder(new PanelTitle(" Sources "));
-
 		String[] sMethods = new String[2];
 		sMethods[0] = "Max intensity";
 		sMethods[1] = "Volumetric";
@@ -113,31 +111,23 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		gbc.insets =  new Insets(1,10,1,10);
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-	//	gbc.gridwidth = 2;
-	//	GBCHelper.alighLoose(gbc);
 		this.add(new JLabel("Render"),gbc);
 		
 		gbc.gridx++;
 		gbc.gridheight = 2;
 		gbc.fill = SwingConstants.VERTICAL;
-		//gbc.anchor = SwingConstants.CENTER;
 		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
-		//sp.setPreferredSize(new Dimension((int) (nButtonSize*0.5),nButtonSize));
 		this.add(sp,gbc);
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.gridheight = 1;
 		gbc.gridx++;
 		this.add(new JLabel("Voxels"),gbc);
 
-		//gbc.gridwidth = 1;
 		gbc.gridx=0;
 		gbc.gridy++;
 		this.add(panRender,gbc);			
 		
 		gbc.gridx+=2;
-		//gbc.gridy++;
-		//this.add(new JLabel("Voxels:"),gbc);
-		//gbc.gridx++;
 		this.add( panInterpolation, gbc );
 		
 	    selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
