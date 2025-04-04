@@ -12,6 +12,8 @@ import bvb.gui.clip.ClipPanel;
 
 public class TabPanelView extends JPanel
 {
+	final public ViewPanel viewPanel;
+
 	final public SourcesRenderPanel sourcesRenderPanel;
 
 	final public ClipPanel clipPanel;
@@ -22,20 +24,24 @@ public class TabPanelView extends JPanel
 			
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
+	    viewPanel = new ViewPanel();
+	    
 	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
 	    
+	    clipPanel = new ClipPanel(bvb, selectedSources);		
+
 		//Sources render method panel
-	    JPanel panRender = new JPanel(new GridBagLayout()); 
-	    panRender.setBorder(new PanelTitle(" Sources render "));
-	    gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-	    panRender.add(sourcesRenderPanel,gbc);
+//	    JPanel panRender = new JPanel(new GridBagLayout()); 
+//	    panRender.setBorder(new PanelTitle(" Sources render "));
+//	   
+//	    gbc.gridx = 0;
+//	    gbc.gridy = 0;
+//	    gbc.weightx = 1.0;
+//	    gbc.fill = GridBagConstraints.HORIZONTAL;
+//	    panRender.add(sourcesRenderPanel,gbc);
 	    
 	    gbc = new GridBagConstraints();
 	    
-	    clipPanel = new ClipPanel(bvb, selectedSources);		
 	    //add panels to Navigation
 	    gbc.insets = new Insets(4,3,4,3);
 	    //View
@@ -46,7 +52,10 @@ public class TabPanelView extends JPanel
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    
-	    this.add(panRender,gbc);
+	    this.add (viewPanel, gbc);
+	    
+	    gbc.gridy++;	    
+	    this.add(sourcesRenderPanel,gbc);
 	    
 	    gbc.gridy++;
 	    this.add(clipPanel,gbc);

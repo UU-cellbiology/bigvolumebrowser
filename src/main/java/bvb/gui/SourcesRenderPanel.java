@@ -43,6 +43,8 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		selectedSources = selectedSources_;
 		
 		setLayout(new GridBagLayout());
+		
+		this.setBorder(new PanelTitle(" Render "));
 
 		String[] sMethods = new String[2];
 		sMethods[0] = "Max intensity";
@@ -52,27 +54,27 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		sInterpolation[0] = "Nearest";
 		sInterpolation[1] = "Trilinear";
 		
-		GridBagConstraints cd = new GridBagConstraints();
+		GridBagConstraints gbc = new GridBagConstraints();
 
 		cbRenderMethod = new JComboBox<>(sMethods);
 		cbRenderMethod.addActionListener(this);
 		
-		cd.gridx=0;
-		cd.gridy=0;
-		GBCHelper.alighLoose(cd);
-		this.add(new JLabel("View:"),cd);
-		cd.gridx++;
-		this.add(cbRenderMethod,cd);		
+		gbc.gridx=0;
+		gbc.gridy=0;
+		GBCHelper.alighLoose(gbc);
+		this.add(new JLabel("View:"),gbc);
+		gbc.gridx++;
+		this.add(cbRenderMethod,gbc);		
 		
 		cbInterpolation = new JComboBox<>(sInterpolation);
 		
 		cbInterpolation.addActionListener(this);
 		
-		cd.gridx=0;
-		cd.gridy++;
-		this.add(new JLabel("Interpolation:"),cd);
-		cd.gridx++;
-		this.add(cbInterpolation,cd);	
+		gbc.gridx=0;
+		gbc.gridy++;
+		this.add(new JLabel("Interpolation:"),gbc);
+		gbc.gridx++;
+		this.add(cbInterpolation,gbc);	
 		
 	    selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
 		{			
