@@ -191,7 +191,6 @@ public class ClipRangePanel extends JPanel
 			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
 			if(clipInt == null)
 			{
-				//final Bounds3D bounds = clipAxesBounds.getBounds( cs );
 				clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
 			}
 			if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
@@ -207,14 +206,7 @@ public class ClipRangePanel extends JPanel
 			max[nAxis] = range.getMax();
 			
 			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
-			
-			//double [] a1 = clipSetups.clipRotationAngles.getCurrentEulerAngles( cs );
-			//double [] a2 = clipSetups.clipRotationAngles.getAngles( cs );
-			//clipSetups.clipRotationAngles.setAngles( cs, a1 );
 			clipSetups.clipCenters.updateCenters( cs );
-			//clipSetups.updateClipTransform( (GammaConverterSetup)cs );
-			min[nAxis]++;
-			//clipSetups.clipRotationAngles.setAngles( cs, clipSetups.clipRotationAngles.getCurrentEulerAngles( cs ) );
 
 		}
 		updateGUI();

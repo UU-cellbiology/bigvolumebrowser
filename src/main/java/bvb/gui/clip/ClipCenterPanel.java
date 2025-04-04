@@ -4,7 +4,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 
@@ -47,14 +49,24 @@ public class ClipCenterPanel extends JPanel
 		cd.gridx = 0;
 		cd.fill = GridBagConstraints.BOTH;
 		cd.weightx = 1.0;
+		final JPopupMenu [] menus = new JPopupMenu[3];
 		for(int d=0;d<3;d++)
 		{
 			cd.gridy++;
 			
 			clipCenterPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
-
+			menus[d] = new JPopupMenu();
+			menus[d].add( runnableItem(  "set bounds ...", clipCenterPanels[d]::setBoundsDialog ) );
 			this.add(clipCenterPanels[d],cd);
 		}
+
+		menus[0].add( runnableItem(  "reset bounds", () -> resetBounds(0)));
+		menus[1].add( runnableItem(  "reset bounds", () -> resetBounds(1)));
+		menus[2].add( runnableItem(  "reset bounds", () -> resetBounds(2)));
+	
+		clipCenterPanels[0].setPopup( () -> menus[0] );
+		clipCenterPanels[1].setPopup( () -> menus[1] );
+		clipCenterPanels[2].setPopup( () -> menus[2] );
 		
 		clipCenterPanels[0].changeListeners().add( () -> updateClipCenter(0));
 		clipCenterPanels[1].changeListeners().add( () -> updateClipCenter(1));
@@ -151,17 +163,63 @@ public class ClipCenterPanel extends JPanel
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
+		double currVal = clipCenterPanels[nAxis].getValue().getCurrentValue();
+		double minBound = clipCenterPanels[nAxis].getValue().getRangeMin();
+		double maxBound = clipCenterPanels[nAxis].getValue().getRangeMax();
 		for ( final ConverterSetup cs : csList )
 		{
+			final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
 			
+			if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+			{
+				bounds.getMinBound()[nAxis] = minBound;
+				bounds.getMaxBound()[nAxis] = maxBound;
+				clipSetups.clipCenterBounds.setBounds( cs, bounds );
+			}
 			final double [] newCenter = clipSetups.clipCenters.getCenters( cs );
-			newCenter[nAxis] = clipCenterPanels[nAxis].getValue().getCurrentValue();
+			newCenter[nAxis] = currVal;
 			
 			clipSetups.clipCenters.setCenters( cs, newCenter );
 			clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
+			//update bounds
+			
 
 		}
 		blockUpdates = false;
 		updateGUI();
+	}
+	
+	/** sets bounds along the axis including all selected sources **/
+	public void resetBounds(int nAxis)
+	{
+		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		if ( blockUpdates || csList== null || csList.isEmpty() )
+			return;
+		Bounds3D range3D = null;
+		for ( final ConverterSetup cs : csList )
+		{
+			if(range3D == null)
+				range3D = clipSetups.clipCenterBounds.getDefaultBounds( cs );
+			else
+				range3D = range3D.join( clipSetups.clipCenterBounds.getDefaultBounds( cs ) );			
+		}
+		if(range3D != null)
+		{
+			double currVal = clipCenterPanels[nAxis].getValue().getCurrentValue();
+			double bmin = range3D.getMinBound()[nAxis];
+			double bmax = range3D.getMaxBound()[nAxis];
+			currVal = Math.min( bmax, currVal );
+			currVal = Math.max( bmin, currVal );
+			clipCenterPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
+			updateClipCenter(nAxis);
+		}
+	}
+
+	
+	private JMenuItem runnableItem( final String text, final Runnable action )
+	{
+		final JMenuItem item = new JMenuItem( text );
+		item.addActionListener( e -> action.run() );
+		return item;
 	}
 }

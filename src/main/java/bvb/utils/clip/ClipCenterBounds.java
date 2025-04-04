@@ -6,7 +6,6 @@ import java.util.Map;
 import net.imglib2.FinalRealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.util.BoundedRange;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
 import bvb.utils.Bounds3D;
@@ -33,33 +32,6 @@ public class ClipCenterBounds
 	{
 		setupToBounds.put( setup, bounds );
 
-		if(setup instanceof GammaConverterSetup)
-		{
-			GammaConverterSetup gsetup = (GammaConverterSetup)setup;
-			final FinalRealInterval clipInterval = gsetup.getClipInterval();
-			final double [] min = clipInterval.minAsDoubleArray( );
-			final double [] max = clipInterval.maxAsDoubleArray( );
-			
-			final BoundedRange [] range = new BoundedRange[3];
-			for (int d=0; d<3; d++)
-			{
-					range[d] = new BoundedRange( min[d], max[d], min[d], max[d] ).withMinBound( bounds.getMinBound()[d] ).withMaxBound( bounds.getMaxBound()[d] );
-			}
-			boolean bUpdate = false;
-			for(int d=0;d<3;d++)
-			{
-				if ( range[d].getMin() != min[d] || range[d].getMax() != max[d] )
-				{
-					min[d] = range[d].getMin();
-					max[d] = range[d].getMax();
-					bUpdate = true;
-				}
-			}
-			if(bUpdate)
-			{
-				gsetup.setClipInterval( new FinalRealInterval(min,max) );
-			}
-		}
 	}
 
 	public Bounds3D getDefaultBounds( final ConverterSetup setup )
