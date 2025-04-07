@@ -24,7 +24,7 @@ public class TabPanelView extends JPanel
 			
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
-	    viewPanel = new ViewPanel();
+	    viewPanel = new ViewPanel(bvb);
 	    
 	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
 	    

@@ -3,6 +3,9 @@ package bvb.core;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 
+import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
@@ -108,7 +111,7 @@ public class BigVolumeBrowser  implements PlugIn
 			controlPanel.cpFrame.add(controlPanel);
 			
 	        //Display the window.
-			controlPanel.cpFrame.setSize(400,600);
+			controlPanel.cpFrame.setSize(controlPanel.nDefaultWidth, controlPanel.nDefaultHeight);
 			controlPanel.cpFrame.setVisible(true);
 		    java.awt.Point bvv_p = bvvFrame.getLocationOnScreen();
 		    java.awt.Dimension bvv_d = bvvFrame.getSize();
@@ -182,6 +185,27 @@ public class BigVolumeBrowser  implements PlugIn
 		}
 		
 		
+		
+	}
+	
+	public void makeFullScreen()
+	{
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		int width = gd.getDisplayMode().getWidth();
+		int height = gd.getDisplayMode().getHeight();
+		int nCPWidth = controlPanel.cpFrame.getWidth();
+		Dimension nBVVWindowDim = new Dimension( width - nCPWidth, height );
+		
+		bvvFrame.getContentPane().setPreferredSize(  nBVVWindowDim ) ;	
+		bvvFrame.setSize(width - nCPWidth, height  );
+		controlPanel.cpFrame.setSize( nCPWidth, height );
+		bvvFrame.setLocation( 0, 0 );
+		if(bvvFrame.getSplitPanel() != null)
+		{
+			bvvFrame.getSplitPanel().setCollapsed( false );
+		}
+
+		controlPanel.cpFrame.setLocation(width - nCPWidth, 0);
 		
 	}
 	
