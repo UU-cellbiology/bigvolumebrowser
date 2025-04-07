@@ -1,5 +1,6 @@
 package bvb.gui.clip;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
@@ -214,7 +215,14 @@ public class ClipCenterPanel extends JPanel
 			updateClipCenter(nAxis);
 		}
 	}
-
+	
+	void setSliderColors(Color [] colors)
+	{
+		for(int i=0;i<3;i++)
+		{
+			clipCenterPanels[i].setSliderForeground( colors[i] );	
+		}
+	}
 	
 	private JMenuItem runnableItem( final String text, final Runnable action )
 	{

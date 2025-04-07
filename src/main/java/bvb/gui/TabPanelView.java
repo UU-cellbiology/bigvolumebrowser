@@ -51,12 +51,21 @@ public class TabPanelView extends JPanel
 	    gbc.gridwidth = 1;
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
+	    JPanel both = new JPanel(new GridBagLayout());
+	    GridBagConstraints c = new GridBagConstraints();
+	    c.insets = new Insets(3,0,3,0);
+	    both.add( viewPanel,c);
+	    c.gridx++;
+	    both.add( sourcesRenderPanel,c );
 	    
-	    this.add (viewPanel, gbc);
-	    
-	    gbc.gridy++;	    
-	    this.add(sourcesRenderPanel,gbc);
-	    
+	    both.setBorder(new PanelTitle(" View "));
+
+	    this.add( both, gbc );
+	    //this.add (viewPanel, gbc);
+
+	    //gbc.gridy++;	    
+	    //this.add(sourcesRenderPanel,gbc);
+	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    gbc.gridy++;
 	    this.add(clipPanel,gbc);
 	    

@@ -26,8 +26,8 @@ import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 {
+	
 	final BigVolumeBrowser bvb;
-
 	
 	final ClipSetups clipSetups;
 	
@@ -108,6 +108,12 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	    //add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
 	    updateGUI();
+	    Color [] colors = new Color[3];
+	    colors[0] =  new Color(198,34,0);
+	    colors[1] =  new Color(67,154,0);
+	    colors[2] =  new Color(0,34,213);
+
+	    this.setSliderColors( colors );
 	}
 	
 	
@@ -168,6 +174,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	private void setPanelsEnabled(boolean bEnabled)
 	{
+		
 		clipRangePanel.setEnabled(bEnabled);
 		clipRotationPanel.setEnabled(bEnabled);
 		clipCenterPanel.setEnabled( bEnabled );
@@ -185,7 +192,10 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		
 		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
 		if(csList== null || csList.isEmpty())
+		{
+			cbClipEnabled.setSelected( false );
 			return;
+		}
 		for ( final ConverterSetup cs: csList)
 		{
 			  ((GammaConverterSetup)cs).setClipActive( bEnabled );
@@ -204,5 +214,14 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public void stateChanged( ChangeEvent arg0 )
 	{
 		updateGUI();
+	}
+	
+	void setSliderColors(Color [] colors)
+	{
+		
+		clipRangePanel.setSliderColors( colors );
+		clipRotationPanel.setSliderColors( colors );
+		clipCenterPanel.setSliderColors( colors );
+		
 	}
 }

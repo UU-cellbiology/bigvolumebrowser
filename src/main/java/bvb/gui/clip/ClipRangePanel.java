@@ -1,6 +1,7 @@
 package bvb.gui.clip;
 
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -238,6 +239,14 @@ public class ClipRangePanel extends JPanel
 			final BoundedRange newRange = new BoundedRange (bmin,bmax, min, max);
 			clipAxesPanels[nAxis].setRange( newRange );
 			updateClipAxisRangeBounds(nAxis);
+		}
+	}
+	
+	void setSliderColors(Color [] colors)
+	{
+		for(int i=0;i<3;i++)
+		{
+			clipAxesPanels[i].setSliderForeground( colors[i] );	
 		}
 	}
 	

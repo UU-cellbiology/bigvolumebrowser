@@ -21,7 +21,7 @@ public class ViewPanel extends JPanel
 		super();
 		setLayout(new GridBagLayout());
 		
-		this.setBorder(new PanelTitle(" View "));
+		//this.setBorder(new PanelTitle(" View "));
 		
 		//ORIGIN
 		URL icon_path = this.getClass().getResource("/icons/orig.png");

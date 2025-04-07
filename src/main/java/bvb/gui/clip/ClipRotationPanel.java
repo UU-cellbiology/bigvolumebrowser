@@ -1,5 +1,6 @@
 package bvb.gui.clip;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -67,6 +68,7 @@ public class ClipRotationPanel extends JPanel
 				updateGUI();
 			}
 		} );
+	
 		
 		//add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
@@ -152,6 +154,13 @@ public class ClipRotationPanel extends JPanel
 		blockUpdates = false;
 		updateGUI();
 	}
-		
+	
+	void setSliderColors(Color [] colors)
+	{
+		for(int i=0;i<3;i++)
+		{
+			clipRotationPanels[i].setSliderForeground( colors[i] );	
+		}
+	}
 
 }
