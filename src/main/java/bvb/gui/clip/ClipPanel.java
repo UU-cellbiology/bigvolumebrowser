@@ -5,8 +5,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.net.URL;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,7 +59,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 
 		GridBagLayout gridbag = new GridBagLayout();
 		setLayout(gridbag);
-		this.setBorder(new PanelTitle(" Clipping "));
+		this.setBorder(new PanelTitle(" Clip "));
 
 		clipSetups = new ClipSetups(bvb.bvv.getBvvHandle().getConverterSetups());
 		
@@ -66,8 +68,11 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	    clipCenterPanel = new ClipCenterPanel(selectedSources, clipSetups); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
+		URL icon_path = this.getClass().getResource("/icons/rotate.png");
+	    ImageIcon tabIcon = new ImageIcon(icon_path);
 		tabClipPane.addTab( "Range", clipRangePanel );
-		tabClipPane.addTab( "Rotation", clipRotationPanel );
+		//tabClipPane.addTab("",tabIcon, clipRotationPanel , "Rotation");
+		tabClipPane.addTab ("Rotate", clipRotationPanel);
 		tabClipPane.addTab( "Center", clipCenterPanel );
 		
 		tabClipPane.addChangeListener((e) -> updateGUI());

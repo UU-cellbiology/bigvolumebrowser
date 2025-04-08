@@ -1,20 +1,17 @@
-package bvb.gui;
+package bvb.core;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-import bvb.core.BigVolumeBrowser;
-import bvb.gui.clip.ClipPanel;
-
+import bvb.gui.SelectedSources;
+import bvb.gui.TabPanelView;
 
 
 public class BVBControlPanel extends JPanel

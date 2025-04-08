@@ -2,6 +2,7 @@ package bvb.core;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
+import com.jogamp.opengl.GL3;
 
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
@@ -17,6 +18,9 @@ import javax.swing.WindowConstants;
 
 import net.imglib2.FinalRealInterval;
 
+import org.joml.Matrix4f;
+
+import bdv.viewer.TimePointListener;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.SpimDataException;
 
@@ -25,16 +29,17 @@ import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
+import bvvpg.core.render.RenderData;
+import bvvpg.core.util.MatrixMath;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
-
-import bvb.gui.BVBControlPanel;
+import bvb.gui.VolumeBBoxes;
 import bvb.io.BDVHDF5Loader;
 
 
-public class BigVolumeBrowser  implements PlugIn
+public class BigVolumeBrowser  implements PlugIn, TimePointListener
 {
 	/** Bvv instance **/
 	public Bvv bvv = null;
@@ -51,6 +56,10 @@ public class BigVolumeBrowser  implements PlugIn
 	/** actions and behaviors **/
 	public BVBActions bvbActions;
 	
+	/** boxes around volume **/
+	
+	public final VolumeBBoxes volumeBoxes;
+	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
 	
@@ -61,6 +70,8 @@ public class BigVolumeBrowser  implements PlugIn
 	{
 		bvvSourceToSpimData = new ConcurrentHashMap<>();
 		spimDataTobvvSourceList = new ConcurrentHashMap<>();
+		volumeBoxes = new VolumeBBoxes(this);
+		volumeBoxes.setVisible( true );
 		
 	}
 	/** starting as plugin from ImageJ/FIJI **/
@@ -88,24 +99,33 @@ public class BigVolumeBrowser  implements PlugIn
 		{
 			//start empty bvv
 			bvv = BvvFunctions.show( Bvv.options().
-					dCam(BVBSettings.dCam).
-					dClipNear(BVBSettings.dClipNear).
-					dClipFar(BVBSettings.dClipFar).				
-					renderWidth( BVBSettings.renderWidth).
-					renderHeight( BVBSettings.renderHeight).
-					numDitherSamples( BVBSettings.numDitherSamples ).
-					cacheBlockSize( BVBSettings.cacheBlockSize ).
-					maxCacheSizeInMB( BVBSettings.maxCacheSizeInMB ).
-					ditherWidth(BVBSettings.ditherWidth).
+					dCam(BVVSettings.dCam).
+					dClipNear(BVVSettings.dClipNear).
+					dClipFar(BVVSettings.dClipFar).				
+					renderWidth( BVVSettings.renderWidth).
+					renderHeight( BVVSettings.renderHeight).
+					numDitherSamples( BVVSettings.numDitherSamples ).
+					cacheBlockSize( BVVSettings.cacheBlockSize ).
+					maxCacheSizeInMB( BVVSettings.maxCacheSizeInMB ).
+					ditherWidth(BVVSettings.ditherWidth).
 					frameTitle("BigVolumeBrowser")
 					);
 			bvvViewer = ((BvvHandleFrame)bvv.getBvvHandle()).getViewerPanel();
+			
+			//get renderScene
+			bvvViewer.setRenderScene(this::renderScene);
+			
+			//listen to timepoint change
+			bvvViewer.addTimePointListener(this);
+			
 			bvvFrame = ((BvvHandleFrame)bvv.getBvvHandle()).getBigVolumeViewer().getViewerFrame();
 			
 			bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-			//setup control panel
 			
-			controlPanel = new BVBControlPanel(this);
+			
+			
+			//setup control panel
+						controlPanel = new BVBControlPanel(this);
 			controlPanel.cpFrame = new JFrame("BVB Control Panel");
 			controlPanel.cpFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			controlPanel.cpFrame.add(controlPanel);
@@ -140,6 +160,29 @@ public class BigVolumeBrowser  implements PlugIn
 		controlPanel.cpFrame.dispose();
 	}
 	
+	/** switches to full screen mode **/
+	public void makeFullScreen()
+	{
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		int width = gd.getDisplayMode().getWidth();
+		int height = gd.getDisplayMode().getHeight();
+		int nCPWidth = controlPanel.cpFrame.getWidth();
+				
+		bvvFrame.getContentPane().setPreferredSize(  new Dimension( width - nCPWidth, height ) ) ;	
+		bvvFrame.setSize(width - nCPWidth, height  );
+		bvvFrame.setLocation( 0, 0 );
+		
+		controlPanel.cpFrame.setSize( nCPWidth, height );
+		controlPanel.cpFrame.setLocation(width - nCPWidth, 0);	
+		
+		if(bvvFrame.getSplitPanel() != null)
+		{
+			bvvFrame.getSplitPanel().setCollapsed( false );
+		}
+
+	
+	}
+	
 	@SuppressWarnings( "rawtypes" )
 	public void loadBDVHDF5(String xmlFileName)
 	{
@@ -158,6 +201,8 @@ public class BigVolumeBrowser  implements PlugIn
 			{
 				bvvSourceToSpimData.put( bvvSource, spimData );
 			}
+			updateSceneRender();
+			
 //			double [] minI = new double[3];
 //			double [] maxI = new double[3];
 //			for(int i=0;i<3;i++)
@@ -187,26 +232,30 @@ public class BigVolumeBrowser  implements PlugIn
 		
 		
 	}
-	
-	public void makeFullScreen()
-	{
-		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		int width = gd.getDisplayMode().getWidth();
-		int height = gd.getDisplayMode().getHeight();
-		int nCPWidth = controlPanel.cpFrame.getWidth();
-		Dimension nBVVWindowDim = new Dimension( width - nCPWidth, height );
-		
-		bvvFrame.getContentPane().setPreferredSize(  nBVVWindowDim ) ;	
-		bvvFrame.setSize(width - nCPWidth, height  );
-		controlPanel.cpFrame.setSize( nCPWidth, height );
-		bvvFrame.setLocation( 0, 0 );
-		if(bvvFrame.getSplitPanel() != null)
-		{
-			bvvFrame.getSplitPanel().setCollapsed( false );
-		}
 
-		controlPanel.cpFrame.setLocation(width - nCPWidth, 0);
+	
+	public void renderScene(final GL3 gl, final RenderData data)
+	{
+		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
+		//handl.setRenderScene( ( gl, data ) -> {
+		//
+		final Matrix4f pvm = new Matrix4f( data.getPv() );
+		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+		final Matrix4f camview = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
 		
+		volumeBoxes.draw( gl, pvm, camview, screen_size );
+	}
+	
+	public void updateSceneRender()
+	{
+		volumeBoxes.updateVolumeBoxes();
+		bvvViewer.requestRepaint();
+	}
+	
+	@Override
+	public void timePointChanged( int timePointIndex )
+	{
+		updateSceneRender();		
 	}
 	
 	public static void main(String... args) throws Exception
@@ -220,9 +269,10 @@ public class BigVolumeBrowser  implements PlugIn
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/cliptest.xml" );
 	}
+
 }

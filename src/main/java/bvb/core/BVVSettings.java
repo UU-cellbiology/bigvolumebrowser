@@ -10,7 +10,7 @@ import bvb.scijava.Services;
 import bvb.scijava.ConfigureRenderWindow;
 import ij.IJ;
 
-public class BVBSettings
+public class BVVSettings
 {
 
 	//BVV canvas rendering parameters, can be changed/adjusted somewhere else

@@ -42,7 +42,23 @@ public class ViewPanel extends JPanel
 	    butVBox = new JToggleButton(tabIcon);
 	    //butVBox.setSelected(btdata.bVolumeBox);
 	    butVBox.setToolTipText("Volume Box");
-	    //butVBox.addItemListener(new ItemListener() {
+	    butVBox.setSelected( true );
+	    butVBox.addItemListener(new ItemListener() {
+
+	    	@Override
+	    	public void itemStateChanged(ItemEvent e) 
+	    	{
+	    		if(e.getStateChange() == ItemEvent.SELECTED)
+	    		{
+	    			bvb.volumeBoxes.setVisible( true );
+	    			bvb.bvvViewer.requestRepaint();
+	    		} else if(e.getStateChange()==ItemEvent.DESELECTED)
+	    		{
+	    			bvb.volumeBoxes.setVisible( false );
+	    			bvb.bvvViewer.requestRepaint();
+	    		}
+	    	}
+	    });
 	    
 	    //FULL SCREEN
 		icon_path = this.getClass().getResource("/icons/fullscreen.png");
