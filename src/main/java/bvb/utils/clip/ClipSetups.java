@@ -1,5 +1,6 @@
 package bvb.utils.clip;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
@@ -67,5 +68,32 @@ public class ClipSetups
 		
 	}
 	
+	public FinalRealInterval clipRangeToWorld( GammaConverterSetup cs, FinalRealInterval interval)
+	{
+		final double [] min = interval.minAsDoubleArray();
+		final double [] max = interval.maxAsDoubleArray();
+		final double [] shift = Misc.getSourceMinAllTP( converterSetups.getSource( cs ).getSpimSource());
+		for(int d=0; d<3; d++)
+		{
+			min[d] += shift[d];
+			max[d] += shift[d];
+
+		}
+		return new FinalRealInterval(min, max);
+	}
+	
+	public FinalRealInterval clipWorldToRange( GammaConverterSetup cs, FinalRealInterval interval)
+	{	
+		final double [] min = interval.minAsDoubleArray();
+		final double [] max = interval.maxAsDoubleArray();
+		final double [] shift = Misc.getSourceMinAllTP( converterSetups.getSource( cs ).getSpimSource());
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= shift[d];
+			max[d] -= shift[d];
+
+		}
+		return new FinalRealInterval(min, max);
+	}
 	
 }

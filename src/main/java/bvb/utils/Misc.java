@@ -3,6 +3,7 @@ package bvb.utils;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.Intervals;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
@@ -23,6 +24,96 @@ public class Misc
 		}
 		final FinalRealInterval interval = new FinalRealInterval(min, max);
 		return transformSource.estimateBounds( interval );
+	}
+	
+	public static FinalRealInterval getSourceBoundingBoxAllTP(final Source<?> source)
+	{
+		FinalRealInterval interval = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(interval == null)
+				{
+					interval = Misc.getSourceBoundingBox(source,t,0);
+				}
+				else
+				{
+					interval = Intervals.union( interval, Misc.getSourceBoundingBox(source,t,0));
+				}
+					
+				t++;
+			}
+		}
+		return interval;
+	}
+
+	
+	public static double[] getSourceMin(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformSource = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		final FinalRealInterval interval =transformSource.estimateBounds( new FinalRealInterval(min, max) );
+		
+		return interval.minAsDoubleArray();
+	}
+	
+	public static double[] getSourceMinAllTP(final Source<?> source)
+	{
+		double [] min = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(min == null)
+				{
+					min = Misc.getSourceMin(source,t,0);
+				}
+				else
+				{
+					final double [] minCurr = Misc.getSourceMin(source,t,0);
+					for(int d=0; d<3; d++)
+						min[d] = Math.min( min[d], minCurr[d] );
+				}					
+				t++;
+			}
+		}
+		return min;
+	}
+	
+	public static FinalRealInterval getSourceSize(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformSource = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) ) ;
+		interval.realMin( min );
+		interval.realMax( max );
+		for(int d=0; d<3; d++)
+		{
+			max[d] -= min[d];
+			min[d] = 0.0;
+		}		
+		return new FinalRealInterval( min, max );
 	}
 	
 	/** depending on nAxis value, extracts Euler angle (rotation around nAxis)

@@ -78,11 +78,13 @@ public class ClipAxesBounds
 			{
 				if(bounds == null)
 				{
-					bounds = new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0));
+					bounds = new Bounds3D(Misc.getSourceSize(source.getSpimSource(),t,0));
+					//bounds = new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0));
 				}
 				else
 				{
-					bounds = bounds.join( new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0)) );
+					bounds = bounds.join( new Bounds3D(Misc.getSourceSize(source.getSpimSource(),t,0)) );
+					//bounds = bounds.join( new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0)) );
 				}
 					
 				t++;
@@ -102,12 +104,25 @@ public class ClipAxesBounds
 		if(setup instanceof GammaConverterSetup)
 		{
 			GammaConverterSetup gsetup = (GammaConverterSetup)setup;
-			final FinalRealInterval clipInterval = gsetup.getClipInterval();
+			FinalRealInterval clipInterval = gsetup.getClipInterval();
 			if(clipInterval == null)
 				return bounds;
-			
-			return bounds.join( new Bounds3D( clipInterval) );
+			clipInterval = clipWorldToRange(gsetup,clipInterval);
+			return bounds.join( new Bounds3D( clipInterval ) );
 		}
 		return bounds;
+	}
+	public FinalRealInterval clipWorldToRange( final GammaConverterSetup cs, final FinalRealInterval interval)
+	{	
+		final double [] min = interval.minAsDoubleArray();
+		final double [] max = interval.maxAsDoubleArray();
+		final double [] shift = Misc.getSourceMinAllTP( bimap.getSource( cs ).getSpimSource());
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= shift[d];
+			max[d] -= shift[d];
+
+		}
+		return new FinalRealInterval(min, max);
 	}
 }

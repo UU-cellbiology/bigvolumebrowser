@@ -55,24 +55,8 @@ public class ClipCenters
 		if(interval == null)
 		{
 			final SourceAndConverter< ? > source = bimap.getSource( setup );
-			if ( source != null )
-			{
-				//get the range over all timepoints
-				int t = 0;
-				while(source.getSpimSource().isPresent( t ))
-				{
-					if(interval == null)
-					{
-						interval = Misc.getSourceBoundingBox(source.getSpimSource(),t,0);
-					}
-					else
-					{
-						interval = Intervals.union( interval, Misc.getSourceBoundingBox(source.getSpimSource(),t,0));
-					}
-						
-					t++;
-				}
-			}
+			interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
+
 		}
 		if(interval == null)
 			return null;

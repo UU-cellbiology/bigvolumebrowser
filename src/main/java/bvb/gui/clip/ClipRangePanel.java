@@ -122,12 +122,13 @@ public class ClipRangePanel extends JPanel
 		final double [] min = new double [3];
 		final double [] max = new double [3];
 
-		for ( final ConverterSetup cs: csList)
+		for ( final ConverterSetup csIn: csList)
 		{
+			GammaConverterSetup cs = (GammaConverterSetup)csIn;
 			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
 			final double [] minBound = bounds.getMinBound();
 			final double [] maxBound = bounds.getMaxBound();
-			final FinalRealInterval clipInterval = ((GammaConverterSetup)cs).getClipInterval();
+			FinalRealInterval clipInterval = cs.getClipInterval();
 			if(clipInterval == null)
 			{
 				for(int d=0;d<3;d++)
@@ -138,6 +139,7 @@ public class ClipRangePanel extends JPanel
 			}
 			else
 			{
+				clipInterval = clipSetups.clipWorldToRange(cs, clipInterval );
 				clipInterval.realMin( min );
 				clipInterval.realMax( max );
 			}
@@ -178,7 +180,7 @@ public class ClipRangePanel extends JPanel
 		} );
 	}
 	
-	public void updateClipAxisRangeBounds(int nAxis)
+	public synchronized void updateClipAxisRangeBounds(int nAxis)
 	{
 		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
@@ -186,13 +188,19 @@ public class ClipRangePanel extends JPanel
 		//System.out.println(nAxis);
 		final BoundedRange range = clipAxesPanels[nAxis].getRange();
 
-		for ( final ConverterSetup cs : csList )
+		for ( final ConverterSetup csIn : csList )
 		{
-			FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
+			final GammaConverterSetup cs = (GammaConverterSetup)csIn;
+			FinalRealInterval clipInt = cs.getClipInterval();
+			
 			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
 			if(clipInt == null)
 			{
 				clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
+			}
+			else
+			{
+				clipInt = clipSetups.clipWorldToRange(cs, clipInt );
 			}
 			if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
 			{
@@ -206,12 +214,16 @@ public class ClipRangePanel extends JPanel
 			min[nAxis] = range.getMin();
 			max[nAxis] = range.getMax();
 			
-			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
+			//((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
+			cs.setClipInterval( clipSetups.clipRangeToWorld(cs, new FinalRealInterval(min,max) ));
 			clipSetups.clipCenters.updateCenters( cs );
 
 		}
 		updateGUI();
 	}
+	
+
+
 	
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
