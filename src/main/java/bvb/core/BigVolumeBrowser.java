@@ -51,15 +51,20 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	/** Frame of BigVolumeViewer **/
 	public VolumeViewerFrame bvvFrame;
 	
+	public BvvHandleFrame bvvHandle;
+	
 	/** control panel **/
 	public BVBControlPanel controlPanel;
 	
 	/** actions and behaviors **/
 	public BVBActions bvbActions;
 	
-	/** boxes around volume **/
-	
+	/** boxes around volume **/	
 	public final VolumeBBoxes volumeBoxes;
+	
+	/** boxes around volume **/	
+	public final VolumeBBoxes clipBoxes;
+
 	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
@@ -73,6 +78,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		spimDataTobvvSourceList = new ConcurrentHashMap<>();
 		volumeBoxes = new VolumeBBoxes(this);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
+		clipBoxes = new VolumeBBoxes(this);
 		
 	}
 	/** starting as plugin from ImageJ/FIJI **/
@@ -111,7 +117,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 					ditherWidth(BVVSettings.ditherWidth).
 					frameTitle("BigVolumeBrowser")
 					);
-			bvvViewer = ((BvvHandleFrame)bvv.getBvvHandle()).getViewerPanel();
+			
+			bvvHandle = ( BvvHandleFrame ) bvv.getBvvHandle();
+			bvvViewer = bvvHandle.getViewerPanel();
 			
 			//get renderScene
 			bvvViewer.setRenderScene(this::renderScene);
@@ -119,7 +127,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			//listen to timepoint change
 			bvvViewer.addTimePointListener(this);
 			
-			bvvFrame = ((BvvHandleFrame)bvv.getBvvHandle()).getBigVolumeViewer().getViewerFrame();
+			bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 			
 			bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
@@ -151,6 +159,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			
 			controlPanel.cpFrame.addWindowListener( closeWA );
 		    bvvFrame.addWindowListener(	closeWA );
+		    
+		    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
 		}
 	}
 	
@@ -252,11 +262,14 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 		//draw boxes around volume
 		volumeBoxes.draw( gl, pvm, camview, screen_size );
+		//draw clip boxes
+		clipBoxes.draw( gl, pvm, camview, screen_size );
 	}
 	
 	public void updateSceneRender()
 	{
 		volumeBoxes.updateVolumeBoxes();
+		
 		bvvViewer.requestRepaint();
 	}
 	
@@ -277,9 +290,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/cliptest.xml" );
 	}
 

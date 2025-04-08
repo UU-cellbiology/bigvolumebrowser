@@ -156,4 +156,24 @@ public class Misc
 		return min;
 		
 	}
+	
+	public static boolean compareAffineTransforms(AffineTransform3D af1,AffineTransform3D af2 )
+	{
+		boolean bOut = true;
+		if(af1 == null && af2 == null)
+			return true;
+		if(af1 == null || af2 == null)
+			return false;
+		for(int i=0; i<3; i++)
+		{
+			for(int j=0; j<4; j++)
+			{
+				bOut &= Double.compare( af1.get( i, j ), af2.get( i, j ) ) == 0 ;
+			}
+			if(!bOut)
+				return false;
+		}
+		
+		return bOut;
+	}
 }

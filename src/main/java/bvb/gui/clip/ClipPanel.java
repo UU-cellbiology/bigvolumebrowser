@@ -35,7 +35,8 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	final SelectedSources selectedSources;
 	public JCheckBox cbClipEnabled;
-	public JLabel selectionWindow;
+	public JCheckBox cbShowClipBoxes;
+	//public JLabel selectionWindow;
 	
 	final ClipRangePanel clipRangePanel;
 	final ClipRotationPanel clipRotationPanel;
@@ -61,15 +62,15 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		setLayout(gridbag);
 		this.setBorder(new PanelTitle(" Clip "));
 
-		clipSetups = new ClipSetups(bvb.bvv.getBvvHandle().getConverterSetups());
+		clipSetups = new ClipSetups(bvb.bvvHandle.getConverterSetups());
 		
 		clipRangePanel = new ClipRangePanel(selectedSources, clipSetups);
 	    clipRotationPanel = new ClipRotationPanel(selectedSources, clipSetups); 
 	    clipCenterPanel = new ClipCenterPanel(selectedSources, clipSetups); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
-		URL icon_path = this.getClass().getResource("/icons/rotate.png");
-	    ImageIcon tabIcon = new ImageIcon(icon_path);
+		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
+	    //ImageIcon tabIcon = new ImageIcon(icon_path);
 		tabClipPane.addTab( "Range", clipRangePanel );
 		//tabClipPane.addTab("",tabIcon, clipRotationPanel , "Rotation");
 		tabClipPane.addTab ("Rotate", clipRotationPanel);
@@ -90,9 +91,26 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		this.add(cbClipEnabled,gbc);
 		cbClipEnabled.addItemListener( this );
 		
-		selectionWindow = new JLabel("Selected: None");
+		cbShowClipBoxes = new JCheckBox ("Box",false);
+		//selectionWindow = new JLabel("Selected: None");
 		gbc.gridx++;
-		this.add(selectionWindow,gbc);
+		this.add(cbShowClipBoxes ,gbc);
+		cbShowClipBoxes.addItemListener( new ItemListener() 
+				{
+					@Override
+					public void itemStateChanged( ItemEvent e )
+					{
+						boolean bNewState =  (e.getStateChange() 
+								== ItemEvent.SELECTED ? true: false);
+						bvb.clipBoxes.setVisible( bNewState );
+						if(bNewState)
+						{
+							bvb.clipBoxes.updateClipBoxes();
+						}
+						bvb.repaintBVV();
+					}
+				
+				});
 		
 		gbc.gridx = 0;
 	    gbc.gridy ++;
@@ -125,17 +143,17 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	private synchronized void updateGUI()
 	{
 		updateColors();
-		switch (selectedSources.getActiveWindow())
-		{
-		case 0:
-			selectionWindow.setText( "Selected: Sources");
-			break;
-		case 1:
-			selectionWindow.setText( "Selected: Groups");
-			break;
-		default:
-			selectionWindow.setText( "Selected: None");
-		}	
+//		switch (selectedSources.getActiveWindow())
+//		{
+//		case 0:
+//			selectionWindow.setText( "Selected: Sources");
+//			break;
+//		case 1:
+//			selectionWindow.setText( "Selected: Groups");
+//			break;
+//		default:
+//			selectionWindow.setText( "Selected: None");
+//		}	
 		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
 		if(csList== null || csList.isEmpty())
 		{

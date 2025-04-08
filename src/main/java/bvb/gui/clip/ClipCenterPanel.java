@@ -209,8 +209,9 @@ public class ClipCenterPanel extends JPanel
 			double currVal = clipCenterPanels[nAxis].getValue().getCurrentValue();
 			double bmin = range3D.getMinBound()[nAxis];
 			double bmax = range3D.getMaxBound()[nAxis];
-			currVal = Math.min( bmax, currVal );
-			currVal = Math.max( bmin, currVal );
+			//currVal = Math.min( bmax, currVal );
+			//currVal = Math.max( bmin, currVal );
+			currVal = 0.5*(bmin+bmax);
 			clipCenterPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
 			updateClipCenter(nAxis);
 		}

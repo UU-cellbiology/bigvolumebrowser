@@ -7,12 +7,12 @@ import java.util.ArrayList;
 
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
-
+import net.imglib2.realtransform.AffineTransform3D;
 
 import org.joml.Matrix4fc;
 
-
 import bvb.scene.VisPolyLineAA;
+import bvb.utils.Misc;
 
 
 public class VolumeBox implements Shape
@@ -22,34 +22,53 @@ public class VolumeBox implements Shape
 	public ArrayList<VisPolyLineAA> edgesVis;
 	public float lineThickness;
 	public Color lineColor;
+	public AffineTransform3D transform = null;
+	
+	public RealInterval interval;
 	
 
-	public VolumeBox(float [][] nDimBox, final float lineThickness_, final Color lineColor_)
+//	public VolumeBox(double [][] nDimBox, AffineTransform3D transform_, final float lineThickness_, final Color lineColor_)
+//	{
+//		this(new FinalRealInterval(nDimBox[0],nDimBox[1]), transform_, lineThickness_, lineColor_);
+//	}
+
+	public VolumeBox(RealInterval nIntervalBox, AffineTransform3D transform_, final float lineThickness_, final Color lineColor_)
 	{
+		interval = nIntervalBox;
 
 		lineThickness = lineThickness_;
 		
 		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
 
-		edgesVis = new ArrayList<>();
-		
-		ArrayList<ArrayList< RealPoint >> edgesPairPoints = getEdgesPairPoints(nDimBox);
+		//edgesVis = new ArrayList<>();
 
-		for(int i=0; i<edgesPairPoints.size(); i++)
+
+		if(transform_ == null)
 		{
-			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness,lineColor));
+			transform = null;
+		}
+		else
+		{
+			transform = new AffineTransform3D();
+			transform.set( transform_ );
+		}
+		
+		setInterval(nIntervalBox);
+
+	}
+	
+	public void setTransform (final AffineTransform3D transformIn, boolean bUpdateInterval)
+	{
+		transform = new AffineTransform3D();
+		transform.set( transformIn );
+		if(bUpdateInterval)
+		{
+			setInterval(interval);
 		}
 	}
-
-	public VolumeBox(RealInterval nIntervalBox, final float lineThickness_, final Color lineColor_)
+	
+	public void setInterval(RealInterval nIntervalBox)
 	{
-
-		lineThickness = lineThickness_;
-		
-		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
-
-		edgesVis = new ArrayList<>();
-
 		float [][] nDimBox = new float [2][3];
 		
 		final double [] minI = nIntervalBox.minAsDoubleArray();
@@ -62,9 +81,18 @@ public class VolumeBox implements Shape
 			nDimBox[1][d] = (float)maxI[d];
 
 		}
-		
 		final ArrayList<ArrayList< RealPoint >> edgesPairPoints = getEdgesPairPoints(nDimBox);
-		
+		if(transform != null)
+		{
+			for(int i=0; i<edgesPairPoints.size(); i++)
+			{
+				for(RealPoint pt : edgesPairPoints.get( i ))
+				{
+					transform.apply( pt, pt);
+				}
+			}
+		}
+		edgesVis = new ArrayList<>();
 		for(int i=0; i<edgesPairPoints.size(); i++)
 		{
 			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness, lineColor));
@@ -112,15 +140,15 @@ public class VolumeBox implements Shape
 		
 		int [][] edgesxy = new int [5][2];
 		
-		edgesxy[0]=new int[]{0,0};
-		edgesxy[1]=new int[]{1,0};
-		edgesxy[2]=new int[]{1,1};
-		edgesxy[3]=new int[]{0,1};
-		edgesxy[4]=new int[]{0,0};
+		edgesxy[0] = new int[]{0,0};
+		edgesxy[1] = new int[]{1,0};
+		edgesxy[2] = new int[]{1,1};
+		edgesxy[3] = new int[]{0,1};
+		edgesxy[4] = new int[]{0,0};
 		
 		//draw front and back
-		RealPoint vertex1=new RealPoint(0,0,0);
-		RealPoint vertex2=new RealPoint(0,0,0);
+		RealPoint vertex1 = new RealPoint(0,0,0);
+		RealPoint vertex2 = new RealPoint(0,0,0);
 		
 		for (z=0;z<2;z++)
 		{
@@ -193,5 +221,63 @@ public class VolumeBox implements Shape
 		}
 		
 		return out;
+	}
+	
+	@Override
+	public boolean equals( final Object obj )
+	{
+		return obj instanceof VolumeBox &&
+				compareVBoxes(  ( VolumeBox ) obj );
+	}
+	
+	boolean compareVBoxes(VolumeBox v2)
+	{
+		if (v2==null)
+			return false;
+		boolean bFinal = true;
+		//compare intervals
+		bFinal  &= interval.equals( v2.interval );
+		//compare transforms
+		bFinal  &= Misc.compareAffineTransforms( this.transform, v2.transform );
+		return bFinal;
+		
+	}
+	public boolean compareIntervalTransformm(RealInterval int2, AffineTransform3D tr2)
+	{
+
+		boolean bFinal = true;
+		//compare intervals
+		bFinal  &= interval.equals( int2 );
+		//compare transforms
+		bFinal  &= Misc.compareAffineTransforms( this.transform, tr2 );
+		return bFinal;
+		
+	}
+	@Override
+	public int hashCode()
+	{
+		int hash = 17;
+		if(interval != null)
+		{
+			final double [] min = interval.minAsDoubleArray();
+			final double [] max = interval.minAsDoubleArray();
+		
+			for(int d=0; d<3; d++)
+			{
+				hash = hash * 23 + Double.hashCode(min[d]);
+				hash = hash * 23 + Double.hashCode(max[d]);
+			}
+		}
+		if(transform != null)
+		{
+	
+			for(int i=0; i<3; i++)
+				for(int j=0; j<3; j++)
+				{
+					hash = hash * 23 + Double.hashCode(transform.get( i,j ));
+
+				}
+		}
+		return hash;
 	}
 }

@@ -3,12 +3,12 @@ package bvb.gui;
 import com.jogamp.opengl.GL3;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import org.joml.Matrix4fc;
 
@@ -18,15 +18,15 @@ import bvb.core.BigVolumeBrowser;
 import bvb.shapes.Shape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
+import bvvpg.source.converters.GammaConverterSetup;
 
 
 public class VolumeBBoxes implements Shape
 {
-	final ArrayList <VolumeBox> volumeBoxes = new ArrayList<>();
 	
 	final BigVolumeBrowser bvb;
 	
-	private final Map < Source< ? >, FinalRealInterval > bvvSourceToBox;
+	private final Map < SourceAndConverter< ? >, VolumeBox > bvvSourceToBox;
 	
 	private boolean bVisible = false;
 	
@@ -60,10 +60,13 @@ public class VolumeBBoxes implements Shape
 				}
 			}
 			bLocked = true;
-			for(VolumeBox vBox :volumeBoxes)
-			{
-				vBox.draw( gl, pvm, vm, screen_size );
-			}
+			bvvSourceToBox.forEach( (src, vbox)-> {
+				if(bvb.bvvViewer.state().isSourceVisible( src ))
+				{
+					vbox.draw( gl, pvm, vm, screen_size );
+				}
+			});
+
 			bLocked = false;
 		}
 		
@@ -72,21 +75,19 @@ public class VolumeBBoxes implements Shape
 	public void setLineColor(final Color color)
 	{
 		lineColor = new Color(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-		for(VolumeBox vBox :volumeBoxes)
-		{
-			vBox.setLineColor( lineColor );
-		}
+		
+		bvvSourceToBox.forEach( (src, vbox)-> {
+			vbox.setLineColor( lineColor );
+		});
 		
 	}
 	
 	public void setLineThickness(final float fThickness)
 	{
 		lineThickness = fThickness;
-		for(VolumeBox vBox :volumeBoxes)
-		{
-			vBox.setLineThickness( lineThickness );
-		}
-		
+		bvvSourceToBox.forEach( (src, vbox)-> {
+			vbox.setLineThickness( lineThickness );
+		});		
 	}
 	
 	public void setVisible (boolean bVisible_)
@@ -108,28 +109,82 @@ public class VolumeBBoxes implements Shape
 			}
 		}
 		bLocked = true;
-		final List< SourceAndConverter< ? > > sources = bvb.bvvViewer.state().getSources();
-		volumeBoxes.clear();
-		for(SourceAndConverter< ? > srcConv : sources)
+		
+		
+		List< SourceAndConverter< ? > > sacList = bvb.bvvViewer.state().getSources();
+		
+		for(SourceAndConverter< ? > sac : sacList )
 		{
-			final Source< ? > src = srcConv.getSpimSource();
+			final Source< ? > src = sac.getSpimSource();
 			final FinalRealInterval srcInt = Misc.getSourceBoundingBox(src,bvb.bvvViewer.state().getCurrentTimepoint(),0);
-			final FinalRealInterval currInt = bvvSourceToBox.get( src );
-			if(currInt == null)
+			final VolumeBox currBox = bvvSourceToBox.get( sac );
+			if(currBox == null)
 			{
-				bvvSourceToBox.put( src, srcInt );
+				bvvSourceToBox.put( sac, new VolumeBox(srcInt, null, lineThickness, lineColor) );
 			}
 			else
 			{
-				if(!currInt.equals( srcInt ))
+				if(!currBox.interval.equals( srcInt ))
 				{
-					bvvSourceToBox.put( src, srcInt );
+					currBox.setInterval( srcInt );
 				}
 			}
 		}
-		bvvSourceToBox.forEach( (src, interval)-> {
-			volumeBoxes.add( new VolumeBox(interval,lineThickness, lineColor));
-		});
+
+		bLocked = false;
+	}
+	
+	public synchronized void updateClipBoxes()
+	{
+		if(!bVisible)
+			return;
+		while(bLocked)
+		{
+			try
+			{
+				Thread.sleep(100);
+			}
+			catch ( InterruptedException exc )
+			{
+				exc.printStackTrace();
+			}
+		}
+		bLocked = true;
+		
+		
+		List< SourceAndConverter< ? > > sacList = bvb.bvvViewer.state().getSources();
+		
+		for(SourceAndConverter< ? > sac : sacList )
+		{
+			GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
+	
+			final VolumeBox currBox = bvvSourceToBox.get( sac );
+			
+			if(cs.clipActive())
+			{
+				final AffineTransform3D transform = new AffineTransform3D();
+				FinalRealInterval interval = cs.getClipInterval();
+				if(interval == null)
+					break;
+				cs.getClipTransform( transform );
+				if(currBox == null)
+				{
+					cs.getClipTransform( transform );
+					bvvSourceToBox.put( sac, new VolumeBox(cs.getClipInterval(), transform, lineThickness, lineColor) );
+				}
+				else
+				{
+					if(!currBox.compareIntervalTransformm( interval, transform ))
+					{
+						currBox.setTransform(transform, false);
+						currBox.setInterval( interval );
+						
+					}
+				}
+			}
+			
+		}
+
 		bLocked = false;
 	}
 }
