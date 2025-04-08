@@ -32,11 +32,10 @@ public class VolumeBox implements Shape
 		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
 
 		edgesVis = new ArrayList<>();
-		int i;
-		
 		
 		ArrayList<ArrayList< RealPoint >> edgesPairPoints = getEdgesPairPoints(nDimBox);
-		for(i=0;i<edgesPairPoints.size(); i++)
+
+		for(int i=0; i<edgesPairPoints.size(); i++)
 		{
 			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness,lineColor));
 		}
@@ -50,22 +49,25 @@ public class VolumeBox implements Shape
 		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
 
 		edgesVis = new ArrayList<>();
-		int i;
+
 		float [][] nDimBox = new float [2][3];
 		
-		double [] minI = nIntervalBox.minAsDoubleArray();
-		double [] maxI = nIntervalBox.maxAsDoubleArray();
-
-		for(i=0;i<3;i++)
+		final double [] minI = nIntervalBox.minAsDoubleArray();
+		
+		final double [] maxI = nIntervalBox.maxAsDoubleArray();
+		
+		for(int d=0;d<3;d++)
 		{
-			nDimBox[0][i]=(float)minI[i];
-			nDimBox[1][i]=(float)maxI[i];
+			nDimBox[0][d] = (float)minI[d];
+			nDimBox[1][d] = (float)maxI[d];
 
 		}
-		ArrayList<ArrayList< RealPoint >> edgesPairPoints = getEdgesPairPoints(nDimBox);
-		for(i=0;i<edgesPairPoints.size(); i++)
+		
+		final ArrayList<ArrayList< RealPoint >> edgesPairPoints = getEdgesPairPoints(nDimBox);
+		
+		for(int i=0; i<edgesPairPoints.size(); i++)
 		{
-			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness,lineColor));
+			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness, lineColor));
 		}
 	}
 	
@@ -105,16 +107,21 @@ public class VolumeBox implements Shape
 	public static ArrayList<ArrayList< RealPoint >> getEdgesPairPoints(final float [][] nDimBox)
 	{
 		int i,j,z;
+		
 		ArrayList<ArrayList< RealPoint >> out = new ArrayList<>();
+		
 		int [][] edgesxy = new int [5][2];
+		
 		edgesxy[0]=new int[]{0,0};
 		edgesxy[1]=new int[]{1,0};
 		edgesxy[2]=new int[]{1,1};
 		edgesxy[3]=new int[]{0,1};
 		edgesxy[4]=new int[]{0,0};
+		
 		//draw front and back
 		RealPoint vertex1=new RealPoint(0,0,0);
 		RealPoint vertex2=new RealPoint(0,0,0);
+		
 		for (z=0;z<2;z++)
 		{
 			for (i=0;i<4;i++)
@@ -136,8 +143,8 @@ public class VolumeBox implements Shape
 
 			}
 		}
+		
 		//draw the rest 4 edges
-
 		for (i=0;i<4;i++)
 		{
 			for (j=0;j<2;j++)
@@ -160,22 +167,28 @@ public class VolumeBox implements Shape
 	
 	/** returns vertices of box specified by provided interval in no particular order **/
 	public static ArrayList<RealPoint > getBoxVertices(final RealInterval interval)
-	{
-		int i,d;
+	{	
 		ArrayList<RealPoint> out = new ArrayList<>();
+		
 		RealPoint [] rpBounds = new RealPoint [2];
+		
 		rpBounds[0]= interval.minAsRealPoint();
 		rpBounds[1]= interval.maxAsRealPoint();
-		for (i =0;i<8; i++)
+		
+		for (int i=0; i<8; i++)
 		{
 			
 		  String indexes = String.format("%3s", Integer.toBinaryString(i)).replaceAll(" ", "0");
+
 		  //System.out.println(indexes);
+		  
 		  RealPoint vert = new RealPoint(3);
-		  for(d=0;d<3;d++)
+		  
+		  for(int d=0; d<3; d++)
 		  {
 			  vert.setPosition(rpBounds[Character.getNumericValue(indexes.charAt(d))].getDoublePosition(d), d);
 		  }
+		  
 		  out.add(vert);
 		}
 		

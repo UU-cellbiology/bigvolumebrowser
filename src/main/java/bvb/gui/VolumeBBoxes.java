@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.imglib2.FinalRealInterval;
-import net.imglib2.RealInterval;
 
 import org.joml.Matrix4fc;
 
-import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
@@ -67,6 +65,26 @@ public class VolumeBBoxes implements Shape
 				vBox.draw( gl, pvm, vm, screen_size );
 			}
 			bLocked = false;
+		}
+		
+	}
+	
+	public void setLineColor(final Color color)
+	{
+		lineColor = new Color(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+		for(VolumeBox vBox :volumeBoxes)
+		{
+			vBox.setLineColor( lineColor );
+		}
+		
+	}
+	
+	public void setLineThickness(final float fThickness)
+	{
+		lineThickness = fThickness;
+		for(VolumeBox vBox :volumeBoxes)
+		{
+			vBox.setLineThickness( lineThickness );
 		}
 		
 	}

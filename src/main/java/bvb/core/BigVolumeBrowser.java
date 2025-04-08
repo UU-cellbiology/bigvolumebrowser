@@ -2,6 +2,7 @@ package bvb.core;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import java.awt.Dimension;
@@ -71,7 +72,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		bvvSourceToSpimData = new ConcurrentHashMap<>();
 		spimDataTobvvSourceList = new ConcurrentHashMap<>();
 		volumeBoxes = new VolumeBBoxes(this);
-		volumeBoxes.setVisible( true );
+		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		
 	}
 	/** starting as plugin from ImageJ/FIJI **/
@@ -125,7 +126,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			
 			
 			//setup control panel
-						controlPanel = new BVBControlPanel(this);
+			controlPanel = new BVBControlPanel(this);
 			controlPanel.cpFrame = new JFrame("BVB Control Panel");
 			controlPanel.cpFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			controlPanel.cpFrame.add(controlPanel);
@@ -183,6 +184,11 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	}
 	
+	public void repaintBVV()
+	{
+		bvvViewer.requestRepaint();
+	}
+	
 	@SuppressWarnings( "rawtypes" )
 	public void loadBDVHDF5(String xmlFileName)
 	{
@@ -229,20 +235,22 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			exc.printStackTrace();
 		}
 		
-		
-		
 	}
 
 	
 	public void renderScene(final GL3 gl, final RenderData data)
 	{
+		//set canvas background color
+		gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 0.0f);
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		
+		//get viewport size and transform matrices 
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
-		//handl.setRenderScene( ( gl, data ) -> {
-		//
 		final Matrix4f pvm = new Matrix4f( data.getPv() );
 		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
 		final Matrix4f camview = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
 		
+		//draw boxes around volume
 		volumeBoxes.draw( gl, pvm, camview, screen_size );
 	}
 	

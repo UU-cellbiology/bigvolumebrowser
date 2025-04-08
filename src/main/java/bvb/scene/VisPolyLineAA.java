@@ -24,6 +24,7 @@ import bvvpg.core.shadergen.generate.SegmentTemplate;
 
 import static com.jogamp.opengl.GL.GL_FLOAT;
 
+/** shader that draws antialiased lines through an array of points **/
 
 public class VisPolyLineAA
 {
@@ -100,15 +101,14 @@ public class VisPolyLineAA
 	
 	public void setVertices( ArrayList< RealPoint > points)
 	{
-		int i,j;
-		
 		
 		nPointsN = points.size();
-		vertices = new float [nPointsN*3];//assume 3D	
 
-		for (i=0;i<nPointsN; i++)
+		vertices = new float [nPointsN*3]; //assume 3D	
+
+		for (int i=0; i<nPointsN; i++)
 		{
-			for (j=0;j<3; j++)
+			for (int j=0;j<3; j++)
 			{
 				vertices[i*3+j]=points.get(i).getFloatPosition(j);
 			}
@@ -254,9 +254,13 @@ public class VisPolyLineAA
 		
 		
 		int noffset = 0;
+		
+		
 		int[] sizeVP = new int[4];
+		
 		gl.glGetIntegerv( GL.GL_VIEWPORT, sizeVP, noffset );
 		Vector2f viewPort =  new Vector2f(sizeVP[2],sizeVP[3]);
+		
 		prog.getUniform2f("viewport").set(viewPort);
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );	
 		prog.getUniform4f("color").set(l_color);
@@ -264,6 +268,9 @@ public class VisPolyLineAA
 		//prog.getUniform1f( "thickness" ).set(3 );
 		prog.getUniform1f( "thickness" ).set( fLineThickness );
 		prog.getUniform1f( "antialias" ).set( 1.5f);
+		
+		//TODO include clipping interval and transform
+		
 		if(bIncludeClip)
 		{
 		//	prog.getUniform1i("clipactive").set(BigTraceData.nClipROI);

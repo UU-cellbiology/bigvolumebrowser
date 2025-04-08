@@ -1,17 +1,22 @@
 package bvb.core;
 
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.net.URL;
 
+
 import javax.swing.ImageIcon;
+
 import javax.swing.JFrame;
+
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import bvb.gui.SelectedSources;
 import bvb.gui.TabPanelView;
+
 
 
 public class BVBControlPanel extends JPanel
@@ -29,6 +34,7 @@ public class BVBControlPanel extends JPanel
 	final SelectedSources selectedSources;
 	
 	final TabPanelView tabPanelView;
+	
 	
 	public BVBControlPanel(final BigVolumeBrowser bvb_) 
 	{
@@ -58,5 +64,7 @@ public class BVBControlPanel extends JPanel
 	  
 	    this.add(tabPane,gbc);
 	}
+	
+
 	
 }
