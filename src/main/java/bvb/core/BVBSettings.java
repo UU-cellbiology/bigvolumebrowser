@@ -6,10 +6,14 @@ import ij.Prefs;
 
 public class BVBSettings
 {
+	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
 	
+	/** status of displaying boxes around sources **/
 	public static boolean bShowVolumeBoxes = Prefs.get("BVB.bShowVolumeBoxes", true);
 
+	/** animation speed during zoomin in/out , i.e. duration of displayed transform in ms **/
+	public static long nTransformAnimationDuration =  (int)Prefs.get("BVB.nTransformAnimationDuration",400);
 	
 	public static Color getInvertedColor(Color color_in)
 	{		

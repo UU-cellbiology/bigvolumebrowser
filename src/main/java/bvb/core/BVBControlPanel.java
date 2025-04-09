@@ -7,7 +7,7 @@ import java.net.URL;
 
 
 import javax.swing.ImageIcon;
-
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import javax.swing.JPanel;
@@ -40,7 +40,7 @@ public class BVBControlPanel extends JPanel
 	{
 		super(new GridBagLayout());
 		bvb = bvb_;
-		selectedSources = new SelectedSources(bvb.bvvViewer);
+		this.selectedSources = bvb.selectedSources;
 		
 		tabPane = new JTabbedPane(SwingConstants.LEFT);
 		
@@ -63,6 +63,11 @@ public class BVBControlPanel extends JPanel
 	    gbc.fill = GridBagConstraints.BOTH;
 	  
 	    this.add(tabPane,gbc);
+	    
+	    //install actions from BVB	    
+	    this.setActionMap(bvb.bvbActions.getActionMap());
+	    this.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT,bvb.bvbActions.getInputMap());
+
 	}
 	
 

@@ -60,8 +60,8 @@ public class VolumeBBoxes implements Shape
 				}
 			}
 			bLocked = true;
-			bvvSourceToBox.forEach( (src, vbox)-> {
-				if(bvb.bvvViewer.state().isSourceVisible( src ))
+			bvvSourceToBox.forEach( (sac, vbox)-> {
+				if(bvb.bvvViewer.state().isSourceVisible( sac ))
 				{
 					vbox.draw( gl, pvm, vm, screen_size );
 				}

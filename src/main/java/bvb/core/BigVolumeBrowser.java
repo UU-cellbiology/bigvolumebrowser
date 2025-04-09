@@ -10,6 +10,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,8 +37,10 @@ import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
+import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
 import bvb.io.BDVHDF5Loader;
+import bvb.scene.VisPolyLineAA;
 
 
 public class BigVolumeBrowser  implements PlugIn, TimePointListener
@@ -65,12 +68,20 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	/** boxes around volume **/	
 	public final VolumeBBoxes clipBoxes;
 
+	/** flag to lock BVB while it is busy **/
+	public boolean bLocked;
+	
+	/** currently selected source + listener for update **/
+	public SelectedSources selectedSources;
 	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
 	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataTobvvSourceList;
+	
+	
+	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
 	
 	public BigVolumeBrowser()
 	{
@@ -87,7 +98,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		
 		startBVB();
-		bvbActions = new BVBActions(this);
+		
 	}
 	
 	
@@ -104,6 +115,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 		if(bvv == null)
 		{
+			bLocked = true;
 			//start empty bvv
 			bvv = BvvFunctions.show( Bvv.options().
 					dCam(BVVSettings.dCam).
@@ -119,6 +131,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 					);
 			
 			bvvHandle = ( BvvHandleFrame ) bvv.getBvvHandle();
+			
 			bvvViewer = bvvHandle.getViewerPanel();
 			
 			//get renderScene
@@ -127,11 +140,14 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			//listen to timepoint change
 			bvvViewer.addTimePointListener(this);
 			
+			//bind updater on selected sources
+			selectedSources = new SelectedSources(bvvViewer);
+			
 			bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 			
 			bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
-			
+			bvbActions = new BVBActions(this);
 			
 			//setup control panel
 			controlPanel = new BVBControlPanel(this);
@@ -161,6 +177,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		    bvvFrame.addWindowListener(	closeWA );
 		    
 		    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
+		    
+		    
+		    bLocked = false;
 		}
 	}
 	
@@ -264,6 +283,11 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		volumeBoxes.draw( gl, pvm, camview, screen_size );
 		//draw clip boxes
 		clipBoxes.draw( gl, pvm, camview, screen_size );
+		
+		for(VisPolyLineAA line:helpLines)
+		{
+			line.draw( gl, pvm );
+		}
 	}
 	
 	public void updateSceneRender()
