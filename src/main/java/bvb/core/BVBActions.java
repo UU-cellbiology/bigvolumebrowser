@@ -219,15 +219,10 @@ public class BVBActions
 //	}
 	public AffineTransform3D getCenteredViewTransform(final AffineTransform3D ini_transform, final RealInterval inInterval, double zoomFraction)
 	{
-		int i;
+
 
 		final double [] minDim = inInterval.minAsDoubleArray();
 		final double [] maxDim = inInterval.maxAsDoubleArray();
-		final double [] sizeBox = new double[3];
-		for(int d=0;d<3;d++)
-		{
-			sizeBox[d]=maxDim[d]-minDim[d];
-		}
 		
 		double [] centerCoord = new double[3];		
 		
@@ -255,45 +250,16 @@ public class BVBActions
 		//translation after source transform to new position
 		for(int d=0;d<3;d++)
 		{
-			//dl[d] += (centerViewPoint[d]-centerCoordWorldOld[d]);
 			dl[d] -= centerViewPoint[d];
 		}
-		//dl[0] += 0.5f*sW;
-		//dl[1] += 0.5f*sH;
 		//move to the origin
 		transform.setTranslation(dl);
-//		double [] quat = new double [4];
-//		Affine3DHelpers.extractRotationAnisotropic( transform, quat);
-//		LinAlgHelpers.quaternionToR( quat, null );
-		
-		//get
-	
-		//let's figure out the scale		
-//		FinalRealInterval scaledInt = transform.estimateBounds( inInterval );
-		
-		
-//		double [] dScale = new double [3];
-//		for(int d=0;d<3;d++)
-//		{
-//			//transform
-//			dScale[d] = scaledInt.realMax( d )-scaledInt.realMin( d );
-//		}
-//		dScale[0] = sW*1.0/dScale[0];
-//		dScale[1] = sH*1.0/dScale[1];
-//		transform.scale( Math.min( dScale[0], dScale[1] ));
+
 //		//move to the center of the canvas
 		dl[0] = 0.5f*sW;
 		dl[1] = 0.5f*sH;
 		dl[2] = 0.0;
 		transform.translate( dl );
-		FinalRealInterval scaledInt = transform.estimateBounds( inInterval );
-		final double [] sizeBoxScaled = new double[3];
-		for(int d=0;d<3;d++)
-		{
-			sizeBoxScaled[d]=scaledInt.realMax( d )-scaledInt.realMin( d );
-		}
-		
-
 		
 		Matrix4f matPerspWorld = new Matrix4f();
 		MatrixMath.screenPerspective( BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar, sW, sH, 0, matPerspWorld ).mul( MatrixMath.affine( transform, new Matrix4f() ) );
@@ -333,9 +299,7 @@ public class BVBActions
 		boxRayLine.add( new RealPoint (other) );
 		bvb.helpLines.add( new VisPolyLineAA(boxRayLine, 8, Color.GREEN) );
 		
-//		mainLinePoints[0][0] *=(-1);
-//		mainLinePoints[1][0] *=(-1);
-//		Line2D camRay2 = new Line2D(mainLinePoints[0],mainLinePoints[1]);
+
 		for (int d=0; d<2; d++)
 		{
 			mainLinePoints[0][d] = centerCoord[d+1];
@@ -344,16 +308,14 @@ public class BVBActions
 		{
 			mainLinePoints[1][d] = inInterval.realMin( d );
 		}
-//		mainLinePoints[1][0] = -sizeBox[1]*0.5;
-//		mainLinePoints[1][1] = -sizeBox[2]*0.5;
-//		mainLinePoints[1][0] = -sizeBoxScaled[1]*0.5;
-//		mainLinePoints[1][1] = -sizeBoxScaled[2]*0.5;		
-		//sizeBoxScaled
+
 		
 		Line2D boxRay = new Line2D(mainLinePoints[0],mainLinePoints[1]);
 		
 		double [] intersectPoint = Line2D.intersectionLines2D( camRay, boxRay );
 		boxRay.value( intersectPoint[1], intersectPoint);
+		
+		double [] intersectPoint2 = Line2D.intersectionLines2DOther( camRay, boxRay );
 		
 		for(int d=0;d<2;d++)
 		{
@@ -361,13 +323,8 @@ public class BVBActions
 			mainLinePoints[1][d] -= centerCoord[d+1];
 		}
 		
-//		coeffScale = Line2D.intersectionLines2D( camRay2, boxRay );
-//		boxRay.value( coeffScale[1], coeffScale );
-		//double finScale = (-1.0)*coeffScale[0]/(sizeBox[1]*0.5); 
-		//double finScale = (-1.0)*coeffScale[0]/(sizeBox[1]*0.5);//(sizeBoxScaled[1]*0.5); 
 		double finScale = LinAlgHelpers.length( intersectPoint )/LinAlgHelpers.length( mainLinePoints[1] );//*(sizeBoxScaled[1]*0.5);
 
-		//double finScale2 = (-1.0)*coeffScale[1]/(sizeBoxScaled[2]*0.5); 
 		LinAlgHelpers.scale( dl, (-1.0), dl );
 		transform.translate( dl );
 		transform.scale( finScale );

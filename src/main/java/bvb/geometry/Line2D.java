@@ -141,4 +141,31 @@ public class Line2D {
 		return d;
 		
 	}
+	
+	public static double [] intersectionLines2DOther(final Line2D l1, final Line2D l2)
+	{
+		final double [] hom1 = toHomogeneousCoordinates(l1);
+		final double [] hom2 = toHomogeneousCoordinates(l2);
+		final double [] out = new double [2];
+		
+		out[0] = hom1[1]*hom2[2] - hom2[1]*hom1[2];
+		out[1] = hom2[0]*hom1[2] - hom1[0]*hom2[2];
+		//no intersection
+		if(Double.compare( hom1[0]*hom2[1] - hom2[0]*hom1[1], 0.0 )==0)
+		{
+			return null;
+		}
+		return out;
+		
+	}
+	
+	public static double[] toHomogeneousCoordinates(final Line2D line)
+	{
+		double [] out = new double [3];
+		out[0] = -line.linev[1][1];
+		out[1] = line.linev[1][0];
+		out[2] = line.linev[1][1]*line.linev[0][0] - line.linev[1][0]*line.linev[0][1];
+		
+		return out;
+	}
 }
