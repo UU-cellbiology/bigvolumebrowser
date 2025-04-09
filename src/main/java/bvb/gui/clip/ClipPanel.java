@@ -3,12 +3,15 @@ package bvb.gui.clip;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.net.URL;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,12 +21,17 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.imglib2.FinalRealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
+
 import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
+import bdv.util.BoundedRange;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.PanelTitle;
 import bvb.gui.SelectedSources;
-import bvb.utils.clip.ClipSetups;
+import bvb.gui.clip.utils.ClipSetups;
+import bvb.utils.Bounds3D;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipPanel extends JPanel implements ItemListener, ChangeListener
@@ -35,6 +43,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	final SelectedSources selectedSources;
 	public JCheckBox cbClipEnabled;
+	public JButton butResetClip;
 	public JCheckBox cbShowClipBoxes;
 	//public JLabel selectionWindow;
 	
@@ -89,12 +98,13 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		
 		cbClipEnabled = new JCheckBox("Clipping", false);
 		this.add(cbClipEnabled,gbc);
-		cbClipEnabled.addItemListener( this );
-		
+		cbClipEnabled.addItemListener( this );		
+					
 		cbShowClipBoxes = new JCheckBox ("Box",false);
 		//selectionWindow = new JLabel("Selected: None");
 		gbc.gridx++;
 		this.add(cbShowClipBoxes ,gbc);
+		
 		cbShowClipBoxes.addItemListener( new ItemListener() 
 				{
 					@Override
@@ -112,10 +122,25 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				
 				});
 		
+		butResetClip = new JButton("Reset");
+		gbc.gridx ++;
+		this.add(butResetClip,gbc);	
+		butResetClip.addActionListener( new ActionListener() 
+    		{
+				@Override
+				public void actionPerformed( ActionEvent arg0 )
+				{
+					
+					resetClip();
+				}
+    	
+    		});
+    
+		
 		gbc.gridx = 0;
 	    gbc.gridy ++;
 	    gbc.weightx = 1.0;
-	    gbc.gridwidth = 2;
+	    gbc.gridwidth = 3;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add(tabClipPane,gbc);
 	    
@@ -246,5 +271,30 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		clipRotationPanel.setSliderColors( colors );
 		clipCenterPanel.setSliderColors( colors );
 		
+	}
+	
+	void resetClip()
+	{
+		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
+		if(csList== null || csList.isEmpty())
+		{
+			return;
+		}
+		for ( final ConverterSetup cs: csList)
+		{
+			Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( cs );
+
+			if(range3D != null)
+			{
+				clipSetups.clipAxesBounds.setBounds( cs, range3D );
+				clipSetups.clipRotationAngles.setAngles(cs, new double [3]);
+				((GammaConverterSetup)cs).setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
+				((GammaConverterSetup)cs).setClipTransform( new AffineTransform3D() );
+				clipSetups.clipCenters.setCenters(cs, clipSetups.clipCenters.getCurrentOrDefaultCenters( cs ));
+				clipSetups.clipCenterBounds.setBounds( cs, clipSetups.clipCenterBounds.getDefaultBounds( cs ) );
+				clipSetups.updateClipTransform( (GammaConverterSetup) cs);
+				((GammaConverterSetup)cs).setClipActive( true );
+			}
+		}
 	}
 }

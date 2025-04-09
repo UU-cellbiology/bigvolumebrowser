@@ -12,7 +12,7 @@ import javax.swing.SwingUtilities;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
 import bvb.gui.SelectedSources;
-import bvb.utils.clip.ClipSetups;
+import bvb.gui.clip.utils.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 

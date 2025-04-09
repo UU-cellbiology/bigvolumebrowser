@@ -1,4 +1,4 @@
-package bvb.utils.clip;
+package bvb.gui.clip.utils;
 
 import java.util.HashMap;
 import java.util.Map;

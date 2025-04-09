@@ -1,4 +1,4 @@
-package bvb.utils.clip;
+package bvb.gui.clip.utils;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
