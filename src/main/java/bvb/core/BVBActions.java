@@ -32,6 +32,7 @@ import bvb.geometry.Line2D;
 import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.Rotate3DViewerStyle;
 import bvb.scene.VisPolyLineAA;
+import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 import bvvpg.core.util.MatrixMath;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -183,54 +184,10 @@ public class BVBActions
 		return Intervals.union( current, newInt );
 	}
 	
-//	public AffineTransform3D getCenteredViewTransform(final AffineTransform3D ini_transform, final RealInterval inInterval_, double zoomFraction)
-//	{
-//		
-//		double [] quat = new double[4];
-//		Affine3DHelpers.extractRotationAnisotropic(ini_transform, quat);
-//		double [][] mat = new double[3][4];
-//		LinAlgHelpers.quaternionToR( quat, mat );
-//		AffineTransform3D rotTr = new AffineTransform3D();
-//		rotTr.set( mat );
-//		
-//		FinalRealInterval inInterval = rotTr.estimateBounds( inInterval_ ); 
-//		double [][] dBox = new double[2][3];
-//		
-//		dBox[0] = inInterval.minAsDoubleArray();
-//		dBox[1] = inInterval.maxAsDoubleArray();
-//		final double nW = (dBox[1][0]-dBox[0][0]);
-//		final double nH = (dBox[1][1]-dBox[0][1]);
-//		final double nWoff = 2.0*dBox[0][0];
-//		final double nHoff = 2.0*dBox[0][1];
-//		final double nDoff = 2.0*dBox[0][2];
-//		//current window dimensions
-//		final int sW = bvb.bvvViewer.getWidth();
-//		final int sH = bvb.bvvViewer.getHeight();
-//		
-//		double scale = Math.max( sW/nW, sH/nH );
-//		
-//		AffineTransform3D t = new AffineTransform3D();
-//		t.identity();
-//		t.concatenate( rotTr );
-//		t.scale(scale);
-//		t.translate(0.5*(sW-scale*(nW+nWoff)),0.5*(sH-scale*(nH+nHoff)),(-0.5)*scale*(nDoff));
-//		return t;
-//		
-//	}
+
 	public AffineTransform3D getCenteredViewTransform(final AffineTransform3D ini_transform, final RealInterval inInterval, double zoomFraction)
 	{
 
-
-		final double [] minDim = inInterval.minAsDoubleArray();
-		final double [] maxDim = inInterval.maxAsDoubleArray();
-		
-		double [] centerCoord = new double[3];		
-		
-		//center of the interval in the world coordinates
-		for(int d=0; d<3; d++)
-		{
-			centerCoord[d] = 0.5*(maxDim[d] + minDim[d]);
-		}
 		
 		//current window dimensions
 		final int sW = bvb.bvvViewer.getWidth();
@@ -238,6 +195,9 @@ public class BVBActions
 		
 		//current view transform
 		final AffineTransform3D transform = ini_transform.copy();//new AffineTransform3D(ini_transform);
+		
+		//center of the interval in the world coordinates
+		double [] centerCoord = Misc.getIntervalCenter( inInterval );			
 		
 		//center of the screen "volume" 		
 		double [] centerViewPoint = new double[3];
@@ -252,15 +212,44 @@ public class BVBActions
 		{
 			dl[d] -= centerViewPoint[d];
 		}
-		//move to the origin
+		//move to the origin of coordinates
 		transform.setTranslation(dl);
-
-//		//move to the center of the canvas
+		
+		//extract view rotation, since we are not going to change it
+		final double [] quat = new double[4];
+		Affine3DHelpers.extractRotationAnisotropic( transform, quat );
+		double [] angles = new double[3];
+		for(int d=0;d<3;d++)
+		{
+			angles[d] = Misc.quaternionToAngle(d, quat);
+		}
+		final double [][] rotMatrix = new double [3][4];
+		LinAlgHelpers.quaternionToR( quat, rotMatrix );
+		
+		FinalRealInterval rotInterval;
+		//estimate new bounding box of the input interval after rotation
+		AffineTransform3D viewRot = new AffineTransform3D();
+		viewRot.set( rotMatrix );
+		AffineTransform3D viewRotFinal = new AffineTransform3D();
+		LinAlgHelpers.scale( centerCoord, (-1), centerCoord );
+		viewRotFinal.translate( centerCoord ); 
+		//viewRotFinal.rotate( 2, Math.PI*0.5 );
+		viewRotFinal = viewRotFinal.preConcatenate( viewRot );
+		rotInterval = viewRotFinal.estimateBounds( inInterval );
+		LinAlgHelpers.scale( centerCoord, (-1), centerCoord );
+		viewRotFinal.translate( centerCoord ); 
+		
+		rotInterval = viewRotFinal.estimateBounds( inInterval );
+		double [] test = new double[3];
+		viewRotFinal.apply( centerCoord, test);
+		bvb.trBox = new VolumeBox(rotInterval, null, 2.0f, Color.CYAN);
+		double [] verCoord = Misc.getIntervalCenter( rotInterval );
+		//move to the center of the canvas
 		dl[0] = 0.5f*sW;
 		dl[1] = 0.5f*sH;
 		dl[2] = 0.0;
 		transform.translate( dl );
-		
+	
 		Matrix4f matPerspWorld = new Matrix4f();
 		MatrixMath.screenPerspective( BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar, sW, sH, 0, matPerspWorld ).mul( MatrixMath.affine( transform, new Matrix4f() ) );
 		double [][] mainLinePoints = new double[2][2];
@@ -272,8 +261,8 @@ public class BVBActions
 			matPerspWorld.unproject((float)(sW*0.5),sH,z, //z=1 ->far from camera z=0 -> close to camera
 					new int[] { 0, 0, sW, sH },temp);
 			
-			mainLinePoints[z][0]= temp.y;
-			mainLinePoints[z][1]= temp.z;
+			mainLinePoints[z][0] = temp.y;
+			mainLinePoints[z][1] = temp.z;
 			camRayLine.add( new RealPoint(temp.x,temp.y,temp.z));
 			//mainLinePoints[z] = new RealPoint(temp.x,temp.y,temp.z);			
 		}
@@ -293,29 +282,29 @@ public class BVBActions
 		double [] other = new double[3];
 		for (int d=0; d<3; d++)
 		{
-			other[d] = inInterval.realMin( d );
+			other[d] = rotInterval.realMin( d );
 		}
 		other[0] = centerCoord[0];
+		viewRotFinal.inverse().apply( other, other);
 		boxRayLine.add( new RealPoint (other) );
 		bvb.helpLines.add( new VisPolyLineAA(boxRayLine, 8, Color.GREEN) );
+		
 		
 
 		for (int d=0; d<2; d++)
 		{
-			mainLinePoints[0][d] = centerCoord[d+1];
+			mainLinePoints[0][d] = centerCoord[d];
 		}
 		for (int d=0; d<2; d++)
 		{
-			mainLinePoints[1][d] = inInterval.realMin( d );
+			mainLinePoints[1][d] = other[d];
+			//mainLinePoints[1][d] = rotInterval.realMin( d );
 		}
 
 		
 		Line2D boxRay = new Line2D(mainLinePoints[0],mainLinePoints[1]);
 		
-		double [] intersectPoint = Line2D.intersectionLines2D( camRay, boxRay );
-		boxRay.value( intersectPoint[1], intersectPoint);
-		
-		double [] intersectPoint2 = Line2D.intersectionLines2DOther( camRay, boxRay );
+		double [] intersectPoint = Line2D.intersectionLines2DPoint( camRay, boxRay );
 		
 		for(int d=0;d<2;d++)
 		{

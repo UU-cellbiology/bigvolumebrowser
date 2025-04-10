@@ -116,6 +116,7 @@ public class Misc
 		return new FinalRealInterval( min, max );
 	}
 	
+	
 	/** depending on nAxis value, extracts Euler angle (rotation around nAxis)
 	 * value (in radians) from the quaternion q.
 	 * Follows the formula/code from wiki 

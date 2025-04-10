@@ -41,6 +41,7 @@ import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
 import bvb.io.BDVHDF5Loader;
 import bvb.scene.VisPolyLineAA;
+import bvb.shapes.VolumeBox;
 
 
 public class BigVolumeBrowser  implements PlugIn, TimePointListener
@@ -82,6 +83,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	
 	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
+	public VolumeBox trBox = null;
 	
 	public BigVolumeBrowser()
 	{
@@ -277,17 +279,19 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
 		final Matrix4f pvm = new Matrix4f( data.getPv() );
 		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-		final Matrix4f camview = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
+		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
 		
 		//draw boxes around volume
-		volumeBoxes.draw( gl, pvm, camview, screen_size );
+		volumeBoxes.draw( gl, pvm, vm, screen_size );
 		//draw clip boxes
-		clipBoxes.draw( gl, pvm, camview, screen_size );
+		clipBoxes.draw( gl, pvm, vm, screen_size );
 		
 		for(VisPolyLineAA line:helpLines)
 		{
 			line.draw( gl, pvm );
 		}
+		if (trBox!=null)
+			trBox.draw( gl, pvm, vm, screen_size );
 	}
 	
 	public void updateSceneRender()

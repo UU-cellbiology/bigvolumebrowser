@@ -123,7 +123,7 @@ public class Line2D {
 		return LinAlgHelpers.length(dist);
 	}
 	
-	public static double [] intersectionLines2D(Line2D l1, Line2D l2)
+	public static double [] intersectionLines2DParameters(Line2D l1, Line2D l2)
 	{
 		double [] d = new double[2];
 		
@@ -142,7 +142,7 @@ public class Line2D {
 		
 	}
 	
-	public static double [] intersectionLines2DOther(final Line2D l1, final Line2D l2)
+	public static double [] intersectionLines2DPoint(final Line2D l1, final Line2D l2)
 	{
 		final double [] hom1 = toHomogeneousCoordinates(l1);
 		final double [] hom2 = toHomogeneousCoordinates(l2);
@@ -150,11 +150,14 @@ public class Line2D {
 		
 		out[0] = hom1[1]*hom2[2] - hom2[1]*hom1[2];
 		out[1] = hom2[0]*hom1[2] - hom1[0]*hom2[2];
+		final double norm = hom1[0]*hom2[1] - hom2[0]*hom1[1]; 
 		//no intersection
-		if(Double.compare( hom1[0]*hom2[1] - hom2[0]*hom1[1], 0.0 )==0)
+		if(Double.compare( norm, 0.0 )==0)
 		{
 			return null;
 		}
+		out[0]/=norm;
+		out[1]/=norm;
 		return out;
 		
 	}
