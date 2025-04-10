@@ -83,7 +83,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	
 	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
-	public VolumeBox trBox = null;
+	public ArrayList<VolumeBox> trBox = new ArrayList<>();
 	
 	public BigVolumeBrowser()
 	{
@@ -290,8 +290,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		{
 			line.draw( gl, pvm );
 		}
-		if (trBox!=null)
-			trBox.draw( gl, pvm, vm, screen_size );
+		for(VolumeBox box:trBox)
+			box.draw( gl, pvm, vm, screen_size );
 	}
 	
 	public void updateSceneRender()

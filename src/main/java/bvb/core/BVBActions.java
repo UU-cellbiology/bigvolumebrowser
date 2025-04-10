@@ -286,8 +286,13 @@ public class BVBActions
 		boxRayLine.add( new RealPoint (other) );
 		bvb.helpLines.add( new VisPolyLineAA(boxRayLine, 8, Color.GREEN) );
 
-		//show box
-		bvb.trBox = new VolumeBox( rotInterval, viewRotFinal.inverse(), 2.0f, Color.CYAN);
+		//add box
+		for(VolumeBox box:bvb.trBox)
+		{
+			box.setLineColor( Color.CYAN.darker() );
+			box.setLineThickness( 1.0f );
+		}
+		bvb.trBox.add( new VolumeBox( rotInterval, viewRotFinal.inverse(), 3.0f, Color.CYAN));
 
 		
 		Line3D camRay = new Line3D(camRayLine.get( 0 ),camRayLine.get( 1 ));
