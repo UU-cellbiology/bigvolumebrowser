@@ -29,6 +29,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.SourceAndConverter;
 import bvb.geometry.Line2D;
+import bvb.geometry.Line3D;
 import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.Rotate3DViewerStyle;
 import bvb.scene.VisPolyLineAA;
@@ -242,7 +243,7 @@ public class BVBActions
 		rotInterval = viewRotFinal.estimateBounds( inInterval );
 		double [] test = new double[3];
 		viewRotFinal.apply( centerCoord, test);
-		bvb.trBox = new VolumeBox(rotInterval, null, 2.0f, Color.CYAN);
+	
 		double [] verCoord = Misc.getIntervalCenter( rotInterval );
 		//move to the center of the canvas
 		dl[0] = 0.5f*sW;
@@ -272,13 +273,9 @@ public class BVBActions
 		newtemp.set( centerCoord[0], centerCoord[1], centerCoord[2] );
 		matPerspWorld.project( newtemp, new int[] { 0, 0, sW, sH }, temp );
 		
-		Line2D camRay = new Line2D(mainLinePoints[0],mainLinePoints[1]);
 		
-		
-		ArrayList<RealPoint> boxRayLine = new ArrayList<>();
-		
-		boxRayLine.add( new RealPoint (centerCoord ));
-		
+		ArrayList<RealPoint> boxRayLine = new ArrayList<>();		
+		boxRayLine.add( new RealPoint (centerCoord ));		
 		double [] other = new double[3];
 		for (int d=0; d<3; d++)
 		{
@@ -288,31 +285,27 @@ public class BVBActions
 		viewRotFinal.inverse().apply( other, other);
 		boxRayLine.add( new RealPoint (other) );
 		bvb.helpLines.add( new VisPolyLineAA(boxRayLine, 8, Color.GREEN) );
-		
-		
 
-		for (int d=0; d<2; d++)
-		{
-			mainLinePoints[0][d] = centerCoord[d];
-		}
-		for (int d=0; d<2; d++)
-		{
-			mainLinePoints[1][d] = other[d];
-			//mainLinePoints[1][d] = rotInterval.realMin( d );
-		}
+		//show box
+		bvb.trBox = new VolumeBox( rotInterval, viewRotFinal.inverse(), 2.0f, Color.CYAN);
 
 		
-		Line2D boxRay = new Line2D(mainLinePoints[0],mainLinePoints[1]);
+		Line3D camRay = new Line3D(camRayLine.get( 0 ),camRayLine.get( 1 ));
+		Line3D boxRay = new Line3D(boxRayLine.get( 0 ),boxRayLine.get( 1 ));
+
+		double [] vals = Line3D.linesIntersect( camRay, boxRay );
+		double [] intersectPoint  = new double [3];
+		boxRay.value( vals[1], intersectPoint   );
 		
-		double [] intersectPoint = Line2D.intersectionLines2DPoint( camRay, boxRay );
-		
-		for(int d=0;d<2;d++)
-		{
-			intersectPoint[d] -= centerCoord[d+1];
-			mainLinePoints[1][d] -= centerCoord[d+1];
-		}
-		
-		double finScale = LinAlgHelpers.length( intersectPoint )/LinAlgHelpers.length( mainLinePoints[1] );//*(sizeBoxScaled[1]*0.5);
+		ArrayList<RealPoint> extendedBoxRay = new ArrayList<>();
+		extendedBoxRay.add( boxRayLine.get( 0 ) );
+		extendedBoxRay.add( new RealPoint(intersectPoint) );
+		bvb.helpLines.add( new VisPolyLineAA(extendedBoxRay, 4, Color.RED) );
+		double [] len1 = new double[3];
+		LinAlgHelpers.subtract( intersectPoint, centerCoord, len1 );
+		double [] len2 = new double[3];
+		LinAlgHelpers.subtract( other, centerCoord, len2 );
+		double finScale = LinAlgHelpers.length( len1 )/LinAlgHelpers.length( len2);//*(sizeBoxScaled[1]*0.5);
 
 		LinAlgHelpers.scale( dl, (-1.0), dl );
 		transform.translate( dl );

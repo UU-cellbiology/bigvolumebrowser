@@ -23,7 +23,7 @@ public class Line3D {
     /** empty constructor **/
 	public Line3D()
 	{
-		linev= new double [2][3]; 
+		linev = new double [2][3]; 
 	}
 	/**
 	 *  @param v0_ - some vector on the line
@@ -46,6 +46,7 @@ public class Line3D {
 	{
 		initFromTwoPoints(v1,v2);
 	}	
+	
 	public void initFromTwoPoints(final RealPoint v1, final RealPoint v2)
 	{
 		linev= new double [2][3];
@@ -109,5 +110,29 @@ public class Line3D {
 		LinAlgHelpers.subtract(point, line.linev[0], point);
 		LinAlgHelpers.cross(point, line.linev[1], dist);
 		return LinAlgHelpers.length(dist);
+	}
+	
+	/** returns line parameter values for the shortest segment
+	 * between the lines in 3D.
+	 * taken from https://paulbourke.net/geometry/pointlineplane/	 * **/
+	public static double [] linesIntersect(final Line3D l1, final Line3D l2)
+	{
+		double [] out = new double [2];
+		double [] l13 = new double [3];
+		LinAlgHelpers.subtract( l1.linev[0], l2.linev[0], l13 );
+		final double d1343 = dcoef(l13, l2.linev[1]);
+		final double d4321 = dcoef(l2.linev[1], l1.linev[1]);
+		final double d1321 = dcoef(l13, l1.linev[1]);
+		final double d4343 = dcoef(l2.linev[1], l2.linev[1]);
+		final double d2121 = dcoef(l1.linev[1], l1.linev[1]);
+		out[0] =  (d1343*d4321 - d1321*d4343 ) / ( d2121*d4343 - d4321*d4321);
+		out[1] =  ( d1343 + out[0]* d4321 ) / d4343;
+		return out;
+	}
+	
+	public static double dcoef(double [] v1, double v2[])
+	{
+		return LinAlgHelpers.dot( v1, v2 );
+		
 	}
 }
