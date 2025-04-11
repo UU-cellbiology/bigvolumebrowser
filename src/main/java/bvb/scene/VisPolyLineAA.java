@@ -67,21 +67,22 @@ public class VisPolyLineAA
 		
 	}
 	
-	public VisPolyLineAA(final ArrayList< RealPoint > points, final float fLineThickness_, final Vector4f l_color_)
+	public VisPolyLineAA(final RealPoint [] points, final float fLineThickness_,final Color color_in)
 	{
 		this();
 		fLineThickness = fLineThickness_;		
-		l_color = new Vector4f(l_color_);		
+		l_color = new Vector4f(color_in.getComponents(null));		
 		setVertices(points);
 		
 	}
+
 	
-	public void setThickness(float fLineThickness_)
+	public void setThickness(final float fLineThickness_)
 	{
-		fLineThickness= fLineThickness_;
+		fLineThickness = fLineThickness_;
 	}
 	
-	public void setColor(Color color_in)
+	public void setColor(final Color color_in)
 	{
 		l_color = new Vector4f(color_in.getComponents(null));
 	}
@@ -99,10 +100,28 @@ public class VisPolyLineAA
 		setVertices(points);
 	}
 	
+	public void setParams(final RealPoint [] points, final float fLineThickness_, final Color color_in)
+	{
+
+		fLineThickness= fLineThickness_;
+		l_color = new Vector4f(color_in.getComponents(null));		
+		setVertices(points);
+	}
+	
 	public void setVertices( ArrayList< RealPoint > points)
 	{
-		
-		nPointsN = points.size();
+		RealPoint[] pointsArr = new RealPoint[points.size()];
+		for (int i=0;i<points.size();i++)
+		{
+			pointsArr[i] = points.get( i );
+		}
+		setVertices(pointsArr);
+	}
+	
+	public void setVertices( RealPoint [] points)
+	{
+				
+		nPointsN = points.length;
 
 		vertices = new float [nPointsN*3]; //assume 3D	
 
@@ -110,10 +129,11 @@ public class VisPolyLineAA
 		{
 			for (int j=0;j<3; j++)
 			{
-				vertices[i*3+j]=points.get(i).getFloatPosition(j);
+				vertices[i*3+j]=points[i].getFloatPosition(j);
 			}
 			
 		}
+		
 		initialized = false;
 	}
 
