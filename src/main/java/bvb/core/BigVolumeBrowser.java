@@ -18,8 +18,6 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-import net.imglib2.FinalRealInterval;
-
 import org.joml.Matrix4f;
 
 import bdv.viewer.TimePointListener;

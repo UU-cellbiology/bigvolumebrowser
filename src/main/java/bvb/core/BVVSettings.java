@@ -10,16 +10,16 @@ import bvb.scijava.Services;
 import bvb.scijava.ConfigureRenderWindow;
 import ij.IJ;
 
+/** BVV canvas rendering parameters, 
+ * can be changed/adjusted somewhere else.
+ **/
 public class BVVSettings
 {
-
-	//BVV canvas rendering parameters, can be changed/adjusted somewhere else
 	
 	//parameters that can be changed at runtime
 	static double dCam = 1000.;
-	static double dClipNear = 700.;
-//	static double dClipFar = 15000.;	
-	static double dClipFar = 700.;	
+	static double dClipNear = 1000.;
+	static double dClipFar = 15000.;		
 	
 	// parameters that require bvv restart, 
 	// see https://github.com/ekatrukha/BigTrace/wiki/Volume-Render-Settings
