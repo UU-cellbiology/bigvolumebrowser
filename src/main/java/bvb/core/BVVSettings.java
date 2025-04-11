@@ -17,7 +17,7 @@ public class BVVSettings
 {
 	
 	//parameters that can be changed at runtime
-	static double dCam = 1000.;
+	static double dCam = 2000.;
 	static double dClipNear = 1000.;
 	static double dClipFar = 15000.;		
 	

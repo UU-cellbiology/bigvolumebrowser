@@ -1,6 +1,5 @@
 package bvb.core;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
 import java.util.ArrayList;

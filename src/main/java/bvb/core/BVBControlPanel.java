@@ -36,7 +36,7 @@ public class BVBControlPanel extends JPanel
 	
 	final TabPanelView tabPanelView;
 	
-	//final TabPanelInfo tabPanelInfo;
+	final TabPanelInfo tabPanelInfo;
 	
 	
 	public BVBControlPanel(final BigVolumeBrowser bvb_) 
@@ -52,11 +52,11 @@ public class BVBControlPanel extends JPanel
 	    tabPanelView = new TabPanelView(bvb, selectedSources);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
 		
-//		icon_path = this.getClass().getResource("/icons/shortcut.png");
-//	    tabIcon = new ImageIcon(icon_path);
-//	    tabPanelInfo = new TabPanelInfo();	    
-//		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
-//		
+		icon_path = this.getClass().getResource("/icons/shortcut.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    tabPanelInfo = new TabPanelInfo();	    
+		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
+		
 		
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
