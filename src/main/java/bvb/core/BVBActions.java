@@ -249,24 +249,7 @@ public class BVBActions
 		
 		final RealPoint [][] camRayLinesWH = new RealPoint[2][2]; 
 		final RealPoint [][] camRayLinesNearFar = new RealPoint[2][2]; 
-
-		//DEBUG, show long camera ray
-		final RealPoint [][] cameraRays = new RealPoint[2][2];
-		matPerspWorld.unproject(sW*0.5f,sH,1.0f, //z=1 ->far from camera z=0 -> close to camera
-				new int[] { 0, 0, sW, sH },temp);
-		cameraRays[0][1] = new RealPoint(temp.x,temp.y,temp.z);
-		float zCamPos = (float)((-20.0)*(BVVSettings.dCam + BVVSettings.dClipNear)/(BVVSettings.dClipNear+ BVVSettings.dClipFar));
-		matPerspWorld.unproject(sW*0.5f,sH,zCamPos, 
-				new int[] { 0, 0, sW, sH },temp);
-		cameraRays[0][0] = new RealPoint(temp.x,temp.y,temp.z);
-		cameraRays[1][0] = cameraRays[0][0];
-		matPerspWorld.unproject(sW*0.5f,0.0f,1.0f, //z=1 ->far from camera z=0 -> close to camera
-				new int[] { 0, 0, sW, sH },temp);
-		cameraRays[1][1] = new RealPoint(temp.x,temp.y,temp.z);
-		
-		bvb.helpLines.add( new VisPolyLineAA(cameraRays[0], 4, Color.WHITE) );
-		bvb.helpLines.add( new VisPolyLineAA(cameraRays[1], 4, Color.WHITE) );
-		
+	
 		
 		//width
 		for (int z=0 ; z<2; z++)
@@ -280,8 +263,7 @@ public class BVBActions
 		//height
 		for (int z=0 ; z<2; z++)
 		{
-			//take coordinates in original data volume space
-			matPerspWorld.unproject(sW*0.5f,sH,z, //z=1 ->far from camera z=0 -> close to camera
+			matPerspWorld.unproject(sW*0.5f,sH,z, 
 					new int[] { 0, 0, sW, sH },temp);	
 			camRayLinesWH[1][z] = new RealPoint(temp.x,temp.y,temp.z);
 		}
@@ -289,18 +271,16 @@ public class BVBActions
 		//Z view axis
 		for (int z=0 ; z<2; z++)
 		{
-			//take coordinates in original data volume space
-			matPerspWorld.unproject(sW*0.5f,sH*0.5f,z, //z=1 ->far from camera z=0 -> close to camera
+			matPerspWorld.unproject(sW*0.5f,sH*0.5f,z, 
 					new int[] { 0, 0, sW, sH },temp);	
 			camRayLinesNearFar[z][0] = new RealPoint(temp.x,temp.y,temp.z);
 		}
 		for(int i=0;i<2;i++)
 		{
 			camRayLinesNearFar[i][1] = camRayLinesWH[1][i];
-			bvb.helpLines.add( new VisPolyLineAA(camRayLinesNearFar[i], 4, Color.WHITE) );	
 		}
 	
-		//add symmetry in clip far /clip near for the visualization
+		//add symmetry in clip far/clip near for the visualization
 		for(int i=0;i<2;i++)
 		{
 			double[] p2 = camRayLinesNearFar[i][0].positionAsDoubleArray();
@@ -310,31 +290,22 @@ public class BVBActions
 			LinAlgHelpers.scale( b, (-1.0), b);
 			LinAlgHelpers.add( p2, b, b);
 			camRayLinesNearFar[i][0].setPosition( b );
-			bvb.helpLines.add( new VisPolyLineAA(camRayLinesNearFar[i], 4, Color.WHITE) );
 		}
-
-		//add box
-		//but first make previous boxes thinner
-		for(VolumeBox box:bvb.helpBoxes)
-		{
-			box.setLineColor( Color.CYAN.darker() );
-			box.setLineThickness( 1.0f );
-		}		
-		bvb.helpBoxes.add( new VolumeBox( rotInterval, viewRotFinal.inverse(), 3.0f, Color.CYAN));
 
 		double [] scales = new double[4];
 		RealPoint[][] boxRayWH = new RealPoint[2][2];
+		
+		//width and height
 		for(int i=0;i<2;i++)
 		{	
-			bvb.helpLines.add( new VisPolyLineAA(camRayLinesWH[i], 4, Color.WHITE) );
 			boxRayWH[i] = makeBoxRayLineWH(i, rotInterval.minAsDoubleArray(), centerCoord, viewRotFinal );
 			scales[i] = zoomFraction*getMaxScaleFactorIntersect(camRayLinesWH[i], boxRayWH[i]);
-			//scales[i] = zoomFraction*getMaxScaleFactorWidthOrHeight(i,camRayLinesWH[i], rotInterval.minAsDoubleArray(), centerCoord, viewRotFinal );
 		}
+		
+		//clip near and clip far
 		for(int i=0;i<2;i++)
 		{	
 			scales[i+2] = zoomFraction*getMaxScaleFactorIntersect( camRayLinesNearFar[i], boxRayWH[1]);
-			//scales[i] = zoomFraction*getMaxScaleFactorWidthOrHeight(i,camRayLinesWH[i], rotInterval.minAsDoubleArray(), centerCoord, viewRotFinal );
 		}
 
 		double finScale = Double.MAX_VALUE;
@@ -351,61 +322,9 @@ public class BVBActions
 		LinAlgHelpers.scale( dl, (-1.0), dl );
 		transform.translate( dl );
 		
-		
-		//add rescaled box
-		AffineTransform3D newTR = new AffineTransform3D();
-		newTR.set(viewRotFinal.inverse());
-		LinAlgHelpers.scale( centerCoord, (-1.0), centerCoord );
-		newTR.translate( centerCoord );
-		newTR.scale( finScale );
-		LinAlgHelpers.scale( centerCoord, (-1.0), centerCoord );
-		newTR.translate( centerCoord );
-		bvb.helpBoxes.add( new VolumeBox( rotInterval, newTR, 3.0f, Color.ORANGE));
 		return transform;
 	}
-	
-	/** calculates optimal zoom to scale bounding box to fit in width or height **/
-	double getMaxScaleFactorWidthOrHeight(final int nAxis, final RealPoint [] camRayLine, final double [] minInt, final double [] centerCoord, final AffineTransform3D viewRotFinal)
-	{
-		RealPoint [] boxRayLine = new RealPoint[2];
-		boxRayLine[0] =  new RealPoint (centerCoord );
-		double [] boxRayPoint = new double[3];
-		for (int d=0; d<3; d++)
-		{
-			boxRayPoint[d] = minInt[d];
-		}
-		if(nAxis == 0)
-		{	
-			boxRayPoint[1] = centerCoord[1];
-		}
-		else
-		{
-			boxRayPoint[0] = centerCoord[0];	
-		}
-		viewRotFinal.inverse().apply( boxRayPoint, boxRayPoint);
-		boxRayLine[1] = new RealPoint (boxRayPoint);
-		bvb.helpLines.add( new VisPolyLineAA(boxRayLine, 8, Color.GREEN) );
-
-		Line3D camRay = new Line3D(camRayLine[ 0 ],camRayLine[ 1 ]);
-		Line3D boxRay = new Line3D(boxRayLine[ 0 ],boxRayLine[ 1 ]);
 		
-		double [] vals = Line3D.linesIntersect( camRay, boxRay );
-		double [] intersectPoint  = new double [3];
-		
-		boxRay.value( vals[1], intersectPoint );
-		
-		ArrayList<RealPoint> extendedBoxRay = new ArrayList<>();
-		extendedBoxRay.add( boxRayLine[ 0 ] );
-		extendedBoxRay.add( new RealPoint(intersectPoint) );
-		bvb.helpLines.add( new VisPolyLineAA(extendedBoxRay, 4, Color.RED) );
-		
-		LinAlgHelpers.subtract( intersectPoint, centerCoord, intersectPoint );
-		LinAlgHelpers.subtract( boxRayPoint, centerCoord, boxRayPoint );
-		
-		return LinAlgHelpers.length( intersectPoint )/LinAlgHelpers.length( boxRayPoint);
-
-	}
-	
 	/** calculates optimal zoom to scale bounding box,
 	 * based on provided two rays (lines) **/
 	double getMaxScaleFactorIntersect(final RealPoint [] camRayLine, RealPoint [] boxRayLine)
@@ -418,11 +337,7 @@ public class BVBActions
 		double [] intersectPoint  = new double [3];
 		
 		boxRay.value( vals[1], intersectPoint );
-		
-		ArrayList<RealPoint> extendedBoxRay = new ArrayList<>();
-		extendedBoxRay.add( boxRayLine[ 0 ] );
-		extendedBoxRay.add( new RealPoint(intersectPoint) );
-		bvb.helpLines.add( new VisPolyLineAA(extendedBoxRay, 4, Color.RED) );
+	
 		double [] center = boxRayLine[0].positionAsDoubleArray();
 		double [] edge = boxRayLine[1].positionAsDoubleArray();
 		LinAlgHelpers.subtract( intersectPoint, center, intersectPoint );
@@ -432,6 +347,7 @@ public class BVBActions
 
 	}
 	
+	/** calculates "width" and "height" rays **/
 	RealPoint [] makeBoxRayLineWH(final int nAxis, final double [] minInt, final double [] centerCoord, final AffineTransform3D viewRotFinal)
 	{
 		RealPoint [] boxRayLine = new RealPoint[2];
@@ -451,7 +367,7 @@ public class BVBActions
 		}
 		viewRotFinal.inverse().apply( boxRayPoint, boxRayPoint);
 		boxRayLine[1] = new RealPoint (boxRayPoint);
-		bvb.helpLines.add( new VisPolyLineAA(boxRayLine, 8, Color.GREEN) );
+		
 		return boxRayLine;
 	}
 	
