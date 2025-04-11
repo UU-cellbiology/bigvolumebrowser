@@ -252,7 +252,7 @@ public class BVBActions
 		transform.translate( dl );
 	
 		Matrix4f matPerspWorld = new Matrix4f();
-		MatrixMath.screenPerspective( BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar, sW, sH, 0, matPerspWorld ).mul( MatrixMath.affine( transform, new Matrix4f() ) );
+		MatrixMath.screenPerspective( bvb.bvvViewer.getProjectionType(), BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar, sW, sH, 0, matPerspWorld ).mul( MatrixMath.affine( transform, new Matrix4f() ) );
 		double [][] mainLinePoints = new double[2][2];
 		Vector3f temp = new Vector3f(); 
 		ArrayList<RealPoint> camRayLine = new ArrayList<>();

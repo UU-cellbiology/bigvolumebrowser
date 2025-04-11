@@ -28,8 +28,11 @@ public class ViewPanel extends JPanel
 	final BigVolumeBrowser bvb;
 	JToggleButton butOrigin;
 	JToggleButton butVBox;
+	JButton butProjType;
 	JButton butFullScreen;
 	JButton butSettings;
+	final ImageIcon [] projIcon = new ImageIcon[2];
+	final String[] projToolTip = new String[2];
 	
 	public ColorUserSettings selectColors = new ColorUserSettings();
 	
@@ -73,11 +76,37 @@ public class ViewPanel extends JPanel
 	    	}
 	    });
 	    
+	    //PROJECTION MATRIX
+	    projToolTip[0] = "Perspective";
+	    projToolTip[1] = "Orthographic";
+		icon_path = this.getClass().getResource("/icons/proj_persp.png");
+		projIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource("/icons/proj_ortho.png");
+		projIcon[1] = new ImageIcon(icon_path);
+	    butProjType = new JButton(projIcon[bvb.bvvViewer.getProjectionType()]);
+	    butProjType.setToolTipText( projToolTip[bvb.bvvViewer.getProjectionType() ]);
+	    butProjType.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent arg0 )
+			{
+				int newProj = 0; 
+				if(bvb.bvvViewer.getProjectionType() == 0)
+				{
+					newProj = 1;
+				}
+				butProjType.setIcon( projIcon[newProj] );
+				butProjType.setToolTipText( projToolTip[newProj]);
+				bvb.bvvViewer.setProjectionType(newProj);
+
+			}
+	
+		});
+		
 	    //FULL SCREEN
 		icon_path = this.getClass().getResource("/icons/fullscreen.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butFullScreen = new JButton(tabIcon);
-	    //butVBox.setSelected(btdata.bVolumeBox);
 	    butFullScreen.setToolTipText("Full Screen");
 	    butFullScreen.addActionListener(new ActionListener() {
 
@@ -113,6 +142,9 @@ public class ViewPanel extends JPanel
 		
 		gbc.gridx++;	    
 		this.add(butVBox,gbc);
+		
+		gbc.gridx++;	    
+		this.add(butProjType,gbc);
 		
 		gbc.gridx++;	    
 		this.add(butFullScreen,gbc);
