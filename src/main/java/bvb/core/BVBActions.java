@@ -204,15 +204,15 @@ public class BVBActions
 		transform.apply( centerCoord, centerViewPoint );
 
 		//position center of the volume in the center of "screen" volume
-		double [] dl = transform.getTranslation();
+		double [] dl = new double[3];
 		
 		//translation after source transform to new position
 		for(int d=0;d<3;d++)
 		{
-			dl[d] -= centerViewPoint[d];
+			dl[d] = (-1)*centerViewPoint[d];
 		}
 		//move to the origin of coordinates
-		transform.setTranslation(dl);
+		transform.translate(dl);
 		
 		//extract view rotation, since we are not going to change it
 		final double [] quat = new double[4];
@@ -281,14 +281,16 @@ public class BVBActions
 		for(int i=0;i<2;i++)
 		{	
 			bvb.helpLines.add( new VisPolyLineAA(camRayLinesWH[i], 8, Color.WHITE) );
-			scales[i] = getMaxScaleFactorWidthOrHeight(i,camRayLinesWH[i], rotInterval.minAsDoubleArray(), centerCoord, viewRotFinal );
+			scales[i] = zoomFraction*getMaxScaleFactorWidthOrHeight(i,camRayLinesWH[i], rotInterval.minAsDoubleArray(), centerCoord, viewRotFinal );
 		}
 
 		double finScale = Math.min( scales[0], scales[1] );
 		
 		LinAlgHelpers.scale( dl, (-1.0), dl );
 		transform.translate( dl );
+		
 		transform.scale( finScale );
+		
 		LinAlgHelpers.scale( dl, (-1.0), dl );
 		transform.translate( dl );
 		return transform;
