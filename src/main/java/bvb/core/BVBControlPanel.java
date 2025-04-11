@@ -47,19 +47,29 @@ public class BVBControlPanel extends JPanel
 		
 		tabPane = new JTabbedPane(SwingConstants.LEFT);
 		
-		URL icon_path = this.getClass().getResource("/icons/cube_icon.png");
-	    ImageIcon tabIcon = new ImageIcon(icon_path);
+		
+		URL  icon_path = this.getClass().getResource("/icons/load_sources.png");
+		ImageIcon tabIcon = new ImageIcon(icon_path);
+	    //tabPanelInfo = new TabPanelInfo();	    
+		tabPane.addTab("",tabIcon, new JPanel(), "Data sources");
+		
+		icon_path = this.getClass().getResource("/icons/view.png");
+	    tabIcon = new ImageIcon(icon_path);
 	    tabPanelView = new TabPanelView(bvb, selectedSources);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
+		
+		icon_path = this.getClass().getResource("/icons/sources.png");
+		tabIcon = new ImageIcon(icon_path);
+	    //tabPanelInfo = new TabPanelInfo();	    
+		tabPane.addTab("",tabIcon, new JPanel(), "Transform sources");
 		
 		icon_path = this.getClass().getResource("/icons/shortcut.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    tabPanelInfo = new TabPanelInfo();	    
 		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
 		
-		
 	    tabPane.setSize(350, 300);
-	    tabPane.setSelectedIndex(0);
+	    tabPane.setSelectedIndex(1);
 	    
 	    
 	    final GridBagConstraints gbc = new GridBagConstraints();
