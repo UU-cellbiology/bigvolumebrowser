@@ -315,12 +315,12 @@ public class BVBActions
 
 		//add box
 		//but first make previous boxes thinner
-		for(VolumeBox box:bvb.trBox)
+		for(VolumeBox box:bvb.helpBoxes)
 		{
 			box.setLineColor( Color.CYAN.darker() );
 			box.setLineThickness( 1.0f );
 		}		
-		bvb.trBox.add( new VolumeBox( rotInterval, viewRotFinal.inverse(), 3.0f, Color.CYAN));
+		bvb.helpBoxes.add( new VolumeBox( rotInterval, viewRotFinal.inverse(), 3.0f, Color.CYAN));
 
 		double [] scales = new double[4];
 		RealPoint[][] boxRayWH = new RealPoint[2][2];
@@ -360,7 +360,7 @@ public class BVBActions
 		newTR.scale( finScale );
 		LinAlgHelpers.scale( centerCoord, (-1.0), centerCoord );
 		newTR.translate( centerCoord );
-		bvb.trBox.add( new VolumeBox( rotInterval, newTR, 3.0f, Color.ORANGE));
+		bvb.helpBoxes.add( new VolumeBox( rotInterval, newTR, 3.0f, Color.ORANGE));
 		return transform;
 	}
 	

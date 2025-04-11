@@ -81,9 +81,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataTobvvSourceList;
 	
-	
+	//DEBUG VISUALIZATION
 	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
-	public ArrayList<VolumeBox> trBox = new ArrayList<>();
+	public ArrayList<VolumeBox> helpBoxes = new ArrayList<>();
 	
 	public BigVolumeBrowser()
 	{
@@ -290,7 +290,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		{
 			line.draw( gl, pvm );
 		}
-		for(VolumeBox box:trBox)
+		for(VolumeBox box:helpBoxes)
 			box.draw( gl, pvm, vm, screen_size );
 	}
 	
