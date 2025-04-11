@@ -279,18 +279,6 @@ public class BVBActions
 		{
 			camRayLinesNearFar[i][1] = camRayLinesWH[1][i];
 		}
-	
-		//add symmetry in clip far/clip near for the visualization
-		for(int i=0;i<2;i++)
-		{
-			double[] p2 = camRayLinesNearFar[i][0].positionAsDoubleArray();
-			double[] p1 = camRayLinesNearFar[i][1].positionAsDoubleArray();
-			double[] b = new double[3];
-			LinAlgHelpers.subtract(p1,p2,b);
-			LinAlgHelpers.scale( b, (-1.0), b);
-			LinAlgHelpers.add( p2, b, b);
-			camRayLinesNearFar[i][0].setPosition( b );
-		}
 
 		double [] scales = new double[4];
 		RealPoint[][] boxRayWH = new RealPoint[2][2];
