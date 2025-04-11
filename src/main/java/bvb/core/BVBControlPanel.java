@@ -15,6 +15,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import bvb.gui.SelectedSources;
+import bvb.gui.TabPanelInfo;
 import bvb.gui.TabPanelView;
 
 
@@ -35,6 +36,8 @@ public class BVBControlPanel extends JPanel
 	
 	final TabPanelView tabPanelView;
 	
+	//final TabPanelInfo tabPanelInfo;
+	
 	
 	public BVBControlPanel(final BigVolumeBrowser bvb_) 
 	{
@@ -48,6 +51,13 @@ public class BVBControlPanel extends JPanel
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    tabPanelView = new TabPanelView(bvb, selectedSources);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
+		
+//		icon_path = this.getClass().getResource("/icons/shortcut.png");
+//	    tabIcon = new ImageIcon(icon_path);
+//	    tabPanelInfo = new TabPanelInfo();	    
+//		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
+//		
+		
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
 	    
