@@ -98,7 +98,6 @@ public class ViewPanel extends JPanel
 				butProjType.setIcon( projIcon[newProj] );
 				butProjType.setToolTipText( projToolTip[newProj]);
 				bvb.bvvViewer.setProjectionType(newProj);
-
 			}
 	
 		});
