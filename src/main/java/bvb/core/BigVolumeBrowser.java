@@ -12,12 +12,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
@@ -25,6 +27,9 @@ import org.joml.Matrix4f;
 import bdv.viewer.Source;
 import bdv.viewer.TimePointListener;
 import mpicbg.spim.data.generic.AbstractSpimData;
+import mpicbg.spim.data.generic.base.Entity;
+import mpicbg.spim.data.generic.sequence.BasicViewSetup;
+import spimdata.util.Displaysettings;
 import mpicbg.spim.data.SpimDataException;
 
 import ij.ImageJ;
@@ -261,17 +266,37 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		{
 			startBVB();
 		}
-		
-		List< BvvStackSource< ? > > sourcesSPIM = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
+		List< BvvStackSource< ? > > bvvSources = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
 
-		spimDataToBVVSourceList.put( spimData, sourcesSPIM );
-		for (BvvStackSource< ? > bvvSource : sourcesSPIM) 
+		
+		List<BasicViewSetup> views = (List<BasicViewSetup>)(spimData.getSequenceDescription().getViewSetupsOrdered());
+		int nSetup = 0;
+		for(BasicViewSetup view : views)
+		{
+	
+			Map< String, Entity > attr = view.getAttributes();
+			for (Map.Entry<String, Entity> entry : attr.entrySet()) 				
+			{			
+				if(entry.getKey().equals( "displaysettings"))
+				{
+					System.out.println(entry.getKey() + "/" + entry.getValue());
+					Displaysettings sett = ( Displaysettings ) entry.getValue();
+					bvvSources.get( nSetup ).setDisplayRange( sett.min, sett.max );
+					bvvSources.get( nSetup ).setColor(new ARGBType(ARGBType.rgba( sett.color[0], sett.color[1], sett.color[2], 255 ) ));
+				}
+			}
+			nSetup ++;
+		}
+
+		
+		spimDataToBVVSourceList.put( spimData, bvvSources );
+		for (BvvStackSource< ? > bvvSource : bvvSources) 
 		{
 			bvvSourceToSpimData.put( bvvSource, spimData );
 		}
 		updateSceneRender();
 
-		return new ValuePair< >( spimData, sourcesSPIM);
+		return new ValuePair< >( spimData, bvvSources);
 	}
 
 	/** nType 0 - BDV, nType 1 - BioFormats/TIF **/

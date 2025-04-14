@@ -87,7 +87,11 @@ public class BVBActions
 		//solution for now, to not interfere with typing
 		if(!bvb.bLocked && !(c instanceof JTextField))
 		{
-			bvb.bvvViewer.setTransformAnimator(getCenteredViewAnim(getAllSelectedVisibleSourcesBoundindBox(),0.95));
+			final FinalRealInterval focusInt = getAllSelectedVisibleSourcesBoundindBox();
+			if(focusInt != null)
+			{
+				bvb.bvvViewer.setTransformAnimator(getCenteredViewAnim(focusInt,0.95));
+			}
 		}
 	}
 	
