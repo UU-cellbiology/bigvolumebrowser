@@ -29,18 +29,6 @@ public class TabPanelView extends JPanel
 	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
 	    
 	    clipPanel = new ClipPanel(bvb, selectedSources);		
-
-		//Sources render method panel
-//	    JPanel panRender = new JPanel(new GridBagLayout()); 
-//	    panRender.setBorder(new PanelTitle(" Sources render "));
-//	   
-//	    gbc.gridx = 0;
-//	    gbc.gridy = 0;
-//	    gbc.weightx = 1.0;
-//	    gbc.fill = GridBagConstraints.HORIZONTAL;
-//	    panRender.add(sourcesRenderPanel,gbc);
-	    
-	    gbc = new GridBagConstraints();
 	    
 	    //add panels to Navigation
 	    gbc.insets = new Insets(4,3,4,3);
@@ -52,6 +40,7 @@ public class TabPanelView extends JPanel
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    JPanel both = new JPanel(new GridBagLayout());
+	    
 	    GridBagConstraints c = new GridBagConstraints();
 	    c.insets = new Insets(3,0,3,0);
 	    both.add( viewPanel,c);
@@ -61,11 +50,7 @@ public class TabPanelView extends JPanel
 	    both.setBorder(new PanelTitle(" View "));
 
 	    this.add( both, gbc );
-	    //this.add (viewPanel, gbc);
 
-	    //gbc.gridy++;	    
-	    //this.add(sourcesRenderPanel,gbc);
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    gbc.gridy++;
 	    this.add(clipPanel,gbc);
 	    

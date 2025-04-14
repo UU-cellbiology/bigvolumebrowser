@@ -39,7 +39,12 @@ public class ClipAxesBounds
 		if(setup instanceof GammaConverterSetup)
 		{
 			GammaConverterSetup gsetup = (GammaConverterSetup)setup;
-			final FinalRealInterval clipInterval = gsetup.getClipInterval();
+			FinalRealInterval clipInterval = gsetup.getClipInterval();
+			if(clipInterval == null)
+			{
+				Bounds3D defBounds = getDefaultBounds( setup );
+				clipInterval  =  new FinalRealInterval(defBounds.getMinBound(),defBounds.getMaxBound());
+			}
 			final double [] min = clipInterval.minAsDoubleArray( );
 			final double [] max = clipInterval.maxAsDoubleArray( );
 			

@@ -15,6 +15,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import bvb.gui.SelectedSources;
+import bvb.gui.TabPanelDataSources;
 import bvb.gui.TabPanelInfo;
 import bvb.gui.TabPanelView;
 
@@ -34,6 +35,8 @@ public class BVBControlPanel extends JPanel
 
 	final SelectedSources selectedSources;
 	
+	final TabPanelDataSources tabPanelDataSources;
+	
 	final TabPanelView tabPanelView;
 	
 	final TabPanelInfo tabPanelInfo;
@@ -50,18 +53,18 @@ public class BVBControlPanel extends JPanel
 		
 		URL  icon_path = this.getClass().getResource("/icons/load_sources.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
-	    //tabPanelInfo = new TabPanelInfo();	    
-		tabPane.addTab("",tabIcon, new JPanel(), "Data sources");
+	    tabPanelDataSources = new TabPanelDataSources(bvb_);	    
+		tabPane.addTab("",tabIcon, tabPanelDataSources, "Data sources");
 		
 		icon_path = this.getClass().getResource("/icons/view.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    tabPanelView = new TabPanelView(bvb, selectedSources);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
 		
-		icon_path = this.getClass().getResource("/icons/sources.png");
-		tabIcon = new ImageIcon(icon_path);
-	    //tabPanelInfo = new TabPanelInfo();	    
-		tabPane.addTab("",tabIcon, new JPanel(), "Transform sources");
+//		icon_path = this.getClass().getResource("/icons/sources.png");
+//		tabIcon = new ImageIcon(icon_path);
+//	    //tabPanelInfo = new TabPanelInfo();	    
+//		tabPane.addTab("",tabIcon, new JPanel(), "Transform sources");
 		
 		icon_path = this.getClass().getResource("/icons/shortcut.png");
 	    tabIcon = new ImageIcon(icon_path);

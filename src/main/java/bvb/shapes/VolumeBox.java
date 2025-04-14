@@ -5,6 +5,7 @@ import com.jogamp.opengl.GL3;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -74,6 +75,8 @@ public class VolumeBox implements Shape
 		final double [] minI = nIntervalBox.minAsDoubleArray();
 		
 		final double [] maxI = nIntervalBox.maxAsDoubleArray();
+		
+		interval = new FinalRealInterval(minI, maxI);
 		
 		for(int d=0;d<3;d++)
 		{

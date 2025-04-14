@@ -14,6 +14,9 @@ public class BVBSettings
 
 	/** animation speed during zoomin in/out , i.e. duration of displayed transform in ms **/
 	public static long nTransformAnimationDuration =  (int)Prefs.get("BVB.nTransformAnimationDuration",400);
+		
+	/** IO default or last folder **/	
+	public static String lastDir = Prefs.get( "BVB.lastDir", "" );
 	
 	public static Color getInvertedColor(Color color_in)
 	{		

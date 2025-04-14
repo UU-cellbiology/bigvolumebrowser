@@ -129,40 +129,43 @@ public class BVBActions
 		//just in case
 		if(allSources.size()>0)
 		{
+			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			for(SourceAndConverter< ? > sac : allSources)
 			{
-				
-				final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
-				final FinalRealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), bvb.bvvViewer.state().getCurrentTimepoint(), 0 );
-				FinalRealInterval clipInt = cs.getClipInterval() ;
-				//no clipping
-				if(!cs.clipActive() || clipInt == null)
+				if(sac.getSpimSource().isPresent( nTimePoint ))
 				{
-					allInt = appendIntervals(allInt, sourceInt);
-				}
-				//clipping is on
-				else
-				{
-					//get clipping transform
-					final AffineTransform3D clipTr = new AffineTransform3D();
-					cs.getClipTransform( clipTr );
-					clipInt = clipTr.estimateBounds( clipInt );
-					clipInt = Intervals.intersect( clipInt, sourceInt );
-					//clipping interval could be outside of source, let's check it
-					boolean bIntersectOk = true;
-					for(int d = 0; d<3; d++)
+					final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
+					final FinalRealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), nTimePoint, 0 );
+					FinalRealInterval clipInt = cs.getClipInterval() ;
+					//no clipping
+					if(!cs.clipActive() || clipInt == null)
 					{
-						if(clipInt.realMin( d )>=clipInt.realMax( d ))
+						allInt = appendIntervals(allInt, sourceInt);
+					}
+					//clipping is on
+					else
+					{
+						//get clipping transform
+						final AffineTransform3D clipTr = new AffineTransform3D();
+						cs.getClipTransform( clipTr );
+						clipInt = clipTr.estimateBounds( clipInt );
+						clipInt = Intervals.intersect( clipInt, sourceInt );
+						//clipping interval could be outside of source, let's check it
+						boolean bIntersectOk = true;
+						for(int d = 0; d<3; d++)
 						{
-							bIntersectOk = false;
-							break;
+							if(clipInt.realMin( d )>=clipInt.realMax( d ))
+							{
+								bIntersectOk = false;
+								break;
+							}
 						}
+						if(!bIntersectOk)
+						{
+							clipInt = sourceInt;
+						}
+						allInt = appendIntervals(allInt,clipInt);
 					}
-					if(!bIntersectOk)
-					{
-						clipInt = sourceInt;
-					}
-					allInt = appendIntervals(allInt,clipInt);
 				}
 			}
 		}

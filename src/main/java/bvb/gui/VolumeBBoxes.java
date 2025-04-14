@@ -63,7 +63,10 @@ public class VolumeBBoxes implements Shape
 			bvvSourceToBox.forEach( (sac, vbox)-> {
 				if(bvb.bvvViewer.state().isSourceVisible( sac ))
 				{
-					vbox.draw( gl, pvm, vm, screen_size );
+					if(vbox!=null)
+					{
+						vbox.draw( gl, pvm, vm, screen_size );
+					}
 				}
 			});
 
@@ -95,7 +98,7 @@ public class VolumeBBoxes implements Shape
 		bVisible = bVisible_;
 	}
 	
-	public void updateVolumeBoxes()
+	public synchronized void updateVolumeBoxes()
 	{
 		while(bLocked)
 		{
@@ -110,24 +113,31 @@ public class VolumeBBoxes implements Shape
 		}
 		bLocked = true;
 		
-		
+		final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 		List< SourceAndConverter< ? > > sacList = bvb.bvvViewer.state().getSources();
 		
 		for(SourceAndConverter< ? > sac : sacList )
 		{
 			final Source< ? > src = sac.getSpimSource();
-			final FinalRealInterval srcInt = Misc.getSourceBoundingBox(src,bvb.bvvViewer.state().getCurrentTimepoint(),0);
-			final VolumeBox currBox = bvvSourceToBox.get( sac );
-			if(currBox == null)
+			if(src.isPresent( nTimePoint ))
 			{
-				bvvSourceToBox.put( sac, new VolumeBox(srcInt, null, lineThickness, lineColor) );
+				final FinalRealInterval srcInt = Misc.getSourceBoundingBox(src,nTimePoint,0);
+				final VolumeBox currBox = bvvSourceToBox.get( sac );
+				if(currBox == null)
+				{
+					bvvSourceToBox.put( sac, new VolumeBox(srcInt, null, lineThickness, lineColor) );
+				}
+				else
+				{
+					if(!currBox.interval.equals( srcInt ))
+					{
+						currBox.setInterval( srcInt );
+					}
+				}
 			}
 			else
 			{
-				if(!currBox.interval.equals( srcInt ))
-				{
-					currBox.setInterval( srcInt );
-				}
+				bvvSourceToBox.remove( sac );
 			}
 		}
 

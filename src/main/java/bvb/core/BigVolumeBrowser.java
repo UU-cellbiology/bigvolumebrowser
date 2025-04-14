@@ -18,6 +18,8 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.imglib2.util.ValuePair;
+
 import org.joml.Matrix4f;
 
 import bdv.viewer.TimePointListener;
@@ -219,7 +221,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	}
 	
 	@SuppressWarnings( "rawtypes" )
-	public void loadBDVHDF5(String xmlFileName)
+	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> loadBDVHDF5(String xmlFileName)
 	{
 		AbstractSpimData spimData;
 		try
@@ -237,32 +239,13 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 				bvvSourceToSpimData.put( bvvSource, spimData );
 			}
 			updateSceneRender();
-			
-//			double [] minI = new double[3];
-//			double [] maxI = new double[3];
-//			for(int i=0;i<3;i++)
-//				maxI[i]=30;
-//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );
-			
-//			double [] minI = new double[3];
-//			double [] maxI = new double[3];
-//			for(int i=0;i<2;i++)
-//			{
-//				minI[i] = 225;
-//				maxI[i] = 275;
-//			}
-//			minI[2] = 200;
-//			maxI[2] = 300;
-//
-//			sourcesSPIM.get( 0 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-//			sourcesSPIM.get( 1 ).setClipInterval(new FinalRealInterval(minI,maxI)  );	
-//			sourcesSPIM.get( 0 ).setLUT( "Green" );
-//			sourcesSPIM.get( 1 ).setLUT( "Red" );	
+			return new ValuePair< >( spimData, sourcesSPIM);
 		}
 		catch ( SpimDataException exc )
 		{
 			exc.printStackTrace();
 		}
+		return null;
 		
 	}
 
@@ -318,7 +301,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/cliptest.xml" );
 	}
 
