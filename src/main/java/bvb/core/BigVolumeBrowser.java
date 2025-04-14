@@ -39,7 +39,7 @@ import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
 import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
-import bvb.io.BDVHDF5Loader;
+import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.shapes.VolumeBox;
 
@@ -223,32 +223,50 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	@SuppressWarnings( "rawtypes" )
 	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> loadBDVHDF5(String xmlFileName)
 	{
-		AbstractSpimData spimData;
-		try
-		{
-			spimData = BDVHDF5Loader.loadHDF5( xmlFileName );
-			if(bvv == null)
-			{
-				startBVB();
-			}
-			List< BvvStackSource< ? > > sourcesSPIM = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
-			
-			spimDataTobvvSourceList.put( spimData, sourcesSPIM );
-			for (BvvStackSource< ? > bvvSource : sourcesSPIM) 
-			{
-				bvvSourceToSpimData.put( bvvSource, spimData );
-			}
-			updateSceneRender();
-			return new ValuePair< >( spimData, sourcesSPIM);
-		}
-		catch ( SpimDataException exc )
-		{
-			exc.printStackTrace();
-		}
-		return null;
-		
+		return loadFromDiskBDVorBF(xmlFileName, 0);	
+	}
+	
+	@SuppressWarnings( "rawtypes" )
+	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> loadBioFormats(String imageFileName)
+	{
+
+		return loadFromDiskBDVorBF(imageFileName, 1);
 	}
 
+	/** nType 0 - BDV, nType 1 - BioFormats/TIF **/
+	@SuppressWarnings( "rawtypes" )
+	ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> loadFromDiskBDVorBF(String sFilename, int nType)
+	{
+		AbstractSpimData spimData;
+
+		if(nType ==0 )
+		{
+			spimData = SpimDataLoader.loadBioFormats( sFilename );
+		}
+		else
+		{
+			spimData = SpimDataLoader.loadBioFormats( sFilename );
+		}
+		
+		if(spimData == null)
+			return null;
+		
+		if(bvv == null)
+		{
+			startBVB();
+		}
+		
+		List< BvvStackSource< ? > > sourcesSPIM = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
+
+		spimDataTobvvSourceList.put( spimData, sourcesSPIM );
+		for (BvvStackSource< ? > bvvSource : sourcesSPIM) 
+		{
+			bvvSourceToSpimData.put( bvvSource, spimData );
+		}
+		updateSceneRender();
+		
+		return new ValuePair< >( spimData, sourcesSPIM);
+	}
 	
 	public void renderScene(final GL3 gl, final RenderData data)
 	{
@@ -298,10 +316,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
-		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/cliptest.xml" );
 	}
 

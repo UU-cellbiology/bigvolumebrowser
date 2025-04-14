@@ -42,6 +42,16 @@ public class PanelLoadSources extends JPanel
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butBioFormats = new JButton(tabIcon);
 	    butBioFormats.setToolTipText("Load TIF/BioFormats");
+	    
+	    butBioFormats.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				loadBioFormatsDialog();				
+			}
+	    	
+	    } );
 
 		icon_path = this.getClass().getResource("/icons/fiji-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
@@ -57,7 +67,7 @@ public class PanelLoadSources extends JPanel
 			@Override
 			public void actionPerformed( ActionEvent e )
 			{
-				loadBDVXML();				
+				loadBDVXMLDialog();				
 			}
 	    	
 	    } );
@@ -77,11 +87,10 @@ public class PanelLoadSources extends JPanel
 
 	}
 	
-	void loadBDVXML()
-	{
-		
+	public void loadBDVXMLDialog()
+	{		
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
-        
+        chooser.setDialogTitle( "Open BigDataViewer XML/HDF5" );
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
                 "BigDataViewer XML/HDF5", "xml");
         chooser.setFileFilter(filter);
@@ -93,6 +102,23 @@ public class PanelLoadSources extends JPanel
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
             bvb.loadBDVHDF5( chooser.getSelectedFile().getPath() );
+        }
+	}
+	public void loadBioFormatsDialog()
+	{		
+        JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
+        chooser.setDialogTitle( "Open TIF or BioFormats readable files" );
+//        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+//                "TIF or BioFormats readable files");
+//        chooser.setFileFilter(filter);
+        
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            bvb.loadBioFormats(chooser.getSelectedFile().getPath() );
         }
 	}
 }
