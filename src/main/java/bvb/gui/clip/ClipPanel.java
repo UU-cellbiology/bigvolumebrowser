@@ -7,13 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.net.URL;
 import java.util.List;
 
-import javax.swing.ImageIcon;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
@@ -26,7 +24,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
-import bdv.util.BoundedRange;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.PanelTitle;
 import bvb.gui.SelectedSources;

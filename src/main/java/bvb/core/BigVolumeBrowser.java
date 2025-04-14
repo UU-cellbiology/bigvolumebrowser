@@ -22,11 +22,13 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
+import bdv.viewer.Source;
 import bdv.viewer.TimePointListener;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.SpimDataException;
 
 import ij.ImageJ;
+import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
@@ -39,6 +41,8 @@ import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
 import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
+import bvb.io.ImagePlusToSpimDataBVV;
+import bvb.io.SourceToSpimDataWrapperBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.shapes.VolumeBox;
@@ -79,7 +83,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
 	
 	@SuppressWarnings( "rawtypes" )
-	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataTobvvSourceList;
+	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataToBVVSourceList;
 	
 	//DEBUG VISUALIZATION
 	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
@@ -88,7 +92,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	public BigVolumeBrowser()
 	{
 		bvvSourceToSpimData = new ConcurrentHashMap<>();
-		spimDataTobvvSourceList = new ConcurrentHashMap<>();
+		spimDataToBVVSourceList = new ConcurrentHashMap<>();
 		volumeBoxes = new VolumeBBoxes(this);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		clipBoxes = new VolumeBBoxes(this);
@@ -102,7 +106,6 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		startBVB();
 		
 	}
-	
 	
 	public void startBVB()
 	{
@@ -232,6 +235,44 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 
 		return loadFromDiskBDVorBF(imageFileName, 1);
 	}
+	
+	@SuppressWarnings( "rawtypes" )
+	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> addSource(final Source<?> src)
+	{
+		final AbstractSpimData spimData = SourceToSpimDataWrapperBvv.spimDataSourceWrap( src );
+		return addSpimData(spimData);
+	}
+	
+	@SuppressWarnings( "rawtypes" )
+	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
+	{
+		final AbstractSpimData spimData = ImagePlusToSpimDataBVV.getSpimData( imp );
+		return addSpimData(spimData);
+	}
+	
+	@SuppressWarnings( "rawtypes" )
+	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData spimData)
+	{
+	
+		if(spimData == null)
+			return null;
+
+		if(bvv == null)
+		{
+			startBVB();
+		}
+		
+		List< BvvStackSource< ? > > sourcesSPIM = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
+
+		spimDataToBVVSourceList.put( spimData, sourcesSPIM );
+		for (BvvStackSource< ? > bvvSource : sourcesSPIM) 
+		{
+			bvvSourceToSpimData.put( bvvSource, spimData );
+		}
+		updateSceneRender();
+
+		return new ValuePair< >( spimData, sourcesSPIM);
+	}
 
 	/** nType 0 - BDV, nType 1 - BioFormats/TIF **/
 	@SuppressWarnings( "rawtypes" )
@@ -248,24 +289,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			spimData = SpimDataLoader.loadBioFormats( sFilename );
 		}
 		
-		if(spimData == null)
-			return null;
-		
-		if(bvv == null)
-		{
-			startBVB();
-		}
-		
-		List< BvvStackSource< ? > > sourcesSPIM = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
-
-		spimDataTobvvSourceList.put( spimData, sourcesSPIM );
-		for (BvvStackSource< ? > bvvSource : sourcesSPIM) 
-		{
-			bvvSourceToSpimData.put( bvvSource, spimData );
-		}
-		updateSceneRender();
-		
-		return new ValuePair< >( spimData, sourcesSPIM);
+		return addSpimData(spimData);
 	}
 	
 	public void renderScene(final GL3 gl, final RenderData data)

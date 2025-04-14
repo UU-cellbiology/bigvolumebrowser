@@ -4,6 +4,8 @@ package bvb.io;
 import java.io.File;
 import java.io.IOException;
 
+import net.imglib2.realtransform.AffineTransform3D;
+
 import ch.epfl.biop.bdv.img.OpenersToSpimData;
 import ch.epfl.biop.bdv.img.opener.OpenerSettings;
 import ij.IJ;
@@ -41,6 +43,7 @@ public class SpimDataLoader
 		
 		return spimData;
 	}
+	
 	
 	public static AbstractSpimData< ? > loadBioFormats(String imageFileName) 
 	{
@@ -153,7 +156,7 @@ public class SpimDataLoader
 			nOpenSeries = nDatasetIDs[openDatasetN.getNextChoiceIndex()];
 			
 		}
-		
+		SpimData spimData = null;
 
 		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16)
 		{
@@ -162,7 +165,7 @@ public class SpimDataLoader
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
 					.positionConvention("TOP LEFT");
-			return OpenersToSpimData.getSpimData(settings);
+			spimData = (SpimData)OpenersToSpimData.getSpimData(settings);
 			
 		}
 		else
@@ -174,7 +177,7 @@ public class SpimDataLoader
 					.setSerie(nOpenSeries)
 					.to16bits(true)
 					.positionConvention("TOP LEFT");
-			return OpenersToSpimData.getSpimData(settings);
+			spimData = (SpimData) OpenersToSpimData.getSpimData(settings);
 		}
 		else
 		{
@@ -182,24 +185,50 @@ public class SpimDataLoader
 			 return null;
 		}
 
-//		final SequenceDescription seq = bt.spimData.getSequenceDescription();
 
-		
+//		final SequenceDescription seq = spimData.getSequenceDescription();
+//		
 //		//see if data comes from LLS7
 //		String sTestLLS = seq.getViewDescription(0, 0).getViewSetup().getName();
 //		if(sTestLLS.length()>3)
 //		{
-//			if(sTestLLS.contains("LLS") && btdata.sFileNameFullImg.endsWith(".czi"))
+//			if(sTestLLS.contains("LLS") && imageFileName.endsWith(".czi"))
 //			{
 //				if (JOptionPane.showConfirmDialog(null, "Looks like the input comes from Zeiss LLS7.\nDo you want to deskew it?\n"
 //						+ "(if it is already deskewed, click No)", "Loading option",
-//				        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-//				    // yes option
-//					bt.bApplyLLSTransform = true;
+//				        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
+//				{
+//					AffineTransform3D deskewTR = makeLLS7Transform(Math.PI/6.0);
+//					//seq.getViewDescription(0, 0).
 //				} 
 //			}
 //
 //		}
 		
+		return spimData;
+		
+	}
+	
+	/** function generates new LLS7 transform (rotation/shear/z-scaling **/
+	public static AffineTransform3D makeLLS7Transform(double angle)
+	{
+		AffineTransform3D afDataTransform = new AffineTransform3D();
+		AffineTransform3D tShear = new AffineTransform3D();
+		AffineTransform3D tRotate = new AffineTransform3D();
+			
+		//rotate 
+		tRotate.rotate(0, (-1.0)*angle);
+		tRotate.rotate(1,(-1.0)* Math.PI);
+		//shearing transform
+		tShear.set(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0/Math.tan( angle ), 0.0, 0.0, 0.0, 1.0, 0.0);
+		//Z-step adjustment transform
+		afDataTransform.set(1.0, 0.0, 0.0, 0.0, 
+								0.0,1.0, 0.0, 0.0, 
+								0.0, 0.0,Math.sin( angle  ), 0.0);
+		
+		afDataTransform = tShear.concatenate(afDataTransform);
+		afDataTransform = tRotate.concatenate(afDataTransform);
+
+		return afDataTransform;
 	}
 }

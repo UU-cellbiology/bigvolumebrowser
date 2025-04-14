@@ -6,6 +6,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
 import bdv.tools.transformation.TransformedSource;
+import bdv.util.Affine3DHelpers;
 import bdv.viewer.Source;
 
 public class Misc
@@ -267,5 +268,14 @@ public class Misc
 		}
 		
 		return bOut;
+	}
+	
+	public static double[] getScale( AffineTransform3D affineTransform3D ) {
+
+		double[] scales = new double[3];
+		for(int d = 0; d < 3; ++d)
+			scales[d] = Affine3DHelpers.extractScale( affineTransform3D, d );
+
+		return scales;
 	}
 }

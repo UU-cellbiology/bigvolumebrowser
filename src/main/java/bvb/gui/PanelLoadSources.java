@@ -10,14 +10,14 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import ij.IJ;
+import ij.ImagePlus;
 import ij.Prefs;
-import ij.io.OpenDialog;
 
 public class PanelLoadSources extends JPanel
 {
@@ -57,6 +57,16 @@ public class PanelLoadSources extends JPanel
 	    tabIcon = new ImageIcon(icon_path);
 	    butFIJI = new JButton(tabIcon);
 	    butFIJI.setToolTipText("Load Current Image");
+	    
+	    butFIJI.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				loadImagePlus();				
+			}
+	    	
+	    } );
 	    
 		icon_path = this.getClass().getResource("/icons/bdv-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
@@ -108,9 +118,6 @@ public class PanelLoadSources extends JPanel
 	{		
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
         chooser.setDialogTitle( "Open TIF or BioFormats readable files" );
-//        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-//                "TIF or BioFormats readable files");
-//        chooser.setFileFilter(filter);
         
         int returnVal = chooser.showOpenDialog(null);
         
@@ -120,5 +127,25 @@ public class PanelLoadSources extends JPanel
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
             bvb.loadBioFormats(chooser.getSelectedFile().getPath() );
         }
+	}
+	
+	public void loadImagePlus()
+	{	
+		ImagePlus imp = null;
+		try
+		{
+			imp = IJ.getImage();
+		}
+		catch(RuntimeException exc)
+		{
+			return;
+		}
+		
+		if (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16 ) 
+		{
+		    IJ.error("Only 8- or 16-bit grayscale images are currently supported.");
+		    return;
+		}
+		bvb.addImagePlus( imp );
 	}
 }
