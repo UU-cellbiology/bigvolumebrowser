@@ -9,8 +9,10 @@ import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
@@ -61,38 +63,36 @@ public class PanelLoadSources extends JPanel
 	    } );
 	    
 	    gbc.insets = new Insets(4,3,4,3);
-	    //View
+
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-	    //gbc.weightx = 1.0;
-	   // gbc.gridwidth = 1;
-	    //gbc.anchor = GridBagConstraints.NORTHWEST;
-	    //gbc.fill = GridBagConstraints.HORIZONTAL;
+
 	    this.add( butBioFormats,gbc);
+
 	    gbc.gridx++;
 	    this.add( butFIJI,gbc);
-	    gbc.gridx++;
 
-	//    gbc.anchor = GridBagConstraints.CENTER;
-	    //this.add( new JLabel("Add TIF/BioFormats"),gbc);
-	    //gbc.gridx = 0;
-	    //gbc.gridy++;
+	    gbc.gridx++;
 	    this.add( butBDVXML,gbc);
-	   // gbc.gridx++;
-	    //this.add( new JLabel("Add BDV XML/HDF5"),gbc);
+
 	}
 	
 	void loadBDVXML()
 	{
-		OpenDialog openDial = new OpenDialog("Load BDV XML/HDF5", BVBSettings.lastDir, "*.xml");
-        String path = openDial.getDirectory();
-        if (path==null)
-        	return;
+		
+        JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
         
-        BVBSettings.lastDir = path;
-        Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
-        String filename = path+openDial.getFileName();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "BigDataViewer XML/HDF5", "xml");
+        chooser.setFileFilter(filter);
         
-        bvb.loadBDVHDF5( filename );
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            bvb.loadBDVHDF5( chooser.getSelectedFile().getPath() );
+        }
 	}
 }
