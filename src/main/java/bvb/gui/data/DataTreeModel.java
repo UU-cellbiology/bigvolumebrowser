@@ -1,11 +1,13 @@
-package bvb.gui;
+package bvb.gui.data;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -23,6 +25,12 @@ public class DataTreeModel implements TreeModel
 	final DataTreeNode rootNode;
 	
 	final ArrayList<TreeModelListener> listeners;
+	
+	final ImageIcon iconBDV;
+	
+	final ImageIcon iconBioFormats;
+	
+	final ImageIcon iconFIJI;
 
 	public DataTreeModel()
 	{
@@ -30,15 +38,23 @@ public class DataTreeModel implements TreeModel
 		dataChildParent =  new ConcurrentHashMap<>();
 		rootNode = new DataTreeNode(this);
 		listeners = new ArrayList<>();
+
+		iconBDV = new ImageIcon(this.getClass().getResource("/icons/bdv-small.png"));
+		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
+		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
+
 	}
 	
-	public void addData(AbstractSpimData< ? > spimData, List<BvvStackSource<?>> bvvList, String dataName)
+
+	
+	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, String dataName, final ImageIcon spimDataIcon)
 	{
 		List<DataTreeNode> spim =  dataParentChildren.get( rootNode );
 		if(spim == null)
 			spim = new ArrayList<>();
 		final DataTreeNode spimNode = new DataTreeNode(this, spimData);
 		spimNode.setDescription( dataName );
+		spimNode.setIcon( spimDataIcon );
 		spim.add( spimNode );
 		dataParentChildren.put( rootNode, spim );
 		dataChildParent.put( spimNode, rootNode );
@@ -144,5 +160,19 @@ public class DataTreeModel implements TreeModel
 	{
 		
 	}
-
+	
+	public ImageIcon getBDVIcon()
+	{
+		return iconBDV;
+	}
+	
+	public ImageIcon getBioformatsIcon()
+	{
+		return iconBioFormats;
+	}
+	
+	public ImageIcon getFIJIIcon()
+	{
+		return iconFIJI;
+	}
 }

@@ -1,4 +1,4 @@
-package bvb.gui;
+package bvb.gui.data;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -13,6 +13,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.PanelTitle;
 
 
 public class PanelData extends JPanel
@@ -30,30 +31,13 @@ public class PanelData extends JPanel
 		bvb = bvb_;
 		this.setBorder(new PanelTitle(" Loaded data "));
 		
-		
-        //create the root node
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
-        //create the child nodes
-        DefaultMutableTreeNode vegetableNode = new DefaultMutableTreeNode("Vegetables");
-        DefaultMutableTreeNode fruitNode = new DefaultMutableTreeNode("Fruits");
-        //add the child nodes to the root node
-        root.add(vegetableNode);
-        root.add(fruitNode);
-        vegetableNode.add(new DefaultMutableTreeNode("Tomato"));
-        vegetableNode.add(new DefaultMutableTreeNode("Potato"));
-        fruitNode.add(new DefaultMutableTreeNode("Banana"));
-        fruitNode.add(new DefaultMutableTreeNode("Mango"));
-        fruitNode.add(new DefaultMutableTreeNode("Apple"));
-        //create the tree by passing in the root node
+
+        //create the tree by passing in the data model
         treeData = new JTree(bvb.dataTreeModel);
         
         treeData.setRootVisible(false);
         
-        ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("/icons/bioformats.png"));
         DataTreeCellRenderer renderer = new DataTreeCellRenderer();
-        renderer.setLeafIcon(imageIcon);
-        renderer.setOpenIcon( imageIcon );
-        renderer.setClosedIcon( imageIcon );
 
         treeData.setCellRenderer(renderer);
         treeData.setShowsRootHandles(true);

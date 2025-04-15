@@ -1,9 +1,10 @@
-package bvb.gui;
+package bvb.gui.data;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.tree.TreeNode;
 
 import bvvpg.vistools.BvvStackSource;
@@ -17,7 +18,10 @@ public class DataTreeNode implements TreeNode
 	final DataTreeModel dataModel;
 
 	boolean isLeaf = false;
+	
 	String sDescription = "test";
+	
+	ImageIcon nodeIcon = null;
 	
 	//root node
 	public DataTreeNode(final DataTreeModel dataModel_)
@@ -36,6 +40,16 @@ public class DataTreeNode implements TreeNode
 	public void setDescription(String sText)
 	{
 		sDescription = sText;
+	}
+	
+	public void setIcon(final ImageIcon in)
+	{
+		nodeIcon = in;
+	}
+	
+	public ImageIcon getIcon()
+	{
+		return nodeIcon;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -43,10 +44,10 @@ import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
-import bvb.gui.DataTreeModel;
-import bvb.gui.DataTreeNode;
 import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
+import bvb.gui.data.DataTreeModel;
+import bvb.gui.data.DataTreeNode;
 import bvb.io.ImagePlusToSpimDataBVV;
 import bvb.io.SourceToSpimDataWrapperBvv;
 import bvb.io.SpimDataLoader;
@@ -259,7 +260,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	public ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
 		final AbstractSpimData spimData = ImagePlusToSpimDataBVV.getSpimData( imp );
-		return addSpimData(spimData);
+		final ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> out = addSpimData(spimData);
+		dataTreeModel.addData( spimData, out.getB(), imp.getTitle(), dataTreeModel.getFIJIIcon());
+
+		return out;
 	}
 	
 	@SuppressWarnings( "rawtypes" )
@@ -288,7 +292,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			{			
 				if(entry.getKey().equals( "displaysettings"))
 				{
-					System.out.println(entry.getKey() + "/" + entry.getValue());
+					//System.out.println(entry.getKey() + "/" + entry.getValue());
 					Displaysettings sett = ( Displaysettings ) entry.getValue();
 					bvvSources.get( nSetup ).setDisplayRange( sett.min, sett.max );
 					bvvSources.get( nSetup ).setColor(new ARGBType(ARGBType.rgba( sett.color[0], sett.color[1], sett.color[2], 255 ) ));
@@ -313,17 +317,19 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> loadFromDiskBDVorBF(String sFilename, int nType)
 	{
 		AbstractSpimData spimData;
-
-		if(nType ==0 )
+		final ImageIcon spimDataIcon;
+		if(nType == 0 )
 		{
-			spimData = SpimDataLoader.loadHDF5( sFilename );		
+			spimData = SpimDataLoader.loadHDF5( sFilename );
+			spimDataIcon = dataTreeModel.getBDVIcon();
 		}
 		else
 		{
 			spimData = SpimDataLoader.loadBioFormats( sFilename );
+			spimDataIcon = dataTreeModel.getBioformatsIcon();
 		}
-		ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> out = addSpimData(spimData);
-		dataTreeModel.addData( spimData, out.getB(), sFilename );
+		final ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> out = addSpimData(spimData);
+		dataTreeModel.addData( spimData, out.getB(), sFilename, spimDataIcon);
 
 		return out;
 	}

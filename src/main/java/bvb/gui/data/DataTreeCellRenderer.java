@@ -1,7 +1,8 @@
-package bvb.gui;
+package bvb.gui.data;
 
 import java.awt.Component;
 
+import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
@@ -24,10 +25,19 @@ public class DataTreeCellRenderer extends DefaultTreeCellRenderer
 				hasFocus);
 		if(value instanceof DataTreeNode)
 		{
-			String test = this.toString();
-			int i=0;
-			i++;
-			//this.setText( ((DataTreeNode)value).getDescription() );
+
+			final ImageIcon currIcon = ((DataTreeNode)value).getIcon();
+			if(((DataTreeNode)value).getIcon() != null)
+			{
+				if(leaf)
+				{
+					this.setIcon( currIcon );
+				}
+				else
+				{
+					this.setIcon( currIcon );
+				}
+			}
 		}
 		return this;
 	}

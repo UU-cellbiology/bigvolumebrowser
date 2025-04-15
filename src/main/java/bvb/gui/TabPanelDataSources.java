@@ -8,6 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.data.PanelData;
+import bvb.gui.data.PanelLoadSources;
 
 public class TabPanelDataSources extends JPanel
 {
