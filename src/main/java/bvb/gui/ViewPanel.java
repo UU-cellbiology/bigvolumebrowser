@@ -175,6 +175,10 @@ public class ViewPanel extends JPanel
 			
 		});
 		
+		NumberField nfAnimationDuration = new NumberField(5);
+		nfAnimationDuration.setIntegersOnly(true);
+		nfAnimationDuration.setText(Integer.toString(BVBSettings.nTransformAnimationDuration));
+		
 		gbc.gridx=0;
 		gbc.gridy=0;	
 		GBCHelper.alighLoose(gbc);
@@ -182,9 +186,16 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(new JLabel("Background color: "),gbc);
 		gbc.gridx++;
 		pViewSettings.add(butCanvasBGColor,gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Transform animation duration (ms): "),gbc);
+		gbc.gridx++;
+		pViewSettings.add(nfAnimationDuration,gbc);
+		
+		
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
 
 		if (reply == JOptionPane.OK_OPTION) 
 		{
@@ -195,6 +206,9 @@ public class ViewPanel extends JPanel
 			{
 				setCanvasBGColor(tempC);
 			}
+			
+			BVBSettings.nTransformAnimationDuration = Integer.parseInt(nfAnimationDuration.getText());
+			Prefs.set("BVB.nTransformAnimationDuration",BVBSettings.nTransformAnimationDuration);
 			bvb.repaintBVV();
 		}
 	}
