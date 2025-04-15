@@ -5,12 +5,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.ImageIcon;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.PanelTitle;
@@ -39,8 +37,10 @@ public class PanelData extends JPanel
         
         DataTreeCellRenderer renderer = new DataTreeCellRenderer();
 
+        renderer.setLeafIcon( bvb.dataTreeModel.getSourceIcon() );
         treeData.setCellRenderer(renderer);
         treeData.setShowsRootHandles(true);
+        
     	treeScroller = new JScrollPane(treeData);
     	treeScroller.setMinimumSize(new Dimension(170, 250));
     	treeScroller.setPreferredSize(new Dimension(400, 500));

@@ -1,8 +1,5 @@
 package bvb.gui.data;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +28,8 @@ public class DataTreeModel implements TreeModel
 	final ImageIcon iconBioFormats;
 	
 	final ImageIcon iconFIJI;
+	
+	final ImageIcon iconSource;
 
 	public DataTreeModel()
 	{
@@ -42,6 +41,7 @@ public class DataTreeModel implements TreeModel
 		iconBDV = new ImageIcon(this.getClass().getResource("/icons/bdv-small.png"));
 		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
 		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
+		iconSource = new ImageIcon(this.getClass().getResource("/icons/source-small.png"));
 
 	}
 	
@@ -86,9 +86,10 @@ public class DataTreeModel implements TreeModel
 		for (TreeModelListener tml : listeners) 
 		{
 			tml.treeStructureChanged(e);
-			//tml.treeNodesInserted( e );
 		}
 	}
+	
+	@SuppressWarnings( "cast" )
 	@Override
 	public Object getChild( Object parent, int index )
 	{
@@ -102,19 +103,23 @@ public class DataTreeModel implements TreeModel
 		return null;
 	}
 
+	
 	@SuppressWarnings( "cast" )
 	@Override
 	public int getChildCount( Object parent )
 	{
 		if(!(parent instanceof DataTreeNode))
 			return 0;
+				
 		final List< DataTreeNode > list = dataParentChildren.get((DataTreeNode)parent );
+		
 		if(list == null)
 			return 0;
 		
 		return dataParentChildren.get((DataTreeNode)parent ).size();
 	}
 
+	
 	@Override
 	public int getIndexOfChild( Object parent, Object child )
 	{
@@ -124,6 +129,7 @@ public class DataTreeModel implements TreeModel
 			return 0;
 		if(!(child instanceof DataTreeNode))
 			return 0;
+		@SuppressWarnings( "cast" )
 		final List< DataTreeNode > list = dataParentChildren.get((DataTreeNode)parent );
 		if(list == null)
 			return 0;
@@ -174,5 +180,10 @@ public class DataTreeModel implements TreeModel
 	public ImageIcon getFIJIIcon()
 	{
 		return iconFIJI;
+	}
+	
+	public ImageIcon getSourceIcon()
+	{
+		return iconSource;
 	}
 }

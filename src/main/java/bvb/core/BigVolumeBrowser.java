@@ -49,10 +49,12 @@ import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.DataTreeModel;
 import bvb.gui.data.DataTreeNode;
 import bvb.io.ImagePlusToSpimDataBVV;
+import bvb.io.LUTNameFIJI;
 import bvb.io.SourceToSpimDataWrapperBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.shapes.VolumeBox;
+import bvb.utils.Misc;
 
 
 public class BigVolumeBrowser  implements PlugIn, TimePointListener
@@ -287,15 +289,26 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		for(BasicViewSetup view : views)
 		{
 	
+			boolean bLutSet = false;
 			Map< String, Entity > attr = view.getAttributes();
 			for (Map.Entry<String, Entity> entry : attr.entrySet()) 				
 			{			
 				if(entry.getKey().equals( "displaysettings"))
 				{
-					//System.out.println(entry.getKey() + "/" + entry.getValue());
 					Displaysettings sett = ( Displaysettings ) entry.getValue();
 					bvvSources.get( nSetup ).setDisplayRange( sett.min, sett.max );
-					bvvSources.get( nSetup ).setColor(new ARGBType(ARGBType.rgba( sett.color[0], sett.color[1], sett.color[2], 255 ) ));
+					if(!bLutSet)
+						bvvSources.get( nSetup ).setColor(new ARGBType(ARGBType.rgba( sett.color[0], sett.color[1], sett.color[2], 255 ) ));
+				}
+				//check if there is a FIJI lut name stored
+				if(entry.getKey().equals( "lutnamefiji"))
+				{
+					LUTNameFIJI lutName = ( LUTNameFIJI ) entry.getValue();
+					if(!lutName.sLUTName.equals( "" ))
+					{
+						bvvSources.get( nSetup ).setLUT( lutName.sLUTName );
+						bLutSet = true;
+					}
 				}
 			}
 			nSetup ++;
@@ -329,8 +342,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			spimDataIcon = dataTreeModel.getBioformatsIcon();
 		}
 		final ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> out = addSpimData(spimData);
-		dataTreeModel.addData( spimData, out.getB(), sFilename, spimDataIcon);
-
+		if(out != null)
+		{
+			dataTreeModel.addData( spimData, out.getB(), Misc.getSourceStyleName(sFilename), spimDataIcon);
+		}
 		return out;
 	}
 	

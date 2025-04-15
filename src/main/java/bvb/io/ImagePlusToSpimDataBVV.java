@@ -1,5 +1,6 @@
 package bvb.io;
 
+import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import bdv.spimdata.SequenceDescriptionMinimal;
 import bdv.spimdata.SpimDataMinimal;
+import ij.IJ;
 import ij.ImagePlus;
+import ij.plugin.LutLoader;
 import ij.process.LUT;
 import mpicbg.spim.data.generic.AbstractSpimData;
+import mpicbg.spim.data.generic.base.ViewSetupAttributes;
 import mpicbg.spim.data.generic.sequence.BasicImgLoader;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.registration.ViewRegistration;
@@ -83,28 +87,41 @@ public class ImagePlusToSpimDataBVV {
 
 		final int numTimepoints = imp.getNFrames();
 		final int numSetups = imp.getNChannels();
-
+		ViewSetupAttributes.registerManually(XmlIoLutNameFIJI.class);
 		// create setups from channels
 		final HashMap<Integer, BasicViewSetup> setups = new HashMap<>(numSetups);
 		for (int s = 0; s < numSetups; ++s) {
 			final BasicViewSetup setup = new BasicViewSetup(s, String.format(imp
 					.getTitle() + " channel %d", s + 1), size, voxelSize);
+			
+			
 			setup.setAttribute(new Channel(s + 1));
 			Displaysettings ds = new Displaysettings(s + 1);
 			imp.setPositionWithoutUpdate(s+1,1,1);
 			ds.min = imp.getDisplayRangeMin();
 			ds.max = imp.getDisplayRangeMax();
+			LUTNameFIJI lutName = new LUTNameFIJI(s+1);
+			
 			if (imp.getType() == ImagePlus.COLOR_RGB) {
 				ds.isSet = false;
+				lutName.isSet = false;
 			}
 			else {
 				ds.isSet = true;
 				LUT[] luts = imp.getLuts();
 				LUT lut = luts.length>s ? luts[s]:luts[0];
 				ds.color = new int[] { lut.getRed(255), lut.getGreen(255), lut.getBlue(
-						255), lut.getAlpha(255) };
+						255), lut.getAlpha(255) };				
+				
+				lutName.sLUTName = getProperLUTName(lut);
+				if(lutName.sLUTName == null)
+				{
+					lutName.sLUTName = "";
+				}
+				lutName.isSet = true;
 			}
 			setup.setAttribute(ds);
+			setup.setAttribute(lutName);
 			setups.put(s, setup);
 		}
 
@@ -163,5 +180,42 @@ public class ImagePlusToSpimDataBVV {
 		// Default : returns identity
 		return new AffineTransform3D();
 	}
+	
+	/** this is pretty complicated method to get proper LUT name,
+	 * but I could not find anything more simple **/
+	public static String getProperLUTName(LUT lut)
+	{
+		String[] allLuts = IJ.getLuts();
+		for(int i=0; i<allLuts.length; i++)
+		{
+			IndexColorModel icm = LutLoader.getLut(allLuts[i]);
+			if(icm.equals( lut.getColorModel() ))
+			{
+				if(compareICM(icm,lut.getColorModel()))
+				{
+					return allLuts[i];
+				}
+			}
+		}
+		return null;
+	}
+	public static boolean compareICM(IndexColorModel icm1, IndexColorModel icm2)
+	{
+		if(icm1.getMapSize()!=icm2.getMapSize())
+			return false;
+		final int size = icm1.getMapSize();
 
+		final int [] all1 = new int [size];
+		final int [] all2 = new int [size];
+
+		icm1.getRGBs( all1 );
+		icm2.getRGBs( all2 );
+		for(int i=0; i<size;i++)
+		{
+			if(all1[i]!=all2[i])
+				return false;
+		}
+		return true;
+		
+	}
 }

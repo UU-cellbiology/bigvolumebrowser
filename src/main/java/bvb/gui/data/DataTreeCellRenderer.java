@@ -16,13 +16,13 @@ public class DataTreeCellRenderer extends DefaultTreeCellRenderer
             boolean expanded,
             boolean leaf,
             int row,
-            boolean hasFocus) 
+            boolean hasFocus_) 
 	{
 
 		super.getTreeCellRendererComponent(
 				tree, value, sel,
 				expanded, leaf, row,
-				hasFocus);
+				hasFocus_);
 		if(value instanceof DataTreeNode)
 		{
 

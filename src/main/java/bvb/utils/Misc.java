@@ -1,5 +1,7 @@
 package bvb.utils;
 
+import java.io.File;
+
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -277,5 +279,13 @@ public class Misc
 			scales[d] = Affine3DHelpers.extractScale( affineTransform3D, d );
 
 		return scales;
+	}
+	
+	public static String getSourceStyleName(String sFilename)
+	{
+		final File f = new File(sFilename);
+		String out = f.getName();
+		out = out +"  ("+f.getParent()+")";
+		return out;
 	}
 }
