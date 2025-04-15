@@ -20,7 +20,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 
-public class PanelLoadSources extends JPanel
+public class PanelAddSources extends JPanel
 {
 	
 	JButton butBioFormats;
@@ -31,7 +31,7 @@ public class PanelLoadSources extends JPanel
 	
 	final BigVolumeBrowser bvb;
 	
-	public PanelLoadSources(final BigVolumeBrowser bvb_)
+	public PanelAddSources(final BigVolumeBrowser bvb_)
 	{
 		super(new GridBagLayout());	
 		

@@ -13,13 +13,13 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 public class DataTreeNode implements TreeNode
 {
 	DataTreeNode root = null;
-	AbstractSpimData< ? > spimData = null;
-	BvvStackSource<?> bvvSource = null;
+	public AbstractSpimData< ? > spimData = null;
+	public BvvStackSource<?> bvvSource = null;
 	final DataTreeModel dataModel;
 
 	boolean isLeaf = false;
 	
-	String sDescription = "test";
+	String sDescription = "root";
 	
 	ImageIcon nodeIcon = null;
 	
@@ -126,8 +126,7 @@ public class DataTreeNode implements TreeNode
 	@Override
 	public TreeNode getParent()
 	{
-		dataModel.dataChildParent.get( this );
-		return null;
+		return dataModel.dataChildParent.get( this );
 	}
 
 	@Override

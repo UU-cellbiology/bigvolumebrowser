@@ -7,6 +7,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.pgcards.sourcetable.SourceSelectionState;
 import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
+import bvvpg.pgcards.sourcetable.SourceTablePG;
 
 /** Class that keeps track on sources currently selected in BVV (Cards panel).
  *  Fires an event on selection change or focus change
@@ -20,6 +21,7 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
 	private List< ConverterSetup > csList = new ArrayList<>();
 	
 	private ArrayList<Listener> listeners =	new ArrayList<>();
+
 	
 	public static interface Listener 
 	{
