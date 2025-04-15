@@ -30,7 +30,6 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import spimdata.util.Displaysettings;
-import mpicbg.spim.data.SpimDataException;
 
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -44,6 +43,8 @@ import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
+import bvb.gui.DataTreeModel;
+import bvb.gui.DataTreeNode;
 import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
 import bvb.io.ImagePlusToSpimDataBVV;
@@ -87,6 +88,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData > bvvSourceToSpimData;
 	
+	public final ConcurrentHashMap < DataTreeNode, List< DataTreeNode> > dataParentChildren;
+	
+	public DataTreeModel dataTreeModel = new DataTreeModel();
+	
 	@SuppressWarnings( "rawtypes" )
 	private final ConcurrentHashMap < AbstractSpimData, List<BvvStackSource<?> >> spimDataToBVVSourceList;
 	
@@ -98,6 +103,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		bvvSourceToSpimData = new ConcurrentHashMap<>();
 		spimDataToBVVSourceList = new ConcurrentHashMap<>();
+		dataParentChildren =  new ConcurrentHashMap<>();
 		volumeBoxes = new VolumeBBoxes(this);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		clipBoxes = new VolumeBBoxes(this);
@@ -166,7 +172,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			controlPanel.cpFrame.add(controlPanel);
 			
 	        //Display the window.
-			controlPanel.cpFrame.setSize(controlPanel.nDefaultWidth, controlPanel.nDefaultHeight);
+			controlPanel.cpFrame.setSize(BVBSettings.nDefaultWidthControlPanel, BVBSettings.nDefaultHeightControlPanel);
 			controlPanel.cpFrame.setVisible(true);
 		    java.awt.Point bvv_p = bvvFrame.getLocationOnScreen();
 		    java.awt.Dimension bvv_d = bvvFrame.getSize();
@@ -217,6 +223,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 		if(bvvFrame.getSplitPanel() != null)
 		{
+			//bvvFrame.getSplitPanel().setDividerLocation( -0.1 );
 			bvvFrame.getSplitPanel().setCollapsed( false );
 		}
 
@@ -269,7 +276,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		List< BvvStackSource< ? > > bvvSources = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
 
 		
-		List<BasicViewSetup> views = (List<BasicViewSetup>)(spimData.getSequenceDescription().getViewSetupsOrdered());
+		//check for display settings stored in spimdata
+		@SuppressWarnings( "unchecked" )
+		List<BasicViewSetup> views = (spimData.getSequenceDescription().getViewSetupsOrdered());
 		int nSetup = 0;
 		for(BasicViewSetup view : views)
 		{
@@ -307,14 +316,16 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 
 		if(nType ==0 )
 		{
-			spimData = SpimDataLoader.loadBioFormats( sFilename );
+			spimData = SpimDataLoader.loadHDF5( sFilename );		
 		}
 		else
 		{
 			spimData = SpimDataLoader.loadBioFormats( sFilename );
 		}
-		
-		return addSpimData(spimData);
+		ValuePair<AbstractSpimData,List< BvvStackSource< ? > >> out = addSpimData(spimData);
+		dataTreeModel.addData( spimData, out.getB(), sFilename );
+
+		return out;
 	}
 	
 	public void renderScene(final GL3 gl, final RenderData data)
@@ -368,7 +379,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/cliptest.xml" );
 	}
 

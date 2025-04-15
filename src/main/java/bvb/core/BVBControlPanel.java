@@ -25,9 +25,6 @@ public class BVBControlPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	
-	public int nDefaultWidth = 400;
-	
-	public int nDefaultHeight = 600;
 	
 	public JFrame cpFrame;
 	

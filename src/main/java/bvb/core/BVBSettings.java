@@ -18,6 +18,10 @@ public class BVBSettings
 	/** IO default or last folder **/	
 	public static String lastDir = Prefs.get( "BVB.lastDir", "" );
 	
+	public static int nDefaultWidthControlPanel = 400;
+	
+	public static int nDefaultHeightControlPanel = 600;
+	
 	public static Color getInvertedColor(Color color_in)
 	{		
 		return  new Color(255-color_in.getRed(),255-color_in.getGreen(),255-color_in.getBlue(),color_in.getAlpha());

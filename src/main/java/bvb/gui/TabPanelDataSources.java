@@ -11,7 +11,7 @@ import bvb.core.BigVolumeBrowser;
 
 public class TabPanelDataSources extends JPanel
 {
-
+	final PanelData panelData;
 	final PanelLoadSources panelLoadSources;
 	
 	public TabPanelDataSources(final BigVolumeBrowser bvb)
@@ -19,7 +19,7 @@ public class TabPanelDataSources extends JPanel
 		super(new GridBagLayout());	
 		
 		panelLoadSources = new PanelLoadSources(bvb);
-		
+		panelData = new PanelData(bvb);
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
 	    gbc.insets = new Insets(4,3,4,3);
@@ -31,6 +31,8 @@ public class TabPanelDataSources extends JPanel
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add( panelLoadSources, gbc);
+	    gbc.gridy++;
+	    this.add( panelData, gbc);
 
         // Blank/filler component
 	    gbc.gridy++;
