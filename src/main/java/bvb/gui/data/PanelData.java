@@ -21,7 +21,6 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.PanelTitle;
 import bvb.gui.SelectedSources;
 import bvvpg.vistools.BvvStackSource;
-import mpicbg.spim.data.generic.sequence.BasicViewDescription;
 
 
 public class PanelData extends JPanel

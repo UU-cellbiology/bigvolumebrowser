@@ -2,11 +2,22 @@ package bvb.scijava;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+
+import bvb.core.BigVolumeBrowser;
+
+
+import org.scijava.command.ContextCommand;
 import org.scijava.command.Command;
 
 @Plugin(type = Command.class)//, menuPath = CommandConstants.CONTEXT_MENU_ITEMS_ROOT + "Configure BigVolumeViewer Rendering")
-public class ConfigureRenderWindow implements Command
+public class ConfigureRenderWindow extends ContextCommand
 {
+	final BigVolumeBrowser bvb;
+	public ConfigureRenderWindow(final BigVolumeBrowser bvb_)
+	{
+		bvb = bvb_;
+	}
+	
 	@Parameter( label = "Render width" )
 	public int renderWidth = 600;
 
