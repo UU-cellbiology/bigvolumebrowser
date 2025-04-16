@@ -80,7 +80,7 @@ public class BVBActions
 	void installActions()
 	{
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
-		actions.runnableAction(() -> runSettingsCommand(), "BVV settings", "F" );
+		actions.runnableAction(() -> bvb.restartBVV(), "restart test", "F" );
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
 		
 	}

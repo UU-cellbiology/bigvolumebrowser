@@ -24,15 +24,14 @@ import bvb.gui.TabPanelView;
 public class BVBControlPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
-	
-	
+		
 	public JFrame cpFrame;
 	
 	JTabbedPane tabPane;
 
 	final SelectedSources selectedSources;
 	
-	final TabPanelDataSources tabPanelDataSources;
+	final public TabPanelDataSources tabPanelDataSources;
 	
 	final TabPanelView tabPanelView;
 	

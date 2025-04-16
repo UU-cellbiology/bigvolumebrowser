@@ -90,6 +90,19 @@ public class PanelData extends JPanel
         this.add(treeScroller,gbc);
 	}
 	
+	public void addSourceStateListener()
+	{
+    	bvb.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
+		{
+			
+			@Override
+			public void selectedSourcesChanged()
+			{
+				updateSourcesSelection();
+			}
+		} );
+	}
+	
 	synchronized void selectSetups()
 	{
 		if(bLocked)

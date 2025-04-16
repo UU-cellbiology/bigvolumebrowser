@@ -30,6 +30,14 @@ public class DataTreeModel implements TreeModel
 	final ImageIcon iconFIJI;
 	
 	final ImageIcon iconSource;
+	
+	public enum SPIMDataType {
+		  BDV,
+		  BIOFORMATS,
+		  FIJI,
+		  MOBIE,
+		  SOURCE
+		}
 
 	public DataTreeModel()
 	{
@@ -45,7 +53,10 @@ public class DataTreeModel implements TreeModel
 
 	}
 	
-
+	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, BVBSpimDataInfo info)
+	{
+		addData(spimData, bvvList, info.sourceDescription, info.icon);
+	}
 	
 	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, String dataName, final ImageIcon spimDataIcon)
 	{
@@ -89,6 +100,12 @@ public class DataTreeModel implements TreeModel
 		}
 	}
 	
+	public void clearAllSources()
+	{
+		dataParentChildren.clear();
+		dataChildParent.clear();
+		
+	}
 	@SuppressWarnings( "cast" )
 	@Override
 	public Object getChild( Object parent, int index )
