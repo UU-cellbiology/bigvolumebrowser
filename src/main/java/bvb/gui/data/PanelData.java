@@ -67,15 +67,6 @@ public class PanelData extends JPanel
     	treeScroller.setMinimumSize(new Dimension(170, 250));
     	treeScroller.setPreferredSize(new Dimension(400, 500));
     	
-    	bvb.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{
-			
-			@Override
-			public void selectedSourcesChanged()
-			{
-				updateSourcesSelection();
-			}
-		} );
     	GridBagConstraints gbc = new GridBagConstraints();
 	    
 	    gbc.insets = new Insets(4,3,4,3);
@@ -90,6 +81,7 @@ public class PanelData extends JPanel
         this.add(treeScroller,gbc);
 	}
 	
+	/** called by parent **/
 	public void addSourceStateListener()
 	{
     	bvb.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()

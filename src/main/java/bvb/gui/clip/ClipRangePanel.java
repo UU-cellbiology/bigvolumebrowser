@@ -28,7 +28,7 @@ public class ClipRangePanel extends JPanel
 
 	private static final long serialVersionUID = 1885320351623882576L;
 	
-	final SelectedSources sourceSelection;
+	//final SelectedSources sourceSelection;
 
 	final ClipSetups clipSetups;
 	
@@ -37,13 +37,15 @@ public class ClipRangePanel extends JPanel
 	private boolean blockUpdates = false;
 	
 
-	public ClipRangePanel(SelectedSources sourceSelection_, final ClipSetups clipSetups_) 
+	public ClipRangePanel(final ClipSetups clipSetups_) 
 	{
 		super();
-		
-		sourceSelection = sourceSelection_;
-		
+
 		clipSetups = clipSetups_;
+		
+		//sourceSelection = sourceSelection_;
+		
+
 
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints cd = new GridBagConstraints();
@@ -77,9 +79,18 @@ public class ClipRangePanel extends JPanel
 		clipAxesPanels[0].changeListeners().add( () -> updateClipAxisRangeBounds(0));
 		clipAxesPanels[1].changeListeners().add( () -> updateClipAxisRangeBounds(1));
 		clipAxesPanels[2].changeListeners().add( () -> updateClipAxisRangeBounds(2));
-
+		
+		//add listener in case number of sources, etc change
+		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
+		setBVVSourceListener();
+		updateGUI();
+	}
+	
+	
+	public void setBVVSourceListener()
+	{
 		//add source selection listener
-		sourceSelection.addSourceSelectionListener(  new SelectedSources.Listener()
+		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
 		{
 			
 			@Override
@@ -88,11 +99,6 @@ public class ClipRangePanel extends JPanel
 				updateGUI();
 			}
 		} );
-		
-		//add listener in case number of sources, etc change
-		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
-
-		updateGUI();
 	}
 	
 	@Override
@@ -106,7 +112,7 @@ public class ClipRangePanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;	
 		
@@ -180,7 +186,7 @@ public class ClipRangePanel extends JPanel
 	
 	public void updateClipAxisRangeBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		//System.out.println(nAxis);
@@ -216,7 +222,7 @@ public class ClipRangePanel extends JPanel
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;

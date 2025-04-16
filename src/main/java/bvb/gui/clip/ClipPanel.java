@@ -38,7 +38,6 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	final ClipSetups clipSetups;
 	
-	final SelectedSources selectedSources;
 	public JCheckBox cbClipEnabled;
 	public JButton butResetClip;
 	public JCheckBox cbShowClipBoxes;
@@ -58,21 +57,21 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	 */
 	private Color inConsistentBg = Color.WHITE;
 	
-	public ClipPanel(final BigVolumeBrowser bvb_, final SelectedSources selectedSources_)
+	public ClipPanel(final BigVolumeBrowser bvb_)
 	{
 		super();
 		bvb = bvb_;
-		selectedSources = selectedSources_;
+
 
 		GridBagLayout gridbag = new GridBagLayout();
 		setLayout(gridbag);
 		this.setBorder(new PanelTitle(" Clip "));
 
-		clipSetups = new ClipSetups(bvb.bvvHandle.getConverterSetups());
+		clipSetups = new ClipSetups(bvb);
 		
-		clipRangePanel = new ClipRangePanel(selectedSources, clipSetups);
-	    clipRotationPanel = new ClipRotationPanel(selectedSources, clipSetups); 
-	    clipCenterPanel = new ClipCenterPanel(selectedSources, clipSetups); 
+		clipRangePanel = new ClipRangePanel(clipSetups);
+	    clipRotationPanel = new ClipRotationPanel(clipSetups.selectedSources, clipSetups); 
+	    clipCenterPanel = new ClipCenterPanel(clipSetups.selectedSources, clipSetups); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
 		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
@@ -140,18 +139,10 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	    gbc.gridwidth = 3;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add(tabClipPane,gbc);
-	    
-	    selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged( )
-			{
-				updateGUI();
-			}
-		} );
-	    
-	    //add listener in case number of sources, etc change
-		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
+
+
+	    setSourceListeners();
+
 	    updateGUI();
 	    Color [] colors = new Color[3];
 	    colors[0] =  new Color(198,34,0);
@@ -176,7 +167,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 //		default:
 //			selectionWindow.setText( "Selected: None");
 //		}	
-		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if(csList== null || csList.isEmpty())
 		{
 			setPanelsEnabled(false);
@@ -235,7 +226,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	{
 		boolean bEnabled = cbClipEnabled.isSelected();
 		
-		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if(csList== null || csList.isEmpty())
 		{
 			cbClipEnabled.setSelected( false );
@@ -272,7 +263,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	void resetClip()
 	{
-		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if(csList== null || csList.isEmpty())
 		{
 			return;
@@ -293,5 +284,22 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				((GammaConverterSetup)cs).setClipActive( true );
 			}
 		}
+	}
+	
+	public void setSourceListeners()
+	{
+		
+		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
+		{			
+			@Override
+			public void selectedSourcesChanged( )
+			{
+				updateGUI();
+			}
+		} );
+		
+	    //add listener in case number of sources, etc change
+		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
+
 	}
 }

@@ -54,7 +54,7 @@ public class BVBControlPanel extends JPanel
 		
 		icon_path = this.getClass().getResource("/icons/view.png");
 	    tabIcon = new ImageIcon(icon_path);
-	    tabPanelView = new TabPanelView(bvb, selectedSources);
+	    tabPanelView = new TabPanelView(bvb);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
 		
 //		icon_path = this.getClass().getResource("/icons/sources.png");

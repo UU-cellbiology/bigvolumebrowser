@@ -12,23 +12,29 @@ import bvb.gui.clip.ClipPanel;
 
 public class TabPanelView extends JPanel
 {
+	final BigVolumeBrowser bvb;
+	
 	final public ViewPanel viewPanel;
 
 	final public SourcesRenderPanel sourcesRenderPanel;
 
-	final public ClipPanel clipPanel;
+	public ClipPanel clipPanel;
 	
-	public TabPanelView(final BigVolumeBrowser bvb, final SelectedSources selectedSources)
+	public TabPanelView(final BigVolumeBrowser bvb_)
 	{
 		super(new GridBagLayout());	
+		
+		bvb = bvb_;
 			
-	    GridBagConstraints gbc = new GridBagConstraints();
+	   
 	    
 	    viewPanel = new ViewPanel(bvb);
 	    
-	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), selectedSources);
+	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), bvb.selectedSources);
 	    
-	    clipPanel = new ClipPanel(bvb, selectedSources);		
+	    clipPanel = new ClipPanel(bvb);		
+	   
+	    GridBagConstraints gbc = new GridBagConstraints();
 	    
 	    //add panels to Navigation
 	    gbc.insets = new Insets(4,3,4,3);
@@ -58,8 +64,29 @@ public class TabPanelView extends JPanel
 	    gbc.gridy++;
 	    gbc.weightx = 0.01;
 	    gbc.weighty = 0.01;
-	    this.add(new JLabel(), gbc);
-	   		
+	    this.add(new JLabel(), gbc);	
 	}
+	
 
+
+	public void resetClipPanel()
+	{
+		this.remove( clipPanel );
+		clipPanel = new ClipPanel(bvb);
+		clipPanel.setSourceListeners();
+		
+	    GridBagConstraints gbc = new GridBagConstraints();
+	    
+	    //add panels to Navigation
+	    gbc.insets = new Insets(4,3,4,3);
+	    //View
+	    gbc.gridx = 0;
+	    gbc.gridy = 1;
+	    gbc.weightx = 1.0;
+	    gbc.gridwidth = 1;
+	    gbc.anchor = GridBagConstraints.NORTHWEST;
+	    gbc.fill = GridBagConstraints.HORIZONTAL;
+		this.add( clipPanel,gbc );
+	}
 }
+	

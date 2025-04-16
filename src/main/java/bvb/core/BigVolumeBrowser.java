@@ -12,7 +12,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,7 +50,6 @@ import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
-import bvb.gui.data.DataTreeNode;
 import bvb.io.ImagePlusToSpimDataBVV;
 import bvb.io.LUTNameFIJI;
 import bvb.io.SourceToSpimDataWrapperBvv;
@@ -92,16 +90,16 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	/** currently selected source + listener for update **/
 	public SelectedSources selectedSources;
 	
-	@SuppressWarnings( "rawtypes" )
+	/** maps bvv sources to the input data **/
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData<?> > bvvSourceToSpimData;
-		
-	@SuppressWarnings( "rawtypes" )
+	
+	/** maps input data to bvv sources **/
 	private final ConcurrentHashMap < AbstractSpimData<?>, List<BvvStackSource<?> >> spimDataToBVVSourceList;
 
-	@SuppressWarnings( "rawtypes" )
+	/** info about input data (icon, description) **/
 	private final ConcurrentHashMap < AbstractSpimData<?>, BVBSpimDataInfo> spimDataToInfo;
 
-	
+	/** data sources panel tree model **/
 	public DataTreeModel dataTreeModel = new DataTreeModel();
 	
 	boolean bRestartingBVV = false;
@@ -259,27 +257,24 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		bvvViewer.requestRepaint();
 	}
 	
-	@SuppressWarnings( "rawtypes" )
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> loadBDVHDF5(String xmlFileName)
 	{
 		return loadFromDiskBDVorBF(xmlFileName, 0);	
 	}
 	
-	@SuppressWarnings( "rawtypes" )
+
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> loadBioFormats(String imageFileName)
 	{
 
 		return loadFromDiskBDVorBF(imageFileName, 1);
 	}
 	
-	@SuppressWarnings( "rawtypes" )
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src)
 	{
-		final AbstractSpimData spimData = SourceToSpimDataWrapperBvv.spimDataSourceWrap( src );
+		final AbstractSpimData<?> spimData = SourceToSpimDataWrapperBvv.spimDataSourceWrap( src );
 		return addSpimData(spimData);
 	}
 	
-	@SuppressWarnings( "rawtypes" )
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
 		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBVV.getSpimData( imp );
@@ -291,7 +286,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		return out;
 	}
 
-	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData spimData, final BVBSpimDataInfo info)
+	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData, final BVBSpimDataInfo info)
 	{
 		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		if(out != null)
@@ -301,8 +296,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		}
 		return out;
 	}
-	@SuppressWarnings( "rawtypes" )
-	ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData spimData)
+	
+	ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData)
 	{
 	
 		if(spimData == null)
@@ -318,7 +313,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 		//check for display settings stored in spimdata
 		@SuppressWarnings( "unchecked" )
-		List<BasicViewSetup> views = (spimData.getSequenceDescription().getViewSetupsOrdered());
+		List<BasicViewSetup> views = ( List< BasicViewSetup > ) (spimData.getSequenceDescription().getViewSetupsOrdered());
 		int nSetup = 0;
 		for(BasicViewSetup view : views)
 		{
@@ -360,7 +355,6 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	}
 
 	/** nType 0 - BDV, nType 1 - BioFormats/TIF **/
-	@SuppressWarnings( "rawtypes" )
 	ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> loadFromDiskBDVorBF(String sFilename, int nType)
 	{
 		AbstractSpimData<?> spimData;
@@ -442,7 +436,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		this.closeBvv();
 		
 		this.initBVV();
-		//make sure it started
+		//make sure it started??
 //		while(bLocked)
 //		{
 //			try
@@ -478,7 +472,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			dataTreeModel.addData( out.getA(), out.getB(), spimDataToInfo.get( spimData ));			
 		}
 		//sync GUI		
-		controlPanel.tabPanelDataSources.panelData.addSourceStateListener();
+		controlPanel.tabPanelDataSources.updateBVVlisteners();
+		controlPanel.tabPanelView.resetClipPanel();
 		
 		//put back viewer transform
 		bvvViewer.state().setViewerTransform( viewTransform );

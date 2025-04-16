@@ -4,6 +4,8 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
 import bdv.viewer.ConverterSetups;
+import bvb.core.BigVolumeBrowser;
+import bvb.gui.SelectedSources;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -17,11 +19,14 @@ public class ClipSetups
 	
 	final public ClipCenterBounds clipCenterBounds;
 	
-	final public ConverterSetups converterSetups;
+	public ConverterSetups converterSetups;
 	
-	public ClipSetups (final ConverterSetups converterSetups_)
+	public SelectedSources selectedSources;
+	
+	public ClipSetups (final BigVolumeBrowser bvb)
 	{
-		converterSetups = converterSetups_;
+		converterSetups = bvb.bvvViewer.getConverterSetups();
+		selectedSources = bvb.selectedSources;
 		clipAxesBounds = new ClipAxesBounds(converterSetups);
 		clipCenters = new ClipCenters(converterSetups);
 		clipCenterBounds = new ClipCenterBounds(converterSetups);
