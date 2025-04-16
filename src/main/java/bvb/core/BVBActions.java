@@ -10,7 +10,6 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JTextField;
 
-import net.imagej.ops.math.UnaryRealTypeMath.Csc;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
@@ -20,10 +19,7 @@ import net.imglib2.util.LinAlgHelpers;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.scijava.Context;
-import org.scijava.command.CommandInfo;
-import org.scijava.command.CommandService;
-import org.scijava.module.Module;
+
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -35,8 +31,8 @@ import bvb.geometry.Line3D;
 import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.Rotate3DViewerStyle;
 import bvb.scijava.ConfigureRenderWindow;
-import bvb.scijava.Services;
 import bvb.utils.Misc;
+
 import bvvpg.core.util.MatrixMath;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.vistools.BvvHandle;
@@ -95,22 +91,22 @@ public class BVBActions
 		return actions.getInputMap();
 	}
 	
-	void runSettingsCommand()
-	{	
-		final CommandService cs = Services.commandService;
-		
-		Context test2 = cs.getContext();
-		Context test = configureRenderWindow.getContext();//.setContext( cs.getContext() );
-		configureRenderWindow.run();
-		//final CommandInfo info = cs.getCommand( ConfigureRenderWindow.class );
-		
+//	void runSettingsCommand()
+//	{	
 //		final CommandService cs = Services.commandService;
-//		cs.getCommand( ConfigureRenderWindow.class );
-//		Module module = cs.moduleService().createModule(info);
-//		cs.moduleService().run(module, true);
-				//cs.moduleService().createModule( null );
-		//configureRenderWindow.run();
-	}
+//		
+//		Context test2 = cs.getContext();
+//		Context test = configureRenderWindow.getContext();//.setContext( cs.getContext() );
+//		configureRenderWindow.run();
+//		//final CommandInfo info = cs.getCommand( ConfigureRenderWindow.class );
+//		
+////		final CommandService cs = Services.commandService;
+////		cs.getCommand( ConfigureRenderWindow.class );
+////		Module module = cs.moduleService().createModule(info);
+////		cs.moduleService().run(module, true);
+//				//cs.moduleService().createModule( null );
+//		//configureRenderWindow.run();
+//	}
 	
 	void actionCenterView()
 	{

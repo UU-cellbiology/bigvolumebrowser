@@ -33,7 +33,6 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import spimdata.util.Displaysettings;
-import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
@@ -102,9 +101,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	/** data sources panel tree model **/
 	public DataTreeModel dataTreeModel = new DataTreeModel();
 	
-	boolean bRestartingBVV = false;
-	
-	WindowAdapter closeWA;
+	final WindowAdapter closeWA;
 	
 	//DEBUG VISUALIZATION
 	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
@@ -118,6 +115,16 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		volumeBoxes = new VolumeBBoxes(this);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		clipBoxes = new VolumeBBoxes(this);
+		
+	    //sync BVV and Control Panel window closing
+	    closeWA = new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( WindowEvent ev )
+			{
+				shutDownAll();
+			}
+		};
 		
 	}
 	/** starting as plugin from ImageJ/FIJI **/
@@ -143,7 +150,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		if(bvv == null)
 		{
 			bLocked = true;
-			this.initBVV();
+			
+			initBVV();
 			
 			//setup control panel
 			controlPanel = new BVBControlPanel(this);
@@ -158,16 +166,6 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		    java.awt.Dimension bvv_d = bvvFrame.getSize();
 		
 		    controlPanel.cpFrame.setLocation(bvv_p.x + bvv_d.width, bvv_p.y);
-		    
-		    //sync closing
-		    closeWA = new WindowAdapter()
-			{
-				@Override
-				public void windowClosing( WindowEvent ev )
-				{
-					shutDownAll();
-				}
-			};
 			
 			controlPanel.cpFrame.addWindowListener( closeWA );
 		    bvvFrame.addWindowListener(	closeWA );
@@ -218,11 +216,11 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	public void shutDownAll()
 	{
-		closeBvv();
+		closeBVV();
 		controlPanel.cpFrame.dispose();
 	}
 	
-	void closeBvv()
+	void closeBVV()
 	{
 		bvvViewer.stop();
 		bvvFrame.dispose();		
@@ -237,7 +235,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		int nCPWidth = controlPanel.cpFrame.getWidth();
 				
 		bvvFrame.getContentPane().setPreferredSize(  new Dimension( width - nCPWidth, height ) ) ;	
-		bvvFrame.setSize(width - nCPWidth, height  );
+		//bvvFrame.setPreferredSize(new Dimension( width - nCPWidth, height ));
+		bvvFrame.pack();
 		bvvFrame.setLocation( 0, 0 );
 		
 		controlPanel.cpFrame.setSize( nCPWidth, height );
@@ -248,7 +247,6 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			//bvvFrame.getSplitPanel().setDividerLocation( -0.1 );
 			bvvFrame.getSplitPanel().setCollapsed( false );
 		}
-
 	
 	}
 	
@@ -417,38 +415,25 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		updateSceneRender();		
 	}
-	
-	void restartBVV()
+	/** restarts BVV. Main purpose is to update rendering parameters. **/
+	public void restartBVV()
 	{
-		IJ.log( "Restarting BigVolumeViewer..." );
 		
 		//gather all the spimdata
 		ArrayList<AbstractSpimData<?>> spimDataAll = Collections.list( spimDataToBVVSourceList.keys() );
 		//save window position and size on the screen
-	    final java.awt.Point bvv_p = bvvFrame.getLocationOnScreen();
-	    final java.awt.Dimension bvv_d = bvvFrame.getSize();
-		//let's save viewer transform
+	    final java.awt.Point bvv_p = bvvFrame.getLocation();
+	    final java.awt.Dimension bvv_d = bvvFrame.getContentPane().getSize();
+	    //final java.awt.Point bvv_pf= bvvFrame.getRootPane().getLocationOnScreen();
+		
+	    //let's save viewer transform
 		AffineTransform3D viewTransform = bvvViewer.state().getViewerTransform();
 
 
-		//now restart
-		bRestartingBVV  = true;
-		this.closeBvv();
-		
-		this.initBVV();
-		//make sure it started??
-//		while(bLocked)
-//		{
-//			try
-//			{
-//				Thread.sleep(100);
-//			}
-//			catch ( InterruptedException exc )
-//			{
-//				// TODO Auto-generated catch block
-//				exc.printStackTrace();
-//			}
-//		}
+		//now restart	
+		closeBVV();
+
+        initBVV();
 		
 	    bvvFrame.addWindowListener(	closeWA );
 	    
@@ -457,12 +442,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	    spimDataToBVVSourceList.clear();
 	    
 	    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
-	    
-		bRestartingBVV  = false;
 		
-		//restore window position
-		bvvFrame.setLocation( bvv_p );
-		bvvFrame.setPreferredSize( bvv_d );	
+		//restore window position		
+		bvvFrame.setLocation( bvv_p );	
+		bvvFrame.getContentPane().setPreferredSize( bvv_d );	
 		bvvFrame.pack();
 		
 		//put back spimdata
@@ -477,8 +460,6 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 		//put back viewer transform
 		bvvViewer.state().setViewerTransform( viewTransform );
-			
-		IJ.log( "..done." );
 
 	}
 	
