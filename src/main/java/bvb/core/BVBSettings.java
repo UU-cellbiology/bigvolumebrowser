@@ -12,9 +12,9 @@ public class BVBSettings
 	/** status of displaying boxes around sources **/
 	public static boolean bShowVolumeBoxes = Prefs.get("BVB.bShowVolumeBoxes", true);
 
-	/** animation speed during zoomin in/out , i.e. duration of displayed transform in ms **/
+	/** animation speed during zoom in/out , i.e. duration of displayed transform in ms **/
 	public static int nTransformAnimationDuration =  (int)Prefs.get("BVB.nTransformAnimationDuration",400);
-		
+	
 	/** IO default or last folder **/	
 	public static String lastDir = Prefs.get( "BVB.lastDir", "" );
 	

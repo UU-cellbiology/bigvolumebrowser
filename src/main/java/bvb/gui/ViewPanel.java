@@ -83,8 +83,10 @@ public class ViewPanel extends JPanel
 		projIcon[0] = new ImageIcon(icon_path);
 		icon_path = this.getClass().getResource("/icons/proj_ortho.png");
 		projIcon[1] = new ImageIcon(icon_path);
+
 	    butProjType = new JButton(projIcon[bvb.bvvViewer.getProjectionType()]);
 	    butProjType.setToolTipText( projToolTip[bvb.bvvViewer.getProjectionType() ]);
+	    
 	    butProjType.addActionListener(new ActionListener()
 		{
 			@Override
