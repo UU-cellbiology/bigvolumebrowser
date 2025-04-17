@@ -80,14 +80,14 @@
 		<license.licenseName>bsd_2</license.licenseName>
         <license.copyrightOwners>Cell Biology, Neurobiology and Biophysics Department of Utrecht University.</license.copyrightOwners>  			
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
-		<!--  releaseProfiles>sign,deploy-to-scijava</releaseProfiles -->
+		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles> 
 	</properties>
 
 	<dependencies>
 		<dependency>
 		  <groupId>nl.uu.science.cellbiology</groupId>
 		  <artifactId>bvv-playground</artifactId>
-		  <version>0.4.0-SNAPSHOT</version>
+		  <version>0.4.0</version>
 		</dependency>
 		
 		<!-- BIOFORMATS -->

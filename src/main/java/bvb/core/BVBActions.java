@@ -5,6 +5,8 @@ import java.awt.KeyboardFocusManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -17,9 +19,13 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 
+import org.hibernate.mapping.Map;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-
+import org.scijava.Context;
+import org.scijava.command.CommandModule;
+import org.scijava.command.CommandService;
+import org.scijava.module.Module;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -30,7 +36,7 @@ import bdv.viewer.SourceAndConverter;
 import bvb.geometry.Line3D;
 import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.Rotate3DViewerStyle;
-import bvb.scijava.ConfigureRenderWindow;
+import bvb.scijava.ConfigureBVVRenderWindow;
 import bvb.utils.Misc;
 
 import bvvpg.core.util.MatrixMath;
@@ -44,16 +50,11 @@ public class BVBActions
 	final Actions actions;
 	final Behaviours behaviours;
 	
-	final ConfigureRenderWindow configureRenderWindow;
-	
-
-	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
 		bvb = bvb_;
 		actions = new Actions( new InputTriggerConfig() );
 		behaviours = new Behaviours( new InputTriggerConfig() );
-		configureRenderWindow = new ConfigureRenderWindow(bvb);
 		installBehaviors();
 		installActions();
 	}
@@ -76,7 +77,7 @@ public class BVBActions
 	void installActions()
 	{
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
-		actions.runnableAction(() -> bvb.restartBVV(), "restart test", "F" );
+		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
 		
 	}
@@ -91,22 +92,31 @@ public class BVBActions
 		return actions.getInputMap();
 	}
 	
-//	void runSettingsCommand()
-//	{	
-//		final CommandService cs = Services.commandService;
-//		
-//		Context test2 = cs.getContext();
-//		Context test = configureRenderWindow.getContext();//.setContext( cs.getContext() );
-//		configureRenderWindow.run();
-//		//final CommandInfo info = cs.getCommand( ConfigureRenderWindow.class );
-//		
-////		final CommandService cs = Services.commandService;
-////		cs.getCommand( ConfigureRenderWindow.class );
-////		Module module = cs.moduleService().createModule(info);
-////		cs.moduleService().run(module, true);
-//				//cs.moduleService().createModule( null );
-//		//configureRenderWindow.run();
-//	}
+	void runSettingsCommand()
+	{	
+		
+		final Context ctx = new Context(); // you need to have one of these; make one with new if you don't already		
+		CommandService cs = ctx.service(CommandService.class);
+		Future<CommandModule> f = cs.run(ConfigureBVVRenderWindow.class, true);
+		try
+		{
+			Module m = f.get();
+		}
+		catch ( InterruptedException exc )
+		{
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
+		}
+		catch ( ExecutionException exc )
+		{
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
+		} 
+		// wait for command to complete
+	//	Map<String, Object> outputs = m.getOutputs();
+//		System.out.println("Processed data = " + outputs.get("processedData");
+
+	}
 	
 	void actionCenterView()
 	{
