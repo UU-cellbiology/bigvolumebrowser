@@ -21,6 +21,8 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerModel;
 
@@ -145,10 +147,11 @@ public class BVBActions
 		JSpinner maxCacheSizeInMB = new JSpinner(maxCacheSizeInMBM);
 		maxCacheSizeInMB.setToolTipText( "The size of the GPU cache texture. Increase it to the max available."  );
 		
-		SpinnerModel dCamM = new SpinnerNumberModel(BVVSettings.dCam, 10, 10000, 1);		
+		SpinnerModel dCamM = new SpinnerNumberModel(BVVSettings.dCam, BVVSettings.dClipNear+5, Integer.MAX_VALUE, 1);		
 		JSpinner dCam = new JSpinner(dCamM);
 		dCam.setEditor(new JSpinner.NumberEditor(dCam, "#"));
 		dCam.setToolTipText( "Distance from camera to z=0 plane (in space units)."  );
+		
 		
 		SpinnerModel dClipFarM = new SpinnerNumberModel(BVVSettings.dClipFar, 10, Integer.MAX_VALUE, 1);		
 		JSpinner dClipFar = new JSpinner(dClipFarM);
@@ -159,7 +162,24 @@ public class BVBActions
 		JSpinner dClipNear = new JSpinner(dClipNearM);
 		dClipNear.setEditor(new JSpinner.NumberEditor(dClipNear, "#"));
 		dClipNear.setToolTipText( "Visible depth from z=0 closer to the camera (in space units). MUST BE SMALLER THAN CAMERA DISTANCE!"  );
-		
+		dClipNear.addChangeListener( new ChangeListener()
+				{
+
+					@Override
+					public void stateChanged( ChangeEvent arg0 )
+					{
+						int currNear =  ((Double)dClipNear.getValue()).intValue();
+						((SpinnerNumberModel)dCam.getModel()).setMinimum( new Double(currNear+5) );
+						if(currNear > ((Double)dCam.getValue()).intValue())
+						{
+							dCam.setValue( currNear+5 );
+							//(dCam.getModel()).setMinimum( new Integer(currNear+5) );
+						}
+					}
+
+			
+				}
+				);
 		
 		gbcL.insets = new Insets(5,5,5,5);
 		gbcR.insets = new Insets(5,5,5,5);
