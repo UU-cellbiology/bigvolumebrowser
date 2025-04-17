@@ -3,8 +3,6 @@ package bvb.scijava;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import bvb.core.BigVolumeBrowser;
-
 import org.scijava.command.Command;
 
 @Plugin(type = Command.class)//, menuPath = CommandConstants.CONTEXT_MENU_ITEMS_ROOT + "Configure BigVolumeViewer Rendering")

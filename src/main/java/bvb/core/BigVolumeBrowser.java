@@ -25,6 +25,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.util.ValuePair;
 
+
 import org.joml.Matrix4f;
 
 import bdv.viewer.Source;
@@ -33,6 +34,7 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import spimdata.util.Displaysettings;
+
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
@@ -54,6 +56,7 @@ import bvb.io.LUTNameFIJI;
 import bvb.io.SourceToSpimDataWrapperBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
+
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 
@@ -415,6 +418,11 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		updateSceneRender();		
 	}
+	
+	public void settingsDialogBVV()
+	{
+		this.bvbActions.runSettingsCommand();
+	}
 	/** restarts BVV. Main purpose is to update rendering parameters. **/
 	public void restartBVV()
 	{
@@ -466,7 +474,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	public static void main(String... args) throws Exception
 	{
 		
-		//new ImageJ();
+		
+		new ImageJ();
+
+		//ij.command().run(ConfigureBVVRenderWindow.class,true).get();
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 
 		
 		testBVB.startBVB();

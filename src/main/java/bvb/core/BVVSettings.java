@@ -11,8 +11,9 @@ public class BVVSettings
 	
 	//parameters that can be changed at runtime
 	static double dCam = Prefs.get("BVB.dCam", 2000.);
+	static double dClipFar = Prefs.get("BVB.dClipFar", 1000.);
 	static double dClipNear = Prefs.get("BVB.dClipNear", 1000.);
-	static double dClipFar = Prefs.get("BVB.dClipFar", 1000.);	
+	
 	
 	// parameters that require bvv restart, 
 	// see https://github.com/ekatrukha/BigTrace/wiki/Volume-Render-Settings
@@ -22,7 +23,5 @@ public class BVVSettings
 	static int cacheBlockSize = (int)Prefs.get("BVB.cacheBlockSize", 32.);
 	static int maxCacheSizeInMB = (int)Prefs.get("BVB.maxCacheSizeInMB", 500.);
 	static int ditherWidth =(int)Prefs.get("BVB.ditherWidth", 3.);
-	
-	
 
 }

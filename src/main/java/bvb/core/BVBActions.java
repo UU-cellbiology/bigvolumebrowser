@@ -1,16 +1,28 @@
 package bvb.core;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SpinnerModel;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -19,13 +31,9 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 
-import org.hibernate.mapping.Map;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.scijava.Context;
-import org.scijava.command.CommandModule;
-import org.scijava.command.CommandService;
-import org.scijava.module.Module;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -35,8 +43,8 @@ import bdv.util.Affine3DHelpers;
 import bdv.viewer.SourceAndConverter;
 import bvb.geometry.Line3D;
 import bvb.gui.AnisotropicTransformAnimator3D;
+import bvb.gui.NumberField;
 import bvb.gui.Rotate3DViewerStyle;
-import bvb.scijava.ConfigureBVVRenderWindow;
 import bvb.utils.Misc;
 
 import bvvpg.core.util.MatrixMath;
@@ -91,32 +99,160 @@ public class BVBActions
 	{
 		return actions.getInputMap();
 	}
-	
-	void runSettingsCommand()
-	{	
-		
-		final Context ctx = new Context(); // you need to have one of these; make one with new if you don't already		
-		CommandService cs = ctx.service(CommandService.class);
-		Future<CommandModule> f = cs.run(ConfigureBVVRenderWindow.class, true);
-		try
-		{
-			Module m = f.get();
-		}
-		catch ( InterruptedException exc )
-		{
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
-		}
-		catch ( ExecutionException exc )
-		{
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
-		} 
-		// wait for command to complete
-	//	Map<String, Object> outputs = m.getOutputs();
-//		System.out.println("Processed data = " + outputs.get("processedData");
 
+	void runSettingsCommand()
+	{
+		JPanel pViewSettings = new JPanel(new GridBagLayout());
+		
+		GridBagConstraints gbcL = new GridBagConstraints();
+		GridBagConstraints gbcR = new GridBagConstraints();
+		
+		SpinnerModel smW = new SpinnerNumberModel(BVVSettings.renderWidth, 10, 10000, 1);		
+		JSpinner spinnerW = new JSpinner(smW);
+		spinnerW.setEditor(new JSpinner.NumberEditor(spinnerW, "#"));
+		spinnerW.setToolTipText( "Viewport render width"  );
+		
+		SpinnerModel smH = new SpinnerNumberModel(BVVSettings.renderHeight, 10, 10000, 1);		
+		JSpinner spinnerH = new JSpinner(smH);
+		spinnerH.setEditor(new JSpinner.NumberEditor(spinnerH, "#"));
+		spinnerH.setToolTipText( "Viewport render height"  );
+			
+		
+		String[] sDitherWidths = { "none (always render full resolution)", "2x2", "3x3", "4x4", "5x5", "6x6", "7x7", "8x8" };
+		JComboBox<String> ditherWidthsList = new JComboBox<>(sDitherWidths);
+		ditherWidthsList.setToolTipText( "Dither window size" );
+		ditherWidthsList.setSelectedIndex(BVVSettings.ditherWidth-1);
+
+		JSlider slNumDitherSamples = new JSlider(SwingConstants.HORIZONTAL,
+                1, 8, BVVSettings.numDitherSamples);
+		slNumDitherSamples.setToolTipText( "Pixels are interpolated from this many nearest neighbors when dithering. This is not very expensive, it's fine to turn it up to 8." );
+		slNumDitherSamples.setMinorTickSpacing(1);
+		Hashtable< Integer, JLabel > labelTable = new Hashtable<>();
+		labelTable.put( new Integer( 1 ), new JLabel("1") );
+		for(int i=1; i<=4; i++)
+		{
+			labelTable.put( new Integer( i*2 ), new JLabel(Integer.toString( i*2 )) );
+			
+		}
+		slNumDitherSamples.setLabelTable( labelTable );
+		slNumDitherSamples.setPaintTicks(true);
+		slNumDitherSamples.setPaintLabels(true);
+		
+		SpinnerModel cacheBlockSizeM = new SpinnerNumberModel(BVVSettings.cacheBlockSize, 10, 1024, 1);		
+		JSpinner cacheBlockSize = new JSpinner(cacheBlockSizeM);
+		cacheBlockSize.setEditor(new JSpinner.NumberEditor(cacheBlockSize, "#"));
+		SpinnerModel maxCacheSizeInMBM = new SpinnerNumberModel(BVVSettings.maxCacheSizeInMB, 10, Integer.MAX_VALUE, 1);		
+		JSpinner maxCacheSizeInMB = new JSpinner(maxCacheSizeInMBM);
+		maxCacheSizeInMB.setToolTipText( "The size of the GPU cache texture. Increase it to the max available."  );
+		
+		SpinnerModel dCamM = new SpinnerNumberModel(BVVSettings.dCam, 10, 10000, 1);		
+		JSpinner dCam = new JSpinner(dCamM);
+		dCam.setEditor(new JSpinner.NumberEditor(dCam, "#"));
+		dCam.setToolTipText( "Distance from camera to z=0 plane (in space units)."  );
+		
+		SpinnerModel dClipFarM = new SpinnerNumberModel(BVVSettings.dClipFar, 10, Integer.MAX_VALUE, 1);		
+		JSpinner dClipFar = new JSpinner(dClipFarM);
+		dClipFar.setEditor(new JSpinner.NumberEditor(dClipFar, "#"));
+		dClipFar.setToolTipText( "Visible depth from z=0 further away from the camera (in space units)."  );
+		
+		SpinnerModel dClipNearM = new SpinnerNumberModel(BVVSettings.dClipNear, 10, Integer.MAX_VALUE, 1);		
+		JSpinner dClipNear = new JSpinner(dClipNearM);
+		dClipNear.setEditor(new JSpinner.NumberEditor(dClipNear, "#"));
+		dClipNear.setToolTipText( "Visible depth from z=0 closer to the camera (in space units). MUST BE SMALLER THAN CAMERA DISTANCE!"  );
+		
+		
+		gbcL.insets = new Insets(5,5,5,5);
+		gbcR.insets = new Insets(5,5,5,5);
+		gbcL.anchor = GridBagConstraints.EAST;
+		gbcR.fill = GridBagConstraints.HORIZONTAL;
+		gbcR.weightx = 1.0;
+		
+		gbcL.gridx=0;
+		gbcR.gridx=1;
+		gbcL.gridy=0;
+		gbcR.gridy=0;
+		pViewSettings.add( new JLabel("Render width"), gbcL );	
+		pViewSettings.add( spinnerW,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("Render height"), gbcL );
+		pViewSettings.add( spinnerH,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("Dither window size"), gbcL );
+		pViewSettings.add( ditherWidthsList, gbcR );
+
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("Number of dither samples"), gbcL );
+		pViewSettings.add( slNumDitherSamples,gbcR );
+
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("GPU cache tile size"), gbcL );
+		pViewSettings.add( cacheBlockSize,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("GPU cache size (in MB)"), gbcL );
+		pViewSettings.add( maxCacheSizeInMB,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("Camera distance"), gbcL );
+		pViewSettings.add( dCam,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("Clip distance far"), gbcL );
+		pViewSettings.add( dClipFar,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("Clip distance near"), gbcL );
+		pViewSettings.add( dClipNear,gbcR );
+		
+		
+		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "BVV canvas settings", 
+		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+		if (reply == JOptionPane.OK_OPTION) 
+		{
+			
+		}
 	}
+
+//	void runSettingsCommandSciJava()
+//	{	
+//		
+//		//final Context ctx = new Context(); // you need to have one of these; make one with new if you don't already		
+//		//CommandService cs = ctx.service(CommandService.class);
+//		HelloWorld cn = new HelloWorld();
+//		Services.commandService.context().inject( cn );
+//		Future<CommandModule> f = Services.commandService.run(HelloWorld.class, true);
+//
+////		Future<CommandModule> f = Services.commandService.run(ConfigureBVVRenderWindow.class, true);
+//		try
+//		{
+//			Module m = f.get();
+//		}
+//		catch ( InterruptedException exc )
+//		{
+//			// TODO Auto-generated catch block
+//			exc.printStackTrace();
+//		}
+//		catch ( ExecutionException exc )
+//		{
+//			// TODO Auto-generated catch block
+//			exc.printStackTrace();
+//		} 
+//		// wait for command to complete
+//	//	Map<String, Object> outputs = m.getOutputs();
+////		System.out.println("Processed data = " + outputs.get("processedData");
+//
+//	}
 	
 	void actionCenterView()
 	{

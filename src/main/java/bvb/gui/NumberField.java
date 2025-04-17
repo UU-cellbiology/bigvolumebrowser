@@ -1,6 +1,8 @@
 package bvb.gui;
 
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 public class NumberField extends JPanel {
 
@@ -57,7 +60,12 @@ public class NumberField extends JPanel {
 	}
 
 	public static void main(String[] args) {
-		NumberField nf = new NumberField(8);
+		
+		GridBagConstraints gbcNF = new GridBagConstraints();
+		gbcNF.weightx = 1.0;
+		gbcNF.fill = GridBagConstraints.HORIZONTAL;
+		NumberField nf = new NumberField(8, gbcNF);
+		nf.setHorizontalAlignment( SwingConstants.RIGHT );
 		nf.setText("5.88");
 		nf.setLimits(-1000, 1000);
 		// nf.setIntegersOnly(true);
@@ -224,13 +232,23 @@ public class NumberField extends JPanel {
 		textfield.setEnabled(enabled);
 	}
 
-	public NumberField(int n) {
+	public NumberField(int n,GridBagConstraints gbc) 
+	{
+		super(new GridBagLayout());
+		textfield = new JTextField(n);
+		add(textfield, gbc);
+		installListeners();
+	}
+	public NumberField(int n) 
+	{
 		super(new FlowLayout(0, 0, 0));
 		textfield = new JTextField(n);
 		add(textfield);
-//		InputMap im = getInputMap();
-//		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "bla");
-//		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "bla");
+		installListeners();
+	}
+	
+	void installListeners()
+	{
 
 		textfield.addMouseWheelListener(new MouseWheelListener() {
 			@Override
