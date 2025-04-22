@@ -47,7 +47,7 @@ public class PanelData extends JPanel
         
         DataTreeCellRenderer renderer = new DataTreeCellRenderer();
 
-        renderer.setLeafIcon( bvb.dataTreeModel.getSourceIcon() );
+        renderer.setLeafIcon( bvb.dataTreeModel.getDefaultIcon() );
         treeData.setCellRenderer(renderer);
         treeData.setShowsRootHandles(true);
         

@@ -189,6 +189,11 @@
         	<groupId>gov.nist.math</groupId>
         	<artifactId>jama</artifactId>
         </dependency>
+		<dependency>
+			<groupId>nl.uu.science.cellbiology</groupId>
+			<artifactId>AveragingND</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	
 	<repositories>		

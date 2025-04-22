@@ -25,6 +25,7 @@ import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.ValuePair;
 
 
@@ -281,22 +282,50 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	}
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src)
-	{
-		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
-		return addSpimData(spimData);
+	{		
+		return addSource(src, src.getName(), dataTreeModel.getDefaultIcon());
 	}
 
-	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai)
+	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, String sourceName, final ImageIcon icon)
+	{
+		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
+		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(sourceName, icon);
+		spimDataToInfo.put( spimData, info );
+		dataTreeModel.addData( spimData, out.getB(), info);
+		return out;
+	}
+	
+	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai, String raiName, final ImageIcon icon)
 	{
 		final AbstractSpimData<?> spimData = RAIToSpimDataBvv.getSpimData( rai );
-		return addSpimData(spimData);
+		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(raiName, icon);
+		spimDataToInfo.put( spimData, info );
+		dataTreeModel.addData( spimData, out.getB(), info);
+		if(rai.getType() instanceof UnsignedByteType)
+		{
+			for(BvvStackSource< ? > bvvSrc : out.getB())
+			{
+				bvvSrc.setDisplayRange( 0, 255 );
+				bvvSrc.setDisplayRangeBounds( 0, 255 );
+			}
+		}
+		return out;
+	}
+	
+	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai)
+	{
+		String raiName = "RAI_"+Integer.toString(BVBSettings.nAddedRAINumber);
+		BVBSettings.nAddedRAINumber++;
+		return addRAI(rai, raiName, dataTreeModel.getFIJIIcon());
 	}
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
 		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBvv.getSpimData( imp );
 		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
-		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(),dataTreeModel.getFIJIIcon());
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(), dataTreeModel.getFIJIIcon());
 		spimDataToInfo.put( spimData, info );
 		dataTreeModel.addData( spimData, out.getB(), info);
 

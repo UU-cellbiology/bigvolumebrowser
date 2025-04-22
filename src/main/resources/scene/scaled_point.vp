@@ -4,7 +4,6 @@ uniform float pointSizeReal;
 uniform float pointScale;
 uniform mat4 pvm;
 uniform vec2 windowSize;
-//uniform vec3 voxelScale;
 out vec3 posW;
 
 void main()
@@ -18,8 +17,10 @@ void main()
  	//so we stay in the same z-plane
  	
  	vec4 shift = gl_Position;
- 	shift.x = shift.x + 100.0;
+ 	
  	//why 100? why not?
+ 	shift.x = shift.x + 100.0;
+ 	
 
 	// let's go back to original (voxel) coordinates
 	// and get now the line in x direction of the screen
@@ -28,10 +29,6 @@ void main()
  	mat4 invPVM = inverse(pvm);
  	shift = invPVM * shift;
  	
- 	//move to space units
- 	//shift.xyz = voxelScale * shift.xyz;
- 	//vec3 pos_scale = voxelScale * aPos;
- 	//vec3 pos_scale = aPos;
 
  	//normalize length along this direction
  	//in the absolute units
@@ -40,10 +37,6 @@ void main()
  	shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
  	
  	shift.xyz = shift.xyz + aPos;
- 	
- 	//move back to voxel units
- 	
- 	//shift.xyz = shift.xyz / voxelScale;
  	
  	//project it back to the screen
  	shift = pvm * shift;
