@@ -107,9 +107,9 @@
 			<artifactId>imagej-mesh</artifactId>
 		</dependency -->
 		<dependency>
-		    <groupId>com.github.imglib</groupId>
+		    <groupId>net.imglib2</groupId>
 		    <artifactId>imglib2-mesh</artifactId>
-		    <version>e7d4e89</version>
+		    <version>1.1.0</version>
 		</dependency>
 		
 		<dependency>

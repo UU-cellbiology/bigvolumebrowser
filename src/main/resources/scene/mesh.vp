@@ -4,7 +4,6 @@ layout (location = 1) in vec3 aNormal;
 out vec3 FragPos;
 out vec3 Normal;
 out vec3 posW;
-//flat out int disc;
 
 uniform mat4 pvm;
 uniform mat4 vm;
