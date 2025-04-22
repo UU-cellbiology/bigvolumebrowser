@@ -33,7 +33,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 
-
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -45,13 +44,13 @@ import bdv.util.Affine3DHelpers;
 import bdv.viewer.SourceAndConverter;
 import bvb.geometry.Line3D;
 import bvb.gui.AnisotropicTransformAnimator3D;
-import bvb.gui.NumberField;
 import bvb.gui.Rotate3DViewerStyle;
 import bvb.utils.Misc;
 
 import bvvpg.core.util.MatrixMath;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.vistools.BvvHandle;
+import ij.Prefs;
 
 public class BVBActions
 {
@@ -110,14 +109,14 @@ public class BVBActions
 		GridBagConstraints gbcR = new GridBagConstraints();
 		
 		SpinnerModel smW = new SpinnerNumberModel(BVVSettings.renderWidth, 10, 10000, 1);		
-		JSpinner spinnerW = new JSpinner(smW);
-		spinnerW.setEditor(new JSpinner.NumberEditor(spinnerW, "#"));
-		spinnerW.setToolTipText( "Viewport render width"  );
+		JSpinner renderWidth = new JSpinner(smW);
+		renderWidth.setEditor(new JSpinner.NumberEditor(renderWidth, "#"));
+		renderWidth.setToolTipText( "Viewport render width"  );
 		
 		SpinnerModel smH = new SpinnerNumberModel(BVVSettings.renderHeight, 10, 10000, 1);		
-		JSpinner spinnerH = new JSpinner(smH);
-		spinnerH.setEditor(new JSpinner.NumberEditor(spinnerH, "#"));
-		spinnerH.setToolTipText( "Viewport render height"  );
+		JSpinner renderHeight = new JSpinner(smH);
+		renderHeight.setEditor(new JSpinner.NumberEditor(renderHeight, "#"));
+		renderHeight.setToolTipText( "Viewport render height"  );
 			
 		
 		String[] sDitherWidths = { "none (always render full resolution)", "2x2", "3x3", "4x4", "5x5", "6x6", "7x7", "8x8" };
@@ -192,12 +191,12 @@ public class BVBActions
 		gbcL.gridy=0;
 		gbcR.gridy=0;
 		pViewSettings.add( new JLabel("Render width"), gbcL );	
-		pViewSettings.add( spinnerW,gbcR );
+		pViewSettings.add( renderWidth,gbcR );
 		
 		gbcL.gridy++;
 		gbcR.gridy++;
 		pViewSettings.add( new JLabel("Render height"), gbcL );
-		pViewSettings.add( spinnerH,gbcR );
+		pViewSettings.add( renderHeight,gbcR );
 		
 		gbcL.gridy++;
 		gbcR.gridy++;
@@ -240,7 +239,71 @@ public class BVBActions
 
 		if (reply == JOptionPane.OK_OPTION) 
 		{
+			boolean bRestartBVV = false;
+			BVVSettings.dCam = ((Double)dCam.getValue()).doubleValue();
+			Prefs.set("BVB.dCam", BVVSettings.dCam);
+			BVVSettings.dClipFar = ((Double)dClipFar.getValue()).doubleValue();
+			Prefs.set("BVB.dClipFar", BVVSettings.dClipFar);
+			BVVSettings.dClipNear = ((Double)dClipNear.getValue()).doubleValue();
+			Prefs.set("BVB.dClipNear", BVVSettings.dClipNear);
 			
+			int nTempInt =  ((Integer)renderWidth.getValue()).intValue();
+			if(BVVSettings.renderWidth != nTempInt)
+			{
+				BVVSettings.renderWidth = nTempInt;
+				bRestartBVV = true;
+				Prefs.set("BVB.renderWidth", BVVSettings.renderWidth);
+			}
+			
+			nTempInt =  ((Integer)renderHeight.getValue()).intValue();
+			if(BVVSettings.renderHeight != nTempInt)
+			{
+				BVVSettings.renderHeight = nTempInt;
+				bRestartBVV = true;
+				Prefs.set("BVB.renderHeight", BVVSettings.renderHeight);
+			}
+			
+			nTempInt = ditherWidthsList.getSelectedIndex()+1;
+			if(BVVSettings.ditherWidth != nTempInt)
+			{
+				BVVSettings.ditherWidth = nTempInt;
+				bRestartBVV = true;
+				Prefs.set("BVB.ditherWidth", BVVSettings.ditherWidth);
+			}
+			
+			nTempInt = slNumDitherSamples.getValue();
+			if(BVVSettings.numDitherSamples != nTempInt)
+			{
+				BVVSettings.numDitherSamples = nTempInt;
+				bRestartBVV = true;
+				Prefs.set("BVB.numDitherSamples", BVVSettings.numDitherSamples);
+			}
+			
+			nTempInt = ((Integer)cacheBlockSizeM.getValue()).intValue();
+			if(BVVSettings.cacheBlockSize != nTempInt)
+			{
+				BVVSettings.cacheBlockSize = nTempInt;
+				bRestartBVV = true;
+				Prefs.set("BVB.cacheBlockSize", BVVSettings.cacheBlockSize);
+			}
+			
+			nTempInt = ((Integer)maxCacheSizeInMB.getValue()).intValue();
+			if(BVVSettings.maxCacheSizeInMB != nTempInt)
+			{
+				BVVSettings.maxCacheSizeInMB = nTempInt;
+				bRestartBVV = true;
+				Prefs.set("BVB.maxCacheSizeInMB", BVVSettings.maxCacheSizeInMB);
+			}
+			
+			if(!bRestartBVV)
+			{
+				bvb.bvvViewer.setCamParams( BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar );
+				bvb.repaintBVV();
+			}
+			else
+			{
+				bvb.restartBVV();
+			}
 		}
 	}
 
@@ -260,12 +323,12 @@ public class BVBActions
 //		}
 //		catch ( InterruptedException exc )
 //		{
-//			// TODO Auto-generated catch block
+//			// TO DO Auto-generated catch block
 //			exc.printStackTrace();
 //		}
 //		catch ( ExecutionException exc )
 //		{
-//			// TODO Auto-generated catch block
+//			// TO DO Auto-generated catch block
 //			exc.printStackTrace();
 //		} 
 //		// wait for command to complete
