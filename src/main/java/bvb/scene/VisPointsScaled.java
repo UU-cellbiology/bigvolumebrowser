@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-
 import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -23,10 +22,9 @@ import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
 
-
 import static com.jogamp.opengl.GL.GL_FLOAT;
 
-
+/** example class that draws point of specific shape with different filling **/
 public class VisPointsScaled
 {
 
@@ -60,7 +58,7 @@ public class VisPointsScaled
 	
 	
 	/** constructor with multiple vertices **/
-	public VisPointsScaled(final ArrayList< RealPoint > points, final float fPointSize_, final Color color_in ,final int nRenderType_, final int nShape_)
+	public VisPointsScaled(final ArrayList< RealPoint > points, final float fPointSize_, final Color color_in, final int nShape_, final int nRenderType_)
 	{
 		this();
 		
@@ -160,8 +158,7 @@ public class VisPointsScaled
 			}
 		}
 		
-		bLocked = true;
-		
+		bLocked = true;		
 
 		// ..:: VERTEX BUFFER ::..
 

@@ -35,10 +35,10 @@ import spimdata.util.Displaysettings;
 
 // modified version of
 // https://github.com/BIOP/bigdataviewer-image-loaders/blob/5d3a3d56da3e73052e34d64f301a0e3e8f9803ac/src/main/java/ch/epfl/biop/bdv/img/imageplus/ImagePlusToSpimData.java
-public class ImagePlusToSpimDataBVV {
+public class ImagePlusToSpimDataBvv {
 
 	static final private Logger logger = LoggerFactory.getLogger(
-			ImagePlusToSpimDataBVV.class);
+			ImagePlusToSpimDataBvv.class);
 
 	// Function stolen and modified from bigdataviewer_fiji
 	public static AbstractSpimData<?> getSpimData(ImagePlus imp)
@@ -51,7 +51,7 @@ public class ImagePlusToSpimDataBVV {
 				break;
 			default:
 				String message = "Error in image " + imp.getShortTitle() +
-						": Only 8, 16 are supported currently!";
+						": Only 8 and 16 are supported currently!";
 				logger.error(message);
 				throw new UnsupportedOperationException(message);
 		}
@@ -74,12 +74,12 @@ public class ImagePlusToSpimDataBVV {
 		{
 			switch (imp.getType()) {
 				case ImagePlus.GRAY8:
-					imgLoader = ImagePlusImageLoaderBVV.createUnsignedByteInstance(imp,
+					imgLoader = ImagePlusImageLoaderBvv.createUnsignedByteInstance(imp,
 							originTimePoint);
 					break;
 				default:
 					//ImagePlus.GRAY16:
-					imgLoader = ImagePlusImageLoaderBVV.createUnsignedShortInstance(imp,
+					imgLoader = ImagePlusImageLoaderBvv.createUnsignedShortInstance(imp,
 							originTimePoint);
 					break;
 			}

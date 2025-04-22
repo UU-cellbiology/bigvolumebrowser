@@ -38,7 +38,7 @@ import bvb.utils.Misc;
 import ij.IJ;
 import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
 
-public class SourceToViewerSetupImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedShortType, VolatileUnsignedShortType > implements ViewerImgLoader
+public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedShortType, VolatileUnsignedShortType > implements ViewerImgLoader
 {
 	final Source<?> src;
 	final int numScales;
@@ -53,7 +53,7 @@ public class SourceToViewerSetupImgLoaderBvv extends AbstractViewerSetupImgLoade
 	
 	private final CacheArrayLoader<VolatileShortArray> loader;
 	
-	public SourceToViewerSetupImgLoaderBvv(final Source<?> source_)
+	public SourceImgLoaderBvv(final Source<?> source_)
 	{
 		super( new UnsignedShortType(), new VolatileUnsignedShortType() );
 		src = source_;
@@ -114,19 +114,6 @@ public class SourceToViewerSetupImgLoaderBvv extends AbstractViewerSetupImgLoade
 		return mipmapTransforms;
 	}
 	
-	@SuppressWarnings( "unchecked" )
-	@Override
-	public RandomAccessibleInterval< UnsignedShortType > getImage( int timepointId, int level, ImgLoaderHint... hints )
-	{
-		final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
-		
-		if(!bFloat)
-		{
-			return convertIntegerRAIToShort(raiXYZ);
-		}
-		return convertRealRAIToShort(( RandomAccessibleInterval< FloatType > ) raiXYZ, dMin, dMax);
-			
-	}
 	
 	protected <T extends NativeType<T>> VolatileCachedCellImg<T, VolatileShortArray>
 	prepareCachedImage(final int timepointId, final int level, final int setupId,
@@ -143,6 +130,20 @@ public class SourceToViewerSetupImgLoaderBvv extends AbstractViewerSetupImgLoade
 		final CellGrid grid = new CellGrid(dimensions, cellDimensions);
 		return cache.createImg(grid, timepointId, setupId, level, cacheHints,
 				loader, typeCache);
+	}
+	
+	@SuppressWarnings( "unchecked" )
+	@Override
+	public RandomAccessibleInterval< UnsignedShortType > getImage( int timepointId, int level, ImgLoaderHint... hints )
+	{
+		final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
+		
+		if(!bFloat)
+		{
+			return convertIntegerRAIToShort(raiXYZ);
+		}
+		return convertRealRAIToShort(( RandomAccessibleInterval< FloatType > ) raiXYZ, dMin, dMax);
+			
 	}
 	
 	@Override

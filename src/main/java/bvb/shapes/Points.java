@@ -11,6 +11,7 @@ import org.joml.Matrix4fc;
 
 import bvb.scene.VisPointsScaled;
 
+/** Example class that uses points shader **/
 
 public class Points implements Shape
 {
@@ -26,7 +27,7 @@ public class Points implements Shape
 	int renderType;
 	int pointShape;
 	
-	public Points(final float pointSize_, final Color pointColor_, final int nRenderType_, final int nShape_)
+	public Points(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
 		renderType = nRenderType_;
@@ -46,7 +47,7 @@ public class Points implements Shape
 	{
 		if(vertexVis == null)
 		{
-			vertexVis = new VisPointsScaled(vertices, pointSize, pointColor,renderType, pointShape);
+			vertexVis = new VisPointsScaled(vertices, pointSize, pointColor, pointShape, renderType);
 		}
 		else
 		{

@@ -4,6 +4,7 @@ package bvb.io;
 import java.io.File;
 import java.io.IOException;
 
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import ch.epfl.biop.bdv.img.OpenersToSpimData;
@@ -42,6 +43,11 @@ public class SpimDataLoader
 		}
 		
 		return spimData;
+	}
+
+	public static AbstractSpimData< ? > loadRAI(RandomAccessibleInterval<?> rai) 
+	{				
+		return RAIToSpimDataBvv.getSpimData( rai );
 	}
 	
 	

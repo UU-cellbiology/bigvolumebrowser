@@ -47,25 +47,25 @@ import java.util.function.Function;
  * @param <A> volatile array access type
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class ImagePlusImageLoaderBVV<T extends NativeType<T>, V extends Volatile<T> & NativeType<V>, A extends DataAccess & VolatileAccess>
+public class ImagePlusImageLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & NativeType<V>, A extends DataAccess & VolatileAccess>
 		implements ViewerImgLoader, TypedBasicImgLoader<T>, CacheControlOverride
 {
 
 
 	public static
-	ImagePlusImageLoaderBVV<UnsignedShortType, VolatileUnsignedShortType, VolatileShortArray>
+	ImagePlusImageLoaderBvv<UnsignedShortType, VolatileUnsignedShortType, VolatileShortArray>
 	createUnsignedShortInstance(final ImagePlus imp, final int offsetTime)
 	{
-		return new ImagePlusImageLoaderBVV<>(imp, array -> new VolatileShortArray(
+		return new ImagePlusImageLoaderBvv<>(imp, array -> new VolatileShortArray(
 				(short[]) array, true), new UnsignedShortType(),
 				new VolatileUnsignedShortType(), offsetTime);
 	}
 
 	public static
-	ImagePlusImageLoaderBVV<UnsignedShortType, VolatileUnsignedShortType, VolatileShortArray>
+	ImagePlusImageLoaderBvv<UnsignedShortType, VolatileUnsignedShortType, VolatileShortArray>
 	createUnsignedByteInstance(final ImagePlus imp, final int offsetTime)
 	{
-		return new ImagePlusImageLoaderBVV<>(imp, array -> mapByte(	(byte[]) array, true), 
+		return new ImagePlusImageLoaderBvv<>(imp, array -> mapByte(	(byte[]) array, true), 
 				new UnsignedShortType(),
 				new VolatileUnsignedShortType(), offsetTime);
 	}
@@ -112,7 +112,7 @@ public class ImagePlusImageLoaderBVV<T extends NativeType<T>, V extends Volatile
 		return timeShift;
 	}
 
-	protected ImagePlusImageLoaderBVV(final ImagePlus imp,
+	protected ImagePlusImageLoaderBvv(final ImagePlus imp,
 								   final Function<Object, A> wrapPixels, final T type, final V volatileType,
 								   final int timeOffset)
 	{
@@ -131,7 +131,7 @@ public class ImagePlusImageLoaderBVV<T extends NativeType<T>, V extends Volatile
 					volatileType, timeOffset));
 	}
 
-	protected ImagePlusImageLoaderBVV(final ImagePlus imp,
+	protected ImagePlusImageLoaderBvv(final ImagePlus imp,
 								   final Function<Object, A> wrapPixels, final T type, final V volatileType)
 	{
 		this(imp, wrapPixels, type, volatileType, 0);

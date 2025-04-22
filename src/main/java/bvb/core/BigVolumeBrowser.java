@@ -22,6 +22,7 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.util.ValuePair;
@@ -54,9 +55,10 @@ import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
-import bvb.io.ImagePlusToSpimDataBVV;
+import bvb.io.ImagePlusToSpimDataBvv;
 import bvb.io.LUTNameFIJI;
-import bvb.io.SourceToSpimDataWrapperBvv;
+import bvb.io.RAIToSpimDataBvv;
+import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.shapes.Shape;
@@ -280,13 +282,19 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src)
 	{
-		final AbstractSpimData<?> spimData = SourceToSpimDataWrapperBvv.spimDataSourceWrap( src );
+		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
+		return addSpimData(spimData);
+	}
+
+	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai)
+	{
+		final AbstractSpimData<?> spimData = RAIToSpimDataBvv.getSpimData( rai );
 		return addSpimData(spimData);
 	}
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
-		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBVV.getSpimData( imp );
+		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBvv.getSpimData( imp );
 		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(),dataTreeModel.getFIJIIcon());
 		spimDataToInfo.put( spimData, info );

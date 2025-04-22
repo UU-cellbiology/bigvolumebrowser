@@ -18,11 +18,10 @@ import mpicbg.spim.data.registration.ViewRegistrations;
 import mpicbg.spim.data.sequence.TimePoint;
 import mpicbg.spim.data.sequence.TimePoints;
 
-public class SourceToSpimDataWrapperBvv
+public class SourceToSpimDataBvv
 {
 	/** wraps UnsignedByte, UnsignedShort, UnsignedLong or Float type source to a cached spimdata 
 	 * (of UnsignedShort type) to display in BVV, otherwise returns null **/
-	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public static AbstractSpimData< ? > spimDataSourceWrap(final Source<?> src_)
 	{		
 		Object type = src_.getSource( 0, 0 ).getType() ;
@@ -32,7 +31,7 @@ public class SourceToSpimDataWrapperBvv
 			System.err.println( "Volume view of image of type " + type + " is currently not supported.");
 			return null;
 		}
-		final SourceToViewerSetupImgLoaderBvv imgLoader = new SourceToViewerSetupImgLoaderBvv(src_);
+		final SourceImgLoaderBvv imgLoader = new SourceImgLoaderBvv(src_);
 		
 		int numTimepoints = 0;
 		
@@ -58,6 +57,6 @@ public class SourceToSpimDataWrapperBvv
 			registrations.add( new ViewRegistration( t, 0, transform ) );
 		}
 		File dummy = null;
-		return new AbstractSpimData( dummy, seq, new ViewRegistrations( registrations) );
+		return new AbstractSpimData<>( dummy, seq, new ViewRegistrations( registrations) );
 	}
 }
