@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.util.ValuePair;
@@ -29,6 +30,7 @@ import net.imglib2.util.ValuePair;
 import org.joml.Matrix4f;
 
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bdv.viewer.TimePointListener;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
@@ -47,6 +49,7 @@ import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
+import bvb.gui.CenterZoomBVV;
 import bvb.gui.SelectedSources;
 import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.BVBSpimDataInfo;
@@ -350,7 +353,13 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		{
 			bvvSourceToSpimData.put( bvvSource, spimData );
 		}
+		
 		updateSceneRender();
+		
+		if(BVBSettings.bFocusOnSourcesOnLoad)
+		{
+			this.focusOnSources( bvvSources );
+		}
 
 		return new ValuePair< >( spimData, bvvSources);
 	}
@@ -423,6 +432,24 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		this.bvbActions.runSettingsCommand();
 	}
+	
+	public void focusOnSources(List< BvvStackSource< ? > > bvvSources)
+	{
+		final ArrayList<SourceAndConverter< ? >> sacList = new ArrayList<>();
+		for (BvvStackSource< ? > bvvS : bvvSources)
+		{
+			for(SourceAndConverter< ? > sac : bvvS.getSources())
+			{
+				sacList.add( sac );
+			}
+		}
+		final FinalRealInterval interval = CenterZoomBVV.getIntervalFromSourcesList(this,sacList);
+		if(interval != null)
+		{
+			CenterZoomBVV.focusAnimateOnInterval(this, interval, 0.95);
+		}
+	}
+	
 	/** restarts BVV. Main purpose is to update rendering parameters. **/
 	public void restartBVV()
 	{

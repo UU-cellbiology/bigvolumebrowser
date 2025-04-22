@@ -18,7 +18,8 @@ public class TabPanelInfo extends JPanel
 					+"&nbsp;<b>C</b> - center the view (zoom out)<br><br>"
 					+"&nbsp;<b>O</b> - toggle render method<br><br>"
 					+"&nbsp;<b>Shift + X/Y/Z</b> - rotate to major plane<br><br>"					
-					+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br></html>";
+					+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
+					+"&nbsp;<b>F10</b> - BVV (canvas) settings<br><br></html>";
 		JLabel jlInfo = new JLabel(shortCutInfo);
 		jlInfo.setVerticalAlignment(SwingConstants.CENTER);
 		jlInfo.setHorizontalAlignment(SwingConstants.CENTER);

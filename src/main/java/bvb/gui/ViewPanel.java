@@ -11,6 +11,7 @@ import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -181,19 +182,28 @@ public class ViewPanel extends JPanel
 		nfAnimationDuration.setIntegersOnly(true);
 		nfAnimationDuration.setText(Integer.toString(BVBSettings.nTransformAnimationDuration));
 		
+		JCheckBox cbZoomLoad = new JCheckBox();
+		cbZoomLoad.setSelected(BVBSettings.bFocusOnSourcesOnLoad);
+		
 		gbc.gridx=0;
 		gbc.gridy=0;	
 		GBCHelper.alighLoose(gbc);
 		
-		pViewSettings.add(new JLabel("Background color: "),gbc);
+		pViewSettings.add(new JLabel("Background color: "), gbc);
 		gbc.gridx++;
-		pViewSettings.add(butCanvasBGColor,gbc);
+		pViewSettings.add(butCanvasBGColor, gbc);
 		
 		gbc.gridx=0;
 		gbc.gridy++;
-		pViewSettings.add(new JLabel("Transform animation duration (ms): "),gbc);
+		pViewSettings.add(new JLabel("Transform animation duration (ms): "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(nfAnimationDuration,gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Focus on loaded sources? "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbZoomLoad, gbc);
 		
 		
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
@@ -201,17 +211,27 @@ public class ViewPanel extends JPanel
 
 		if (reply == JOptionPane.OK_OPTION) 
 		{
+			boolean bRepaintBVV = false;
+			
 			Color tempC;
 			
 			tempC = selectColors.getColor(0);
 			if(tempC != null)
 			{
+				bRepaintBVV = true;
 				setCanvasBGColor(tempC);
 			}
 			
 			BVBSettings.nTransformAnimationDuration = Integer.parseInt(nfAnimationDuration.getText());
 			Prefs.set("BVB.nTransformAnimationDuration",BVBSettings.nTransformAnimationDuration);
-			bvb.repaintBVV();
+			
+			BVBSettings.bFocusOnSourcesOnLoad = cbZoomLoad.isSelected();
+			Prefs.set("BVB.bFocusOnSourcesOnLoad", BVBSettings.bFocusOnSourcesOnLoad);
+			
+			if(bRepaintBVV)
+			{
+				bvb.repaintBVV();
+			}
 		}
 	}
 	

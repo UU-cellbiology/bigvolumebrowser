@@ -18,6 +18,8 @@ public class BVBSettings
 	/** IO default or last folder **/	
 	public static String lastDir = Prefs.get( "BVB.lastDir", "" );
 	
+	public static boolean bFocusOnSourcesOnLoad =  Prefs.get("BVB.bFocusOnSourcesOnLoad", true);
+	
 	public static int nDefaultWidthControlPanel = 400;
 	
 	public static int nDefaultHeightControlPanel = 600;

@@ -10,9 +10,9 @@ public class BVVSettings
 {
 	
 	//parameters that can be changed at runtime
-	static double dCam = Prefs.get("BVB.dCam", 2000.);
-	static double dClipFar = Prefs.get("BVB.dClipFar", 1000.);
-	static double dClipNear = Prefs.get("BVB.dClipNear", 1000.);
+	public static double dCam = Prefs.get("BVB.dCam", 2000.);
+	public static double dClipFar = Prefs.get("BVB.dClipFar", 1000.);
+	public static double dClipNear = Prefs.get("BVB.dClipNear", 1000.);
 	
 	
 	// parameters that require bvv restart, 
