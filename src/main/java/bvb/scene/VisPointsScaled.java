@@ -1,0 +1,264 @@
+package bvb.scene;
+
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+
+import bvb.core.BVVSettings;
+
+import net.imglib2.RealPoint;
+
+import java.awt.Color;
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+
+
+import org.joml.Matrix4fc;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
+
+import bvvpg.core.backend.jogl.JoglGpuContext;
+import bvvpg.core.shadergen.DefaultShader;
+import bvvpg.core.shadergen.Shader;
+import bvvpg.core.shadergen.generate.Segment;
+import bvvpg.core.shadergen.generate.SegmentTemplate;
+
+
+import static com.jogamp.opengl.GL.GL_FLOAT;
+
+
+public class VisPointsScaled
+{
+
+	private final Shader prog;
+
+	private int vao;
+	
+	private Vector4f l_color;
+	
+	private float fPointSize;
+	
+	private int renderType = 0;
+	
+	private int pointShape = 0;
+	
+	float vertices[]; 
+	
+	private int nPointsN;
+	
+	private boolean initialized;
+	
+	volatile boolean bLocked = false;
+	
+	public VisPointsScaled()
+	{
+		final Segment pointVp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
+		prog = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
+
+	}
+	
+	
+	/** constructor with multiple vertices **/
+	public VisPointsScaled(final ArrayList< RealPoint > points, final float fPointSize_, final Color color_in ,final int nRenderType_, final int nShape_)
+	{
+		this();
+		
+		int i,j;
+		
+		fPointSize= fPointSize_;
+		
+		l_color = new Vector4f(color_in.getComponents(null));
+		
+		nPointsN = points.size();
+		
+		renderType = nRenderType_;
+		
+		pointShape = nShape_;
+		
+		vertices = new float [nPointsN*3];//assume 3D
+
+		for (i=0;i<nPointsN; i++)
+		{
+			for (j=0;j<3; j++)
+			{				
+				vertices[i*3+j]=points.get(i).getFloatPosition(j);
+			}			
+		}
+
+	}
+	
+	public void setVertices( ArrayList< RealPoint > points)
+	{
+		int i,j;	
+		
+		nPointsN = points.size();
+		
+		if(nPointsN == 1)
+			vertices = new float [nPointsN*3]; //assume 3D
+		else
+			vertices = new float [(nPointsN+1)*3]; //assume 3D
+
+		
+		for (i=0;i<nPointsN; i++)
+		{
+			for (j=0;j<3; j++)
+			{
+				vertices[i*3+j] = points.get(i).getFloatPosition(j);
+			}			
+		}
+		
+		if(nPointsN>1)
+		{
+			i = nPointsN-1;
+			for (j=0;j<3; j++)
+			{
+				vertices[(i+1)*3+j] = points.get(i).getFloatPosition(j);
+			}			
+		}
+		
+		initialized = false;
+	}
+	
+	public void setColor(Color pointColor) 
+	{
+		
+		l_color = new Vector4f(pointColor.getComponents(null));
+		
+	}
+	
+	public void setSize(float fPointSize_)
+	{
+		fPointSize = fPointSize_;
+	}
+	
+	/** 0 - filled, 1 - outline **/
+	public void setRenderType(int nRenderType_)
+	{
+		renderType = nRenderType_;
+		
+	}
+	/** 0 - round, 1 - square **/
+	public void setShape(int nShape_)
+	{
+		pointShape = nShape_;
+		
+	}
+
+	private void init( GL3 gl )
+	{
+		
+		while (bLocked)
+		{
+			try
+			{
+				Thread.sleep( 10 );
+			}
+			catch ( InterruptedException exc )
+			{
+				exc.printStackTrace();
+			}
+		}
+		
+		bLocked = true;
+		
+
+		// ..:: VERTEX BUFFER ::..
+
+		final int[] tmp = new int[ 2 ];
+		gl.glGenBuffers( 1, tmp, 0 );
+		final int vbo = tmp[ 0 ];
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbo );
+		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+
+
+		// ..:: VERTEX ARRAY OBJECT ::..
+
+		gl.glGenVertexArrays( 1, tmp, 0 );
+		vao = tmp[ 0 ];
+		gl.glBindVertexArray( vao );
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbo );
+		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 0 );
+		gl.glBindVertexArray( 0 );
+		
+		initialized = true;
+		bLocked  = false;
+
+	}
+
+	public void draw(final GL3 gl, final Matrix4fc pvm, final int [] screen_size )
+	{
+		
+		if (fPointSize < 0.0001)
+			return;
+		if ( !initialized )
+			init( gl );
+		
+		while (bLocked)
+		{
+			try
+			{
+				Thread.sleep( 10 );
+			}
+			catch ( InterruptedException exc )
+			{
+				exc.printStackTrace();
+			}
+		}
+		
+		Vector2f window_sizef;
+		Vector2f ellipse_axes;
+
+		JoglGpuContext context = JoglGpuContext.get( gl );
+		
+		//scale disk with viewport transform
+		window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
+		
+		//The whole story behind the code below is that
+		//the size of the OpenGL sprite corresponding to a point is
+		//changing depending on the actual window size and the render window size parameters.
+		//Basically it scales with coefficient screen_size[0]/renderParams.nRenderW (in each dimension).
+		//To compensate for that, we have to enlarge (shrink) effective point size
+		//(it is done in the vertex shader, we enabled gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE))
+		//and then render the point as nice circle by painting it as an ellipse (in the fragment shader)
+		//that will scale into the circle %)
+		//
+		
+		ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
+		
+		//scale of viewport vs render
+		//we enlarge/shrink to minimum dimension scale
+		//and in the ellipse the other dimension will be cropped
+		//(maybe this part can be moved to GPU? seems not critical right now)
+		
+		float fPointScale = Math.min(ellipse_axes.x,ellipse_axes.y);
+		ellipse_axes.mul(1.0f/fPointScale);
+		
+		//actually it is not true ellipse axes,
+		//but rather inverse squared values
+		ellipse_axes.x = ellipse_axes.x * ellipse_axes.x;
+		ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
+				
+		prog.getUniformMatrix4f( "pvm" ).set( pvm );
+		prog.getUniform1f( "pointSizeReal" ).set( fPointSize );
+		prog.getUniform1f( "pointScale" ).set( fPointScale );
+		prog.getUniform4f( "colorin" ).set(l_color);
+		prog.getUniform2f( "windowSize" ).set(window_sizef);
+		prog.getUniform2f( "ellipseAxes" ).set(ellipse_axes);
+		prog.getUniform1i( "renderType" ).set(renderType);
+		prog.getUniform1i( "pointShape" ).set( pointShape );
+		//progRound.getUniform1i("clipactive").set(0);
+		//progRound.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
+		//progRound.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
+
+		prog.setUniforms( context );
+		
+		prog.use( context );
+		gl.glBindVertexArray( vao );
+		gl.glDrawArrays( GL.GL_POINTS, 0, nPointsN);
+		gl.glBindVertexArray( 0 );
+	}
+
+}

@@ -59,7 +59,7 @@ import bvb.io.LUTNameFIJI;
 import bvb.io.SourceToSpimDataWrapperBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
-
+import bvb.shapes.Shape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 
@@ -108,6 +108,11 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	public DataTreeModel dataTreeModel = new DataTreeModel();
 	
 	final WindowAdapter closeWA;
+	
+	
+	//SHAPES FOR NOW
+	
+	final public ArrayList<Shape> shapes = new ArrayList<>();
 	
 	//DEBUG VISUALIZATION
 	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
@@ -406,13 +411,35 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		volumeBoxes.draw( gl, pvm, vm, screen_size );
 		//draw clip boxes
 		clipBoxes.draw( gl, pvm, vm, screen_size );
+
+		//to be able to change point size in shader
+		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		
+		for(Shape shape : shapes)
+		{
+			shape.draw( gl, pvm, vm, screen_size );
+		}
+
+		//DEBUG
 		for(VisPolyLineAA line:helpLines)
 		{
 			line.draw( gl, pvm );
 		}
+		
 		for(VolumeBox box:helpBoxes)
+		{
 			box.draw( gl, pvm, vm, screen_size );
+		}
+	}
+	
+	public void addShape(final Shape shape)
+	{
+		shapes.add( shape );
+	}
+	
+	public void removeShape(final Shape shape)
+	{
+		shapes.remove( shape );
 	}
 	
 	public void updateSceneRender()
