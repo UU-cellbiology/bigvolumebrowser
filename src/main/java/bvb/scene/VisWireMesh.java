@@ -182,12 +182,22 @@ public class VisWireMesh {
 	private boolean initGPUBufferMesh( GL3 gl )
 	{
 		
-		final int[] tmp = new int[ 3 ];
+		final int[] tmp = new int[ 4 ];
+		final float [] barycenter = new float [mesh.triangles().size()*9];
 		
-		gl.glGenBuffers( 3, tmp, 0 );
+		for(int i=0; i<mesh.triangles().size(); i++)
+		{
+			barycenter[i*9] = 1.0f;
+			barycenter[i*9+4] = 1.0f;
+			barycenter[i*9+8] = 1.0f;
+		}
+		
+		
+		gl.glGenBuffers( 4, tmp, 0 );
 		final int meshPosVbo = tmp[ 0 ];
 		final int meshNormalVbo = tmp[ 1 ];
-		final int meshEbo = tmp[ 2 ];
+		final int meshBaryVbo = tmp[ 2 ];
+		final int meshEbo = tmp[ 3 ];
 		
 		if(mesh==null)
 			return false;
@@ -206,6 +216,10 @@ public class VisWireMesh {
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, normals.limit() * Float.BYTES, normals, GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
+		gl.glBufferData( GL.GL_ARRAY_BUFFER, barycenter.length * Float.BYTES, FloatBuffer.wrap( barycenter ), GL.GL_STATIC_DRAW );
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 
 		final IntBuffer indices = mesh.triangles().indices();
 		indices.rewind();
@@ -222,6 +236,10 @@ public class VisWireMesh {
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
 		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
+
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
+		gl.glVertexAttribPointer( 2, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 2 );
 		
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
 		
@@ -230,7 +248,8 @@ public class VisWireMesh {
 		nMeshTrianglesSize = mesh.triangles().size();	
 		System.out.println(nMeshTrianglesSize*3);
 		System.out.println(mesh.vertices().size());
-		System.out.println(mesh.triangles().indices().capacity());
+		System.out.println(mesh.vertices().normals().limit());
+		System.out.println(mesh.triangles().indices().limit());
 
 		initialized = true;
 

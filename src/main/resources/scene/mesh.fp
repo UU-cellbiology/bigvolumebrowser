@@ -5,6 +5,7 @@ uniform int surfaceRender;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 posW;
+in vec3 bary;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
 uniform int clipactive;
@@ -66,8 +67,20 @@ void main()
 			//plain
 			if(surfaceRender==0)
 			{
-			
-				fragColor = colorin;
+  				//vec3 l = 1.0 - 2.0 * abs(mod(abs(posW), 1.0) -0.5);
+  				vec3 l = abs(mod(abs(posW), 5.0) -2.5);
+				//float d = min(min(bary.x, bary.y), bary.z);
+				float d = min(min(l.x, l.y), l.z);
+				if(d<0.1)
+				{
+					fragColor = colorin;
+				}
+				else
+				{
+				 fragColor = vec4(0.0,0.0,0.0,0.0);
+				 gl_FragDepth = 1.0;
+				}
+				//fragColor = colorin;
 			}	
 			else
 			{
