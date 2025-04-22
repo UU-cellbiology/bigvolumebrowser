@@ -16,6 +16,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GL3;
 
 
@@ -56,7 +57,7 @@ public class VisWireMesh {
 	
 	public static final int SURFACE_PLAIN=0, SURFACE_SHADE=1, SURFACE_SHINY=2, SURFACE_SILHOUETTE=3; 
 	
-	int surfaceRender = SURFACE_SILHOUETTE;
+	int surfaceRender = SURFACE_PLAIN;
 	
 	public static final int silhouette_TRANSPARENT=0, silhouette_CULLED=1; 
 	
@@ -182,6 +183,7 @@ public class VisWireMesh {
 	{
 		
 		final int[] tmp = new int[ 3 ];
+		
 		gl.glGenBuffers( 3, tmp, 0 );
 		final int meshPosVbo = tmp[ 0 ];
 		final int meshNormalVbo = tmp[ 1 ];
@@ -220,10 +222,16 @@ public class VisWireMesh {
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
 		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
+		
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
+		
 		gl.glBindVertexArray( 0 );
 		
-		nMeshTrianglesSize = mesh.triangles().size();		
+		nMeshTrianglesSize = mesh.triangles().size();	
+		System.out.println(nMeshTrianglesSize*3);
+		System.out.println(mesh.vertices().size());
+		System.out.println(mesh.triangles().indices().capacity());
+
 		initialized = true;
 
 		return true; 
@@ -283,8 +291,7 @@ public class VisWireMesh {
 				}
 
 				//gl.glEnable(GL.GL_BLEND);
-				//gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA); 
-				
+				//gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
 				gl.glBindVertexArray( vao );			
 				gl.glDrawElements( GL_TRIANGLES, ( int ) nMeshTrianglesSize * 3, GL_UNSIGNED_INT, 0 );
 				gl.glBindVertexArray( 0 );
@@ -303,10 +310,14 @@ public class VisWireMesh {
 				gl.glBindVertexArray( vao );
 				//gl.glDrawArrays( GL.GL_TRIANGLE_STRIP, 0, nTotVert);
 				gl.glLineWidth(1.0f);
-				//gl.glPolygonMode( GL.GL_FRONT_AND_BACK, GL.GL_LINE_STRIP );//oly
+				gl.glPolygonMode( GL.GL_FRONT_AND_BACK, GL.GL_LINE_STRIP );//oly
+//				for(int i =0; i<mesh.triangles().size();i++)
+//				{
+//					gl.glDrawArrays(  GL.GL_LINE_STRIP, i*3,i*3+1 );
+//				}
 				//gl.glDrawArrays(  GL.GL_LINE_STRIP, 0, 200);
 				//gl.glDrawArrays(  GL.GL_POINTS, 0, mesh.vertices().size());
-				gl.glDrawElements( GL.GL_LINE_STRIP, ( int ) 10 * 3, GL_UNSIGNED_INT, 0 );
+				gl.glDrawElements( GL.GL_LINE_LOOP, ( int ) 2 * 3, GL_UNSIGNED_INT, 0 );
 				gl.glBindVertexArray( 0 );	
 				
 				
