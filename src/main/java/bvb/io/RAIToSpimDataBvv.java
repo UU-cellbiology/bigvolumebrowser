@@ -24,7 +24,7 @@ import mpicbg.spim.data.sequence.TimePoints;
 public class RAIToSpimDataBvv
 {
 	/** very limited and simple loader for now.
-	 * Expects RAI dimensions >= 3 in the format of XYZTC **/
+	 * Expects RAI dimensions equal or larger than 3 in the format of XYZTC **/
 	public static AbstractSpimData<?> getSpimData(final RandomAccessibleInterval<?> rai)
 	{
 		
