@@ -27,7 +27,7 @@ public class ViewPanel extends JPanel
 {
 	
 	final BigVolumeBrowser bvb;
-	JToggleButton butOrigin;
+//	JToggleButton butOrigin;
 	JToggleButton butVBox;
 	JButton butProjType;
 	JButton butFullScreen;
@@ -45,15 +45,15 @@ public class ViewPanel extends JPanel
 		//this.setBorder(new PanelTitle(" View "));
 		
 		//ORIGIN
-		URL icon_path = this.getClass().getResource("/icons/orig.png");
-	    ImageIcon tabIcon = new ImageIcon(icon_path);
-	    butOrigin = new JToggleButton(tabIcon);
-	    //butOrigin.setSelected(btdata.bShowOrigin);
-	    butOrigin.setToolTipText("Show XYZ axes");
+//		URL icon_path = this.getClass().getResource("/icons/orig.png");
+//	    ImageIcon tabIcon = new ImageIcon(icon_path);
+//	    butOrigin = new JToggleButton(tabIcon);
+//	    //butOrigin.setSelected(btdata.bShowOrigin);
+//	    butOrigin.setToolTipText("Show XYZ axes");
 	    
 	    //BOX AROUND
-		icon_path = this.getClass().getResource("/icons/boxvolume.png");
-	    tabIcon = new ImageIcon(icon_path);
+		URL icon_path = this.getClass().getResource("/icons/boxvolume.png");
+		ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butVBox = new JToggleButton(tabIcon);
 	    //butVBox.setSelected(btdata.bVolumeBox);
 	    butVBox.setToolTipText("Volume Box");
@@ -140,9 +140,9 @@ public class ViewPanel extends JPanel
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-		this.add(butOrigin,gbc);
-		
-		gbc.gridx++;	    
+//		this.add(butOrigin,gbc);
+//		
+//		gbc.gridx++;	    
 		this.add(butVBox,gbc);
 		
 		gbc.gridx++;	    

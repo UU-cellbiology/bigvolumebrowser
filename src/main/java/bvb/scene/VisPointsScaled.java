@@ -25,9 +25,9 @@ import bvvpg.core.shadergen.generate.SegmentTemplate;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 
 /** example class that draws point of specific shape with different filling **/
+
 public class VisPointsScaled
 {
-
 	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1; 
 
 	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 

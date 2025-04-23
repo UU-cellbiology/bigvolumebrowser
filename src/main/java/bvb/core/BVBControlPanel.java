@@ -27,7 +27,7 @@ public class BVBControlPanel extends JPanel
 		
 	public JFrame cpFrame;
 	
-	JTabbedPane tabPane;
+	public JTabbedPane tabPane;
 
 	final SelectedSources selectedSources;
 	
@@ -68,7 +68,7 @@ public class BVBControlPanel extends JPanel
 		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
 		
 	    tabPane.setSize(350, 300);
-	    tabPane.setSelectedIndex(1);
+	    tabPane.setSelectedIndex(0);
 	    
 	    
 	    final GridBagConstraints gbc = new GridBagConstraints();

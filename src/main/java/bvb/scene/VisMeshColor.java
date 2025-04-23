@@ -30,9 +30,10 @@ import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 
-public class VisMesh 
-{	
+/** example class showing different ways to render a mesh**/
 
+public class VisMeshColor 
+{	
 	private Shader progPoints;
 	
 	private Shader progMesh;
@@ -72,7 +73,7 @@ public class VisMesh
 	volatile boolean bLocked = false;
 	
 
-	public VisMesh()
+	public VisMeshColor()
 	{
 		initShader();
 	}
@@ -83,12 +84,12 @@ public class VisMesh
 		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 				
-		final Segment meshVp = new SegmentTemplate( VisMesh.class, "/scene/mesh.vp" ).instantiate();
-		final Segment meshFp = new SegmentTemplate( VisMesh.class, "/scene/mesh.fp" ).instantiate();
+		final Segment meshVp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh.vp" ).instantiate();
+		final Segment meshFp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh.fp" ).instantiate();
 		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	
-	public VisMesh(final Mesh meshin)
+	public VisMeshColor(final Mesh meshin)
 	{
 		this();
 		setMesh(meshin);

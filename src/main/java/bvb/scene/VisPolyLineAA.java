@@ -28,7 +28,6 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 public class VisPolyLineAA
 {
-
 	private Shader prog;
 
 	private int vao;

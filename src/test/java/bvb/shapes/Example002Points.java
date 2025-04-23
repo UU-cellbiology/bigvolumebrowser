@@ -12,7 +12,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisPointsScaled;
 import ij.ImageJ;
 
-public class Example001Points
+public class Example002Points
 {
 	public static void main( final String[] args )
 	{

@@ -14,14 +14,14 @@ import net.imglib2.mesh.io.stl.STLMeshIO;
 import org.apache.commons.io.FilenameUtils;
 import org.joml.Matrix4fc;
 
-import bvb.scene.VisMesh;
+import bvb.scene.VisMeshColor;
 
-public class MeshExample implements Shape
+public class MeshColorExample implements Shape
 {
 	
-	VisMesh meshVis = null;
+	VisMeshColor meshVis = null;
 	
-	public MeshExample(String filename)
+	public MeshColorExample(String filename)
 	{
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile(filename);
@@ -30,7 +30,7 @@ public class MeshExample implements Shape
 		
 		if(nmesh != null)
 		{			
-			meshVis = new VisMesh(nmesh);
+			meshVis = new VisMeshColor(nmesh);
 		}
 		else
 		{
@@ -38,11 +38,11 @@ public class MeshExample implements Shape
 		}
 	}
 	
-	public MeshExample(final Mesh nmesh)
+	public MeshColorExample(final Mesh nmesh)
 	{
 		if(nmesh != null)
 		{
-			meshVis = new VisMesh(nmesh);
+			meshVis = new VisMeshColor(nmesh);
 		}
 	}
 	
@@ -50,7 +50,7 @@ public class MeshExample implements Shape
 	{
 		if(meshVis != null )
 		{
-			meshVis.setRenderType( VisMesh.POINTS );
+			meshVis.setRenderType( VisMeshColor.POINTS );
 			meshVis.setPointsSize( fPointsSize_ );
 		}
 	}
@@ -59,7 +59,7 @@ public class MeshExample implements Shape
 	{
 		if(meshVis != null )
 		{
-			meshVis.setRenderType( VisMesh.MESH );
+			meshVis.setRenderType( VisMeshColor.MESH );
 			meshVis.setSurfaceRenderType( nSurfaceRenderType );
 		}
 	}
@@ -68,7 +68,7 @@ public class MeshExample implements Shape
 	{
 		if(meshVis != null )
 		{
-			meshVis.setRenderType( VisMesh.MESH );
+			meshVis.setRenderType( VisMeshColor.MESH );
 			meshVis.setSurfaceGridType( nSurfaceGridType );
 		}
 	}
