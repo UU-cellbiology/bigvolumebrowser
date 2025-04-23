@@ -38,7 +38,7 @@ public class MeshExample implements Shape
 		}
 	}
 	
-	public MeshExample(Mesh nmesh)
+	public MeshExample(final Mesh nmesh)
 	{
 		if(nmesh != null)
 		{
@@ -46,7 +46,7 @@ public class MeshExample implements Shape
 		}
 	}
 	
-	public void setPointsRender(float fPointsSize_)
+	public void setPointsRender(final float fPointsSize_)
 	{
 		if(meshVis != null )
 		{
@@ -55,12 +55,28 @@ public class MeshExample implements Shape
 		}
 	}
 	
-	public void setSurfaceRender(int nSurfaceRenderType)
+	public void setSurfaceRender(final int nSurfaceRenderType)
 	{
 		if(meshVis != null )
 		{
 			meshVis.setRenderType( VisMesh.MESH );
 			meshVis.setSurfaceRenderType( nSurfaceRenderType );
+		}
+	}
+	
+	public void setSurfaceGrid(final int nSurfaceGridType)
+	{
+		if(meshVis != null )
+		{
+			meshVis.setRenderType( VisMesh.MESH );
+			meshVis.setSurfaceGridType( nSurfaceGridType );
+		}
+	}
+	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
+	{
+		if(meshVis != null )
+		{
+			meshVis.setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
 		}
 	}
 	

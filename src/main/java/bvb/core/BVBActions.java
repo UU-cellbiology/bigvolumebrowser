@@ -54,7 +54,8 @@ public class BVBActions
 	/** install smoother rotation **/
 	void installBehaviors()
 	{
-		final BvvHandle handle = bvb.bvv.getBvvHandle();
+		final BvvHandle handle = bvb.bvvHandle;
+		
 		//change drag rotation for navigation "3D Viewer" style
 		final Rotate3DViewerStyle dragRotate = new Rotate3DViewerStyle( 0.75, handle);
 		final Rotate3DViewerStyle dragRotateFast = new Rotate3DViewerStyle( 2.0, handle);
@@ -68,6 +69,7 @@ public class BVBActions
 	
 	void installActions()
 	{
+		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
@@ -82,6 +84,11 @@ public class BVBActions
 	public InputMap getInputMap()
 	{
 		return actions.getInputMap();
+	}
+	
+	void dummy() 
+	{
+		
 	}
 
 	void runSettingsCommand()

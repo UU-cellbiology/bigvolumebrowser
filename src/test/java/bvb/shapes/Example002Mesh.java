@@ -30,7 +30,7 @@ public class Example002Mesh
 		
 		//render with points
 		meshBunny.setPointsRender( 0.3f );
-		//meshBunny.setColor( Color.CYAN );
+		meshBunny.setColor( Color.CYAN );
 		
 		//now load mesh separately
 		Mesh bunny = MeshExample.loadMeshFromFile( fMeshFilename );
@@ -38,15 +38,38 @@ public class Example002Mesh
 		RealInterval bunnyInt = Meshes.boundingBox( bunny );
 		testBVB.addRAI(RAIdummy.dummyRAI(bunnyInt));
 		meshBunny.setColor( Color.CYAN );
-		testBVB.addShape( meshBunny );
+		testBVB.addShape( meshBunny );	
 		
-		
+
 
 		final double displacementX = 1.1*(bunnyInt.realMax( 0 )-bunnyInt.realMin( 0 ));
 		final double displacementY = -1.3*(bunnyInt.realMax( 1 )-bunnyInt.realMin( 1 ));
 		
+		//show different grid surface renders
+		int [] arrSurfaceGrid = new int [] {VisMesh.GRID_WIRE,  
+				VisMesh.GRID_CARTESIAN};
+		
+		for(int i=0;i<2;i++)
+		{		
+			//translate along X and add a copy
+			Meshes.translate( bunny, new double[] {displacementX,0,0} );
+			
+			meshBunny = new MeshExample(bunny);
+			testBVB.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
+			meshBunny.setSurfaceRender( VisMesh.SURFACE_SHADE);
+			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
+			if(i==1)
+			{
+				meshBunny.setCartesianGrid( 2.0f, 0.1f );
+			}
+			meshBunny.setColor( Color.CYAN );
+			testBVB.addShape( meshBunny );		
+		}
+		
+		
+		
 		//translate along X and add a copy
-		Meshes.translate( bunny, new double[] {-displacementX, displacementY,0} );
+		Meshes.translate( bunny, new double[] {-displacementX*3.0, displacementY,0} );
 		
 		//show different surface renders
 		int [] arrSurfaceRender = new int [] {VisMesh.SURFACE_SHADE,  
@@ -61,6 +84,7 @@ public class Example002Mesh
 			testBVB.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			
 			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
+			meshBunny.setSurfaceGrid( VisMesh.GRID_FILLED);
 			meshBunny.setColor( Color.CYAN );
 			testBVB.addShape( meshBunny );		
 		}

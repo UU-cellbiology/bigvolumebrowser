@@ -11,6 +11,9 @@ uniform vec3 clipmax;
 uniform int clipactive;
 uniform float silDecay;
 uniform int silType;
+uniform int gridType;
+uniform float cartesianGridStep;
+uniform float cartesianFraction;
 
 //const vec3 ObjectColor = vec3(1, 1, 1);
 
@@ -39,6 +42,43 @@ vec3 specular(vec3 norm, vec3 viewDir, vec3 lightDir, vec3 lightColor, float shi
 	return specularStrength * spec * lightColor;
 }
 
+vec4 getGridColor(vec4 colorInp)
+{
+		
+	//barycentric
+	if(gridType == 1)
+	{
+		float d = min(min(bary.x, bary.y), bary.z);
+		if(d<0.05)
+		{
+			return colorInp;
+		}
+		else
+		{
+			discard;		
+		}
+	}
+	
+	//cartesian grid
+	if(gridType == 2)
+	{	
+		vec3 l = abs(mod(abs(posW), cartesianGridStep) - 0.5*cartesianGridStep);
+		//float d = min(min(l.x, l.y), l.z);
+		float d = min(l.x, l.y);
+		if(d < cartesianFraction)
+		{
+			return colorInp;
+		}
+		else
+		{
+			discard;
+			//return vec4(1.0,1.0,1.0,1.0);
+		}
+	}
+	
+	//no grid
+	return colorInp;
+}
 
 void main()
 {
@@ -68,39 +108,16 @@ void main()
 			//plain
 			if(surfaceRender==0)
 			{
-  				//barycentric grid
-				float d = min(min(bary.x, bary.y), bary.z);
-				if(d<0.05)
-				{
-					fragColor = colorin;
-				}
-				else
-				{
-					fragColor = vec4(0.0,0.0,0.0,0.0);
-					gl_FragDepth = 1.0;
-				}
+				fragColor = getGridColor(colorin);
+			}
 				
-				//cartesian grid	
-//  				vec3 l = abs(mod(abs(posW), 5.0) -2.5);
-//				float d = min(min(l.x, l.y), l.z);
-//				if(d<0.1)
-//				{
-//					fragColor = colorin;
-//				}
-//				else
-//				{
-//					fragColor = vec4(0.0,0.0,0.0,0.0);
-//					gl_FragDepth = 1.0;
-//				}
-	
-				//fragColor = colorin;
-			}	
-			else
-			{
 			//shaded/shiny
+			else
+			{			
 				vec3 diff = diffuse(norm,  lightDir1, lightColor1);
 				vec3 spec = specular( norm, viewDir, lightDir1, lightColor1, 16.0, 1.0 )*(surfaceRender-1);
 				fragColor = vec4((ambient + diff ) * colorin.rgb+spec, colorin.a);
+				fragColor = getGridColor(fragColor);
 			}	
 		}
 		//silhouette surface
@@ -111,6 +128,8 @@ void main()
 			{
 				//all transparent
 				fragColor = vec4(colorin.rgb, colorin.a*alphax);
+				fragColor = getGridColor(fragColor);
+				
 				gl_FragDepth = 1.0;
 			}
 			else
@@ -119,7 +138,10 @@ void main()
 				if(dot(norm,viewDir)>0)
 					discard;
 				fragColor = vec4(colorin.rgb*alphax, colorin.a);	
+				fragColor = getGridColor(fragColor);				
 			}
 		}
 		
 }
+
+

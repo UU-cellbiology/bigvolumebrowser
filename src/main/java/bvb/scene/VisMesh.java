@@ -47,7 +47,7 @@ public class VisMesh
 
 	public static final int MESH = 0, POINTS = 1;	
 	
-	public int renderType = POINTS;
+	public int renderType = MESH;
 	
 	public float fPointSize = 0.1f;
 	
@@ -60,6 +60,14 @@ public class VisMesh
 	int silhouetteRender = silhouette_TRANSPARENT;	
 
 	float silhouetteDecay = 2.0f;
+	
+	public static final int GRID_FILLED = 0, GRID_WIRE = 1, GRID_CARTESIAN = 2;
+	
+	int gridType = GRID_FILLED;
+	
+	float cartesianGridStep = 2.0f;
+	
+	float cartesianFraction = 0.2f;
 	
 	volatile boolean bLocked = false;
 	
@@ -87,22 +95,33 @@ public class VisMesh
 		
 	}
 	
-	public void setColor(Color color_in)
+	public void setColor(final Color color_in)
 	{
 		l_color = new Vector4f(color_in.getComponents(null));
 	}
 	
-	public void setRenderType(int nRenderType_)
+	public void setRenderType(final int nRenderType_)
 	{
 		renderType = nRenderType_;		
 	}
 	
-	public void setSurfaceRenderType(int surfaceRender_)
+	public void setSurfaceRenderType(final int surfaceRender_)
 	{
 		surfaceRender = surfaceRender_;		
 	}
 	
-	public void setPointsSize(float fPointSize_)
+	public void setSurfaceGridType(final int gridType_)
+	{
+		gridType = gridType_;		
+	}
+	
+	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
+	{
+		cartesianGridStep = cartesianGridStep_;		
+		cartesianFraction = cartesianFraction_;
+	}
+	
+	public void setPointsSize(final float fPointSize_)
 	{
 		fPointSize = fPointSize_;
 	}
@@ -114,24 +133,9 @@ public class VisMesh
 	
 	public void setMesh(final Mesh mesh)
 	{
-//		if(mesh instanceof BufferMesh)
-//		{
-//			BufferMesh bmesh = (BufferMesh) mesh;
-//			if(bmesh.vertices().normals().limit()==0)
-//			{
-//				this.mesh = new BufferMesh( bmesh.vertices().size(), bmesh.triangles().size(), true );
-//				Meshes.calculateNormals( bmesh, this.mesh );
-//			}
-//			else
-//			{
-//				this.mesh = bmesh;
-//			}
-//		}
-//		else
-//		{
-			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-			Meshes.calculateNormals( mesh, this.mesh );
-//		}
+		//for now, let's recalculate normals, just in case
+		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
+		Meshes.calculateNormals( mesh, this.mesh );
 	}
 	
 	
@@ -259,11 +263,16 @@ public class VisMesh
 			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
 			progMesh.getUniform4f("colorin").set(l_color);
 			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
-//				progMesh.getUniform1i("clipactive").set(BigTraceData.nClipROI);
-//				progMesh.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
-//				progMesh.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
+			progMesh.getUniform1i("gridType").set(gridType);
+			progMesh.getUniform1f("cartesianGridStep").set(cartesianGridStep);
+			progMesh.getUniform1f("cartesianFraction").set(cartesianFraction);
+			
 			progMesh.getUniform1i("silType").set(silhouetteRender);
 			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
+//			progMesh.getUniform1i("clipactive").set(BigTraceData.nClipROI);
+//			progMesh.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
+//			progMesh.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
+
 			progMesh.setUniforms( context );
 			progMesh.use( context );
 			if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
