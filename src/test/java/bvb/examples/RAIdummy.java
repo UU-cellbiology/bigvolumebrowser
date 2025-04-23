@@ -1,4 +1,4 @@
-package bvb.shapes;
+package bvb.examples;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;

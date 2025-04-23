@@ -1,4 +1,4 @@
-package bvb.shapes;
+package bvb.examples;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisPointsScaled;
+import bvb.shapes.PointsSameExample;
 import ij.ImageJ;
 
 public class Example002Points

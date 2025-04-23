@@ -1,4 +1,4 @@
-package bvb.shapes;
+package bvb.examples;
 
 
 import java.awt.Color;
@@ -9,6 +9,7 @@ import net.imglib2.mesh.Meshes;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshColor;
+import bvb.shapes.MeshColorExample;
 import ij.ImageJ;
 
 public class Example003Mesh
