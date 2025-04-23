@@ -31,6 +31,7 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
+import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.TimePointListener;
@@ -225,6 +226,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		bvbActions = new BVBActions(this);
+		
+		Prefs.showMultibox( BVBSettings.bShowMultiBox);
+		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
 
 	}
 	

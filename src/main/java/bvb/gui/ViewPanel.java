@@ -185,6 +185,14 @@ public class ViewPanel extends JPanel
 		JCheckBox cbZoomLoad = new JCheckBox();
 		cbZoomLoad.setSelected(BVBSettings.bFocusOnSourcesOnLoad);
 		
+		
+		JCheckBox cbShowScaleBar = new JCheckBox();
+		cbShowScaleBar.setSelected(BVBSettings.bShowScaleBar);
+		
+		JCheckBox cbShowMultiBox = new JCheckBox();
+		cbShowMultiBox.setSelected(BVBSettings.bShowMultiBox);
+		
+		
 		gbc.gridx=0;
 		gbc.gridy=0;	
 		GBCHelper.alighLoose(gbc);
@@ -195,13 +203,25 @@ public class ViewPanel extends JPanel
 		
 		gbc.gridx=0;
 		gbc.gridy++;
+		pViewSettings.add(new JLabel("Show scale bar "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbShowScaleBar, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Show MultiBox "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbShowMultiBox, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
 		pViewSettings.add(new JLabel("Transform animation duration (ms): "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(nfAnimationDuration,gbc);
 		
 		gbc.gridx=0;
 		gbc.gridy++;
-		pViewSettings.add(new JLabel("Focus on loaded sources? "), gbc);
+		pViewSettings.add(new JLabel("Focus on loaded sources "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbZoomLoad, gbc);
 		
@@ -227,7 +247,16 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bFocusOnSourcesOnLoad = cbZoomLoad.isSelected();
 			Prefs.set("BVB.bFocusOnSourcesOnLoad", BVBSettings.bFocusOnSourcesOnLoad);
+
+			BVBSettings.bShowScaleBar = cbShowScaleBar.isSelected();
+			Prefs.set("BVB.bShowScaleBar", BVBSettings.bShowScaleBar);
+			bdv.util.Prefs.showScaleBar(BVBSettings.bShowScaleBar);
 			
+			BVBSettings.bShowMultiBox = cbShowMultiBox.isSelected();
+			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
+			bdv.util.Prefs.showMultibox( BVBSettings.bShowMultiBox );
+			
+
 			if(bRepaintBVV)
 			{
 				bvb.repaintBVV();

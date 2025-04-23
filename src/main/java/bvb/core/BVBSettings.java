@@ -20,6 +20,9 @@ public class BVBSettings
 	
 	public static boolean bFocusOnSourcesOnLoad =  Prefs.get("BVB.bFocusOnSourcesOnLoad", true);
 	
+	public static boolean bShowMultiBox = Prefs.get( "BVB.bShowMultiBox", true );
+	public static boolean bShowScaleBar = Prefs.get( "BVB.bShowScaleBar", true );
+	
 	public static int nDefaultWidthControlPanel = 400;
 	
 	public static int nDefaultHeightControlPanel = 600;
