@@ -23,7 +23,7 @@ public class Example003Mesh
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
 		testBVB.startBVB();
 	
-		final Color meshColor = Color.MAGENTA;
+		final Color meshColor = Color.CYAN;
 		//load and show bunny mesh from file
 		String fMeshFilename  = "src/test/resources/mesh/bunny.stl";
 		
