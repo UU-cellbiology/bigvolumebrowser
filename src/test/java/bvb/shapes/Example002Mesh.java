@@ -1,17 +1,10 @@
 package bvb.shapes;
 
+
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealPoint;
-import net.imglib2.mesh.Mesh;
-import net.imglib2.mesh.Meshes;
-import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
-import net.imglib2.mesh.impl.nio.BufferMesh;
-import net.imglib2.mesh.io.stl.STLMeshIO;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import bvb.core.BigVolumeBrowser;
@@ -29,23 +22,23 @@ public class Example002Mesh
 		testBVB.startBVB();
 		
 		//load some data
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
 		
-		
-		//add sphere with random values as background
-		
+		//add sphere with random values as background		
 		int nRadius = 35;
 		int maxInt = 200;
 		final RandomAccessibleInterval< UnsignedByteType > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);
 		
 		testBVB.addRAI( sphereRai );
 		
-		//load mesh
-		String fn = "/home/eugene/Desktop/StanfordBunny_fixed.stl";	
+		//load and show bunny mesh
+		File resource = new File("src/test/resources/mesh/bunny.stl");
 		
-		MeshExample meshBVB = new MeshExample(fn);
+		MeshExample meshBunny = new MeshExample(resource.toString());
+		meshBunny.setPointsRender( 0.3f );
+		meshBunny.setColor( Color.CYAN );
 		
-		testBVB.addShape( meshBVB );
+		testBVB.addShape( meshBunny );
 		
 	}
 }

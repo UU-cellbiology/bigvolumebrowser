@@ -16,9 +16,6 @@ import bvb.scene.VisPointsScaled;
 public class PointsSameExample implements Shape
 {
 	
-	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1; 
-
-	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
 
 	public VisPointsScaled vertexVis = null;
 	

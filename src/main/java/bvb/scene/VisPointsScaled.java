@@ -28,6 +28,10 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 public class VisPointsScaled
 {
 
+	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1; 
+
+	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
+	
 	private Shader prog;
 
 	private int vao;
@@ -214,13 +218,10 @@ public class VisPointsScaled
 			}
 		}
 		
-		Vector2f window_sizef;
-		Vector2f ellipse_axes;
-
 		JoglGpuContext context = JoglGpuContext.get( gl );
 		
 		//scale disk with viewport transform
-		window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
+		Vector2f window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
 		
 		//The whole story behind the code below is that
 		//the size of the OpenGL sprite corresponding to a point is
@@ -232,7 +233,7 @@ public class VisPointsScaled
 		//that will scale into the circle %)
 		//
 		
-		ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
+		Vector2f ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
 		
 		//scale of viewport vs render
 		//we enlarge/shrink to minimum dimension scale

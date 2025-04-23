@@ -7,16 +7,16 @@ import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import org.joml.Vector3f;
+import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import bvb.core.BVVSettings;
+
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GL3;
 
 
@@ -26,54 +26,42 @@ import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
 
-import net.imglib2.RealPoint;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 
-public class VisWireMesh {
-	
-	public static final int OUTLINE=0, WIRE=1, SURFACE=2;
-	
-	private Shader progLine;
+public class VisWireMesh 
+{	
+
+	private Shader progPoints;
 	
 	private Shader progMesh;
 
 	private int vao;
-		
-	private float vertices[]; 
 	
-	public int nPointsN = 0;
-
-	public int renderType = 1;
-	
-	private Vector4f l_color;	
-	
-	public float fLineThickness;
-	
-	public final float fWireLineThickness = 1.0f;
+	private Vector4f l_color =  new Vector4f(Color.WHITE.getComponents(null));	
 
 	private boolean initialized;
 	
 	private BufferMesh mesh = null;
+
+	public static final int MESH = 0, POINTS = 1;	
 	
-	public static final int SURFACE_PLAIN=0, SURFACE_SHADE=1, SURFACE_SHINY=2, SURFACE_SILHOUETTE=3; 
+	public int renderType = POINTS;
 	
-	int surfaceRender = SURFACE_PLAIN;
+	public float fPointSize = 0.1f;
 	
-	public static final int silhouette_TRANSPARENT=0, silhouette_CULLED=1; 
+	public static final int SURFACE_PLAIN = 0, SURFACE_SHADE = 1, SURFACE_SHINY = 2, SURFACE_SILHOUETTE = 3; 
 	
-	int silhouetteRender = silhouette_TRANSPARENT;
+	int surfaceRender = SURFACE_SHADE;
 	
+	public static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
+	
+	int silhouetteRender = silhouette_TRANSPARENT;	
+
 	float silhouetteDecay = 2.0f;
 	
-	boolean wireAntiAliasing = false;
-	
-	private long nMeshTrianglesSize = 0;
-	
 	volatile boolean bLocked = false;
-	
-	VisPolyLineAA centerLine = null;
-	
-	ArrayList<VisPolyLineAA> wireLine = null;
 	
 
 	public VisWireMesh()
@@ -83,45 +71,25 @@ public class VisWireMesh {
 	
 	void initShader()
 	{
-		final Segment lineVp = new SegmentTemplate( VisWireMesh.class, "/scene/simple_color_clip.vp" ).instantiate();
-		final Segment lineFp = new SegmentTemplate( VisWireMesh.class, "/scene/simple_color_clip.fp" ).instantiate();		
-		progLine = new DefaultShader( lineVp.getCode(), lineFp.getCode() );
+		final Segment pointVp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
+		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 				
 		final Segment meshVp = new SegmentTemplate( VisWireMesh.class, "/scene/mesh.vp" ).instantiate();
 		final Segment meshFp = new SegmentTemplate( VisWireMesh.class, "/scene/mesh.fp" ).instantiate();
 		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	
-	public VisWireMesh(final BufferMesh meshin, final float fLineThickness_, final Color color_in, final int nRenderType)
+	public VisWireMesh(final Mesh meshin)
 	{
 		this();
+		setMesh(meshin);
 		
-		fLineThickness= fLineThickness_;	
-		l_color = new Vector4f(color_in.getComponents(null));		
-		renderType = nRenderType;
-		this.mesh = meshin;
-		
-	}
-	
-	
-	public void setThickness(float fLineThickness_)
-	{
-		fLineThickness = fLineThickness_;
-		if(centerLine!=null)
-			centerLine.setThickness( fLineThickness );
 	}
 	
 	public void setColor(Color color_in)
 	{
 		l_color = new Vector4f(color_in.getComponents(null));
-		if(centerLine != null)
-			centerLine.setColor( l_color );
-		if(wireLine!=null)
-		{
-			 for (VisPolyLineAA segment : wireLine)
-				 segment.setColor( l_color ); 
-			
-		}
 	}
 	
 	public void setRenderType(int nRenderType_)
@@ -129,21 +97,42 @@ public class VisWireMesh {
 		renderType = nRenderType_;		
 	}
 	
+	public void setPointsSize(float fPointSize_)
+	{
+		fPointSize = fPointSize_;
+	}
+	
 	public int getRenderType()
 	{
 		return renderType;		
 	}
 	
-	public void setMesh(BufferMesh mesh)
+	public void setMesh(final Mesh mesh)
 	{
-		this.mesh = mesh;
+//		if(mesh instanceof BufferMesh)
+//		{
+//			BufferMesh bmesh = (BufferMesh) mesh;
+//			if(bmesh.vertices().normals().limit()==0)
+//			{
+//				this.mesh = new BufferMesh( bmesh.vertices().size(), bmesh.triangles().size(), true );
+//				Meshes.calculateNormals( bmesh, this.mesh );
+//			}
+//			else
+//			{
+//				this.mesh = bmesh;
+//			}
+//		}
+//		else
+//		{
+			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
+			Meshes.calculateNormals( mesh, this.mesh );
+//		}
 	}
 	
 	
 	private boolean initMesh( final GL3 gl )
 	{
 		return initGPUBufferMesh(gl);	
-
 	}
 	
 	public void reload()
@@ -174,10 +163,10 @@ public class VisWireMesh {
 		final int meshBaryVbo = tmp[ 2 ];
 		final int meshEbo = tmp[ 3 ];
 		
-		if(mesh==null)
+		if(mesh == null)
 			return false;
 		else
-			if (mesh.vertices()==null)
+			if (mesh.vertices() == null)
 				return false;
 
 		final FloatBuffer vertBuff = mesh.vertices().verts();
@@ -217,21 +206,14 @@ public class VisWireMesh {
 		gl.glEnableVertexAttribArray( 2 );
 		
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
-		
 		gl.glBindVertexArray( 0 );
-		
-		nMeshTrianglesSize = mesh.triangles().size();	
-		System.out.println(nMeshTrianglesSize*3);
-		System.out.println(mesh.vertices().size());
-		System.out.println(mesh.vertices().normals().limit());
-		System.out.println(mesh.triangles().indices().limit());
 
 		initialized = true;
 
 		return true; 
 	}
 
-	public void draw( final GL3 gl, final Matrix4fc pvm, Matrix4fc vm )
+	public void draw( final GL3 gl, final Matrix4fc pvm, Matrix4fc vm,  final int [] screen_size)
 	{
 		
 		while (bLocked)
@@ -245,7 +227,9 @@ public class VisWireMesh {
 				exc.printStackTrace();
 			}
 		}
+		
 		bLocked = true;
+		
 		if ( !initialized )
 		{
 			if(!initMesh(gl))
@@ -254,70 +238,70 @@ public class VisWireMesh {
 				return;
 			}
 		}
+		
 		bLocked = false;
 
-//		if(nPointsN>1)
-//		{
-			
-			JoglGpuContext context = JoglGpuContext.get( gl );
-			
-			gl.glDepthFunc( GL.GL_LESS);
-			
-			if(renderType == SURFACE)
-			{
-				final Matrix4f itvm = vm.invert( new Matrix4f() ).transpose();
+		JoglGpuContext context = JoglGpuContext.get( gl );
 
-				progMesh.getUniformMatrix4f( "pvm" ).set( pvm );
-				progMesh.getUniformMatrix4f( "vm" ).set( vm );
-				progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
-				progMesh.getUniform4f("colorin").set(l_color);
-				progMesh.getUniform1i("surfaceRender").set(surfaceRender);
+		gl.glDepthFunc( GL.GL_LESS);
+
+		if(renderType == MESH)
+		{
+			final Matrix4f itvm = vm.invert( new Matrix4f() ).transpose();
+
+			progMesh.getUniformMatrix4f( "pvm" ).set( pvm );
+			progMesh.getUniformMatrix4f( "vm" ).set( vm );
+			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
+			progMesh.getUniform4f("colorin").set(l_color);
+			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
 //				progMesh.getUniform1i("clipactive").set(BigTraceData.nClipROI);
 //				progMesh.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
 //				progMesh.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
-				progMesh.getUniform1i("silType").set(silhouetteRender);
-				progMesh.getUniform1f("silDecay").set(silhouetteDecay);
-				progMesh.setUniforms( context );
-				progMesh.use( context );
-				if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
-				{
-					gl.glDepthFunc( GL.GL_ALWAYS);
-				}
-
-				//gl.glEnable(GL.GL_BLEND);
-				//gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
-				gl.glBindVertexArray( vao );			
-				gl.glDrawElements( GL_TRIANGLES, ( int ) nMeshTrianglesSize * 3, GL_UNSIGNED_INT, 0 );
-				gl.glBindVertexArray( 0 );
-			}
-			else
+			progMesh.getUniform1i("silType").set(silhouetteRender);
+			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
+			progMesh.setUniforms( context );
+			progMesh.use( context );
+			if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
 			{
-		
-				progLine.getUniformMatrix4f( "pvm" ).set( pvm );
-				progLine.getUniform4f("colorin").set(l_color);
-//				progMesh.getUniform1i("clipactive").set(BigTraceData.nClipROI);
-//				progMesh.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
-//				progMesh.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
-				progLine.setUniforms( context );
-				progLine.use( context );			
-	
-				gl.glBindVertexArray( vao );
-				//gl.glDrawArrays( GL.GL_TRIANGLE_STRIP, 0, nTotVert);
-				gl.glLineWidth(1.0f);
-				gl.glPolygonMode( GL.GL_FRONT_AND_BACK, GL.GL_LINE_STRIP );//oly
-//				for(int i =0; i<mesh.triangles().size();i++)
-//				{
-//					gl.glDrawArrays(  GL.GL_LINE_STRIP, i*3,i*3+1 );
-//				}
-				//gl.glDrawArrays(  GL.GL_LINE_STRIP, 0, 200);
-				//gl.glDrawArrays(  GL.GL_POINTS, 0, mesh.vertices().size());
-				gl.glDrawElements( GL.GL_LINE_LOOP, ( int ) 2 * 3, GL_UNSIGNED_INT, 0 );
-				gl.glBindVertexArray( 0 );	
-				
-				
+				gl.glDepthFunc( GL.GL_ALWAYS);
 			}
-			gl.glDepthFunc( GL.GL_LESS);
-		//}
+
+			//gl.glEnable(GL.GL_BLEND);
+			//gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glBindVertexArray( vao );			
+			gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
+			gl.glBindVertexArray( 0 );
+		}
+		else
+		{
+
+			Vector2f window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
+			
+			Vector2f ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
+			
+			float fPointScale = Math.min(ellipse_axes.x,ellipse_axes.y);
+			ellipse_axes.mul(1.0f/fPointScale);
+			ellipse_axes.x = ellipse_axes.x * ellipse_axes.x;
+			ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
+					
+			progPoints.getUniformMatrix4f( "pvm" ).set( pvm );
+			progPoints.getUniform1f( "pointSizeReal" ).set( fPointSize );
+			progPoints.getUniform1f( "pointScale" ).set( fPointScale );
+			progPoints.getUniform4f( "colorin" ).set( l_color );
+			progPoints.getUniform2f( "windowSize" ).set( window_sizef );
+			progPoints.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
+			progPoints.getUniform1i( "renderType" ).set( VisPointsScaled.RENDER_FILLED );
+			progPoints.getUniform1i( "pointShape" ).set( VisPointsScaled.SHAPE_ROUND );
+			progPoints.setUniforms( context );			
+			progPoints.use( context );
+			
+			gl.glBindVertexArray( vao );
+			gl.glDrawArrays( GL.GL_POINTS, 0, mesh.vertices().size());
+			gl.glBindVertexArray( 0 );
+
+		}
+		gl.glDepthFunc( GL.GL_LESS);
+
 	}
 	
 	public static float[] getNormal(float [][] triangle)

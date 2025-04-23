@@ -9,7 +9,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 
 import bvb.core.BigVolumeBrowser;
-
+import bvb.scene.VisPointsScaled;
 import ij.ImageJ;
 
 public class Example001Points
@@ -24,11 +24,9 @@ public class Example001Points
 		testBVB.startBVB();
 		
 		//load some data
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
 		
-		
-		//add sphere with random values as background
-		
+		//add sphere with random values as background		
 		int nRadius = 35;
 		int maxInt = 200;
 		final RandomAccessibleInterval< UnsignedByteType > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);
@@ -37,7 +35,7 @@ public class Example001Points
 
 		
 		//define point size, color, shape and filling
-		PointsSameExample testPoints = new PointsSameExample(nRadius*0.2f, Color.RED, PointsSameExample.SHAPE_SQUARE, PointsSameExample.RENDER_OUTLINE);
+		PointsSameExample testPoints = new PointsSameExample(nRadius*0.2f, Color.RED, VisPointsScaled.SHAPE_SQUARE, VisPointsScaled.RENDER_OUTLINE);
 		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		

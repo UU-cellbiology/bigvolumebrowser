@@ -57,6 +57,7 @@ void main()
 			}
 		}							
 		gl_FragDepth = gl_FragCoord.z;
+		
 		//plain, shaded or shiny surface
 		if(surfaceRender<3)
 		{
@@ -67,19 +68,31 @@ void main()
 			//plain
 			if(surfaceRender==0)
 			{
-  				//vec3 l = 1.0 - 2.0 * abs(mod(abs(posW), 1.0) -0.5);
-  				vec3 l = abs(mod(abs(posW), 5.0) -2.5);
-				//float d = min(min(bary.x, bary.y), bary.z);
-				float d = min(min(l.x, l.y), l.z);
-				if(d<0.1)
+  				//barycentric grid
+				float d = min(min(bary.x, bary.y), bary.z);
+				if(d<0.05)
 				{
 					fragColor = colorin;
 				}
 				else
 				{
-				 fragColor = vec4(0.0,0.0,0.0,0.0);
-				 gl_FragDepth = 1.0;
+					fragColor = vec4(0.0,0.0,0.0,0.0);
+					gl_FragDepth = 1.0;
 				}
+				
+				//cartesian grid	
+//  				vec3 l = abs(mod(abs(posW), 5.0) -2.5);
+//				float d = min(min(l.x, l.y), l.z);
+//				if(d<0.1)
+//				{
+//					fragColor = colorin;
+//				}
+//				else
+//				{
+//					fragColor = vec4(0.0,0.0,0.0,0.0);
+//					gl_FragDepth = 1.0;
+//				}
+	
 				//fragColor = colorin;
 			}	
 			else
