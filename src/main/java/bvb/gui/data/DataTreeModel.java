@@ -29,7 +29,9 @@ public class DataTreeModel implements TreeModel
 	
 	final ImageIcon iconFIJI;
 	
-	final ImageIcon iconDefault;
+	final ImageIcon iconDefaultData;
+	
+	final ImageIcon iconOneSource;
 	
 	public enum SPIMDataType {
 		  BDV,
@@ -49,7 +51,8 @@ public class DataTreeModel implements TreeModel
 		iconBDV = new ImageIcon(this.getClass().getResource("/icons/bdv-small.png"));
 		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
 		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
-		iconDefault = new ImageIcon(this.getClass().getResource("/icons/source-small.png"));
+		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/data-small-default.png"));
+		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/source-small.png"));
 
 	}
 	
@@ -199,8 +202,13 @@ public class DataTreeModel implements TreeModel
 		return iconFIJI;
 	}
 	
-	public ImageIcon getDefaultIcon()
+	public ImageIcon getDataDefault()
 	{
-		return iconDefault;
+		return iconDefaultData;
+	}
+	
+	public ImageIcon getIconOneSource()
+	{
+		return iconOneSource;
 	}
 }

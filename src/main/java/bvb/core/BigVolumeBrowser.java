@@ -283,7 +283,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src)
 	{		
-		return addSource(src, src.getName(), dataTreeModel.getDefaultIcon());
+		return addSource(src, src.getName(), dataTreeModel.getDataDefault());
 	}
 
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, String sourceName, final ImageIcon icon)
@@ -318,7 +318,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		String raiName = "RAI_"+Integer.toString(BVBSettings.nAddedRAINumber);
 		BVBSettings.nAddedRAINumber++;
-		return addRAI(rai, raiName, dataTreeModel.getFIJIIcon());
+		return addRAI(rai, raiName, dataTreeModel.getDataDefault());
 	}
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
@@ -530,7 +530,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 		
 		//save shapes
-		ArrayList<Shape> tempShapes = new ArrayList<>();
+		final ArrayList<Shape> tempShapes = new ArrayList<>();
 		for(Shape shape : shapes)
 		{
 			tempShapes.add( shape );
@@ -557,8 +557,6 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		bvvFrame.setLocation( bvv_p );	
 		bvvFrame.getContentPane().setPreferredSize( bvv_d );	
 		bvvFrame.pack();
-
-
 		
 		//put back spimdata
 		for(AbstractSpimData<?> spimData:spimDataAll)
@@ -566,13 +564,16 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 			dataTreeModel.addData( out.getA(), out.getB(), spimDataToInfo.get( spimData ));			
 		}
+		
 		//sync GUI		
 		controlPanel.tabPanelDataSources.updateBVVlisteners();
 		controlPanel.tabPanelView.resetClipPanel();
 		
 		BVBSettings.bFocusOnSourcesOnLoad = focusStore;
+		
 		//put back viewer transform
 		bvvViewer.state().setViewerTransform( viewTransform );
+		
 		//reload shapes
 		for(Shape shape : tempShapes)
 		{
