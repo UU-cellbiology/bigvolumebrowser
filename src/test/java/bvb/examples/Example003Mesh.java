@@ -20,8 +20,8 @@ public class Example003Mesh
 		new ImageJ();
 
 		//start BVB
-		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
-		testBVB.startBVB();
+		BigVolumeBrowser bvbTest = new BigVolumeBrowser(); 		
+		bvbTest.startBVB();
 	
 		final Color meshColor = Color.CYAN;
 		//load and show bunny mesh from file
@@ -38,11 +38,11 @@ public class Example003Mesh
 		
 		//let's add an empty volume around it
 		RealInterval bunnyInt = Meshes.boundingBox( bunny );
-		testBVB.addRAI(RAIdummy.dummyRAI(bunnyInt));
+		bvbTest.addRAI(RAIdummy.dummyRAI(bunnyInt));
 		meshBunny.setColor(meshColor );
 		
 		//and finally add mesh to BVB
-		testBVB.addShape( meshBunny );	
+		bvbTest.addShape( meshBunny );	
 		
 
 		//now let's show other ways to render meshed
@@ -61,7 +61,7 @@ public class Example003Mesh
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
 			meshBunny = new MeshColorExample(bunny);
-			testBVB.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
+			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
 			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
 			if(i==1)
@@ -69,7 +69,7 @@ public class Example003Mesh
 				meshBunny.setCartesianGrid( 2.0f, 0.1f );
 			}
 			meshBunny.setColor( meshColor );
-			testBVB.addShape( meshBunny );		
+			bvbTest.addShape( meshBunny );		
 		}
 		
 		
@@ -86,14 +86,16 @@ public class Example003Mesh
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
 			meshBunny = new MeshColorExample(bunny);
-			testBVB.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
+			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			
 			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
 			meshBunny.setSurfaceGrid( VisMeshColor.GRID_FILLED);
 			meshBunny.setColor( meshColor );
-			testBVB.addShape( meshBunny );		
+			bvbTest.addShape( meshBunny );		
 		}
 		
+		//focus on everything
+		bvbTest.bvbActions.actionCenterView();
 
 	}
 }

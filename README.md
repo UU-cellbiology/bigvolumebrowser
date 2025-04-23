@@ -8,7 +8,8 @@ Currently at the stage of active development (2025/04/23).
 
 Documentation coming soon.
 
-**For users**: download jars from Release to FIJI's *jars* folder. Hopefully the interface is self-explanatory. Good luck!
+**For users**: download zip with jars from the latest [Release](https://github.com/UU-cellbiology/bigvolumebrowser/releases) and unpack it to FIJI's *jars* folder.  
+Hopefully the interface is self-explanatory.
 
 **For developers**: please check the code in [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).
 

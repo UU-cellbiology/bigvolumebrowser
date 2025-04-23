@@ -336,6 +336,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		return out;
 	}
 
+	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData, final BVBSpimDataInfo info)
 	{
 		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);

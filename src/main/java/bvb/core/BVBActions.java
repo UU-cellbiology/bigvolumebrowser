@@ -327,7 +327,7 @@ public class BVBActions
 //
 //	}
 	
-	void actionCenterView()
+	public void actionCenterView()
 	{
 		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//solution for now, to not interfere with typing
