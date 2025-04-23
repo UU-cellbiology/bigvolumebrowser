@@ -2,12 +2,13 @@ package bvb.shapes;
 
 
 import java.awt.Color;
-import java.io.File;
 
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.RealInterval;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.scene.VisMesh;
 import ij.ImageJ;
 
 public class Example002Mesh
@@ -20,25 +21,50 @@ public class Example002Mesh
 		//start BVB
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
 		testBVB.startBVB();
-		
-		//load some data
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
-		
-		//add sphere with random values as background		
-		int nRadius = 35;
-		int maxInt = 200;
-		final RandomAccessibleInterval< UnsignedByteType > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);
-		
-		testBVB.addRAI( sphereRai );
+	
 		
 		//load and show bunny mesh
-		File resource = new File("src/test/resources/mesh/bunny.stl");
+		String fMeshFilename  = "src/test/resources/mesh/bunny.stl";
 		
-		MeshExample meshBunny = new MeshExample(resource.toString());
+		MeshExample meshBunny = new MeshExample(fMeshFilename);
+		
+		//render with points
 		meshBunny.setPointsRender( 0.3f );
-		meshBunny.setColor( Color.CYAN );
+		//meshBunny.setColor( Color.CYAN );
 		
+		//now load mesh separately
+		Mesh bunny = MeshExample.loadMeshFromFile( fMeshFilename );
+		
+		RealInterval bunnyInt = Meshes.boundingBox( bunny );
+		testBVB.addRAI(RAIdummy.dummyRAI(bunnyInt));
+		meshBunny.setColor( Color.CYAN );
 		testBVB.addShape( meshBunny );
 		
+		
+
+		final double displacementX = 1.1*(bunnyInt.realMax( 0 )-bunnyInt.realMin( 0 ));
+		final double displacementY = -1.3*(bunnyInt.realMax( 1 )-bunnyInt.realMin( 1 ));
+		
+		//translate along X and add a copy
+		Meshes.translate( bunny, new double[] {-displacementX, displacementY,0} );
+		
+		//show different surface renders
+		int [] arrSurfaceRender = new int [] {VisMesh.SURFACE_SHADE,  
+				VisMesh.SURFACE_SHINY, VisMesh.SURFACE_SILHOUETTE};
+		
+		for(int i=0;i<3;i++)
+		{		
+			//translate along X and add a copy
+			Meshes.translate( bunny, new double[] {displacementX,0,0} );
+			
+			meshBunny = new MeshExample(bunny);
+			testBVB.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
+			
+			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
+			meshBunny.setColor( Color.CYAN );
+			testBVB.addShape( meshBunny );		
+		}
+		
+
 	}
 }

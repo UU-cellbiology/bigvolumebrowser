@@ -30,7 +30,7 @@ import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 
-public class VisWireMesh 
+public class VisMesh 
 {	
 
 	private Shader progPoints;
@@ -64,7 +64,7 @@ public class VisWireMesh
 	volatile boolean bLocked = false;
 	
 
-	public VisWireMesh()
+	public VisMesh()
 	{
 		initShader();
 	}
@@ -75,12 +75,12 @@ public class VisWireMesh
 		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 				
-		final Segment meshVp = new SegmentTemplate( VisWireMesh.class, "/scene/mesh.vp" ).instantiate();
-		final Segment meshFp = new SegmentTemplate( VisWireMesh.class, "/scene/mesh.fp" ).instantiate();
+		final Segment meshVp = new SegmentTemplate( VisMesh.class, "/scene/mesh.vp" ).instantiate();
+		final Segment meshFp = new SegmentTemplate( VisMesh.class, "/scene/mesh.fp" ).instantiate();
 		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	
-	public VisWireMesh(final Mesh meshin)
+	public VisMesh(final Mesh meshin)
 	{
 		this();
 		setMesh(meshin);
@@ -95,6 +95,11 @@ public class VisWireMesh
 	public void setRenderType(int nRenderType_)
 	{
 		renderType = nRenderType_;		
+	}
+	
+	public void setSurfaceRenderType(int surfaceRender_)
+	{
+		surfaceRender = surfaceRender_;		
 	}
 	
 	public void setPointsSize(float fPointSize_)
@@ -304,60 +309,5 @@ public class VisWireMesh
 
 	}
 	
-	public static float[] getNormal(float [][] triangle)
-	{
-        final float v10x = triangle[1][0] - triangle[0][0];
-        final float v10y = triangle[1][1] - triangle[0][1];
-        final float v10z = triangle[1][2] - triangle[0][2];
 
-        final float v20x = triangle[2][0] - triangle[0][0];
-        final float v20y = triangle[2][1] - triangle[0][1];
-        final float v20z = triangle[2][2] - triangle[0][2];
-
-        final float nx = v10y * v20z - v10z * v20y;
-        final float ny = v10z * v20x - v10x * v20z;
-        final float nz = v10x * v20y - v10y * v20x;
-        final float nmag = (float) Math.sqrt(Math.pow(nx, 2) + Math.pow(ny, 2) + Math.pow(nz, 2));
-
-        return new float[]{nx / nmag, ny / nmag, nz / nmag};
-	}
-	
-	public static float[][] getCumNormal(float [] normale)
-	{
-		float [][] out = new float [3][3];
-		for (int i=0;i<3;i++)
-		{
-			for(int d = 0; d<3;d++)
-			{
-				out[i][d] = (i+1)*normale[d]; 
-			}
-		}
-		return out;
-	}
-	
-	public static void addTriangle(final BufferMesh mesh_in, final float[][] triangle)
-	{
-		final float [] normale = getNormal(triangle);
-		final float [][] cumNormal = getCumNormal(normale);
-		long [] index = new long[3];
-		double vNormalMag ;
-		for (int i=0;i<3;i++)
-		{
-			vNormalMag =  Math.sqrt(Math.pow(cumNormal[i][0], 2) + Math.pow(cumNormal[i][1], 2) + Math.pow(cumNormal[i][2], 2));
-			index[i] = mesh_in.vertices().add(triangle[i][0],triangle[i][1],triangle[i][2],
-					cumNormal[i][0] / vNormalMag, cumNormal[i][1] / vNormalMag, cumNormal[i][2] / vNormalMag,0.0,0.0);
-		}
-		mesh_in.triangles().add(index[0], index[1], index[2], normale[0], normale[1], normale[2]);
-	}
-	
-	public static void addTriangleWithoutNormale(final BufferMesh mesh_in, final float[][] triangle)
-	{
-		long [] index = new long[3];
-		for (int i=0;i<3;i++)
-		{			
-			index[i] = mesh_in.vertices().add(triangle[i][0],triangle[i][1],triangle[i][2]);
-		}
-		mesh_in.triangles().add(index[0], index[1], index[2]);
-
-	}
 }

@@ -14,12 +14,12 @@ import net.imglib2.mesh.io.stl.STLMeshIO;
 import org.apache.commons.io.FilenameUtils;
 import org.joml.Matrix4fc;
 
-import bvb.scene.VisWireMesh;
+import bvb.scene.VisMesh;
 
 public class MeshExample implements Shape
 {
 	
-	VisWireMesh meshVis = null;
+	VisMesh meshVis = null;
 	
 	public MeshExample(String filename)
 	{
@@ -30,7 +30,7 @@ public class MeshExample implements Shape
 		
 		if(nmesh != null)
 		{			
-			meshVis = new VisWireMesh(nmesh);
+			meshVis = new VisMesh(nmesh);
 		}
 		else
 		{
@@ -42,7 +42,7 @@ public class MeshExample implements Shape
 	{
 		if(nmesh != null)
 		{
-			meshVis = new VisWireMesh(nmesh);
+			meshVis = new VisMesh(nmesh);
 		}
 	}
 	
@@ -50,8 +50,17 @@ public class MeshExample implements Shape
 	{
 		if(meshVis != null )
 		{
-			meshVis.setRenderType( VisWireMesh.POINTS );
+			meshVis.setRenderType( VisMesh.POINTS );
 			meshVis.setPointsSize( fPointsSize_ );
+		}
+	}
+	
+	public void setSurfaceRender(int nSurfaceRenderType)
+	{
+		if(meshVis != null )
+		{
+			meshVis.setRenderType( VisMesh.MESH );
+			meshVis.setSurfaceRenderType( nSurfaceRenderType );
 		}
 	}
 	
