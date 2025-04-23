@@ -15,7 +15,7 @@
 
 	<name>BigVolumeBrowser</name>
 	<description>browsing large volumetric data</description>
-	<url>https://github.com/ekatrukha/bigvolumebrowser</url>
+	<url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
 	<inceptionYear>2025</inceptionYear>
 	<organization>
 		<name>Cell Biology, Neurobiology and Biophysics Department of Utrecht University</name>
@@ -61,18 +61,18 @@
 	</mailingLists>
 
     <scm>
-        <connection>scm:git:git://github.com/ekatrukha/bigvolumebrowser</connection>
-        <developerConnection>scm:git:git@github.com/ekatrukha/bigvolumebrowser</developerConnection>
+        <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
+        <developerConnection>scm:git:git@github.com/UU-cellbiology/bigvolumebrowser</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/ekatrukha/bigvolumebrowser</url>
+        <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
         <system>GitHub</system>
-        <url>http://github.com/ekatrukha/bigvolumebrowser/issues</url>
+        <url>http://github.com/UU-cellbiology/bigvolumebrowser/issues</url>
     </issueManagement>
     <ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/ekatrukha/bigvolumebrowser/actions</url>
+		<url>https://github.com/UU-cellbiology/bigvolumebrowser/actions</url>
     </ciManagement>
 
 	<properties>
