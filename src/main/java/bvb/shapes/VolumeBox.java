@@ -27,12 +27,6 @@ public class VolumeBox implements Shape
 	
 	public RealInterval interval;
 	
-
-//	public VolumeBox(double [][] nDimBox, AffineTransform3D transform_, final float lineThickness_, final Color lineColor_)
-//	{
-//		this(new FinalRealInterval(nDimBox[0],nDimBox[1]), transform_, lineThickness_, lineColor_);
-//	}
-
 	public VolumeBox(RealInterval nIntervalBox, AffineTransform3D transform_, final float lineThickness_, final Color lineColor_)
 	{
 		interval = nIntervalBox;
@@ -40,9 +34,6 @@ public class VolumeBox implements Shape
 		lineThickness = lineThickness_;
 		
 		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
-
-		//edgesVis = new ArrayList<>();
-
 
 		if(transform_ == null)
 		{
@@ -105,9 +96,12 @@ public class VolumeBox implements Shape
 	@Override
 	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size) {
 	
-		for (int i=0;i<edgesVis.size();i++)
+		if(edgesVis != null)
 		{
-			edgesVis.get(i).draw(gl, pvm);
+			for (VisPolyLineAA edge : edgesVis)
+			{
+				edge.draw(gl, pvm);
+			}
 		}
 	}
 	
@@ -282,5 +276,18 @@ public class VolumeBox implements Shape
 				}
 		}
 		return hash;
+	}
+
+	@Override
+	public void reload()
+	{
+		if(edgesVis != null)
+		{
+			for (VisPolyLineAA edge : edgesVis)
+			{
+				edge.reload();
+			}
+		}
+		
 	}
 }

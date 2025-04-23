@@ -33,9 +33,9 @@ public class VisWireMesh {
 	
 	public static final int OUTLINE=0, WIRE=1, SURFACE=2;
 	
-	private final Shader progLine;
+	private Shader progLine;
 	
-	private final Shader progMesh;
+	private Shader progMesh;
 
 	private int vao;
 		
@@ -77,6 +77,11 @@ public class VisWireMesh {
 	
 
 	public VisWireMesh()
+	{
+		initShader();
+	}
+	
+	void initShader()
 	{
 		final Segment lineVp = new SegmentTemplate( VisWireMesh.class, "/scene/simple_color_clip.vp" ).instantiate();
 		final Segment lineFp = new SegmentTemplate( VisWireMesh.class, "/scene/simple_color_clip.fp" ).instantiate();		
@@ -135,48 +140,18 @@ public class VisWireMesh {
 	}
 	
 	
-	private boolean init( final GL3 gl )
+	private boolean initMesh( final GL3 gl )
 	{
-		bLocked  = true;
-		//if(renderType == SURFACE)
-		//{
-			return initGPUBufferMesh(gl);	
-		//}
-		
-		
-		//bLocked  = false;
-		//return true;
+		return initGPUBufferMesh(gl);	
+
 	}
 	
-	private void initGPUBufferWire( final GL3 gl )
+	public void reload()
 	{
-		initialized = true;
-		if(nPointsN>1)
-		{
-
-			// ..:: VERTEX BUFFER ::..
-	
-			final int[] tmp = new int[ 2 ];
-			gl.glGenBuffers( 1, tmp, 0 );
-			final int vbo = tmp[ 0 ];
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbo );
-			gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-	
-	
-			// ..:: VERTEX ARRAY OBJECT ::..
-	
-			gl.glGenVertexArrays( 1, tmp, 0 );
-			vao = tmp[ 0 ];
-			gl.glBindVertexArray( vao );
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbo );
-			gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 0 );
-			gl.glBindVertexArray( 0 );
-		}
+		initShader();
+		
+		initialized = false;
 	}
-	
-
 	
 	/** upload MeshData to GPU **/
 	private boolean initGPUBufferMesh( GL3 gl )
@@ -273,7 +248,7 @@ public class VisWireMesh {
 		bLocked = true;
 		if ( !initialized )
 		{
-			if(!init(gl))
+			if(!initMesh(gl))
 			{
 				bLocked = false;
 				return;

@@ -29,7 +29,7 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 public class VisPolyLineAA
 {
 
-	private final Shader prog;
+	private Shader prog;
 
 	private int vao;
 	
@@ -50,6 +50,11 @@ public class VisPolyLineAA
 	private boolean initialized;
 
 	public VisPolyLineAA()
+	{
+		initShader();
+	}
+	
+	void initShader()
 	{
 		final Segment lineVp = new SegmentTemplate( VisPolyLineAA.class, "/scene/aa_line.vp" ).instantiate();
 		final Segment lineFp = new SegmentTemplate( VisPolyLineAA.class, "/scene/aa_line.fp" ).instantiate();
@@ -263,6 +268,12 @@ public class VisPolyLineAA
 		gl.glBindVertexArray( 0 );
 
 		
+	}
+	
+	public void reload()
+	{
+		initShader();
+		initialized = false;
 	}
 
 	public void draw( GL3 gl, Matrix4fc pvm)

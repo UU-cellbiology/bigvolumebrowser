@@ -37,7 +37,7 @@ public class Example001Points
 
 		
 		//define point size, color, shape and filling
-		Points testPoints = new Points(nRadius*0.2f, Color.RED, Points.SHAPE_SQUARE, Points.RENDER_OUTLINE);
+		PointsSameExample testPoints = new PointsSameExample(nRadius*0.2f, Color.RED, PointsSameExample.SHAPE_SQUARE, PointsSameExample.RENDER_OUTLINE);
 		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		

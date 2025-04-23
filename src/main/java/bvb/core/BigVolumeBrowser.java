@@ -527,7 +527,18 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		
 	    //let's save viewer transform
 		AffineTransform3D viewTransform = bvvViewer.state().getViewerTransform();
-
+		
+		
+		//save shapes
+		ArrayList<Shape> tempShapes = new ArrayList<>();
+		for(Shape shape : shapes)
+		{
+			tempShapes.add( shape );
+		}
+		shapes.clear();
+		
+		boolean focusStore = BVBSettings.bFocusOnSourcesOnLoad;
+		BVBSettings.bFocusOnSourcesOnLoad = false;
 
 		//now restart	
 		closeBVV();
@@ -546,6 +557,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		bvvFrame.setLocation( bvv_p );	
 		bvvFrame.getContentPane().setPreferredSize( bvv_d );	
 		bvvFrame.pack();
+
+
 		
 		//put back spimdata
 		for(AbstractSpimData<?> spimData:spimDataAll)
@@ -557,8 +570,19 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		controlPanel.tabPanelDataSources.updateBVVlisteners();
 		controlPanel.tabPanelView.resetClipPanel();
 		
+		BVBSettings.bFocusOnSourcesOnLoad = focusStore;
 		//put back viewer transform
 		bvvViewer.state().setViewerTransform( viewTransform );
+		//reload shapes
+		for(Shape shape : tempShapes)
+		{
+			shape.reload();
+		}
+		//add back
+		for(Shape shape : tempShapes)
+		{
+			shapes.add( shape );
+		}
 
 	}
 	

@@ -28,7 +28,7 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 public class VisPointsScaled
 {
 
-	private final Shader prog;
+	private Shader prog;
 
 	private int vao;
 	
@@ -50,12 +50,15 @@ public class VisPointsScaled
 	
 	public VisPointsScaled()
 	{
+		initShader();
+	}
+	
+	void initShader()
+	{
 		final Segment pointVp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.vp" ).instantiate();
 		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
 		prog = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
-
 	}
-	
 	
 	/** constructor with multiple vertices **/
 	public VisPointsScaled(final ArrayList< RealPoint > points, final float fPointSize_, final Color color_in, final int nShape_, final int nRenderType_)
@@ -183,6 +186,12 @@ public class VisPointsScaled
 		initialized = true;
 		bLocked  = false;
 
+	}
+	
+	public void reload()
+	{
+		initShader();
+		initialized = false;
 	}
 
 	public void draw(final GL3 gl, final Matrix4fc pvm, final int [] screen_size )

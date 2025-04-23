@@ -197,4 +197,10 @@ public class VolumeBBoxes implements Shape
 
 		bLocked = false;
 	}
+
+	@Override
+	public void reload()
+	{
+		
+	}
 }

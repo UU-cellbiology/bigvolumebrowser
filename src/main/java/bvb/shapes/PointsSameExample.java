@@ -13,7 +13,7 @@ import bvb.scene.VisPointsScaled;
 
 /** Example class that uses points shader **/
 
-public class Points implements Shape
+public class PointsSameExample implements Shape
 {
 	
 	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1; 
@@ -27,17 +27,18 @@ public class Points implements Shape
 	int renderType;
 	int pointShape;
 	
-	public Points(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
+	public PointsSameExample(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
 		renderType = nRenderType_;
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		pointShape = nShape_;
 	}
+	
 	@Override
 	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
 	{
-		if(!(vertexVis == null))
+		if(vertexVis != null)
 		{
 			vertexVis.draw( gl, pvm, screen_size);
 		}
@@ -61,7 +62,7 @@ public class Points implements Shape
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		
-		if(!(vertexVis == null))
+		if(vertexVis != null)
 		{
 			vertexVis.setColor(pointColor);			
 		}
@@ -88,6 +89,14 @@ public class Points implements Shape
 	{
 		return "point"+Integer.toString(this.hashCode());
 
+	}
+
+	@Override
+	public void reload()
+	{
+		if(vertexVis != null)
+			vertexVis.reload();
+		
 	}
 
 }

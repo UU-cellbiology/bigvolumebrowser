@@ -43,7 +43,7 @@ public class Example002Mesh
 		//load mesh
 		String fn = "/home/eugene/Desktop/StanfordBunny_fixed.stl";	
 		
-		MeshFromSTL meshBVB = new MeshFromSTL(fn);
+		MeshExample meshBVB = new MeshExample(fn);
 		
 		testBVB.addShape( meshBVB );
 		

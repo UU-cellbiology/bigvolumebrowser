@@ -17,11 +17,11 @@ import org.joml.Matrix4fc;
 
 import bvb.scene.VisWireMesh;
 
-public class MeshFromSTL implements Shape
+public class MeshExample implements Shape
 {
 	Mesh mesh = null;
 	VisWireMesh meshVis;
-	public MeshFromSTL(String filename)
+	public MeshExample(String filename)
 	{
 		//load mesh
 
@@ -75,5 +75,12 @@ public class MeshFromSTL implements Shape
 		mesh.triangles().add( 3, 4, 5 );
 		//mesh.triangles().add( 0, 4, 5 );
 		return mesh;
+	}
+
+	@Override
+	public void reload()
+	{
+		meshVis.reload();
+		
 	}
 }
