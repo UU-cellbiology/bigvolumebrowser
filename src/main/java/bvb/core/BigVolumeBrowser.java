@@ -113,6 +113,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	final WindowAdapter closeWA;
 	
+	String BVVFrameTitle = "BigVolumeBrowser";
+	
 	
 	//SHAPES FOR NOW
 	
@@ -142,16 +144,17 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		};
 		
 	}
+	
 	/** starting as plugin from ImageJ/FIJI **/
 	@Override
 	public void run( String arg )
 	{
 		
-		startBVB();
+		startBVB("");
 		
 	}
 	
-	public void startBVB()
+	public void startBVB(String BVVFrameTitle_)
 	{
 		//switch to FlatLaf theme		
 		try {
@@ -160,6 +163,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		    FlatIntelliJLaf.setup();
 		} catch( Exception ex ) {
 		    System.err.println( "Failed to initialize LaF" );
+		}
+		if(!BVVFrameTitle_.equals( "" ))
+		{
+			this.BVVFrameTitle = BVVFrameTitle_;
 		}
 		
 		if(bvv == null)
@@ -170,7 +177,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 			
 			//setup control panel
 			controlPanel = new BVBControlPanel(this);
-			controlPanel.cpFrame = new JFrame("BVB Control Panel");
+			controlPanel.cpFrame = new JFrame("Control Panel BVB");
 			controlPanel.cpFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			controlPanel.cpFrame.add(controlPanel);
 			
@@ -205,7 +212,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 				cacheBlockSize( BVVSettings.cacheBlockSize ).
 				maxCacheSizeInMB( BVVSettings.maxCacheSizeInMB ).
 				ditherWidth(BVVSettings.ditherWidth).
-				frameTitle("BigVolumeBrowser")
+				frameTitle(BVVFrameTitle)
 				);
 		
 		bvvHandle = ( BvvHandleFrame ) bvv.getBvvHandle();
@@ -287,9 +294,14 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src)
 	{		
-		return addSource(src, src.getName(), dataTreeModel.getDataDefault());
+		return addSource(src, src.getName(), dataTreeModel.getIconDataDefault());
 	}
 
+	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, final ImageIcon icon)
+	{		
+		return addSource(src, src.getName(), icon);
+	}
+	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, String sourceName, final ImageIcon icon)
 	{
 		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
@@ -322,14 +334,14 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	{
 		String raiName = "RAI_"+Integer.toString(BVBSettings.nAddedRAINumber);
 		BVBSettings.nAddedRAINumber++;
-		return addRAI(rai, raiName, dataTreeModel.getDataDefault());
+		return addRAI(rai, raiName, dataTreeModel.getIconDataDefault());
 	}
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
 		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBvv.getSpimData( imp );
 		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
-		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(), dataTreeModel.getFIJIIcon());
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(), dataTreeModel.getIconFIJI());
 		spimDataToInfo.put( spimData, info );
 		dataTreeModel.addData( spimData, out.getB(), info);
 
@@ -356,7 +368,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 
 		if(bvv == null)
 		{
-			startBVB();
+			startBVB(BVVFrameTitle);
 		}
 		
 		List< BvvStackSource< ? > > bvvSources = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
@@ -419,12 +431,12 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		if(nType == 0 )
 		{
 			spimData = SpimDataLoader.loadHDF5( sFilename );
-			spimDataIcon = dataTreeModel.getBDVIcon();
+			spimDataIcon = dataTreeModel.getIconBDV();
 		}
 		else
 		{
 			spimData = SpimDataLoader.loadBioFormats( sFilename );
-			spimDataIcon = dataTreeModel.getBioformatsIcon();
+			spimDataIcon = dataTreeModel.getIconBioformats();
 		}
 		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		
@@ -601,7 +613,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		//ij.command().run(ConfigureBVVRenderWindow.class,true).get();
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 
 		
-		testBVB.startBVB();
+		testBVB.startBVB("");
 		//testBVB.run("");
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );

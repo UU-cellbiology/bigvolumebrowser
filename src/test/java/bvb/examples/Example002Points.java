@@ -10,7 +10,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisPointsScaled;
-import bvb.shapes.PointsSameExample;
+import bvb.shapes.PointsSame;
 import ij.ImageJ;
 
 public class Example002Points
@@ -22,7 +22,7 @@ public class Example002Points
 
 		//start BVB
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
-		testBVB.startBVB();
+		testBVB.startBVB("");
 		
 		//load some data
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
@@ -36,7 +36,7 @@ public class Example002Points
 
 		
 		//define point size, color, shape and filling
-		PointsSameExample testPoints = new PointsSameExample(nRadius*0.2f, Color.RED, VisPointsScaled.SHAPE_SQUARE, VisPointsScaled.RENDER_OUTLINE);
+		PointsSame testPoints = new PointsSame(nRadius*0.2f, Color.RED, VisPointsScaled.SHAPE_SQUARE, VisPointsScaled.RENDER_OUTLINE);
 		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		

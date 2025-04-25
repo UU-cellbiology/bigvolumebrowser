@@ -9,7 +9,7 @@ import net.imglib2.mesh.Meshes;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshColor;
-import bvb.shapes.MeshColorExample;
+import bvb.shapes.MeshColor;
 import ij.ImageJ;
 
 public class Example003Mesh
@@ -21,20 +21,20 @@ public class Example003Mesh
 
 		//start BVB
 		BigVolumeBrowser bvbTest = new BigVolumeBrowser(); 		
-		bvbTest.startBVB();
+		bvbTest.startBVB("");
 	
 		final Color meshColor = Color.CYAN;
 		//load and show bunny mesh from file
 		String fMeshFilename  = "src/test/resources/mesh/bunny.stl";
 		
-		MeshColorExample meshBunny = new MeshColorExample(fMeshFilename);
+		MeshColor meshBunny = new MeshColor(fMeshFilename);
 		
 		//render with points
 		meshBunny.setPointsRender( 0.3f );
 		meshBunny.setColor( meshColor );
 		
 		//now let's load mesh separately
-		Mesh bunny = MeshColorExample.loadMeshFromFile( fMeshFilename );
+		Mesh bunny = MeshColor.loadMeshFromFile( fMeshFilename );
 		
 		//let's add an empty volume around it
 		RealInterval bunnyInt = Meshes.boundingBox( bunny );
@@ -60,7 +60,7 @@ public class Example003Mesh
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
-			meshBunny = new MeshColorExample(bunny);
+			meshBunny = new MeshColor(bunny);
 			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
 			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
@@ -85,7 +85,7 @@ public class Example003Mesh
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
-			meshBunny = new MeshColorExample(bunny);
+			meshBunny = new MeshColor(bunny);
 			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			
 			meshBunny.setSurfaceRender( arrSurfaceRender[i]);

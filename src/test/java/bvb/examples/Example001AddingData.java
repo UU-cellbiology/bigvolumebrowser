@@ -22,7 +22,7 @@ public class Example001AddingData
 
 		//start BVB
 		BigVolumeBrowser bvbTest = new BigVolumeBrowser(); 		
-		bvbTest.startBVB();
+		bvbTest.startBVB("");
 		
 		
 		//make and add ImagePlus

@@ -29,6 +29,8 @@ public class DataTreeModel implements TreeModel
 	
 	final ImageIcon iconFIJI;
 	
+	final ImageIcon iconMoBIE;
+	
 	final ImageIcon iconDefaultData;
 	
 	final ImageIcon iconOneSource;
@@ -51,6 +53,7 @@ public class DataTreeModel implements TreeModel
 		iconBDV = new ImageIcon(this.getClass().getResource("/icons/bdv-small.png"));
 		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
 		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
+		iconMoBIE = new ImageIcon(this.getClass().getResource("/icons/mobie-logo-small.png"));		
 		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/data-small-default.png"));
 		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/source-small.png"));
 
@@ -187,22 +190,27 @@ public class DataTreeModel implements TreeModel
 		
 	}
 	
-	public ImageIcon getBDVIcon()
+	public ImageIcon getIconBDV()
 	{
 		return iconBDV;
 	}
 	
-	public ImageIcon getBioformatsIcon()
+	public ImageIcon getIconBioformats()
 	{
 		return iconBioFormats;
 	}
 	
-	public ImageIcon getFIJIIcon()
+	public ImageIcon getIconFIJI()
 	{
 		return iconFIJI;
 	}
+
+	public ImageIcon getIconMoBIE()
+	{
+		return iconMoBIE;
+	}
 	
-	public ImageIcon getDataDefault()
+	public ImageIcon getIconDataDefault()
 	{
 		return iconDefaultData;
 	}

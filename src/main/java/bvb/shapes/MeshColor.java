@@ -16,12 +16,12 @@ import org.joml.Matrix4fc;
 
 import bvb.scene.VisMeshColor;
 
-public class MeshColorExample implements Shape
+public class MeshColor implements Shape
 {
 	
 	VisMeshColor meshVis = null;
 	
-	public MeshColorExample(String filename)
+	public MeshColor(String filename)
 	{
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile(filename);
@@ -38,7 +38,7 @@ public class MeshColorExample implements Shape
 		}
 	}
 	
-	public MeshColorExample(final Mesh nmesh)
+	public MeshColor(final Mesh nmesh)
 	{
 		if(nmesh != null)
 		{
