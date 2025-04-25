@@ -65,14 +65,12 @@ public class ViewPanel extends JPanel
 	    	{
 	    		if(e.getStateChange() == ItemEvent.SELECTED)
 	    		{
-	    			bvb.volumeBoxes.setVisible( true );
-	    			Prefs.set("BVB.bShowVolumeBoxes", true);
-	    			bvb.repaintBVV();
-	    		} else if(e.getStateChange()==ItemEvent.DESELECTED)
+	    			bvb.showVolumeBoxes( true );
+
+	    		} 
+	    		else 
 	    		{
-	    			bvb.volumeBoxes.setVisible( false );
-	    			Prefs.set("BVB.bShowVolumeBoxes", false);
-	    			bvb.repaintBVV();
+	    			bvb.showVolumeBoxes( false );
 	    		}
 	    	}
 	    });
@@ -239,7 +237,8 @@ public class ViewPanel extends JPanel
 			if(tempC != null)
 			{
 				bRepaintBVV = true;
-				setCanvasBGColor(tempC);
+				bvb.setCanvasBGColor(tempC);
+				
 			}
 			
 			BVBSettings.nTransformAnimationDuration = Integer.parseInt(nfAnimationDuration.getText());
@@ -264,13 +263,5 @@ public class ViewPanel extends JPanel
 		}
 	}
 	
-	public void setCanvasBGColor(final Color bgColor)
-	{
-		BVBSettings.canvasBGColor = new Color(bgColor.getRed(),bgColor.getGreen(),bgColor.getBlue(),bgColor.getAlpha());
-		selectColors.setColor(null, 0);
-		Prefs.set("BVB.canvasBGColor", bgColor.getRGB());
-		final Color bbFrameColor = BVBSettings.getInvertedColor(bgColor);
-		bvb.volumeBoxes.setLineColor( bbFrameColor );
-		//bt.clipBox.setLineColor( bbFrameColor.darker() );
-	}
+
 }

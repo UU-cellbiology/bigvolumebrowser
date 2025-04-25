@@ -99,7 +99,9 @@ public class PanelData extends JPanel
 	{
 		if(bLocked)
 			return;
+		
 		bLocked = true;
+		
 		TreePath[] selPaths = treeData.getSelectionPaths();
 		if(selPaths == null)
 		{
@@ -111,11 +113,11 @@ public class PanelData extends JPanel
 		{
 
 			DataTreeNode node = (DataTreeNode) selPaths[i].getLastPathComponent(  );
-			if(node.bvvSource!=null)
+			if(node.bvvSource != null)
 			{
 				selectedSAC.add( getSAC(node.bvvSource) );
 			}
-			if(node.spimData !=null)
+			if(node.spimData != null)
 			{
 				List< DataTreeNode > listBvvSourcesNodes = bvb.dataTreeModel.dataParentChildren.get(node);
 				for(DataTreeNode leafnode :listBvvSourcesNodes)

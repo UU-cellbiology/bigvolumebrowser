@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -68,7 +69,7 @@ import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 
 
-public class BigVolumeBrowser  implements PlugIn, TimePointListener
+public class BigVolumeBrowser implements PlugIn, TimePointListener
 {
 	/** Bvv instance **/
 	public Bvv bvv = null;
@@ -79,6 +80,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	/** Frame of BigVolumeViewer **/
 	public VolumeViewerFrame bvvFrame;
 	
+	/** Handle of BigVolumeViewer **/
 	public BvvHandleFrame bvvHandle;
 	
 	/** control panel **/
@@ -88,9 +90,9 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	public BVBActions bvbActions;
 	
 	/** boxes around volume **/	
-	public final VolumeBBoxes volumeBoxes;
+	final VolumeBBoxes volumeBoxes;
 	
-	/** boxes around volume **/	
+	/** clipping boxes **/	
 	public final VolumeBBoxes clipBoxes;
 
 	/** flag to lock BVB while it is busy **/
@@ -115,14 +117,19 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
+	final private ArrayList<Listener> listeners =	new ArrayList<>();
+
+	public static interface Listener 
+	{
+		public void bvbRestarted();
+	}
 	
-	//SHAPES FOR NOW
-	
+	//SHAPES FOR NOW	
 	final public ArrayList<Shape> shapes = new ArrayList<>();
 	
 	//DEBUG VISUALIZATION
-	public ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
-	public ArrayList<VolumeBox> helpBoxes = new ArrayList<>();
+	ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
+	ArrayList<VolumeBox> helpBoxes = new ArrayList<>();
 	
 	public BigVolumeBrowser()
 	{
@@ -356,6 +363,10 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		{
 			spimDataToInfo.put( spimData, info );
 			dataTreeModel.addData( spimData, out.getB(), info);
+			if(info.sourceSettings.size()!=0)
+			{
+				info.applySourceSettings( out.getB() );
+			}
 		}
 		return out;
 	}
@@ -486,6 +497,14 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		}
 	}
 	
+	public void showVolumeBoxes(boolean bShow)
+	{
+		volumeBoxes.setVisible( bShow );
+		ij.Prefs.set("BVB.bShowVolumeBoxes", bShow);
+		repaintBVV();
+	}
+	
+	
 	public void addShape(final Shape shape)
 	{
 		shapes.add( shape );
@@ -545,6 +564,8 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 	    //let's save viewer transform
 		AffineTransform3D viewTransform = bvvViewer.state().getViewerTransform();
 		
+		//save settings
+		updateSpimDataInfo();
 		
 		//save shapes
 		final ArrayList<Shape> tempShapes = new ArrayList<>();
@@ -578,8 +599,7 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		//put back spimdata
 		for(AbstractSpimData<?> spimData:spimDataAll)
 		{
-			final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
-			dataTreeModel.addData( out.getA(), out.getB(), spimDataToInfo.get( spimData ));			
+			addSpimData(spimData, spimDataToInfo.get( spimData ));
 		}
 		
 		//sync GUI		
@@ -601,8 +621,39 @@ public class BigVolumeBrowser  implements PlugIn, TimePointListener
 		{
 			shapes.add( shape );
 		}
-
+		
+		//notify listener that BVB finished restarting
+		for(Listener l : listeners)
+			l.bvbRestarted();
 	}
+	
+	void updateSpimDataInfo()
+	{		
+		for (Map.Entry<AbstractSpimData<?>, BVBSpimDataInfo> spimdataE : spimDataToInfo.entrySet()) 
+		{
+			List< BvvStackSource< ? > > bvvSList = spimDataToBVVSourceList.get( spimdataE.getKey() );
+			spimdataE.getValue().storeSourceSettings( bvvSList );
+		}
+	}
+	
+	public void setCanvasBGColor(final Color bgColor)
+	{
+		BVBSettings.canvasBGColor = new Color(bgColor.getRed(),bgColor.getGreen(),bgColor.getBlue(),bgColor.getAlpha());		
+		ij.Prefs.set("BVB.canvasBGColor", bgColor.getRGB());
+		final Color bbFrameColor = BVBSettings.getInvertedColor(bgColor);
+		volumeBoxes.setLineColor( bbFrameColor );
+		clipBoxes.setLineColor( bbFrameColor.darker() );
+	}
+	
+	public List<BvvStackSource<?> > getBVVSourcesList(final AbstractSpimData<?> spimData)
+	{
+		return spimDataToBVVSourceList.get( spimData );
+	}
+	
+	public void addBVBListener(Listener l) 
+	{
+        listeners.add(l);
+    }
 	
 	public static void main(String... args) throws Exception
 	{
