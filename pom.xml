@@ -79,8 +79,7 @@
 		<package-name>bvb</package-name>    
 		<license.licenseName>bsd_2</license.licenseName>
         <license.copyrightOwners>Cell Biology, Neurobiology and Biophysics Department of Utrecht University.</license.copyrightOwners>  			
-		<license.excludes>/main/resources/**</license.excludes>
-		<license.excludes>/test/resources/**</license.excludes>
+		<license.excludes>**/resources/**</license.excludes>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles> 
 	</properties>
