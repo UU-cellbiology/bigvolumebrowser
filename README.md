@@ -1,4 +1,4 @@
-[![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build-main.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build-main.yml)
+[![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml)
 
 # BigVolumeBrowser
 
