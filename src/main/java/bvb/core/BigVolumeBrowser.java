@@ -43,7 +43,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -153,7 +155,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	}
 	
 	//SHAPES FOR NOW	
-	final public ArrayList<Shape> shapes = new ArrayList<>();
+	final public Queue<Shape> shapes = new ConcurrentLinkedQueue<>();
 	
 	//DEBUG VISUALIZATION
 	ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();

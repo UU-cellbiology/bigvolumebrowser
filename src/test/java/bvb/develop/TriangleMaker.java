@@ -7,7 +7,7 @@ public class TriangleMaker
 	final Mesh mesh;
 	final int[] indices;
 	int nCurrent;
-	public int nMax =0;
+	public int nMax = 0;
 	
 	public TriangleMaker( final Mesh mesh)
 	{
@@ -16,20 +16,19 @@ public class TriangleMaker
 		indices = new int [4];
 	}
 	
-	public void addIndex(String sInd)
+	public boolean addIndex(String sInd)
 	{
-		if(sInd.equals( "]" ))
-		{
-			int dd =10;
-		}
 		
 		int nInd = Integer.parseInt(sInd);
 		if(nInd >nMax)
 			nMax = nInd;
 		if(nInd == -1)
 		{
-			if(nCurrent!=4)
+			if(nCurrent>4 && nCurrent<3)
+			{				
 				System.out.println("Something wrong with triangles");
+				return false;
+			}
 			dropTriangles();
 			nCurrent = 0;
 		}
@@ -38,12 +37,25 @@ public class TriangleMaker
 			indices[nCurrent] = nInd;
 			nCurrent++;
 		}
+		return true;
 	}
 	
 	void dropTriangles()
 	{
-		//counter clock-wise
-		mesh.triangles().addf( indices[0], indices[2], indices[1]);
-		mesh.triangles().addf( indices[0], indices[3], indices[2]);
+		if(nCurrent == 3)
+		{
+			//counter clock-wise
+			mesh.triangles().addf( indices[0], indices[2], indices[1]);
+		}
+
+		if(nCurrent == 4)
+		{
+			//counter clock-wise
+			mesh.triangles().addf( indices[0], indices[2], indices[1]);
+			mesh.triangles().addf( indices[0], indices[3], indices[2]);
+		}
+		
+//		mesh.triangles().addf( indices[0], indices[1], indices[2]);
+//		mesh.triangles().addf( indices[0], indices[2], indices[3]);
 	}
 }

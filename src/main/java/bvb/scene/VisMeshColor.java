@@ -88,7 +88,7 @@ public class VisMeshColor
 	
 	int silhouetteRender = silhouette_TRANSPARENT;	
 
-	float silhouetteDecay = 2.0f;
+	float silhouetteDecay = 1.0f;
 	
 	public static final int GRID_FILLED = 0, GRID_WIRE = 1, GRID_CARTESIAN = 2;
 	
@@ -164,7 +164,8 @@ public class VisMeshColor
 	{
 		//for now, let's recalculate normals, just in case
 		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-		Meshes.calculateNormals( mesh, this.mesh );
+		//Meshes.calculateNormals( mesh, this.mesh );
+		Meshes.copy( mesh, this.mesh );
 	}
 	
 	
