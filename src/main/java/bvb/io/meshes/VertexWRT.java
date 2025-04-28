@@ -1,4 +1,4 @@
-package bvb.develop;
+package bvb.io.meshes;
 
 public class VertexWRT
 {
@@ -39,12 +39,22 @@ public class VertexWRT
 		this.nxyz[0] = x;
 		this.nxyz[1] = y;
 		this.nxyz[2] = z;
+		normalize( this.nxyz );
 	}
+	
 	public void setNXYZ(String x,String y,String z)
 	{
-		this.nxyz[0] =  Float.parseFloat( x );
+		this.nxyz[0] = Float.parseFloat( x );
 		this.nxyz[1] = Float.parseFloat( y );
-		this.nxyz[2] =  Float.parseFloat( z );
+		this.nxyz[2] = Float.parseFloat( z );
+		normalize( this.nxyz );
+	}
+	
+	public static void normalize( final float[] a )
+	{
+		final double len = Math.sqrt( a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
+		for ( int i = 0; i < 3; ++i )
+			a[ i ] /= len;
 	}
 	
 }

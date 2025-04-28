@@ -15,6 +15,7 @@ import net.imglib2.util.Intervals;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.examples.RAIdummy;
+import bvb.io.meshes.WRTLoader;
 import bvb.scene.VisMeshColor;
 import bvb.shapes.MeshColor;
 import ij.ImageJ;
@@ -27,8 +28,8 @@ public class WRL_Parser_Test
 	{
 		new ImageJ();
 		
-		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/Image_6.wrl";
-		String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_MSC_RPMI.wrl";
+		String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/Image_6.wrl";
+		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_MSC_RPMI.wrl";
 
 		
 		WRTLoader loaderWRT = new WRTLoader ();
@@ -67,11 +68,29 @@ public class WRL_Parser_Test
 			//meshBVB.setPointsRender( 0.3f );
 			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
 			meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SHINY );
+			meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE );
 			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_PLAIN);
-			//meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE);
-			//meshBVB.setCartesianGrid( 2.0f, 0.1f );
+			//cartesian
+//			meshBVB.setSurfaceGrid( VisMeshColor.GRID_CARTESIAN);
+//			meshBVB.setCartesianGrid( 1.0f, 0.1f );
 			//and finally add mesh to BVB
 			bvbTest.addShape( meshBVB );	
 		}
+//		for(int i=0;i<loadedMeshes.size();i++)
+//		{
+//		
+//			MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+//
+//			meshBVB.setColor(meshColor );
+//		
+//			meshBVB.setPointsRender( 0.3f );
+//			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
+//			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SHINY );
+//			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_PLAIN);
+//			//meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE);
+//			//meshBVB.setCartesianGrid( 2.0f, 0.1f );
+//			//and finally add mesh to BVB
+//			bvbTest.addShape( meshBVB );	
+//		}
 	}
 }

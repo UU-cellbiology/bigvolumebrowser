@@ -1,4 +1,4 @@
-package bvb.develop;
+package bvb.io.meshes;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -18,11 +18,7 @@ public class WRTLoader
 	long nLineN = 0;
 	public ArrayList<Mesh> readWRT(String sFilename)
 	{
-		VertexWRT currV;
-		
-	
-		
-		
+			
 		try ( BufferedReader br = new BufferedReader(new FileReader(sFilename));) 
 		{
 			
@@ -171,6 +167,9 @@ public class WRTLoader
 	
 	boolean loadIndices(final BufferedReader br, String linein) throws IOException
 	{
+		
+		//calculate vertices per primitive (triangles or "squares")
+		int nVertPerPrim = TriangleMaker.getVerticesNPerPrimitive(linein);
 		String line = "";
 		String[] la;
 		Mesh currMesh = meshes.get( nMeshesN-1 );
@@ -178,8 +177,16 @@ public class WRTLoader
 		for(int i=0;i<vertices.size();i++)
 		{
 			v = vertices.get( i );
-			currMesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
-					v.nxyz[0], v.nxyz[1], v.nxyz[2], v.uv[0], v.uv[1] );
+			if(nVertPerPrim ==4)
+			{
+				currMesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
+						-v.nxyz[0], -v.nxyz[1], -v.nxyz[2], v.uv[0], v.uv[1] );
+			}
+			else
+			{
+				currMesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
+						v.nxyz[0], v.nxyz[1], v.nxyz[2], v.uv[0], v.uv[1] );				
+			}
 		}
 
 		//System.out.println("SUCCESS2");
@@ -213,7 +220,7 @@ public class WRTLoader
 						tr.addIndex( la[i] );
 			}
 		}
-		if(nMeshesN>=2)
+		if(nMeshesN>=1)
 			return false;
 		return true;
 	}

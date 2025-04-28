@@ -35,6 +35,8 @@ import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
+import java.util.Map;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -43,6 +45,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import bvb.core.BVVSettings;
+import bvb.scene.WelshPowell.Vertex;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -57,6 +60,7 @@ import bvvpg.core.shadergen.generate.SegmentTemplate;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.util.LinAlgHelpers;
 
 /** example class showing different ways to render a mesh**/
 
@@ -162,11 +166,21 @@ public class VisMeshColor
 	
 	public void setMesh(final Mesh mesh)
 	{
-		//for now, let's recalculate normals, just in case
+		
 		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-		//Meshes.calculateNormals( mesh, this.mesh );
-		Meshes.copy( mesh, this.mesh );
-	}
+		
+		//see if normals were setup already
+		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ),mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
+		
+		if(Double.compare(  LinAlgHelpers.length( test_norm ),0.0) != 0)
+		{
+			Meshes.copy( mesh, this.mesh );
+		}
+		else
+		{
+			Meshes.calculateNormals( mesh, this.mesh );
+		}
+	}	
 	
 	
 	private boolean initMesh( final GL3 gl )
@@ -185,17 +199,72 @@ public class VisMeshColor
 	private boolean initGPUBufferMesh( GL3 gl )
 	{
 		
-		final int[] tmp = new int[ 4 ];
-		final float [] barycenter = new float [mesh.triangles().size()*9];
 		
-		for(int i=0; i<mesh.triangles().size(); i++)
+//		final float [] barycenter = new float [mesh.vertices().size()*9];
+//		
+//		for(int i=0; i<mesh.triangles().size(); i++)
+//		{
+//			barycenter[i*9] = 1.0f;
+//			barycenter[i*9+4] = 1.0f;
+//			barycenter[i*9+8] = 1.0f;
+//		}
+
+//		final float [] barycenter = new float [9];
+//		barycenter[0] = 1.0f;
+//		barycenter[4] = 1.0f;
+//		barycenter[8] = 1.0f;
+				
+
+		
+		final float [] barycenter = new float [mesh.vertices().size()*3];
+		
+		final IntBuffer indicesT = mesh.triangles().indices().duplicate();
+		indicesT.rewind();
+		//boolean test = indices.hasArray();
+		final int [] trindices = IntBuffertoArray(indicesT);
+		//boolean bFirst = true;
+		
+		WelshPowell wp = new WelshPowell(mesh.vertices().size(),trindices);
+		Map< Vertex, Integer > cIndex = wp.colourVertices();
+		
+		for (Map.Entry<Vertex, Integer > entry : cIndex.entrySet()) 
 		{
-			barycenter[i*9] = 1.0f;
-			barycenter[i*9+4] = 1.0f;
-			barycenter[i*9+8] = 1.0f;
+			barycenter[entry.getKey().node.intValue()*3+entry.getValue().intValue()]= 1.0f;
+//		    System.out.println(entry.getKey() + "/" + entry.getValue());
 		}
-		
-		
+//		
+//		for(int i=0; i<trindices.length; i+=3)
+//		{
+//			
+//			for(int j=0;j<3;j++)
+//			{
+//				for(int d=0;d<3;d++)
+//				{
+//					barycenter[trindices[i+j]*3+d] = 0.0f;
+//				}
+//			}
+//			if(bFirst)
+//			{
+//				barycenter[trindices[i]*3+1] = 1.0f;
+//				barycenter[trindices[i+1]*3+2] = 1.0f;
+//				barycenter[trindices[i+2]*3] = 1.0f;
+//			
+//			}
+//			else
+//			{
+//				barycenter[trindices[i]*3+2] = 1.0f;
+//				barycenter[trindices[i+1]*3+2] = 1.0f;
+//				barycenter[trindices[i+2]*3+1] = 1.0f;				
+//			}
+//			bFirst = !bFirst;
+////			for(int j=0;j<3;j++)
+////			{
+////				barycenter[trindices[i+j]*3+j] = 1.0f;
+////			}
+//
+//		}
+
+		final int[] tmp = new int[ 4 ];
 		gl.glGenBuffers( 4, tmp, 0 );
 		final int meshPosVbo = tmp[ 0 ];
 		final int meshNormalVbo = tmp[ 1 ];
@@ -347,6 +416,20 @@ public class VisMeshColor
 		gl.glDepthFunc( GL.GL_LESS);
 
 	}
-	
+	public static int[] IntBuffertoArray(IntBuffer b) {
+	    if(b.hasArray()) 
+	    {
+	        if(b.arrayOffset() == 0)
+	            return b.array();
+
+	        return Arrays.copyOfRange(b.array(), b.arrayOffset(), b.array().length);
+	    }
+
+	    b.rewind();
+	    int[] foo = new int[b.remaining()];
+	    b.get(foo);
+
+	    return foo;
+	}
 
 }

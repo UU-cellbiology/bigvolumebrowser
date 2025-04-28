@@ -63,8 +63,8 @@ vec4 getGridColor(vec4 colorInp)
 	if(gridType == 2)
 	{	
 		vec3 l = abs(mod(abs(posW), cartesianGridStep) - 0.5*cartesianGridStep);
-		//float d = min(min(l.x, l.y), l.z);
-		float d = min(l.x, l.y);
+		float d = min(min(l.x, l.y), l.z);
+		//float d = min(l.x, l.y);
 		if(d < cartesianFraction)
 		{
 			return colorInp;
@@ -72,7 +72,6 @@ vec4 getGridColor(vec4 colorInp)
 		else
 		{
 			discard;
-			//return vec4(1.0,1.0,1.0,1.0);
 		}
 	}
 	

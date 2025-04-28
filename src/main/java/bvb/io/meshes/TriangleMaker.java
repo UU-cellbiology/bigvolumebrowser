@@ -1,4 +1,4 @@
-package bvb.develop;
+package bvb.io.meshes;
 
 import net.imglib2.mesh.Mesh;
 
@@ -15,7 +15,15 @@ public class TriangleMaker
 		nCurrent = 0;
 		indices = new int [4];
 	}
-	
+	public static int getVerticesNPerPrimitive(String linein)
+	{
+		String[] la;
+		la = linein.split("\\s+|,");
+		if(la[9].equals( "-1" ))
+			return 3;
+		return 4;
+		
+	}
 	public boolean addIndex(String sInd)
 	{
 		
@@ -51,8 +59,11 @@ public class TriangleMaker
 		if(nCurrent == 4)
 		{
 			//counter clock-wise
+//			mesh.triangles().addf( indices[0], indices[1], indices[2]);
+//			mesh.triangles().addf( indices[0], indices[2], indices[3]);
 			mesh.triangles().addf( indices[0], indices[2], indices[1]);
 			mesh.triangles().addf( indices[0], indices[3], indices[2]);
+
 		}
 		
 //		mesh.triangles().addf( indices[0], indices[1], indices[2]);
