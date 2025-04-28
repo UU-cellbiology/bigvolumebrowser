@@ -29,14 +29,21 @@ public class WelshPowell
 			addEdge(trindices[i+1], trindices[i+2]);
 		}
 		int nMaxColorN = 0;
+		int moreTwoN = 0;
 		int nMinColorN = 10000;
 		double nAver = 0.0;
+		int addV = 0;
 		for(Vertex v:vertices)
 		{
 			nAver += v.neighbors.size();
 			if(v.neighbors.size()>nMaxColorN)
 			{
 				nMaxColorN = v.neighbors.size();
+			}
+			if(v.neighbors.size()>2)
+			{
+				moreTwoN++;
+				addV+=v.neighbors.size()-2;
 			}
 			if(v.neighbors.size()<nMinColorN)
 			{
@@ -48,6 +55,8 @@ public class WelshPowell
 		System.out.println("triangles " + Integer.toString( trindices.length/3 ));
 		System.out.println("min color " + Integer.toString( nMinColorN ));
 		System.out.println("max color " + Integer.toString( nMaxColorN ));
+		System.out.println("moretwo " + Integer.toString( moreTwoN ));
+		System.out.println("addV " + Integer.toString( addV ));
 		System.out.println("aver color " + Double.toString( nAver ));
 		System.out.println("graphs total "+Integer.toString(graphs.size()));
 	}

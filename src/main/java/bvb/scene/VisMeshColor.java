@@ -222,33 +222,33 @@ public class VisMeshColor
 		indicesT.rewind();
 		//boolean test = indices.hasArray();
 		final int [] trindices = IntBuffertoArray(indicesT);
-		//boolean bFirst = true;
+		boolean bFirst = true;
 		
-		WelshPowell wp = new WelshPowell(mesh.vertices().size(),trindices);
-		Map< Vertex, Integer > cIndex = wp.colourVertices();
-		
-		for (Map.Entry<Vertex, Integer > entry : cIndex.entrySet()) 
-		{
-			barycenter[entry.getKey().node.intValue()*3+entry.getValue().intValue()]= 1.0f;
-//		    System.out.println(entry.getKey() + "/" + entry.getValue());
-		}
+//		WelshPowell wp = new WelshPowell(mesh.vertices().size(),trindices);
+//		Map< Vertex, Integer > cIndex = wp.colourVertices();
 //		
-//		for(int i=0; i<trindices.length; i+=3)
+//		for (Map.Entry<Vertex, Integer > entry : cIndex.entrySet()) 
 //		{
-//			
-//			for(int j=0;j<3;j++)
-//			{
-//				for(int d=0;d<3;d++)
-//				{
-//					barycenter[trindices[i+j]*3+d] = 0.0f;
-//				}
-//			}
+//			barycenter[entry.getKey().node.intValue()*3+entry.getValue().intValue()]= 1.0f;
+////		    System.out.println(entry.getKey() + "/" + entry.getValue());
+//		}
+//		
+		for(int i=0; i<trindices.length; i+=3)
+		{
+			
+			for(int j=0;j<3;j++)
+			{
+				for(int d=0;d<3;d++)
+				{
+					barycenter[trindices[i+j]*3+d] = 0.0f;
+				}
+			}
 //			if(bFirst)
 //			{
-//				barycenter[trindices[i]*3+1] = 1.0f;
-//				barycenter[trindices[i+1]*3+2] = 1.0f;
-//				barycenter[trindices[i+2]*3] = 1.0f;
-//			
+				barycenter[trindices[i]*3+1] = 1.0f;
+				barycenter[trindices[i+1]*3+2] = 1.0f;
+				barycenter[trindices[i+2]*3] = 1.0f;
+			
 //			}
 //			else
 //			{
@@ -257,12 +257,12 @@ public class VisMeshColor
 //				barycenter[trindices[i+2]*3+1] = 1.0f;				
 //			}
 //			bFirst = !bFirst;
-////			for(int j=0;j<3;j++)
-////			{
-////				barycenter[trindices[i+j]*3+j] = 1.0f;
-////			}
-//
-//		}
+//			for(int j=0;j<3;j++)
+//			{
+//				barycenter[trindices[i+j]*3+j] = 1.0f;
+//			}
+
+		}
 
 		final int[] tmp = new int[ 4 ];
 		gl.glGenBuffers( 4, tmp, 0 );

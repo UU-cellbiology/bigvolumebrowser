@@ -5,8 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Triangle;
+import net.imglib2.mesh.Triangles;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
 
 public class WRTLoader
@@ -14,8 +19,12 @@ public class WRTLoader
 	ArrayList<Mesh> meshes = new ArrayList<>();
 	ArrayList<VertexWRT> vertices = new ArrayList<>();
 	int nMeshesN = 0;
-	
+	int newVindex;
+	int nVertPerPrim;
 	long nLineN = 0;
+	int nTimePoint = 0;
+	
+	ArrayList<Integer> addedInd = new ArrayList<>();
 	public ArrayList<Mesh> readWRT(String sFilename)
 	{
 			
@@ -35,8 +44,14 @@ public class WRTLoader
 
 				if(line.contains( " Coordinate {" ) )
 				{
+					System.out.println( nLineN );
 					loadVertices(br);
+					nTimePoint++;
+	//				System.out.println( nLineN );
+					if(nTimePoint>1)
+						bContinue = false;
 				}
+
 
 				if(line.contains( " TextureCoordinate" ) )
 				{
@@ -51,11 +66,12 @@ public class WRTLoader
 
 				if(line.contains( " coordIndex" ) )
 				{
-					bContinue = loadIndices(br, line);
+					loadIndices(br, line);
 
 				}
 				
-			
+				if(nMeshesN>500)
+					bContinue = false;
 			}
 			System.out.println("Found " +Integer.toString( nMeshesN )+ " meshes");
 			
@@ -76,8 +92,7 @@ public class WRTLoader
 	{		
 		String line = "";
 		String[] la;
-		nMeshesN ++;
-		meshes.add( new NaiveFloatMesh() );
+
 		System.out.println("Mesh "+Integer.toString(nMeshesN));
 		vertices.clear();
 		line = br.readLine();
@@ -169,36 +184,27 @@ public class WRTLoader
 	{
 		
 		//calculate vertices per primitive (triangles or "squares")
-		int nVertPerPrim = TriangleMaker.getVerticesNPerPrimitive(linein);
+		nVertPerPrim = TriangleMaker.getVerticesNPerPrimitive(linein);
+		nMeshesN ++;
+		final Mesh currMesh = new NaiveFloatMesh();
+		meshes.add( currMesh );
 		String line = "";
 		String[] la;
-		Mesh currMesh = meshes.get( nMeshesN-1 );
-		VertexWRT v;
-		for(int i=0;i<vertices.size();i++)
-		{
-			v = vertices.get( i );
-			if(nVertPerPrim ==4)
-			{
-				currMesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
-						-v.nxyz[0], -v.nxyz[1], -v.nxyz[2], v.uv[0], v.uv[1] );
-			}
-			else
-			{
-				currMesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
-						v.nxyz[0], v.nxyz[1], v.nxyz[2], v.uv[0], v.uv[1] );				
-			}
-		}
 
-		//System.out.println("SUCCESS2");
+		addedInd.clear();
+
+		newVindex = 0;
+
 		la = linein.split("\\s+|,");
 		final TriangleMaker tr = new TriangleMaker(currMesh);
 		for(int i = 3; i<la.length;i++)
 		{
 			if(la[i].length()>0)
 			{
-				if(!tr.addIndex( la[i] ))
+				final int [] currInd = tr.addIndex( la[i] );
+				if(currInd != null)
 				{
-					//int j=10;
+					addIndices(currMesh, currInd);					
 				}
 			}
 		}
@@ -217,12 +223,89 @@ public class WRTLoader
 			{
 				for(int i = 1; i<la.length;i++)
 					if(la[i].length()>0)
-						tr.addIndex( la[i] );
+					{
+						final int [] currInd = tr.addIndex( la[i] );
+						if(currInd != null)
+						{
+							addIndices(currMesh, currInd);
+							
+						}
+					}
 			}
 		}
-		if(nMeshesN>=1)
-			return false;
+		
+		System.out.println("in vertN "+Integer.toString( addedInd.size() ));
+		System.out.println("added vertN "+Integer.toString( currMesh.vertices().size()-addedInd.size() ));
+		System.out.println(addedInd.size() );
+//		if(nMeshesN>=200)
+//			return false;
 		return true;
+	}
+	
+	public void addIndices(final Mesh currMesh, final int [] currInd)
+	{
+		if(nVertPerPrim == 3)
+		{
+			addTriangle( currMesh, currInd);
+		}
+		else
+		{
+			final int[] tri1 = new int [] {currInd[0],currInd[2],currInd[1]};
+			final int[] tri2 = new int [] {currInd[0],currInd[3],currInd[2]};
+			addTriangle( currMesh, tri1);
+			addTriangle( currMesh, tri2);
+		}
+	}
+	
+	public void addTriangle(final Mesh currMesh, final int [] currInd)
+	{
+		int [] newInd = new int [3];
+		for(int k=0;k<3; k++)
+		{
+			if(!addedInd.contains(currInd[k]))
+			{
+				newInd[k] = newVindex;
+				newVindex++;
+				addedInd.add( currInd[k]);
+				
+				if(nVertPerPrim == 4)
+				{
+					addVertNegNormal(currMesh,vertices.get( currInd[k] ));
+				}
+				else
+				{
+					addVertPosNormal(currMesh,vertices.get( currInd[k] ));
+				}
+			}
+			else
+			{
+				newInd[k] = newVindex;
+				newVindex++;
+				
+				if(nVertPerPrim == 4)
+				{
+					addVertNegNormal(currMesh,vertices.get( currInd[k] ));
+				}
+				else
+				{
+					addVertPosNormal(currMesh,vertices.get( currInd[k] ));
+				}
+				//currInd[k] = newVindex;
+			}
+		}
+		currMesh.triangles().addf( newInd[0], newInd[2], newInd[1]);
+		
+	}
+	
+	public static void addVertPosNormal(final Mesh mesh, final VertexWRT v)
+	{
+		mesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
+				v.nxyz[0], v.nxyz[1], v.nxyz[2], v.uv[0], v.uv[1] );
+	}
+	public static void addVertNegNormal(final Mesh mesh, final VertexWRT v)
+	{
+		mesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
+				-v.nxyz[0], -v.nxyz[1], -v.nxyz[2], v.uv[0], v.uv[1] );
 	}
 	
 }
