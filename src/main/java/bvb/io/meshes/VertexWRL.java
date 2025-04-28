@@ -1,6 +1,6 @@
 package bvb.io.meshes;
 
-public class VertexWRT
+public class VertexWRL
 {
 	public final float [] xyz = new float[3];
 	public final float [] uv = new float [2];

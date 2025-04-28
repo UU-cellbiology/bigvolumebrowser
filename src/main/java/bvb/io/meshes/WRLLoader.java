@@ -14,10 +14,10 @@ import net.imglib2.mesh.Triangle;
 import net.imglib2.mesh.Triangles;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
 
-public class WRTLoader
+public class WRLLoader
 {
 	ArrayList<Mesh> meshes = new ArrayList<>();
-	ArrayList<VertexWRT> vertices = new ArrayList<>();
+	ArrayList<VertexWRL> vertices = new ArrayList<>();
 	int nMeshesN = 0;
 	int newVindex;
 	int nVertPerPrim;
@@ -25,14 +25,13 @@ public class WRTLoader
 	int nTimePoint = 0;
 	
 	ArrayList<Integer> addedInd = new ArrayList<>();
-	public ArrayList<Mesh> readWRT(String sFilename)
+	public ArrayList<Mesh> readWRL(String sFilename)
 	{
 			
 		try ( BufferedReader br = new BufferedReader(new FileReader(sFilename));) 
 		{
 			
 			String line = "";
-			//String[] la;
 			boolean bContinue = true;
 
 			while(bContinue)
@@ -48,8 +47,8 @@ public class WRTLoader
 					loadVertices(br);
 					nTimePoint++;
 	//				System.out.println( nLineN );
-					if(nTimePoint>1)
-						bContinue = false;
+					//if(nTimePoint>1)
+						//bContinue = false;
 				}
 
 
@@ -99,7 +98,7 @@ public class WRTLoader
 		nLineN++;
 		la = line.split("\\s+|,");		
 		int nVert = 1;
-		VertexWRT currV = new VertexWRT ();
+		VertexWRL currV = new VertexWRL ();
 		currV.setXYZ( la[3], la[4], la[5]);
 		vertices.add( currV );
 		boolean bRead = true;
@@ -108,7 +107,7 @@ public class WRTLoader
 			line = br.readLine();
 			nLineN++;
 			la = line.split("\\s+|,");
-			currV = new VertexWRT ();
+			currV = new VertexWRL ();
 			currV.setXYZ( la[1], la[2], la[3]);
 			vertices.add( currV );
 
@@ -297,12 +296,12 @@ public class WRTLoader
 		
 	}
 	
-	public static void addVertPosNormal(final Mesh mesh, final VertexWRT v)
+	public static void addVertPosNormal(final Mesh mesh, final VertexWRL v)
 	{
 		mesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
 				v.nxyz[0], v.nxyz[1], v.nxyz[2], v.uv[0], v.uv[1] );
 	}
-	public static void addVertNegNormal(final Mesh mesh, final VertexWRT v)
+	public static void addVertNegNormal(final Mesh mesh, final VertexWRL v)
 	{
 		mesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
 				-v.nxyz[0], -v.nxyz[1], -v.nxyz[2], v.uv[0], v.uv[1] );
