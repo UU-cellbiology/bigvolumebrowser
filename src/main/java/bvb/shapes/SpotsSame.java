@@ -41,7 +41,7 @@ import bvb.scene.VisPointsScaled;
 
 /** Example class that uses points shader **/
 
-public class PointsSame implements Shape
+public class SpotsSame implements BasicShape
 {
 	
 
@@ -52,7 +52,7 @@ public class PointsSame implements Shape
 	int renderType;
 	int pointShape;
 	
-	public PointsSame(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
+	public SpotsSame(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
 		renderType = nRenderType_;

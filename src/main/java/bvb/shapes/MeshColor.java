@@ -44,7 +44,7 @@ import org.joml.Matrix4fc;
 
 import bvb.scene.VisMeshColor;
 
-public class MeshColor implements Shape
+public class MeshColor implements BasicShape
 {
 	
 	VisMeshColor meshVis = null;

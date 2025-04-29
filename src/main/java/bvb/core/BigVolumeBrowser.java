@@ -94,7 +94,7 @@ import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
-import bvb.shapes.Shape;
+import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 
@@ -155,7 +155,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	}
 	
 	//SHAPES FOR NOW	
-	final public Queue<Shape> shapes = new ConcurrentLinkedQueue<>();
+	final public Queue<BasicShape> shapes = new ConcurrentLinkedQueue<>();
 	
 	//DEBUG VISUALIZATION
 	ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
@@ -510,7 +510,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		
-		for(Shape shape : shapes)
+		for(BasicShape shape : shapes)
 		{
 			shape.draw( gl, pvm, vm, screen_size );
 		}
@@ -535,12 +535,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	}
 	
 	
-	public void addShape(final Shape shape)
+	public void addShape(final BasicShape shape)
 	{
 		shapes.add( shape );
 	}
 	
-	public void removeShape(final Shape shape)
+	public void removeShape(final BasicShape shape)
 	{
 		shapes.remove( shape );
 	}
@@ -598,8 +598,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		updateSpimDataInfo();
 		
 		//save shapes
-		final ArrayList<Shape> tempShapes = new ArrayList<>();
-		for(Shape shape : shapes)
+		final ArrayList<BasicShape> tempShapes = new ArrayList<>();
+		for(BasicShape shape : shapes)
 		{
 			tempShapes.add( shape );
 		}
@@ -642,12 +642,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvViewer.state().setViewerTransform( viewTransform );
 		
 		//reload shapes
-		for(Shape shape : tempShapes)
+		for(BasicShape shape : tempShapes)
 		{
 			shape.reload();
 		}
 		//add back
-		for(Shape shape : tempShapes)
+		for(BasicShape shape : tempShapes)
 		{
 			shapes.add( shape );
 		}

@@ -44,7 +44,7 @@ import bvb.scene.VisPolyLineAA;
 import bvb.utils.Misc;
 
 
-public class VolumeBox implements Shape
+public class VolumeBox implements BasicShape
 {
 	public ArrayList<RealPoint> vertices;
 	public ArrayList<ArrayList<RealPoint>> edges;

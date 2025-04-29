@@ -43,13 +43,13 @@ import org.joml.Matrix4fc;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
-import bvb.shapes.Shape;
+import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 
-public class VolumeBBoxes implements Shape
+public class VolumeBBoxes implements BasicShape
 {
 	
 	final BigVolumeBrowser bvb;

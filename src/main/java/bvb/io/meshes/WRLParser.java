@@ -6,28 +6,37 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import net.imglib2.mesh.Mesh;
-import net.imglib2.mesh.Triangle;
-import net.imglib2.mesh.Triangles;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
 
-public class WRLLoader
+public class WRLParser
 {
-	ArrayList<Mesh> meshes = new ArrayList<>();
-	ArrayList<VertexWRL> vertices = new ArrayList<>();
+	final ArrayList<Mesh> meshes = new ArrayList<>();
+	final ArrayList<VertexWRL> vertices = new ArrayList<>();
 	int nMeshesN = 0;
 	int newVindex;
 	int nVertPerPrim;
 	long nLineN = 0;
-	int nTimePoint = 0;
+	int nTimePoint = -1;
+	boolean bTimeData = false;
 	
-	ArrayList<Integer> addedInd = new ArrayList<>();
+	public boolean bEnableWireGrid = true;	
+	public int nMaxMeshes = Integer.MAX_VALUE;
+	public int nMaxTimePoints = Integer.MAX_VALUE;	
+	
+	Map<Integer,Integer> addedInd = new HashMap<>();
+	
 	public ArrayList<Mesh> readWRL(String sFilename)
 	{
-			
+		
+
+		nMeshesN = 0;
+
+		nLineN = 0;
+		nTimePoint = -1;
+		bTimeData = false;
 		try ( BufferedReader br = new BufferedReader(new FileReader(sFilename));) 
 		{
 			
@@ -40,15 +49,24 @@ public class WRLLoader
 				nLineN ++;
 				if(line==null)
 					break;
-
+				if(line.contains( " TimeSwitch" ) )
+				{
+					bTimeData = true;
+				}
+				
+				
 				if(line.contains( " Coordinate {" ) )
 				{
 					System.out.println( nLineN );
 					loadVertices(br);
-					nTimePoint++;
-	//				System.out.println( nLineN );
-					//if(nTimePoint>1)
-						//bContinue = false;
+					if(bTimeData)
+					{
+						nTimePoint++;
+						if(nMaxTimePoints == nTimePoint)
+						{
+							bContinue = false;
+						}
+					}
 				}
 
 
@@ -69,7 +87,7 @@ public class WRLLoader
 
 				}
 				
-				if(nMeshesN>500)
+				if(nMeshesN>nMaxMeshes )
 					bContinue = false;
 			}
 			System.out.println("Found " +Integer.toString( nMeshesN )+ " meshes");
@@ -97,7 +115,7 @@ public class WRLLoader
 		line = br.readLine();
 		nLineN++;
 		la = line.split("\\s+|,");		
-		int nVert = 1;
+//		int nVert = 1;
 		VertexWRL currV = new VertexWRL ();
 		currV.setXYZ( la[3], la[4], la[5]);
 		vertices.add( currV );
@@ -111,12 +129,12 @@ public class WRLLoader
 			currV.setXYZ( la[1], la[2], la[3]);
 			vertices.add( currV );
 
-			nVert++;
+//			nVert++;
 			if(la.length>4)
 				bRead = false;
 		}
-		System.out.println("Loaded " +Integer.toString( nVert )+ " vertices");
-		//bContinue = false;
+//		System.out.println("Loaded " +Integer.toString( nVert )+ " vertices");
+
 		return true;
 	}
 	
@@ -169,7 +187,6 @@ public class WRLLoader
 			nLineN++;
 			la = line.split("\\s+|,");
 			vertices.get( nVert ).setNXYZ( la[1], la[2], la[3]);
-			//mesh.vertices().addf( Float.parseFloat( la[1] ), Float.parseFloat( la[2] ), Float.parseFloat( la[3] ) );				
 			nVert++;
 			if(la.length>4)
 				bRead = false;
@@ -182,7 +199,7 @@ public class WRLLoader
 	boolean loadIndices(final BufferedReader br, String linein) throws IOException
 	{
 		
-		//calculate vertices per primitive (triangles or "squares")
+		//calculate vertices per primitive (triangles or quads)
 		nVertPerPrim = TriangleMaker.getVerticesNPerPrimitive(linein);
 		nMeshesN ++;
 		final Mesh currMesh = new NaiveFloatMesh();
@@ -207,7 +224,7 @@ public class WRLLoader
 				}
 			}
 		}
-		//bContinue = false;
+
 		boolean bRead = true;
 		while(bRead)
 		{
@@ -233,11 +250,10 @@ public class WRLLoader
 			}
 		}
 		
-		System.out.println("in vertN "+Integer.toString( addedInd.size() ));
-		System.out.println("added vertN "+Integer.toString( currMesh.vertices().size()-addedInd.size() ));
-		System.out.println(addedInd.size() );
-//		if(nMeshesN>=200)
-//			return false;
+//		System.out.println("in vertN "+Integer.toString( addedInd.size() ));
+//		System.out.println("added vertN "+Integer.toString( currMesh.vertices().size()-addedInd.size() ));
+//		System.out.println(addedInd.size() );
+
 		return true;
 	}
 	
@@ -258,50 +274,59 @@ public class WRLLoader
 	
 	public void addTriangle(final Mesh currMesh, final int [] currInd)
 	{
-		int [] newInd = new int [3];
+
 		for(int k=0;k<3; k++)
 		{
-			if(!addedInd.contains(currInd[k]))
+			
+			if(addedInd.get(currInd[k]) == null)
 			{
-				newInd[k] = newVindex;
+				addedInd.put( currInd[k], newVindex);
+				addVertex(currMesh,vertices.get( currInd[k] ));
+				currInd[k] = newVindex;
 				newVindex++;
-				addedInd.add( currInd[k]);
-				
-				if(nVertPerPrim == 4)
-				{
-					addVertNegNormal(currMesh,vertices.get( currInd[k] ));
-				}
-				else
-				{
-					addVertPosNormal(currMesh,vertices.get( currInd[k] ));
-				}
+
 			}
 			else
-			{
-				newInd[k] = newVindex;
-				newVindex++;
-				
-				if(nVertPerPrim == 4)
+			{				
+				//separate vertices per triangle,
+				//allows wireframe mesh render 
+				//but loads more data (adds extra vertices)
+				if(bEnableWireGrid)
 				{
-					addVertNegNormal(currMesh,vertices.get( currInd[k] ));
+					addVertex(currMesh,vertices.get( currInd[k] ));
+					currInd[k] = newVindex;
+					newVindex++;
 				}
+				//shared vertices per triangle,
+				//does not always allow wireframe mesh render
 				else
 				{
-					addVertPosNormal(currMesh,vertices.get( currInd[k] ));
+					currInd[k] = addedInd.get(currInd[k]).intValue();
 				}
-				//currInd[k] = newVindex;
 			}
 		}
-		currMesh.triangles().addf( newInd[0], newInd[2], newInd[1]);
+		currMesh.triangles().addf( currInd[0], currInd[2], currInd[1]);
 		
 	}
 	
-	public static void addVertPosNormal(final Mesh mesh, final VertexWRL v)
+	void addVertex(final Mesh currMesh, final VertexWRL v)
+	{
+		if(nVertPerPrim == 4)
+		{
+			addVertNegNormal(currMesh,v);
+		}
+		else
+		{
+			addVertPosNormal(currMesh,v);
+		}
+	}
+	
+	static void addVertPosNormal(final Mesh mesh, final VertexWRL v)
 	{
 		mesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
 				v.nxyz[0], v.nxyz[1], v.nxyz[2], v.uv[0], v.uv[1] );
 	}
-	public static void addVertNegNormal(final Mesh mesh, final VertexWRL v)
+	static void addVertNegNormal(final Mesh mesh, final VertexWRL v)
 	{
 		mesh.vertices().addf( v.xyz[0], v.xyz[1], v.xyz[2], 
 				-v.nxyz[0], -v.nxyz[1], -v.nxyz[2], v.uv[0], v.uv[1] );

@@ -11,7 +11,7 @@ import net.imglib2.util.Intervals;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.examples.RAIdummy;
-import bvb.io.meshes.WRLLoader;
+import bvb.io.meshes.WRLParser;
 import bvb.scene.VisMeshColor;
 import bvb.shapes.MeshColor;
 import ij.ImageJ;
@@ -24,11 +24,12 @@ public class WRL_Parser_Test
 	{
 		new ImageJ();
 		
-		String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/Image_6.wrl";
-		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_MSC_RPMI.wrl";
+		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/Image_6.wrl";
+		String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_MSC_RPMI.wrl";
 
 		
-		WRLLoader loaderWRT = new WRLLoader ();
+		WRLParser loaderWRT = new WRLParser ();
+		loaderWRT.bEnableWireGrid = false;
 		ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
 		//start BVB
 		BigVolumeBrowser bvbTest = new BigVolumeBrowser(); 		
@@ -65,7 +66,7 @@ public class WRL_Parser_Test
 			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
 
 			meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SHINY );
-			//meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE );
+			meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE );
 			//cartesian
 //			meshBVB.setSurfaceGrid( VisMeshColor.GRID_CARTESIAN);
 //			meshBVB.setCartesianGrid( 1.0f, 0.1f );

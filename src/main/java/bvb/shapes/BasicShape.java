@@ -26,58 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package bvb.examples;
+package bvb.shapes;
 
-import java.awt.Color;
-import java.util.ArrayList;
+import com.jogamp.opengl.GL3;
 
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealPoint;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
+import org.joml.Matrix4fc;
 
-
-import bvb.core.BigVolumeBrowser;
-import bvb.scene.VisPointsScaled;
-import bvb.shapes.PointsSame;
-import ij.ImageJ;
-
-public class Example002Points
+public interface BasicShape
 {
-	public static void main( final String[] args )
-	{
-				
-		new ImageJ();
+	/** method to draw GPU primitives **/
+	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size);
 
-		//start BVB
-		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
-		testBVB.startBVB("");
-		
-		//load some data
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
-		
-		//add sphere with random values as background		
-		int nRadius = 35;
-		int maxInt = 200;
-		final RandomAccessibleInterval< UnsignedByteType > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);
-		
-		testBVB.addRAI( sphereRai );
-
-		
-		//define point size, color, shape and filling
-		PointsSame testPoints = new PointsSame(nRadius*0.2f, Color.RED, VisPointsScaled.SHAPE_SQUARE, VisPointsScaled.RENDER_OUTLINE);
-		
-		final ArrayList<RealPoint> vertices = new ArrayList<>();
-		
-		int nTotNumber = 20;
-		
-		double nScale = nRadius*2.0;
-		
-		for(int i=0;i<nTotNumber; i++)
-		{
-			vertices.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-		}
-		
-		testPoints.setPoints( vertices );
-		testBVB.addShape( testPoints );
-	}
+	/** method required to reload GPU shader/primitives 
+	 * during BVV restart **/
+	public void reload();
 }
