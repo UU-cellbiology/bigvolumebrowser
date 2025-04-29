@@ -42,6 +42,7 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import bvb.core.BVVSettings;
@@ -214,7 +215,11 @@ public class VisMeshColor
 				{
 					barycenter[trindices[i+j]*3+d] = 0.0f;
 				}
-				barycenter[trindices[i]*3+j] = 1.0f;
+				
+			}
+			for(int j=0;j<3;j++)
+			{
+				barycenter[trindices[i+j]*3+j] = 1.0f;
 			}
 
 		}
@@ -351,14 +356,44 @@ public class VisMeshColor
 			ellipse_axes.mul(1.0f/fPointScale);
 			ellipse_axes.x = ellipse_axes.x * ellipse_axes.x;
 			ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
-					
+			Vector3f aPos = new Vector3f ();
+			aPos.x = 4890.786865234375f;
+			aPos.y = 10439.10400390625f;
+			aPos.z = 1188.9420776367188f;
+			Vector4f aPos4 = new Vector4f (aPos, 1.0f);
+			
+			Vector4f glPosition = aPos4.mul( pvm );
+			Vector4f shift = new Vector4f (glPosition);
+			shift.x = shift.x + 1000.f;
+			Matrix4f invPVM = new Matrix4f();
+			pvm.invert( invPVM );
+			shift = shift.mul( invPVM );
+			shift.w = 1.0f;
+			for(int d=0;d<3;d++)
+			{
+				shift.setComponent( d, shift.get( d )-aPos.get( d ) );
+			}
+			float len = shift.length();
+			for(int d=0;d<3;d++)
+			{
+				shift.setComponent( d, shift.get( d )*0.5f*fPointSize/len );
+			}
+			for(int d=0;d<3;d++)
+			{
+				shift.setComponent( d, shift.get( d ) + aPos.get( d ) );
+			}
+			
+		 	shift = shift.mul(pvm);
+		 	float dRadius = Math.abs(window_sizef.x*(shift.x/shift.w - glPosition.x/glPosition.w));
+			//shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
+			System.out.println(dRadius);		
 			progPoints.getUniformMatrix4f( "pvm" ).set( pvm );
 			progPoints.getUniform1f( "pointSizeReal" ).set( fPointSize );
 			progPoints.getUniform1f( "pointScale" ).set( fPointScale );
 			progPoints.getUniform4f( "colorin" ).set( l_color );
 			progPoints.getUniform2f( "windowSize" ).set( window_sizef );
 			progPoints.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
-			progPoints.getUniform1i( "renderType" ).set( VisPointsScaled.RENDER_FILLED );
+			progPoints.getUniform1i( "renderType" ).set( VisPointsScaled.RENDER_OUTLINE );
 			progPoints.getUniform1i( "pointShape" ).set( VisPointsScaled.SHAPE_ROUND );
 			progPoints.setUniforms( context );			
 			progPoints.use( context );

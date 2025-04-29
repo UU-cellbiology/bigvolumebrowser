@@ -19,16 +19,16 @@ void main()
  	vec4 shift = gl_Position;
  	
  	//why 100? why not?
- 	shift.x = shift.x + 100.0;
- 	
+ 	shift.x = shift.x + 1000.;
 
-	// let's go back to original (voxel) coordinates
+
+	// let's go back to original (BVV) coordinates
 	// and get now the line in x direction of the screen
 	// (in the same z plane)
 	
  	mat4 invPVM = inverse(pvm);
  	shift = invPVM * shift;
- 	
+	shift.w = 1.0;
 
  	//normalize length along this direction
  	//in the absolute units
@@ -36,18 +36,21 @@ void main()
 
  	shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
  	
- 	shift.xyz = shift.xyz + aPos;
+ 	shift.xyz = aPos + shift.xyz ;
  	
  	//project it back to the screen
  	shift = pvm * shift;
  	
  	//calculate final required radius in pixels
  	//(we need to multiply it by w to do a proper projection)
- 	float dRadius = abs(windowSize.x*(shift.x/shift.w-gl_Position.x/gl_Position.w));
+ 	float dRadius = abs(windowSize.x*(shift.x/shift.w - gl_Position.x/gl_Position.w));
+
  	
  	//final point size,
  	//let's make sure it is not zero
-    gl_PointSize =  max(dRadius/pointScale,1.0);
+   // gl_PointSize =  max(dRadius/pointScale,1.0);
+    gl_PointSize =  dRadius/pointScale;
+    
     posW = aPos;
 
 }

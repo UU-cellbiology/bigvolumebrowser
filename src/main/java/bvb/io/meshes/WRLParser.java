@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
@@ -26,7 +26,7 @@ public class WRLParser
 	public int nMaxMeshes = Integer.MAX_VALUE;
 	public int nMaxTimePoints = Integer.MAX_VALUE;	
 	
-	Map<Integer,Integer> addedInd = new HashMap<>();
+	Map<Integer,Integer> addedInd = new ConcurrentHashMap<>();
 	
 	public ArrayList<Mesh> readWRL(String sFilename)
 	{
@@ -305,7 +305,7 @@ public class WRLParser
 				}
 			}
 		}
-		currMesh.triangles().addf( currInd[0], currInd[2], currInd[1]);
+		currMesh.triangles().addf( currInd[0], currInd[1], currInd[2]);
 		
 	}
 	

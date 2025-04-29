@@ -29,7 +29,8 @@ public class WRL_Parser_Test
 
 		
 		WRLParser loaderWRT = new WRLParser ();
-		loaderWRT.bEnableWireGrid = false;
+		loaderWRT.nMaxMeshes = 1;
+		loaderWRT.bEnableWireGrid = true;
 		ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
 		//start BVB
 		BigVolumeBrowser bvbTest = new BigVolumeBrowser(); 		
