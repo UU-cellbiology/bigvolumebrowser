@@ -19,7 +19,7 @@ void main()
  	vec4 shift = gl_Position;
  	
  	//why 100? why not?
- 	shift.x = shift.x + 1000.;
+ 	shift.x = shift.x + 100.;
 
 
 	// let's go back to original (BVV) coordinates
@@ -28,6 +28,9 @@ void main()
 	
  	mat4 invPVM = inverse(pvm);
  	shift = invPVM * shift;
+ 	
+ 	//inverse transform can lead to rounding errors
+ 	//so make sure we return where we were
 	shift.w = 1.0;
 
  	//normalize length along this direction
