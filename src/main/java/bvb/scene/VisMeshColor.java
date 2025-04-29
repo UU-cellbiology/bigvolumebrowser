@@ -36,7 +36,7 @@ import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
-import java.util.Map;
+
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -45,7 +45,6 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import bvb.core.BVVSettings;
-import bvb.scene.WelshPowell.Vertex;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -198,69 +197,25 @@ public class VisMeshColor
 	/** upload MeshData to GPU **/
 	private boolean initGPUBufferMesh( GL3 gl )
 	{
-		
-		
-//		final float [] barycenter = new float [mesh.vertices().size()*9];
-//		
-//		for(int i=0; i<mesh.triangles().size(); i++)
-//		{
-//			barycenter[i*9] = 1.0f;
-//			barycenter[i*9+4] = 1.0f;
-//			barycenter[i*9+8] = 1.0f;
-//		}
-
-//		final float [] barycenter = new float [9];
-//		barycenter[0] = 1.0f;
-//		barycenter[4] = 1.0f;
-//		barycenter[8] = 1.0f;
-				
-
-		
+	
+		//build baricentric coordinates for each triangle
 		final float [] barycenter = new float [mesh.vertices().size()*3];
 		
 		final IntBuffer indicesT = mesh.triangles().indices().duplicate();
 		indicesT.rewind();
-		//boolean test = indices.hasArray();
+
 		final int [] trindices = IntBuffertoArray(indicesT);
-		boolean bFirst = true;
-		
-//		WelshPowell wp = new WelshPowell(mesh.vertices().size(),trindices);
-//		Map< Vertex, Integer > cIndex = wp.colourVertices();
-//		
-//		for (Map.Entry<Vertex, Integer > entry : cIndex.entrySet()) 
-//		{
-//			barycenter[entry.getKey().node.intValue()*3+entry.getValue().intValue()]= 1.0f;
-////		    System.out.println(entry.getKey() + "/" + entry.getValue());
-//		}
-//		
+
 		for(int i=0; i<trindices.length; i+=3)
-		{
-			
+		{			
 			for(int j=0;j<3;j++)
 			{
 				for(int d=0;d<3;d++)
 				{
 					barycenter[trindices[i+j]*3+d] = 0.0f;
 				}
+				barycenter[trindices[i]*3+j] = 1.0f;
 			}
-//			if(bFirst)
-//			{
-				barycenter[trindices[i]*3+1] = 1.0f;
-				barycenter[trindices[i+1]*3+2] = 1.0f;
-				barycenter[trindices[i+2]*3] = 1.0f;
-			
-//			}
-//			else
-//			{
-//				barycenter[trindices[i]*3+2] = 1.0f;
-//				barycenter[trindices[i+1]*3+2] = 1.0f;
-//				barycenter[trindices[i+2]*3+1] = 1.0f;				
-//			}
-//			bFirst = !bFirst;
-//			for(int j=0;j<3;j++)
-//			{
-//				barycenter[trindices[i+j]*3+j] = 1.0f;
-//			}
 
 		}
 
