@@ -1,10 +1,8 @@
 package bvb.io.meshes;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -29,7 +27,7 @@ public class WRLParser
 	public boolean bEnableWireGrid = true;	
 	public int nMaxMeshes = Integer.MAX_VALUE;
 	public int nMaxTimePoints = Integer.MAX_VALUE;	
-	boolean bMeshOK = false;
+	boolean bMeshOK = true;
 	Map<Integer,Integer> addedInd = new ConcurrentHashMap<>();
 	
 	public ArrayList<Mesh> readWRL(String sFilename)
@@ -39,8 +37,7 @@ public class WRLParser
 		nLineN = 0;
 		nTimePoint = -1;
 		bTimeData = false;
-		int nCurrStage = -1;
-
+		bMeshOK = true;
 		int nCurrVertN = -1;
 		
 //		boolean bSkim = true;
@@ -58,7 +55,7 @@ public class WRLParser
 			{
 				line = br.readLine();
 				nLineN ++;
-				if(line==null)
+				if(line == null)
 					break;
 				if(line.contains( " TimeSwitch" ) && nMeshesN ==0 )
 				{
@@ -70,6 +67,7 @@ public class WRLParser
 				if(line.contains( " Transform {" ) )
 				{
 					bSkipNextMesh = true;	
+					System.out.println("skip mesh Transform");
 				}
 				
 				//vertices coordinates
@@ -79,23 +77,24 @@ public class WRLParser
 					{
 						bSkipNextMesh = false;
 						nCurrVertN = -1;
-						nCurrStage = -1;
+						bMeshOK = false;
 					}
 					else
 					{
 						nCurrVertN = loadVertices(br);
 					}
-					
-					if(nCurrVertN<0)
+					if(bMeshOK)						
 					{
-						bMeshOK = false;
-						nCurrStage = -1;
-					}
-					else
-					{
-						bMeshOK = true;
-						nCurrStage = 0;
-					}
+						if(nCurrVertN<0)
+						{
+							bMeshOK = false;
+							System.out.println("skip mesh Vertices");
+						}
+						else
+						{
+							bMeshOK = true;
+						}
+					}					
 					if(bTimeData)
 					{
 						nTimePoint++;
@@ -109,58 +108,44 @@ public class WRLParser
 				//texture coordinates per vertex
 				if(line.contains( " TextureCoordinate" ) )
 				{
-					if(nCurrStage != 0 )
-					{
-						bMeshOK = false;
-					}
-					else
-					{
+					if(bMeshOK)
+					{	
 						if(nCurrVertN != loadUV(br))
 						{
+							System.out.println("skip mesh UV");
 							bMeshOK = false;
 							System.out.println("TextureCoordinate not ok");
 						}
-						else
-						{
-							nCurrStage++;
-						}
+
 					}
 				}
 
 				//normal coordinates per vertex
 				if(line.contains( " Normal" ) )
 				{
-					if(nCurrStage != 1)
-					{
-						bMeshOK = false;
-					}
-					else
-					{
+
 						if(bMeshOK)
 						{
 							if(nCurrVertN != loadNormals(br))
 							{
+								System.out.println("skip mesh Normals N");
 								bMeshOK = false;
 								System.out.println("Normals not ok");
 							}
-							else
-							{
-								nCurrStage++;
-							}
 						}
-					}
+
 				}
 
 				if(line.contains( " coordIndex" ) )
 				{
-					if(bMeshOK && nCurrStage == 2)
+					if(bMeshOK)
 					{
 						loadIndices(br, line);
 					}
-					else
-					{
-						System.out.println("Indices are not loaded without full info on vertices");
-					}
+//					else
+//					{
+//						System.out.println("Indices are not loaded without full info on vertices");
+//					}
 
 				}
 //				if(bSkim == true)
