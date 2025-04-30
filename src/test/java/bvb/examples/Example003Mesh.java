@@ -52,10 +52,11 @@ public class Example003Mesh
 		bvbTest.startBVB("");
 	
 		final Color meshColor = Color.CYAN;
+		
 		//load and show bunny mesh from file
 		String fMeshFilename  = "src/test/resources/mesh/bunny.stl";
 		
-		MeshColor meshBunny = new MeshColor(fMeshFilename);
+		MeshColor meshBunny = new MeshColor(fMeshFilename, bvbTest);
 		
 		//render with points
 		meshBunny.setPointsRender( 0.3f );
@@ -88,7 +89,7 @@ public class Example003Mesh
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
-			meshBunny = new MeshColor(bunny);
+			meshBunny = new MeshColor(bunny, bvbTest);
 			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
 			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
@@ -113,7 +114,7 @@ public class Example003Mesh
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
-			meshBunny = new MeshColor(bunny);
+			meshBunny = new MeshColor(bunny, bvbTest);
 			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			
 			meshBunny.setSurfaceRender( arrSurfaceRender[i]);

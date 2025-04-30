@@ -19,9 +19,17 @@ public class TriangleMaker
 	{
 		String[] la;
 		la = linein.split("\\s+|,");
+		if(la.length<10)
+		{
+			return -1;
+		}
 		if(la[9].equals( "-1" ))
 			return 3;
-		return 4;
+		if(la[11].equals( "-1" ))
+			return 4;
+		
+		return -1;
+			
 		
 	}
 	public int[] addIndex(String sInd)

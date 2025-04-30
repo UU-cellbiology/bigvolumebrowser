@@ -54,6 +54,7 @@ import javax.swing.WindowConstants;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -573,7 +574,14 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				sacList.add( sac );
 			}
 		}
+		
 		final FinalRealInterval interval = CenterZoomBVV.getIntervalFromSourcesList(this,sacList);
+
+		focusOnRealInterval(interval);
+	}
+	
+	public void focusOnRealInterval(RealInterval interval)
+	{
 		if(interval != null)
 		{
 			CenterZoomBVV.focusAnimateOnInterval(this, interval, 0.95);

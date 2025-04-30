@@ -56,4 +56,21 @@ public class RAIdummy
 	    return Views.interval( Views.extendZero( center ), minmax[0], minmax[1] );
 
 	}
+	/** make a dummy empty interval **/
+	public static RandomAccessibleInterval<UnsignedShortType> dummyRAI(final RealInterval interval, final int nTimePoints)
+	{
+		double [] min = interval.minAsDoubleArray();
+		double [] max = interval.maxAsDoubleArray();
+		long [][] minmax = new long[2][4];
+		for(int d=0; d<3;d++)
+		{
+			minmax[0][d] = Math.round( Math.floor( min[d] ) );
+			minmax[1][d] = Math.round( Math.ceil( max[d] ) );
+		}
+		minmax[0][3] = 0;
+		minmax[1][3] = nTimePoints-1;
+	    ArrayImg< UnsignedShortType, ShortArray > center = ArrayImgs.unsignedShorts(new long [] {1,1,1, nTimePoints });
+	    return Views.interval( Views.extendZero( center ), minmax[0], minmax[1] );
+
+	}
 }

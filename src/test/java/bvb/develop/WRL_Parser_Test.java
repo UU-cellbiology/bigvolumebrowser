@@ -29,7 +29,8 @@ public class WRL_Parser_Test
 
 		
 		WRLParser loaderWRT = new WRLParser ();
-		loaderWRT.nMaxMeshes = 1;
+		//loaderWRT.nMaxMeshes = 1000;
+		//loaderWRT.nMaxTimePoints = 20;
 		loaderWRT.bEnableWireGrid = true;
 		ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
 		//start BVB
@@ -45,21 +46,36 @@ public class WRL_Parser_Test
 		
 		final Color meshColor = Color.CYAN;
 
+
 		//let's add an empty volume around it
 		RealInterval totInt = Meshes.boundingBox( loadedMeshes.get(0) );
-
+		
 		for(int i=1;i<loadedMeshes.size();i++)
 		{
 			totInt = Intervals.union( totInt,  Meshes.boundingBox( loadedMeshes.get(i) )); 
 		}
 		
-		//let's add an empty volume around it
-		bvbTest.addRAI(RAIdummy.dummyRAI(totInt));
+		if(!loaderWRT.isTimeData())
+		{
+			//let's add an empty volume around it
+			bvbTest.addRAI(RAIdummy.dummyRAI(totInt));
+		}
+		else
+		{
+			int nMaxTP = 0;
+			for(int i=0;i<loaderWRT.timePoints.size();i++)
+			{
+				if(loaderWRT.timePoints.get( i )>nMaxTP)
+					nMaxTP = loaderWRT.timePoints.get( i );
+			}
+			bvbTest.addRAI(RAIdummy.dummyRAI(totInt, nMaxTP+1));
+		}
 		
+
 		for(int i=0;i<loadedMeshes.size();i++)
 		{
 		
-			MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+			MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ), bvbTest);
 
 			meshBVB.setColor(meshColor );
 		
@@ -67,28 +83,19 @@ public class WRL_Parser_Test
 			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
 
 			meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SHINY );
-			meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE );
+			//meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE );
 			//cartesian
 //			meshBVB.setSurfaceGrid( VisMeshColor.GRID_CARTESIAN);
 //			meshBVB.setCartesianGrid( 1.0f, 0.1f );
 			//and finally add mesh to BVB
+			
+			if(loaderWRT.isTimeData())
+			{
+				meshBVB.setTimePoint( loaderWRT.timePoints.get( i ) );
+			}
+			
 			bvbTest.addShape( meshBVB );	
 		}
-//		for(int i=0;i<loadedMeshes.size();i++)
-//		{
-//		
-//			MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
-//
-//			meshBVB.setColor(meshColor );
-//		
-//			meshBVB.setPointsRender( 0.3f );
-//			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
-//			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SHINY );
-//			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_PLAIN);
-//			//meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE);
-//			//meshBVB.setCartesianGrid( 2.0f, 0.1f );
-//			//and finally add mesh to BVB
-//			bvbTest.addShape( meshBVB );	
-//		}
+		
 	}
 }

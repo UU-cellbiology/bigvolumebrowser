@@ -42,15 +42,19 @@ import net.imglib2.mesh.io.stl.STLMeshIO;
 import org.apache.commons.io.FilenameUtils;
 import org.joml.Matrix4fc;
 
+import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshColor;
 
 public class MeshColor implements BasicShape
 {
 	
+	final BigVolumeBrowser bvb;
 	VisMeshColor meshVis = null;
+	int nTimePoint = -1;
 	
-	public MeshColor(String filename)
+	public MeshColor(String filename, BigVolumeBrowser bvb_)
 	{
+		bvb  = bvb_;
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile(filename);
 		
@@ -66,12 +70,24 @@ public class MeshColor implements BasicShape
 		}
 	}
 	
-	public MeshColor(final Mesh nmesh)
+	public MeshColor(final Mesh nmesh, BigVolumeBrowser bvb_)
 	{
+		bvb  = bvb_;
+		
 		if(nmesh != null)
 		{
 			meshVis = new VisMeshColor(nmesh);
 		}
+	}
+	
+	public void setTimePoint(final int nTP)
+	{
+		this.nTimePoint = nTP;
+	}
+	
+	public int getTimePoint()
+	{
+		return nTimePoint;
 	}
 	
 	public void setPointsRender(final float fPointsSize_)
@@ -80,6 +96,7 @@ public class MeshColor implements BasicShape
 		{
 			meshVis.setRenderType( VisMeshColor.POINTS );
 			meshVis.setPointsSize( fPointsSize_ );
+			bvb.repaintBVV();
 		}
 	}
 	
@@ -89,6 +106,7 @@ public class MeshColor implements BasicShape
 		{
 			meshVis.setRenderType( VisMeshColor.MESH );
 			meshVis.setSurfaceRenderType( nSurfaceRenderType );
+			bvb.repaintBVV();
 		}
 	}
 	
@@ -98,6 +116,7 @@ public class MeshColor implements BasicShape
 		{
 			meshVis.setRenderType( VisMeshColor.MESH );
 			meshVis.setSurfaceGridType( nSurfaceGridType );
+			bvb.repaintBVV();
 		}
 	}
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
@@ -105,6 +124,7 @@ public class MeshColor implements BasicShape
 		if(meshVis != null )
 		{
 			meshVis.setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
+			bvb.repaintBVV();
 		}
 	}
 	
@@ -113,6 +133,7 @@ public class MeshColor implements BasicShape
 		if(meshVis != null )
 		{
 			meshVis.setColor( colorin );
+			bvb.repaintBVV();
 		}
 	}
 	
@@ -156,7 +177,12 @@ public class MeshColor implements BasicShape
 	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
 	{
 		if(meshVis != null)
-			meshVis.draw( gl, pvm, vm, screen_size );
+		{
+			if(nTimePoint<0 || nTimePoint == bvb.bvvViewer.state().getCurrentTimepoint())
+			{
+				meshVis.draw( gl, pvm, vm, screen_size );
+			}
+		}
 	}
 	
 
