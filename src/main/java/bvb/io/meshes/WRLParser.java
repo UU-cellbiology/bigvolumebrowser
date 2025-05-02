@@ -67,11 +67,7 @@ public class WRLParser
 				nLineN ++;
 				if(line == null)
 					break;
-				if(line.contains( " TimeSwitch" ))// && nMeshesN ==0 )
-				{
-					bTimeData = true;
-					nTimePoint=-1;
-				}
+
 				
 				writer.write( line +"\n");
 				
@@ -80,8 +76,14 @@ public class WRLParser
 					bSkipNextMesh = true;	
 					System.out.println("skip mesh Transform");
 				}
+				if(line.contains( " TimeSwitch" ) && !bSkipNextMesh)// && nMeshesN ==0 )
+				{
+					bTimeData = true;
+					nTimePoint = -1;
+					//System.out.println(bSkipNextMesh);
+				}
 				
-				if(line.contains( "diffuseColor" ))
+				if(line.contains( "diffuseColor" )&& !bSkipNextMesh)
 				{
 					
 					String [] lineC = line.split("\\s+|,");	
