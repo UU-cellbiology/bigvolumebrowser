@@ -1,8 +1,11 @@
 package bvb.io.meshes;
 
+import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -17,18 +20,24 @@ public class WRLParser
 	final ArrayList<VertexWRL> vertices = new ArrayList<>();
 	
 	final public ArrayList<Integer> timePoints = new ArrayList<>();
+	boolean bTimeData = false;
+	final public ArrayList<Color> meshColors = new ArrayList<>();
+	boolean bHasColor = false;
+	
 	int nMeshesN = 0;
 	int newVindex;
 	int nVertPerPrim;
 	long nLineN = 0;
 	int nTimePoint = -1;
-	boolean bTimeData = false;
+
 	
 	public boolean bEnableWireGrid = true;	
 	public int nMaxMeshes = Integer.MAX_VALUE;
 	public int nMaxTimePoints = Integer.MAX_VALUE;	
 	boolean bMeshOK = true;
 	Map<Integer,Integer> addedInd = new ConcurrentHashMap<>();
+	Color meshColor = new Color(127,127,127);
+
 	
 	public ArrayList<Mesh> readWRL(String sFilename)
 	{	
@@ -39,11 +48,12 @@ public class WRLParser
 		bTimeData = false;
 		bMeshOK = true;
 		int nCurrVertN = -1;
+
 		
 //		boolean bSkim = true;
 		
 		try ( BufferedReader br = new BufferedReader(new FileReader(sFilename));
-//				FileWriter writer = new FileWriter(new File(sFilename+"_text.txt"));
+				FileWriter writer = new FileWriter(new File(sFilename+"_text.txt"));
 				) 
 		{
 			
@@ -57,17 +67,28 @@ public class WRLParser
 				nLineN ++;
 				if(line == null)
 					break;
-				if(line.contains( " TimeSwitch" ) && nMeshesN ==0 )
+				if(line.contains( " TimeSwitch" ))// && nMeshesN ==0 )
 				{
 					bTimeData = true;
+					nTimePoint=-1;
 				}
 				
-//				writer.write( line +"\n");
+				writer.write( line +"\n");
 				
 				if(line.contains( " Transform {" ) )
 				{
 					bSkipNextMesh = true;	
 					System.out.println("skip mesh Transform");
+				}
+				
+				if(line.contains( "diffuseColor" ))
+				{
+					
+					String [] lineC = line.split("\\s+|,");	
+					meshColor = new Color(Float.parseFloat( lineC[2] ),
+									Float.parseFloat( lineC[3] ),
+									Float.parseFloat( lineC[4] ));
+					bHasColor = true;
 				}
 				
 				//vertices coordinates
@@ -81,10 +102,9 @@ public class WRLParser
 					}
 					else
 					{
+
 						nCurrVertN = loadVertices(br);
-					}
-					if(bMeshOK)						
-					{
+						
 						if(nCurrVertN<0)
 						{
 							bMeshOK = false;
@@ -98,6 +118,7 @@ public class WRLParser
 					if(bTimeData)
 					{
 						nTimePoint++;
+						System.out.println("Timepoint "+Integer.toString( nTimePoint ));
 						if(nMaxTimePoints == nTimePoint)
 						{
 							bContinue = false;
@@ -136,17 +157,9 @@ public class WRLParser
 
 				}
 
-				if(line.contains( " coordIndex" ) )
+				if(line.contains( " coordIndex" ) && bMeshOK)
 				{
-					if(bMeshOK)
-					{
 						loadIndices(br, line);
-					}
-//					else
-//					{
-//						System.out.println("Indices are not loaded without full info on vertices");
-//					}
-
 				}
 //				if(bSkim == true)
 //				{
@@ -159,7 +172,7 @@ public class WRLParser
 //						skipIndices(br);
 //					}
 //				}
-				
+//				
 				if(nMeshesN>nMaxMeshes )
 					bContinue = false;
 			}
@@ -314,6 +327,8 @@ public class WRLParser
 		{
 			timePoints.add( nTimePoint );
 		}
+		if(bHasColor)
+			meshColors.add(meshColor);
 
 		la = linein.split("\\s+|,");
 		final TriangleMaker tr = new TriangleMaker(currMesh);
@@ -439,5 +454,10 @@ public class WRLParser
 	public boolean isTimeData()
 	{
 		return bTimeData;
+	}
+	
+	public boolean containsColorInfo()
+	{
+		return bHasColor;
 	}
 }

@@ -271,7 +271,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		bvbActions = new BVBActions(this);
-		
+		setCanvasBGColor(BVBSettings.canvasBGColor);
 		Prefs.showMultibox( BVBSettings.bShowMultiBox);
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
 

@@ -80,6 +80,7 @@ public class MeshColor implements BasicShape
 		}
 	}
 	
+	
 	public void setTimePoint(final int nTP)
 	{
 		this.nTimePoint = nTP;
@@ -99,6 +100,7 @@ public class MeshColor implements BasicShape
 			bvb.repaintBVV();
 		}
 	}
+	
 	
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{

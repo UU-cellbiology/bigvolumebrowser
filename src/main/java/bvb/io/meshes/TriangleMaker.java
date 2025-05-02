@@ -25,6 +25,11 @@ public class TriangleMaker
 		}
 		if(la[9].equals( "-1" ))
 			return 3;
+		
+		if(la.length<12)
+		{
+			return -1;
+		}
 		if(la[11].equals( "-1" ))
 			return 4;
 		
