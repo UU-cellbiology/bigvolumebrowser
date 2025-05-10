@@ -32,6 +32,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -90,6 +93,23 @@ public class PanelData extends JPanel
 						
 					}
         		});
+        
+        MouseListener ml = new MouseAdapter() {
+            @Override
+			public void mousePressed(MouseEvent e) 
+            {
+                int selRow = treeData.getRowForLocation(e.getX(), e.getY());
+               
+                if(selRow != -1) 
+                {
+                	if(e.getClickCount() == 2) 
+                	{
+                       bvb.bvbActions.actionCenterView();
+                    }
+                }
+            }
+        };
+        treeData.addMouseListener( ml );
         
     	treeScroller = new JScrollPane(treeData);
     	treeScroller.setMinimumSize(new Dimension(170, 250));

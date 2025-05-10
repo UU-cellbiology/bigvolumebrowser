@@ -24,10 +24,10 @@ public class WRL_Parser_Test
 	{
 		new ImageJ();
 		
-		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/Image_6.wrl";
+		String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/Image_6.wrl";
 		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_MSC_RPMI.wrl";
 		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/smaller/B7/wrl_by_channel/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_t30_[ims1_2025-04-30T16-58-39.664]_Ch1_CD8.wrl";
-		String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/smaller/B7/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_t30_[ims1_2025-04-30T16-58-39.664]_all_surfaces.wrl";
+		//String sFilename = "/home/eugene/Desktop/projects/BVB/wrl_example/smaller/B7/240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_t30_[ims1_2025-04-30T16-58-39.664]_all_surfaces.wrl";
 		//240822_Droplet_LAIR_TOPRO00_Timelapse_B7_Merged_xyCorrected_[ims1_2024-09-26T13-56-16.610]_t30_[ims1_2025-04-30T16-58-39.664]_Ch1_CD8.wrl
 		
 		WRLParser loaderWRT = new WRLParser ();
@@ -84,7 +84,8 @@ public class WRL_Parser_Test
 			//meshBVB.setPointsRender( 0.3f );
 			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
 
-			meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
+			//meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SILHOUETTE );
+			meshBVB.setSurfaceRender( VisMeshColor.SURFACE_SHINY);
 			//meshBVB.setSurfaceGrid( VisMeshColor.GRID_WIRE );
 			//cartesian
 //			meshBVB.setSurfaceGrid( VisMeshColor.GRID_CARTESIAN);

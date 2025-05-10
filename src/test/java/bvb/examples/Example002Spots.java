@@ -64,11 +64,11 @@ public class Example002Spots
 
 		
 		//define point size, color, shape and filling
-		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisPointsScaled.SHAPE_ROUND, VisPointsScaled.RENDER_OUTLINE);
+		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisPointsScaled.SHAPE_ROUND, VisPointsScaled.RENDER_FILLED);
 		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		
-		int nTotNumber = 100;
+		int nTotNumber =30;
 		
 		double nScale = nRadius*2.0;
 		
