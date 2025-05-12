@@ -33,7 +33,10 @@ import com.jogamp.opengl.GL3;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.util.Intervals;
 
 import org.joml.Matrix4fc;
 
@@ -43,14 +46,13 @@ import bvb.scene.VisSpotsSame;
 
 public class SpotsSame implements BasicShape
 {
-	
-
 	public VisSpotsSame vertexVis = null;
 	
 	float pointSize;
 	Color pointColor;
 	int renderType;
 	int pointShape;
+	FinalRealInterval bBox = null;
 	
 	public SpotsSame(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -79,8 +81,33 @@ public class SpotsSame implements BasicShape
 		{
 			vertexVis.setVertices(vertices);
 		}
+		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
+				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
+		for ( final RealPoint v : vertices )
+		{
+			final double x = v.getDoublePosition(0), y = v.getDoublePosition(1), z = v.getDoublePosition(2);
+			if ( x < boundingBox[ 0 ] )
+				boundingBox[ 0 ] = x;
+			if ( y < boundingBox[ 1 ] )
+				boundingBox[ 1 ] = y;
+			if ( z < boundingBox[ 2 ] )
+				boundingBox[ 2 ] = z;
+			if ( x > boundingBox[ 3 ] )
+				boundingBox[ 3 ] = x;
+			if ( y > boundingBox[ 4 ] )
+				boundingBox[ 4 ] = y;
+			if ( z > boundingBox[ 5 ] )
+				boundingBox[ 5 ] = z;
+		}
+		bBox =  Intervals.createMinMaxReal( boundingBox[ 0 ], boundingBox[ 1 ], boundingBox[ 2 ], boundingBox[ 3 ], boundingBox[ 4 ], boundingBox[ 5 ] );
+
 	}
 	
+	public RealInterval boundingBox()
+	{
+		return bBox;
+	}
 	
 	public void setPointsColor(Color pointColor_) 
 	{

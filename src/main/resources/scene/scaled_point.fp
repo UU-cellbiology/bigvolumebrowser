@@ -46,7 +46,9 @@ void main()
 		}
 		else if(renderType==2)
 		{
-			colorout.a = colorin.a * exp( ((-1)*norm*norm)/(2.0*(0.3*0.3)) ); 
+			
+			float sd = -9.0/2.0; //i.e.  (-1)/(2.0*0.333*0.333);  
+			colorout.a = colorin.a * exp( sd*norm); 
 			gl_FragDepth = 1.0;
 		}
 	}
@@ -70,7 +72,6 @@ void main()
 			if(renderType == 2)
 			{
 				vec2 fade = abs((1/sqrt(ellipseAxes))-abs(coord));
-				//colorout.a = colorin.a * exp( ((-4.0)*norm*norm)/(2.0*(0.1*0.1)) ); 
 				colorout.a = colorin.a * fade.x * fade.y; 
 				gl_FragDepth = 1.0;
 			}

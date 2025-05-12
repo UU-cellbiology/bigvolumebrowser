@@ -51,6 +51,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -63,6 +64,7 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
+import bdv.ui.CardPanel;
 import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -80,6 +82,7 @@ import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
+import bvvpg.pgcards.BVVPGDefaultCards;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
@@ -229,11 +232,22 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		    controlPanel.cpFrame.setLocation(bvv_p.x + bvv_d.width, bvv_p.y);
 			
 			controlPanel.cpFrame.addWindowListener( closeWA );
+			
+
 		    bvvFrame.addWindowListener(	closeWA );
 		    
+		
+//		    controlPanel.tabPanelView.viewPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+//		    controlPanel.tabPanelView.viewPanel.butFullScreen.setVisible( false );
+//		    controlPanel.tabPanelView.sourcesRenderPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+//		    controlPanel.tabPanelView.clipPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+//		    bvvFrame.getCardPanel().setCardExpanded( BVVPGDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false );
+//		    bvvFrame.getCardPanel().addCard( "View", controlPanel.tabPanelView.viewPanel, false);
+//		    bvvFrame.getCardPanel().addCard( "Sources render", controlPanel.tabPanelView.sourcesRenderPanel, false);
+//		    bvvFrame.getCardPanel().addCard( "Clipping", controlPanel.tabPanelView.clipPanel, true );
+
 		    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
-		    
-		    bLocked = false;
+			bLocked = false;
 		}
 	}
 	
@@ -268,7 +282,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		
-		bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		//bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		bvbActions = new BVBActions(this);
 		setCanvasBGColor(BVBSettings.canvasBGColor);

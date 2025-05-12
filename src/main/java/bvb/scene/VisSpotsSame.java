@@ -287,10 +287,16 @@ public class VisSpotsSame
 		//progRound.getUniform1i("clipactive").set(0);
 		//progRound.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
 		//progRound.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
-
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		if(renderType == RENDER_GAUSS)
 		{
 			gl.glDepthFunc( GL.GL_ALWAYS);
+		}
+		else
+		{
+			gl.glDepthFunc( GL.GL_LESS);
+
 		}
 		prog.setUniforms( context );
 		

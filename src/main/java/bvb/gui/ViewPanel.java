@@ -58,7 +58,7 @@ public class ViewPanel extends JPanel
 //	JToggleButton butOrigin;
 	JToggleButton butVBox;
 	JButton butProjType;
-	JButton butFullScreen;
+	public JButton butFullScreen;
 	JButton butSettings;
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];

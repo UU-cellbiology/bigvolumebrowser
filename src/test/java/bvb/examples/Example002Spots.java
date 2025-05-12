@@ -64,11 +64,14 @@ public class Example002Spots
 
 		
 		//define point size, color, shape and filling
-		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
-		
+//		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
+		SpotsSame testPoints = new SpotsSame(nRadius*0.16f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
+
+		//SpotsSame testPoints2 = new SpotsSame(nRadius*0.16f, Color.GREEN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
+
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		
-		int nTotNumber =30;
+		int nTotNumber = 30;
 		
 		double nScale = nRadius*2.0;
 		
@@ -78,6 +81,10 @@ public class Example002Spots
 		}
 		
 		testPoints.setPoints( vertices );
+		//testPoints2.setPoints( vertices );
+		//testBVB.addShape( testPoints2 );
 		testBVB.addShape( testPoints );
+
+
 	}
 }
