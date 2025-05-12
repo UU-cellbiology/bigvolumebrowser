@@ -111,8 +111,8 @@ public class VisMeshColor
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 				
 		final Segment meshVp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh.vp" ).instantiate();
@@ -362,8 +362,8 @@ public class VisMeshColor
 			progPoints.getUniform4f( "colorin" ).set( l_color );
 			progPoints.getUniform2f( "windowSize" ).set( window_sizef );
 			progPoints.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
-			progPoints.getUniform1i( "renderType" ).set( VisPointsScaled.RENDER_FILLED );
-			progPoints.getUniform1i( "pointShape" ).set( VisPointsScaled.SHAPE_ROUND );
+			progPoints.getUniform1i( "renderType" ).set( VisSpotsSame.RENDER_FILLED );
+			progPoints.getUniform1i( "pointShape" ).set( VisSpotsSame.SHAPE_ROUND );
 			progPoints.setUniforms( context );			
 			progPoints.use( context );
 			

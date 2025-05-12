@@ -37,7 +37,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 
 import bvb.core.BigVolumeBrowser;
-import bvb.scene.VisPointsScaled;
+import bvb.scene.VisSpotsSame;
 import bvb.shapes.SpotsSame;
 import ij.ImageJ;
 
@@ -64,7 +64,7 @@ public class Example002Spots
 
 		
 		//define point size, color, shape and filling
-		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisPointsScaled.SHAPE_ROUND, VisPointsScaled.RENDER_FILLED);
+		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
 		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		

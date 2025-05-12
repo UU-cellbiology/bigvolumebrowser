@@ -213,6 +213,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			
 			initBVV();
 			
+			
 			//setup control panel
 			controlPanel = new BVBControlPanel(this);
 			controlPanel.cpFrame = new JFrame("Control Panel BVB");
@@ -231,7 +232,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		    bvvFrame.addWindowListener(	closeWA );
 		    
 		    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
-		    
 		    
 		    bLocked = false;
 		}

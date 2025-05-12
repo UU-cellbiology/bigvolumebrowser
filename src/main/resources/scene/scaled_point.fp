@@ -24,6 +24,10 @@ void main()
     //transform coordinates to NDC
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
+	vec4 colorout = colorin;
+	
+	gl_FragDepth = gl_FragCoord.z;
+	
 	if(pointShape == 0)
 	{
 	
@@ -35,10 +39,15 @@ void main()
 		
 		//draw only outline,
 		//i.e. discard inside
-		if(renderType != 0)
+		if(renderType == 1)
 		{
 			if ( norm < 0.6) 
 				discard;
+		}
+		else if(renderType==2)
+		{
+			colorout.a = colorin.a * exp( ((-1)*norm*norm)/(2.0*(0.3*0.3)) ); 
+			gl_FragDepth = 1.0;
 		}
 	}
 	else
@@ -51,12 +60,24 @@ void main()
 		
 		//draw only outline
 		//i.e. discard inside
-		if(renderType != 0)
+		if(renderType == 1)
 		{
 			float norm2 = step(0.8/sqrt(ellipseAxes.x),abs(coord.x)) + step(0.8/sqrt(ellipseAxes.y),abs(coord.y)); 
 			if ( norm2 < 0.5) discard;
 		}	
+		else
+		{
+			if(renderType == 2)
+			{
+				vec2 fade = abs((1/sqrt(ellipseAxes))-abs(coord));
+				//colorout.a = colorin.a * exp( ((-4.0)*norm*norm)/(2.0*(0.1*0.1)) ); 
+				colorout.a = colorin.a * fade.x * fade.y; 
+				gl_FragDepth = 1.0;
+			}
+		}
+		
 	}
 
-    fragColor = colorin; 
+    fragColor = colorout; 
+    
 }

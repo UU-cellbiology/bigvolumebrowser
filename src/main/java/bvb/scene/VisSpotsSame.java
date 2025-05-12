@@ -54,9 +54,9 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 /** example class that draws point of specific shape with different filling **/
 
-public class VisPointsScaled
+public class VisSpotsSame
 {
-	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1; 
+	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS = 2; 
 
 	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
 	
@@ -66,52 +66,52 @@ public class VisPointsScaled
 	
 	private Vector4f l_color;
 	
-	private float fPointSize;
+	private float fSpotSize;
 	
 	private int renderType = 0;
 	
-	private int pointShape = 0;
+	private int spotShape = 0;
 	
 	float vertices[]; 
 	
-	private int nPointsN;
+	private int nSpotsN;
 	
 	private boolean initialized;
 	
 	volatile boolean bLocked = false;
 	
-	public VisPointsScaled()
+	public VisSpotsSame()
 	{
 		initShader();
 	}
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisPointsScaled.class, "/scene/scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.fp" ).instantiate();		
 		prog = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 	}
 	
 	/** constructor with multiple vertices **/
-	public VisPointsScaled(final ArrayList< RealPoint > points, final float fPointSize_, final Color color_in, final int nShape_, final int nRenderType_)
+	public VisSpotsSame(final ArrayList< RealPoint > points, final float fSpotSize_, final Color color_in, final int nShape_, final int nRenderType_)
 	{
 		this();
 		
 		int i,j;
 		
-		fPointSize= fPointSize_;
+		fSpotSize = fSpotSize_;
 		
 		l_color = new Vector4f(color_in.getComponents(null));
 		
-		nPointsN = points.size();
+		nSpotsN = points.size();
 		
 		renderType = nRenderType_;
 		
-		pointShape = nShape_;
+		spotShape = nShape_;
 		
-		vertices = new float [nPointsN*3];//assume 3D
+		vertices = new float [nSpotsN*3];//assume 3D
 
-		for (i=0;i<nPointsN; i++)
+		for (i=0;i<nSpotsN; i++)
 		{
 			for (j=0;j<3; j++)
 			{				
@@ -125,15 +125,15 @@ public class VisPointsScaled
 	{
 		int i,j;	
 		
-		nPointsN = points.size();
+		nSpotsN = points.size();
 		
-		if(nPointsN == 1)
-			vertices = new float [nPointsN*3]; //assume 3D
+		if(nSpotsN == 1)
+			vertices = new float [nSpotsN*3]; //assume 3D
 		else
-			vertices = new float [(nPointsN+1)*3]; //assume 3D
+			vertices = new float [(nSpotsN+1)*3]; //assume 3D
 
 		
-		for (i=0;i<nPointsN; i++)
+		for (i=0;i<nSpotsN; i++)
 		{
 			for (j=0;j<3; j++)
 			{
@@ -141,9 +141,9 @@ public class VisPointsScaled
 			}			
 		}
 		
-		if(nPointsN>1)
+		if(nSpotsN>1)
 		{
-			i = nPointsN-1;
+			i = nSpotsN-1;
 			for (j=0;j<3; j++)
 			{
 				vertices[(i+1)*3+j] = points.get(i).getFloatPosition(j);
@@ -160,9 +160,9 @@ public class VisPointsScaled
 		
 	}
 	
-	public void setSize(float fPointSize_)
+	public void setSize(float fSpotSize_)
 	{
-		fPointSize = fPointSize_;
+		fSpotSize = fSpotSize_;
 	}
 	
 	/** 0 - filled, 1 - outline **/
@@ -174,7 +174,7 @@ public class VisPointsScaled
 	/** 0 - round, 1 - square **/
 	public void setShape(int nShape_)
 	{
-		pointShape = nShape_;
+		spotShape = nShape_;
 		
 	}
 
@@ -229,7 +229,7 @@ public class VisPointsScaled
 	public void draw(final GL3 gl, final Matrix4fc pvm, final int [] screen_size )
 	{
 		
-		if (fPointSize < 0.0001)
+		if (fSpotSize < 0.0001)
 			return;
 		if ( !initialized )
 			init( gl );
@@ -277,23 +277,28 @@ public class VisPointsScaled
 		ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
 				
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );
-		prog.getUniform1f( "pointSizeReal" ).set( fPointSize );
+		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform1f( "pointScale" ).set( fPointScale );
 		prog.getUniform4f( "colorin" ).set(l_color);
 		prog.getUniform2f( "windowSize" ).set(window_sizef);
 		prog.getUniform2f( "ellipseAxes" ).set(ellipse_axes);
 		prog.getUniform1i( "renderType" ).set(renderType);
-		prog.getUniform1i( "pointShape" ).set( pointShape );
+		prog.getUniform1i( "pointShape" ).set( spotShape );
 		//progRound.getUniform1i("clipactive").set(0);
 		//progRound.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
 		//progRound.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
 
+		if(renderType == RENDER_GAUSS)
+		{
+			gl.glDepthFunc( GL.GL_ALWAYS);
+		}
 		prog.setUniforms( context );
 		
 		prog.use( context );
 		gl.glBindVertexArray( vao );
-		gl.glDrawArrays( GL.GL_POINTS, 0, nPointsN);
+		gl.glDrawArrays( GL.GL_POINTS, 0, nSpotsN);
 		gl.glBindVertexArray( 0 );
+		gl.glDepthFunc( GL.GL_LESS);
 	}
 
 }

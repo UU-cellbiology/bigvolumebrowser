@@ -112,7 +112,7 @@ public class PanelData extends JPanel
         treeData.addMouseListener( ml );
         
     	treeScroller = new JScrollPane(treeData);
-    	treeScroller.setMinimumSize(new Dimension(170, 250));
+    	treeScroller.setMinimumSize(new Dimension(170, 200));
     	treeScroller.setPreferredSize(new Dimension(400, 500));
     	
     	GridBagConstraints gbc = new GridBagConstraints();

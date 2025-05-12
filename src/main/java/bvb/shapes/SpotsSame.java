@@ -37,7 +37,7 @@ import net.imglib2.RealPoint;
 
 import org.joml.Matrix4fc;
 
-import bvb.scene.VisPointsScaled;
+import bvb.scene.VisSpotsSame;
 
 /** Example class that uses points shader **/
 
@@ -45,7 +45,7 @@ public class SpotsSame implements BasicShape
 {
 	
 
-	public VisPointsScaled vertexVis = null;
+	public VisSpotsSame vertexVis = null;
 	
 	float pointSize;
 	Color pointColor;
@@ -73,7 +73,7 @@ public class SpotsSame implements BasicShape
 	{
 		if(vertexVis == null)
 		{
-			vertexVis = new VisPointsScaled(vertices, pointSize, pointColor, pointShape, renderType);
+			vertexVis = new VisSpotsSame(vertices, pointSize, pointColor, pointShape, renderType);
 		}
 		else
 		{
