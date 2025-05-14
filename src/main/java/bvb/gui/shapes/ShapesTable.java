@@ -18,7 +18,7 @@ public class ShapesTable extends JTable
 		setShowGrid( false );
 		
 		getColumnModel().getColumn( ShapesTableModel.IS_VISIBLE_COLUMN ).setMinWidth( 20 );
-		getColumnModel().getColumn( ShapesTableModel.IS_VISIBLE_COLUMN ).setPreferredWidth( 25 );
+		getColumnModel().getColumn( ShapesTableModel.IS_VISIBLE_COLUMN ).setPreferredWidth( 5 );
 
 	}
 }

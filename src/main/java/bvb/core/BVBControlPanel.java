@@ -39,6 +39,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
@@ -67,6 +68,8 @@ public class BVBControlPanel extends JPanel
 	final TabPanelShapes tabPanelShapes;
 	
 	final TabPanelInfo tabPanelInfo;
+	
+	final public JProgressBar progressBar;
 	
 	
 	public BVBControlPanel(final BigVolumeBrowser bvb_) 
@@ -101,6 +104,12 @@ public class BVBControlPanel extends JPanel
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
 	    
+	    progressBar = new JProgressBar(0,100);
+
+	    progressBar.setValue(0);
+	    progressBar.setStringPainted(true);
+	    progressBar.setString("BigVolumeBrowser v" + BVBSettings.sVersion);
+	    
 	    
 	    final GridBagConstraints gbc = new GridBagConstraints();
 	    gbc.gridx = 0;
@@ -109,10 +118,16 @@ public class BVBControlPanel extends JPanel
 	    gbc.weighty = 1.0;
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
 	    gbc.gridwidth = GridBagConstraints.REMAINDER;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    gbc.fill = GridBagConstraints.BOTH;
 	  
 	    this.add(tabPane,gbc);
+	    gbc.gridy++;
+	    gbc.gridwidth = GridBagConstraints.RELATIVE;
+	    gbc.gridheight = GridBagConstraints.RELATIVE;
+	    gbc.weighty = 0.01;
+	    gbc.anchor = GridBagConstraints.SOUTHEAST;
+	    gbc.fill = GridBagConstraints.HORIZONTAL;
+	    this.add(progressBar,gbc);
 	    
 	    //install actions from BVB	    
 	    this.setActionMap(bvb.bvbActions.getActionMap());
