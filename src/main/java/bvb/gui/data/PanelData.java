@@ -113,7 +113,7 @@ public class PanelData extends JPanel
         
     	treeScroller = new JScrollPane(treeData);
     	treeScroller.setMinimumSize(new Dimension(170, 200));
-    	treeScroller.setPreferredSize(new Dimension(400, 500));
+    	//treeScroller.setPreferredSize(new Dimension(400, 500));
     	
     	GridBagConstraints gbc = new GridBagConstraints();
 	    
@@ -121,11 +121,12 @@ public class PanelData extends JPanel
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
+	    gbc.weightx = 0.99;
+	    gbc.weighty = 0.99;
+
 	    gbc.gridwidth = 1;
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-    	gbc.fill = GridBagConstraints.HORIZONTAL;
+	    gbc.fill = GridBagConstraints.BOTH;
         this.add(treeScroller,gbc);
 	}
 	

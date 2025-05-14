@@ -46,6 +46,7 @@ import org.joml.Matrix4fc;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshColor;
+import bvb.utils.Misc;
 
 public class MeshColor extends AbstractBasicShape
 {
@@ -60,18 +61,19 @@ public class MeshColor extends AbstractBasicShape
 	
 	RealInterval boundingBox = null;
 	
-	public MeshColor(String filename, BigVolumeBrowser bvb_)
+	public MeshColor(String sFilename, BigVolumeBrowser bvb_)
 	{
 		bvb  = bvb_;
 		//load mesh from file
-		Mesh nmesh = loadMeshFromFile(filename);
+		Mesh nmesh = loadMeshFromFile( sFilename );
 		
 		//Mesh nmesh = createMeshWithNoise(15);
 		
 		if(nmesh != null)
 		{			
-			meshVis = new VisMeshColor(nmesh);
+			meshVis = new VisMeshColor( nmesh );
 			boundingBox = Meshes.boundingBox( nmesh );
+			setName(Misc.getSourceStyleName( sFilename ));
 		}
 		else
 		{
@@ -85,7 +87,7 @@ public class MeshColor extends AbstractBasicShape
 		
 		if(nmesh != null)
 		{
-			meshVis = new VisMeshColor(nmesh);
+			meshVis = new VisMeshColor( nmesh );
 			boundingBox = Meshes.boundingBox( nmesh );
 		}
 	}
@@ -153,9 +155,9 @@ public class MeshColor extends AbstractBasicShape
 		}
 	}
 	
-	public static Mesh loadMeshFromFile(String filename)
+	public static Mesh loadMeshFromFile(String sFilename)
 	{
-		String fileExt = FilenameUtils.getExtension(filename);
+		String fileExt = FilenameUtils.getExtension( sFilename );
 		
 		NaiveDoubleMesh nmesh = new NaiveDoubleMesh();
 				
@@ -163,7 +165,7 @@ public class MeshColor extends AbstractBasicShape
 		{
 			try
 			{
-				STLMeshIO.read( nmesh, new File( filename ) );
+				STLMeshIO.read( nmesh, new File( sFilename ) );
 			}
 			catch ( IOException exc )
 			{
@@ -179,7 +181,7 @@ public class MeshColor extends AbstractBasicShape
 				//not sure what is better
 				//BufferMesh bmesh = null;
 				//bmesh = PLYMeshIO.open( filename );				
-				PLYMeshIO.read( new File( filename ), nmesh );
+				PLYMeshIO.read( new File( sFilename ), nmesh );
 			}
 			catch ( IOException exc )
 			{

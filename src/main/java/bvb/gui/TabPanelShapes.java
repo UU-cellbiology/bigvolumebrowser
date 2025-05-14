@@ -29,12 +29,13 @@ public class TabPanelShapes extends JPanel
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
+	    gbc.weightx = 0.99;
 	    gbc.gridwidth = 1;
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
+	    gbc.fill = GridBagConstraints.BOTH;
 	    this.add( panelAddShapes, gbc);
 	    gbc.gridy++;
+	    gbc.weighty = 0.99;
 	    this.add( panelShapes, gbc);
 
 

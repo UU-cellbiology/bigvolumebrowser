@@ -30,8 +30,8 @@ public class PanelShapes extends JPanel
 		tableShapes = new ShapesTable(bvb, new ShapesTableModel(bvb));
 
 		tableScroller = new JScrollPane(tableShapes);
-		tableScroller.setMinimumSize(new Dimension(170, 200));
-		tableScroller.setPreferredSize(new Dimension(400, 500));
+		tableScroller.setMinimumSize(new Dimension(170, 300));
+		//tableScroller.setPreferredSize(new Dimension(400, 600));
     	
     	GridBagConstraints gbc = new GridBagConstraints();
 	    
@@ -39,11 +39,11 @@ public class PanelShapes extends JPanel
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-	    gbc.weightx = 1.0;
+	    gbc.weightx = 0.99;
+	    gbc.weighty = 0.99;
 	    gbc.gridwidth = 1;
 	    gbc.anchor = GridBagConstraints.NORTHWEST;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-    	gbc.fill = GridBagConstraints.HORIZONTAL;
+	    gbc.fill = GridBagConstraints.BOTH;
         this.add(tableScroller,gbc);
 		
 	}
