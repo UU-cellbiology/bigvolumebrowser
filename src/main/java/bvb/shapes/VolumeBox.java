@@ -44,7 +44,7 @@ import bvb.scene.VisPolyLineAA;
 import bvb.utils.Misc;
 
 
-public class VolumeBox implements BasicShape
+public class VolumeBox extends AbstractBasicShape
 {
 	public ArrayList<RealPoint> vertices;
 	public ArrayList<ArrayList<RealPoint>> edges;
@@ -316,6 +316,13 @@ public class VolumeBox implements BasicShape
 				edge.reload();
 			}
 		}
+		
+	}
+
+	@Override
+	public void setVisible( boolean bVisible_ )
+	{
+		bVisible = bVisible_;
 		
 	}
 }

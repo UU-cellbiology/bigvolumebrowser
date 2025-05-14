@@ -43,15 +43,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -64,7 +61,6 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
-import bdv.ui.CardPanel;
 import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -82,7 +78,6 @@ import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
-import bvvpg.pgcards.BVVPGDefaultCards;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
@@ -159,7 +154,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	}
 	
 	//SHAPES FOR NOW	
-	final public Queue<BasicShape> shapes = new ConcurrentLinkedQueue<>();
+	//final public Queue<BasicShape> shapes = new ConcurrentLinkedQueue<>();
+	public List<BasicShape> shapes = Collections.synchronizedList(new ArrayList<>());
 	
 	//DEBUG VISUALIZATION
 	ArrayList<VisPolyLineAA> helpLines = new ArrayList<>();
@@ -553,6 +549,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void addShape(final BasicShape shape)
 	{
 		shapes.add( shape );
+		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();
 	}
 	
 	public void removeShape(final BasicShape shape)

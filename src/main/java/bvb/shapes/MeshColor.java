@@ -34,7 +34,9 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 
+import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
@@ -45,12 +47,18 @@ import org.joml.Matrix4fc;
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshColor;
 
-public class MeshColor implements BasicShape
+public class MeshColor extends AbstractBasicShape
 {
 	
 	final BigVolumeBrowser bvb;
+	
 	VisMeshColor meshVis = null;
+	
 	int nTimePoint = -1;
+	
+	String sName = "";
+	
+	RealInterval boundingBox = null;
 	
 	public MeshColor(String filename, BigVolumeBrowser bvb_)
 	{
@@ -63,6 +71,7 @@ public class MeshColor implements BasicShape
 		if(nmesh != null)
 		{			
 			meshVis = new VisMeshColor(nmesh);
+			boundingBox = Meshes.boundingBox( nmesh );
 		}
 		else
 		{
@@ -77,9 +86,14 @@ public class MeshColor implements BasicShape
 		if(nmesh != null)
 		{
 			meshVis = new VisMeshColor(nmesh);
+			boundingBox = Meshes.boundingBox( nmesh );
 		}
 	}
 	
+	public RealInterval boundingBox()
+	{
+		return boundingBox;
+	}
 	
 	public void setTimePoint(final int nTP)
 	{
@@ -157,6 +171,7 @@ public class MeshColor implements BasicShape
 				return null;
 			}
 		}
+		
 		if(fileExt.equals( "ply" ))
 		{
 			try
@@ -178,20 +193,44 @@ public class MeshColor implements BasicShape
 	@Override
 	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
 	{
-		if(meshVis != null)
+		if(bVisible)
 		{
-			if(nTimePoint<0 || nTimePoint == bvb.bvvViewer.state().getCurrentTimepoint())
+			if(meshVis != null)
 			{
-				meshVis.draw( gl, pvm, vm, screen_size );
+				if(nTimePoint<0 || nTimePoint == bvb.bvvViewer.state().getCurrentTimepoint())
+				{
+					meshVis.draw( gl, pvm, vm, screen_size );
+				}
 			}
 		}
 	}
+	public void setName(String sName_)
+	{
+		sName = sName_;
+	}
 	
+	@Override
+	public String toString()
+	{
+		if(sName.equals( "" ))
+		{
+			return "mesh"+this.hashCode();
+		}
+		return sName;
+	}
 
 	@Override
 	public void reload()
 	{
 		meshVis.reload();
+		
+	}
+
+	@Override
+	public void setVisible( boolean bVisible_ )
+	{
+		bVisible = bVisible_;
+		bvb.repaintBVV();
 		
 	}
 	

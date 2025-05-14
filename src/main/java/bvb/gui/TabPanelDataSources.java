@@ -36,8 +36,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import bvb.core.BigVolumeBrowser;
+
 import bvb.gui.data.PanelData;
-import bvb.gui.shapes.PanelAddShapes;
 import bvb.gui.data.PanelAddSources;
 
 public class TabPanelDataSources extends JPanel

@@ -143,6 +143,7 @@ public class PanelAddSources extends JPanel
             bvb.loadBDVHDF5( chooser.getSelectedFile().getPath() );
         }
 	}
+	
 	public void loadBioFormatsDialog()
 	{		
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);

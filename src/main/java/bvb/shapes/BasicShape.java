@@ -40,4 +40,10 @@ public interface BasicShape
 	/** method required to reload GPU shader/primitives 
 	 * during BVV restart **/
 	public void reload();
+	
+	/** switch visibility **/
+	public void setVisible(boolean bVisible_);
+	
+	/**report visibility **/
+	public boolean isVisible();
 }

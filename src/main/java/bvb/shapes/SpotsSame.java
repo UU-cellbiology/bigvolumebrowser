@@ -44,7 +44,7 @@ import bvb.scene.VisSpotsSame;
 
 /** Example class that uses points shader **/
 
-public class SpotsSame implements BasicShape
+public class SpotsSame extends AbstractBasicShape
 {
 	public VisSpotsSame vertexVis = null;
 	
@@ -65,9 +65,12 @@ public class SpotsSame implements BasicShape
 	@Override
 	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
 	{
-		if(vertexVis != null)
+		if(bVisible)
 		{
-			vertexVis.draw( gl, pvm, screen_size);
+			if(vertexVis != null)
+			{
+				vertexVis.draw( gl, pvm, screen_size);
+			}
 		}
 	}
 	
@@ -149,6 +152,12 @@ public class SpotsSame implements BasicShape
 		if(vertexVis != null)
 			vertexVis.reload();
 		
+	}
+
+	@Override
+	public void setVisible( boolean bVisible_ )
+	{
+		bVisible = bVisible_;
 	}
 
 }

@@ -43,13 +43,13 @@ import org.joml.Matrix4fc;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
-import bvb.shapes.BasicShape;
+import bvb.shapes.AbstractBasicShape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 
-public class VolumeBBoxes implements BasicShape
+public class VolumeBBoxes extends AbstractBasicShape
 {
 	
 	final BigVolumeBrowser bvb;
@@ -121,6 +121,7 @@ public class VolumeBBoxes implements BasicShape
 		});		
 	}
 	
+	@Override
 	public void setVisible (boolean bVisible_)
 	{
 		bVisible = bVisible_;
