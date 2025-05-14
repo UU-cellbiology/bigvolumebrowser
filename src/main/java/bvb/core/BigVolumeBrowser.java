@@ -219,7 +219,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			
 			//setup control panel
 			controlPanel = new BVBControlPanel(this);
-			controlPanel.cpFrame = new JFrame("Control Panel BVB");
+			controlPanel.cpFrame = new JFrame("BVB");
 			controlPanel.cpFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			controlPanel.cpFrame.add(controlPanel);
 			

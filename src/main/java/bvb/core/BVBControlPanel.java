@@ -45,6 +45,7 @@ import javax.swing.SwingConstants;
 import bvb.gui.SelectedSources;
 import bvb.gui.TabPanelDataSources;
 import bvb.gui.TabPanelInfo;
+import bvb.gui.TabPanelShapes;
 import bvb.gui.TabPanelView;
 
 
@@ -62,6 +63,8 @@ public class BVBControlPanel extends JPanel
 	final public TabPanelDataSources tabPanelDataSources;
 	
 	final TabPanelView tabPanelView;
+	
+	final TabPanelShapes tabPanelShapes;
 	
 	final TabPanelInfo tabPanelInfo;
 	
@@ -85,10 +88,10 @@ public class BVBControlPanel extends JPanel
 	    tabPanelView = new TabPanelView(bvb);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
 		
-//		icon_path = this.getClass().getResource("/icons/sources.png");
-//		tabIcon = new ImageIcon(icon_path);
-//	    //tabPanelInfo = new TabPanelInfo();	    
-//		tabPane.addTab("",tabIcon, new JPanel(), "Transform sources");
+		icon_path = this.getClass().getResource("/icons/shapes.png");
+		tabIcon = new ImageIcon(icon_path);
+	    tabPanelShapes = new TabPanelShapes(bvb);	    
+		tabPane.addTab("",tabIcon, tabPanelShapes, "Shapes");
 		
 		icon_path = this.getClass().getResource("/icons/shortcut.png");
 	    tabIcon = new ImageIcon(icon_path);

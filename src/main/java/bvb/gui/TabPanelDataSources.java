@@ -44,7 +44,6 @@ public class TabPanelDataSources extends JPanel
 {
 	final PanelAddSources panelAddSources;
 	final PanelData panelData;
-	final PanelAddShapes panelAddShapes;
 	
 	
 	public TabPanelDataSources(final BigVolumeBrowser bvb)
@@ -53,7 +52,6 @@ public class TabPanelDataSources extends JPanel
 		
 		panelAddSources = new PanelAddSources(bvb);
 		panelData = new PanelData(bvb);
-		panelAddShapes = new PanelAddShapes(bvb);
 		
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
@@ -68,8 +66,6 @@ public class TabPanelDataSources extends JPanel
 	    this.add( panelAddSources, gbc);
 	    gbc.gridy++;
 	    this.add( panelData, gbc);
-	    gbc.gridy++;
-	    this.add( panelAddShapes, gbc);
 
         // Blank/filler component
 	    gbc.gridy++;
