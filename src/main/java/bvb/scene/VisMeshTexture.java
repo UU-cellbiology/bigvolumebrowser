@@ -354,31 +354,38 @@ public class VisMeshTexture
 	
 
 	}
-	public static ByteBuffer convertImageToByteBuffer(BufferedImage image, boolean flipVertically) {
+	
+	public ByteBuffer convertImageToByteBuffer(BufferedImage image, boolean flipVertically) 
+	{
 	    int width = image.getWidth();
 	    int height = image.getHeight();
 
-	    // Convert to a known format (ARGB)
+	    // Use TYPE_4BYTE_ABGR so we know the byte order
 	    BufferedImage convertedImg = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
 	    convertedImg.getGraphics().drawImage(image, 0, 0, null);
 
-	    byte[] pixelData = ((DataBufferByte) convertedImg.getRaster().getDataBuffer()).getData();
-	    ByteBuffer buffer = ByteBuffer.allocateDirect(pixelData.length);
-	    
-	    // Flip vertically (OpenGL's (0,0) is bottom-left, BufferedImage is top-left)
-	    if (flipVertically) {
-	        int bytesPerPixel = 4;
-	        for (int y = height - 1; y >= 0; y--) {
-	            int offset = y * width * bytesPerPixel;
-	            buffer.put(pixelData, offset, width * bytesPerPixel);
+	    byte[] abgr = ((DataBufferByte) convertedImg.getRaster().getDataBuffer()).getData();
+	    ByteBuffer rgbaBuffer = ByteBuffer.allocateDirect(width * height * 4);
+
+	    int stride = width * 4;
+
+	    for (int y = 0; y < height; y++) {
+	        int row = flipVertically ? (height - 1 - y) : y;
+	        int rowStart = row * stride;
+
+	        for (int x = 0; x < width; x++) {
+	            int i = rowStart + x * 4;
+	            byte a = abgr[i + 0];
+	            byte b = abgr[i + 1];
+	            byte g = abgr[i + 2];
+	            byte r = abgr[i + 3];
+
+	            rgbaBuffer.put(r).put(g).put(b).put(a); // RGBA order
 	        }
-	    } else {
-	        buffer.put(pixelData);
 	    }
 
-	    buffer.flip(); // Prepare buffer for reading
-	    return buffer;
+	    rgbaBuffer.flip();
+	    return rgbaBuffer;
 	}
-	
 
 }

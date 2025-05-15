@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
@@ -99,8 +100,8 @@ public class GLB_test
             byteBuffer.position(bufferViewModel.getByteOffset());
             byteBuffer.get(imageBytes);
 			BufferedImage image = null;
-			//image.
-			
+
+
 			try
 			{
 				image = ImageIO.read(new ByteArrayInputStream(imageBytes));
@@ -123,9 +124,11 @@ public class GLB_test
 //			bvbTest.addShape( meshTeddy );
 //			bvbTest.focusOnRealInterval( Meshes.boundingBox( currMesh ) );
 			
+
 			MeshTexture meshTeddyTextured = new MeshTexture(currMesh, image, bvbTest);
 			bvbTest.addShape( meshTeddyTextured );
-			bvbTest.focusOnRealInterval( Meshes.boundingBox( currMesh ) );
+			RealInterval meshBBox =  Meshes.boundingBox( currMesh );
+			bvbTest.focusOnRealInterval(  meshBBox  );
 			
 		}
 		
