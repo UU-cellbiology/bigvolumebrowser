@@ -3,6 +3,8 @@ package bvb.develop;
 import com.jogamp.opengl.GL;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -12,27 +14,35 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.MeshColor;
+import bvb.shapes.MeshTexture;
 import de.javagl.jgltf.impl.v2.GlTF;
 import de.javagl.jgltf.model.AccessorData;
 import de.javagl.jgltf.model.AccessorDatas;
 import de.javagl.jgltf.model.AccessorModel;
+import de.javagl.jgltf.model.BufferModel;
+import de.javagl.jgltf.model.BufferViewModel;
 import de.javagl.jgltf.model.GltfModel;
+import de.javagl.jgltf.model.ImageModel;
 import de.javagl.jgltf.model.MeshModel;
 import de.javagl.jgltf.model.MeshPrimitiveModel;
+import de.javagl.jgltf.model.TextureModel;
 import de.javagl.jgltf.model.io.GltfModelReader;
+import de.javagl.jgltf.model.v2.MaterialModelV2;
 import ij.ImageJ;
 
 public class GLB_test
 {
 	public static void main( final String[] args )
 	{
-		String sFilename = "/home/eugene/Desktop/projects/BVB/GLB_read/teddy.glb";
+		String sFilename = "src/test/resources/mesh/teddy.glb";
 		GltfModelReader gltfModelReader = new GltfModelReader();
 		GltfModel gltfModel = null;
 		
@@ -54,9 +64,12 @@ public class GLB_test
 			final Mesh currMesh = new NaiveFloatMesh();
 		
 			final float [][] vert = readAttributeFloatArray(meshPrimitiveModel, "POSITION");
+			final float [][] uvmap = readAttributeFloatArray(meshPrimitiveModel, "TEXCOORD_0");
+			System.out.println( uvmap.length );
 			for(int i = 0; i < vert.length; i++)
 			{
 				currMesh.vertices().addf(vert[i][0], vert[i][1], vert[i][2] );
+				currMesh.vertices().setTexturef( i, uvmap[i][0], uvmap[i][1] ); 
 			}
 			System.out.println( vert.length );
 			final int [] indices = readIndices(meshPrimitiveModel);
@@ -68,17 +81,52 @@ public class GLB_test
 				}
 			}
 			System.out.println(indices.length);
+			
+			
+			final MaterialModelV2 material = ( MaterialModelV2 ) meshPrimitiveModel.getMaterialModel();
+			final TextureModel baseColorTexture = material.getBaseColorTexture();
+			if (baseColorTexture == null) {
+			    System.out.println("No base color texture found.");
+			    return;
+			}
+
+			// 3. Get the image model
+			final ImageModel imageModel = baseColorTexture.getImageModel();
+			final BufferViewModel bufferViewModel = imageModel.getBufferViewModel();
+			final BufferModel bufferModel = bufferViewModel.getBufferModel();
+			final ByteBuffer byteBuffer = bufferModel.getBufferData();
+	        final byte[] imageBytes = new byte[bufferViewModel.getByteLength()];
+            byteBuffer.position(bufferViewModel.getByteOffset());
+            byteBuffer.get(imageBytes);
+			BufferedImage image = null;
+			//image.
+			
+			try
+			{
+				image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+			}
+			catch ( IOException exc )
+			{
+				// TODO Auto-generated catch block
+				exc.printStackTrace();
+			}
+			
 			new ImageJ();
+		
 
 			//start BVB
 			BigVolumeBrowser bvbTest = new BigVolumeBrowser(); 		
 			bvbTest.startBVB("");
-		
-			//final Color meshColor = Color.CYAN;
-			MeshColor meshTeddy = new MeshColor(currMesh, bvbTest);
-			//meshTeddy.setPointsRender( 0.002f );
-			bvbTest.addShape( meshTeddy );
+
+//			MeshColor meshTeddy = new MeshColor(currMesh, bvbTest);
+//			//meshTeddy.setPointsRender( 0.002f );
+//			bvbTest.addShape( meshTeddy );
+//			bvbTest.focusOnRealInterval( Meshes.boundingBox( currMesh ) );
+			
+			MeshTexture meshTeddyTextured = new MeshTexture(currMesh, image, bvbTest);
+			bvbTest.addShape( meshTeddyTextured );
 			bvbTest.focusOnRealInterval( Meshes.boundingBox( currMesh ) );
+			
 		}
 		
 	}
