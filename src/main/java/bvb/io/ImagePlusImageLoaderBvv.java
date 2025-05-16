@@ -44,16 +44,16 @@ import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.img.basictypeaccess.DataAccess;
 import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
-
+import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
-
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-
+import net.imglib2.type.volatiles.VolatileUnsignedByteType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import java.util.HashMap;
@@ -90,12 +90,12 @@ public class ImagePlusImageLoaderBvv<T extends NativeType<T>, V extends Volatile
 	}
 
 	public static
-	ImagePlusImageLoaderBvv<UnsignedShortType, VolatileUnsignedShortType, VolatileShortArray>
+	ImagePlusImageLoaderBvv<UnsignedByteType, VolatileUnsignedByteType, VolatileByteArray>
 	createUnsignedByteInstance(final ImagePlus imp, final int offsetTime)
 	{
-		return new ImagePlusImageLoaderBvv<>(imp, array -> mapByte(	(byte[]) array, true), 
-				new UnsignedShortType(),
-				new VolatileUnsignedShortType(), offsetTime);
+		return new ImagePlusImageLoaderBvv<>(imp, array -> new VolatileByteArray(
+				(byte[]) array, true), new UnsignedByteType(),
+				new VolatileUnsignedByteType(), offsetTime);
 	}
 
 	private static final double[][] mipmapResolutions = new double[][] { { 1, 1, 1 } };
@@ -284,13 +284,4 @@ public class ImagePlusImageLoaderBvv<T extends NativeType<T>, V extends Volatile
 		}
 	}
 	
-	public static VolatileShortArray mapByte(byte[] array, boolean isValid)
-	{
-		final short[] data = new short[array.length];
-		for(int i=0;i<array.length; i++)
-		{
-			data[i] = (short)Byte.toUnsignedInt(array[i]);
-		}
-		return new VolatileShortArray(data,isValid);
-	}
 }

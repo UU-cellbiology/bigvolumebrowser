@@ -209,7 +209,7 @@ public class SpimDataLoader
 					.location(new File(imageFileName))
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
-					.to16bits(true)
+//					.to16bits(true)
 					.positionConvention("TOP LEFT");
 			spimData = (SpimData) OpenersToSpimData.getSpimData(settings);
 		}

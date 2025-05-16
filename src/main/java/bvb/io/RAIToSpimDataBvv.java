@@ -109,6 +109,7 @@ public class RAIToSpimDataBvv
 		for ( int t = 0; t < numTimepoints; ++t )
 			timepoints.add( new TimePoint( t ) );
 		
+		@SuppressWarnings( { "unchecked", "rawtypes" } )
 		final RAIImgLoaderBvv imgLoader = new RAIImgLoaderBvv(rai, size.dimensionsAsLongArray(), numSetups);
 		
 		final SequenceDescriptionMinimal seq = new SequenceDescriptionMinimal( new TimePoints( timepoints ), setups, imgLoader, null );

@@ -105,11 +105,12 @@ public class ImagePlusToSpimDataBvv {
 					imgLoader = ImagePlusImageLoaderBvv.createUnsignedByteInstance(imp,
 							originTimePoint);
 					break;
-				default:
-					//ImagePlus.GRAY16:
+				case ImagePlus.GRAY16:
 					imgLoader = ImagePlusImageLoaderBvv.createUnsignedShortInstance(imp,
 							originTimePoint);
 					break;
+				default:
+					return null;
 			}
 		}
 

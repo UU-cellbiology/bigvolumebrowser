@@ -33,36 +33,36 @@ import java.util.HashMap;
 import net.imglib2.Cursor;
 
 import net.imglib2.FinalInterval;
-import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
-
+import net.imglib2.Volatile;
 import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.LoadingStrategy;
-import net.imglib2.converter.Converters;
-
+import net.imglib2.img.basictypeaccess.DataAccess;
+import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
+import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
+import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 import net.imglib2.view.Views;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
 import bdv.cache.CacheControl;
 import bdv.img.cache.CacheArrayLoader;
-import bdv.img.cache.VolatileCachedCellImg;
 import bdv.img.cache.VolatileGlobalCellCache;
+import bdv.util.volatiles.VolatileTypeMatcher;
 import ch.epfl.biop.bdv.img.CacheControlOverride;
 import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
 
 
-public class RAIImgLoaderBvv implements ViewerImgLoader, CacheControlOverride
+public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & NativeType<V>, A extends DataAccess & VolatileAccess> implements ViewerImgLoader, CacheControlOverride
 {
 		
-	final RandomAccessibleInterval<?> raiXYZTC;
+	final RandomAccessibleInterval<T> raiXYZTC;
 	
 	final long[] dimensions;
 	
@@ -77,7 +77,8 @@ public class RAIImgLoaderBvv implements ViewerImgLoader, CacheControlOverride
 	
 	private final HashMap<Integer, RAISetupLoader> setupImgLoaders;
 	
-	public RAIImgLoaderBvv(final RandomAccessibleInterval<?> rai_, final long [] dims_, final int numSetups)
+	@SuppressWarnings( "unchecked" )
+	public RAIImgLoaderBvv(final RandomAccessibleInterval<T> rai_, final long [] dims_, final int numSetups)
 	{
 		
 		cache = new VolatileGlobalCellCache( 2, 1 );
@@ -101,26 +102,29 @@ public class RAIImgLoaderBvv implements ViewerImgLoader, CacheControlOverride
 			default:
 				raiXYZTC = null;
 		}
+
 		numScales = 1;
 		setupImgLoaders = new HashMap<>();
 		for (int setupId = 0; setupId < numSetups; ++setupId)
-			setupImgLoaders.put(setupId, new RAISetupLoader(setupId));
+			setupImgLoaders.put(setupId, new RAISetupLoader(setupId, 
+									raiXYZTC.getType(), 
+									(V)VolatileTypeMatcher.getVolatileTypeForType( raiXYZTC.getType() )));
 
 	}
 	
 	
-	class RAISetupLoader extends AbstractViewerSetupImgLoader <UnsignedShortType, VolatileUnsignedShortType> 
+	class RAISetupLoader extends AbstractViewerSetupImgLoader <T, V> 
 	{
 		
 		private final int setupId;
 		
-		final RAIArrayLoader loader;
+		final RAIArrayLoader<T,A> loader;
 		
-		public RAISetupLoader (final int setupId)
+		public RAISetupLoader (final int setupId, final T type, final V volatileType)
 		{
-			super(new UnsignedShortType(), new VolatileUnsignedShortType());
+			super(type, volatileType);
 			this.setupId = setupId;
-			loader =  new RAIArrayLoader(raiXYZTC);
+			loader =  new RAIArrayLoader<>(raiXYZTC);
 		}
 
 		@Override
@@ -142,27 +146,20 @@ public class RAIImgLoaderBvv implements ViewerImgLoader, CacheControlOverride
 		}
 
 		@Override
-		public RandomAccessibleInterval< VolatileUnsignedShortType > getVolatileImage( int timepointId, int level, ImgLoaderHint... hints )
+		public RandomAccessibleInterval< V > getVolatileImage( int timepointId, int level, ImgLoaderHint... hints )
 		{
 			return prepareCachedImage(timepointId, level, LoadingStrategy.VOLATILE, volatileType);
 
 		}
 
-
-		@SuppressWarnings( "unchecked" )
 		@Override
-		public RandomAccessibleInterval< UnsignedShortType > getImage( int timepointId, int level, ImgLoaderHint... hints )
+		public RandomAccessibleInterval< T > getImage( int timepointId, int level, ImgLoaderHint... hints )
 		{
-			if(raiXYZTC.getType() instanceof UnsignedShortType)
-			{
-				return ( RandomAccessibleInterval< UnsignedShortType > ) Views.hyperSlice(Views.hyperSlice( raiXYZTC, 4, setupId), 3, timepointId);
-			}
-			
-			return convertByteRAIToShort(Views.hyperSlice(Views.hyperSlice( raiXYZTC, 4, setupId), 3, timepointId));
-
+				return Views.hyperSlice(Views.hyperSlice( raiXYZTC, 4, setupId), 3, timepointId);
 		}
 		
-		protected <T extends NativeType<T>> VolatileCachedCellImg<T, VolatileShortArray>
+		@SuppressWarnings( "hiding" )
+		protected <T extends NativeType<T>> AbstractCellImg<T, A, ?, ?>
 		prepareCachedImage(final int timepointId, final int level,
 						   final LoadingStrategy loadingStrategy, final T typeCache)
 		{
@@ -180,58 +177,63 @@ public class RAIImgLoaderBvv implements ViewerImgLoader, CacheControlOverride
 
 
 	}
-	static class RAIArrayLoader implements CacheArrayLoader<VolatileShortArray> 
+	
+	static class RAIArrayLoader<T extends NativeType<T>,A extends DataAccess> implements CacheArrayLoader<A> 
 	{
-		final RandomAccessibleInterval<?> rai;
+		final RandomAccessibleInterval<T> rai;
 		
-		public RAIArrayLoader (final RandomAccessibleInterval<?> rai_)
+		public RAIArrayLoader (final RandomAccessibleInterval<T> rai_)
 		{
 			rai = rai_;
 		}
 		@SuppressWarnings( "unchecked" )
 		@Override
-		public VolatileShortArray loadArray( int timepoint, int setup, int level, int[] dimensions, long[] min ) throws InterruptedException
+		public A loadArray( int timepoint, int setup, int level, int[] dimensions, long[] min ) throws InterruptedException
 		{
-			final RandomAccessibleInterval< ? > raiXYZ = Views.hyperSlice(Views.hyperSlice( rai, 4, setup), 3, timepoint);
-			
-			final short[] data = new short[dimensions[0]*dimensions[1]*dimensions[2]];
-			
+			final RandomAccessibleInterval< T > raiXYZ = Views.hyperSlice(Views.hyperSlice( rai, 4, setup), 3, timepoint);
+						
 			final long[][] intRange = new long [2][3];
+			
 			for(int d=0;d<3;d++)
 			{
 				intRange[0][d]= min[d];
 				intRange[1][d]= min[d]+dimensions[d]-1;
 			}
 
-			IterableInterval< UnsignedShortType > iterRAI;
 			
-			if(rai.getType() instanceof UnsignedShortType)
+			if(raiXYZ.getType() instanceof UnsignedShortType)
 			{
-				iterRAI = ( IterableInterval< UnsignedShortType > ) Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1])));
+				Cursor< UnsignedShortType > cur = 
+						( Cursor< UnsignedShortType > ) Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))).cursor();
+				final short[] data = new short[dimensions[0]*dimensions[1]*dimensions[2]];
+				int nCount = 0;
+				while (cur.hasNext())
+				{
+					cur.fwd();
+					data[nCount] = cur.get().getShort();
+					nCount++;
+				}
+				return ( A ) new VolatileShortArray(data,true);
 			}
-			else
+			
+			if(raiXYZ.getType() instanceof UnsignedByteType)
 			{
-				iterRAI = Views.flatIterable( convertByteRAIToShort(Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))));
+				Cursor< UnsignedByteType > cur = 
+						( Cursor< UnsignedByteType > ) Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))).cursor();
+				final byte[] data = new byte[dimensions[0]*dimensions[1]*dimensions[2]];
+				int nCount = 0;
+				while (cur.hasNext())
+				{
+					cur.fwd();
+					data[nCount] = cur.get().getByte();
+					nCount++;
+				}
+				return ( A ) new VolatileByteArray(data,true);
 			}
-			int nCount = 0;
-
-			Cursor< UnsignedShortType > cur = iterRAI.cursor();
-			while (cur.hasNext())
-			{
-				cur.fwd();
-				data[nCount] = cur.get().getShort();
-				nCount++;
-			}
-			return new VolatileShortArray(data,true);
+			
+			return null;
 		}
 		
-	}
-	public static RandomAccessibleInterval< UnsignedShortType > convertByteRAIToShort(RandomAccessibleInterval< ? > raiXYZ)
-	{
-		return Converters.convert(
-				raiXYZ,
-				( i, o ) -> o.setInteger( ((UnsignedByteType) i).get() ),
-				new UnsignedShortType( ) );
 	}
 	
 	@Override
