@@ -96,10 +96,8 @@ public class PanelData extends JPanel
 
 					@Override
 					public void valueChanged( TreeSelectionEvent arg0 )
-					{
-						
-						selectSetups();
-						
+					{						
+						selectSetups();						
 					}
         		});
         
@@ -115,11 +113,11 @@ public class PanelData extends JPanel
                 	{
                        bvb.bvbActions.actionCenterView();
                     }
-//                	if(SwingUtilities.isRightMouseButton(e))
-//                	{
-//                		treeData.clearSelection();
-//                		selectSetups();
-//                	}
+                	if(SwingUtilities.isRightMouseButton(e))
+                	{
+                		treeData.clearSelection();
+                		selectSetups();
+                	}
                 }
             }
         };
