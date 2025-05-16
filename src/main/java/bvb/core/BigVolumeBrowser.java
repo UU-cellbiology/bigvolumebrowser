@@ -520,10 +520,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
-		
-		for(BasicShape shape : shapes)
+		int shapeN = shapes.size();
+		for(int i=0; i<shapeN; i++)
 		{
-			shape.draw( gl, pvm, vm, screen_size );
+			shapes.get( i ).draw( gl, pvm, vm, screen_size );
 		}
 
 		//DEBUG
@@ -546,7 +546,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	}
 	
 	
-	public void addShape(final BasicShape shape)
+	public synchronized void addShape(final BasicShape shape)
 	{
 		shapes.add( shape );
 		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();

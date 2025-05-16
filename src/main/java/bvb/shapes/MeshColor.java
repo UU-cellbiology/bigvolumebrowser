@@ -55,8 +55,6 @@ public class MeshColor extends AbstractBasicShape
 	
 	VisMeshColor meshVis = null;
 	
-	int nTimePoint = -1;
-	
 	String sName = "";
 	
 	RealInterval boundingBox = null;
@@ -92,19 +90,10 @@ public class MeshColor extends AbstractBasicShape
 		}
 	}
 	
+	@Override
 	public RealInterval boundingBox()
 	{
 		return boundingBox;
-	}
-	
-	public void setTimePoint(final int nTP)
-	{
-		this.nTimePoint = nTP;
-	}
-	
-	public int getTimePoint()
-	{
-		return nTimePoint;
 	}
 	
 	public void setPointsRender(final float fPointsSize_)
@@ -216,7 +205,11 @@ public class MeshColor extends AbstractBasicShape
 	{
 		if(sName.equals( "" ))
 		{
-			return "mesh"+this.hashCode();
+			if(nTimePoint<0)
+			{
+				return "mesh"+this.hashCode();
+			}
+			return "mesh_t" + Integer.toString( nTimePoint ) + "_" + this.hashCode();
 		}
 		return sName;
 	}

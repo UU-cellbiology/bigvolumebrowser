@@ -107,6 +107,7 @@ public class SpotsSame extends AbstractBasicShape
 
 	}
 	
+	@Override
 	public RealInterval boundingBox()
 	{
 		return bBox;

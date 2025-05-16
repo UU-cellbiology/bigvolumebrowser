@@ -50,4 +50,8 @@ public interface BasicShape
 	public boolean isVisible();
 	
 	public RealInterval boundingBox();
+	
+	public void setTimePoint(final int nTP);
+	
+	public int getTimePoint();
 }

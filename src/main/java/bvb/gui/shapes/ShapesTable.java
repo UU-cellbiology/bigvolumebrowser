@@ -67,9 +67,14 @@ public class ShapesTable extends JTable
 					{
 						final int mrow = convertRowIndexToModel( vrow );
 						focusOnSelectedShapes();
-						final RealInterval shapeBox = bvb.shapes.get( mrow ).boundingBox();
+						final BasicShape currShape = bvb.shapes.get( mrow );
+						final RealInterval shapeBox = currShape.boundingBox();
 						if(shapeBox != null)
 						{
+							if(currShape.getTimePoint()>=0)
+							{
+								bvb.bvvViewer.setTimepoint( currShape.getTimePoint() );
+							}
 							bvb.focusOnRealInterval( shapeBox );
 							return;
 
