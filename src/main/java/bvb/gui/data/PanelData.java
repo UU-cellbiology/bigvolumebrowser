@@ -28,10 +28,13 @@
  */
 package bvb.gui.data;
 
+import java.awt.event.KeyListener;
+
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -40,9 +43,12 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -83,6 +89,7 @@ public class PanelData extends JPanel
         renderer.setLeafIcon( bvb.dataTreeModel.getIconOneSource() );
         treeData.setCellRenderer(renderer);
         treeData.setShowsRootHandles(true);
+     
         
         treeData.addTreeSelectionListener( new TreeSelectionListener() 
         		{
@@ -117,7 +124,11 @@ public class PanelData extends JPanel
             }
         };
         treeData.addMouseListener( ml );
-        
+
+        for(KeyListener kl: treeData.getListeners(KeyListener.class)) 
+        {
+        	treeData.removeKeyListener(kl);
+        }
     	treeScroller = new JScrollPane(treeData);
     	treeScroller.setMinimumSize(new Dimension(170, 200));
     	//treeScroller.setPreferredSize(new Dimension(400, 500));
