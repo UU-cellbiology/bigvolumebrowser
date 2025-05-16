@@ -39,9 +39,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.swing.ActionMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -106,6 +108,11 @@ public class PanelData extends JPanel
                 	{
                        bvb.bvbActions.actionCenterView();
                     }
+//                	if(SwingUtilities.isRightMouseButton(e))
+//                	{
+//                		treeData.clearSelection();
+//                		selectSetups();
+//                	}
                 }
             }
         };
@@ -150,14 +157,15 @@ public class PanelData extends JPanel
 			return;
 		
 		bLocked = true;
-		
+		final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
 		TreePath[] selPaths = treeData.getSelectionPaths();
 		if(selPaths == null)
 		{
 			bLocked = false;
+			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
 			return;
 		}
-		ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+		
 		for(int i=0;i<selPaths.length; i++)
 		{
 

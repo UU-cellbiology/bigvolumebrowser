@@ -69,35 +69,41 @@ import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
 public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedShortType, VolatileUnsignedShortType > implements ViewerImgLoader
 {
 	final Source<?> src;
+	
 	final int numScales;
+	
 	final AffineTransform3D [] mipmapTransforms;
+	
 	final double [][] mipmapResolutions; 
+	
 	private VolatileGlobalCellCache cache;
-	//private long[][] imageDimensions;
+	
 	final Object typeIn;
+	
 	boolean bFloat = false;
+	
 	double dMin,dMax;
-	
-	
+		
 	private final CacheArrayLoader<VolatileShortArray> loader;
 	
 	public SourceImgLoaderBvv(final Source<?> source_)
 	{
 		super( new UnsignedShortType(), new VolatileUnsignedShortType() );
+		
 		src = source_;
 		numScales = src.getNumMipmapLevels();
 		typeIn =  src.getSource( 0, 0 ).getType();
 		cache = new VolatileGlobalCellCache( numScales+1, 1 );
 
-	
 		mipmapTransforms = new AffineTransform3D[numScales];
 
 		mipmapResolutions = new double[ numScales ][];
+		
 		AffineTransform3D transformSource = new AffineTransform3D();
 		src.getSourceTransform( 0, 0, transformSource );
 		
 		final double [] zeroScale = Misc.getScale( transformSource);
-		//double [] currMipMapRes = new double [3];
+
 		for(int i=0;i<numScales;i++)
 		{
 			AffineTransform3D transform = new AffineTransform3D();
@@ -121,6 +127,7 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 			dMax = dPair.getB().doubleValue();
 			IJ.log( "found ["+Double.toString( dMin )+"," +Double.toString( dMax )+"]");
 		}
+		
 		loader = new SourceArrayLoader(src, bFloat, dMin, dMax);
 	}
 

@@ -30,6 +30,8 @@ package bvb.shapes;
 
 import com.jogamp.opengl.GL3;
 
+import net.imglib2.RealInterval;
+
 import org.joml.Matrix4fc;
 
 public interface BasicShape
@@ -46,4 +48,6 @@ public interface BasicShape
 	
 	/**report visibility **/
 	public boolean isVisible();
+	
+	public RealInterval boundingBox();
 }

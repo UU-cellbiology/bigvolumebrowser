@@ -325,4 +325,10 @@ public class VolumeBox extends AbstractBasicShape
 		bVisible = bVisible_;
 		
 	}
+
+	@Override
+	public RealInterval boundingBox()
+	{
+		return interval;
+	}
 }

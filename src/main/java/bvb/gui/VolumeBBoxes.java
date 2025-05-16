@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.List;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import org.joml.Matrix4fc;
@@ -231,5 +232,11 @@ public class VolumeBBoxes extends AbstractBasicShape
 	public void reload()
 	{
 		
+	}
+
+	@Override
+	public RealInterval boundingBox()
+	{
+		return null;
 	}
 }
