@@ -58,25 +58,6 @@ public class TransformTranslation
 		}
 		
 		return out;		
-		//setup.g
-//		AffineTransform3D clipTr = new AffineTransform3D();
-//		((GammaConverterSetup)setup).getClipTransform(clipTr);
-//		FinalRealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
-//
-//		if(interval == null)
-//		{
-//			final SourceAndConverter< ? > source = bimap.getSource( setup );
-//			interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
-//
-//		}
-//		if(interval == null)
-//			return null;
-//			
-//		final double [] center = Misc.getIntervalCenter(interval);
-//		
-//		clipTr.apply( center, center );
-//
-//		return center;
 		
 	}
 }

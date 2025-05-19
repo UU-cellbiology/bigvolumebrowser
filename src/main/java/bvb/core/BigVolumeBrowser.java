@@ -722,6 +722,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		AffineTransform3D testT = new AffineTransform3D();
 		testT.setTranslation( 50.,50.,0. );
+		testT.scale( 0.1, 0.2, 0.3 );
 		(( TransformedSource< ? > )src).setFixedTransform( testT );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );

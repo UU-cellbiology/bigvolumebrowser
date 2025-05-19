@@ -17,6 +17,8 @@ public class TransformSetups
 	
 	public SelectedSources selectedSources;
 	
+	final public TransformScale transformScale;
+	
 	final public TransformTranslation transformTranslation;
 	
 	final public TransformTranslationBounds transformTranslationBounds;
@@ -26,6 +28,8 @@ public class TransformSetups
 		this.bvb = bvb_;
 		converterSetups = bvb.bvvViewer.getConverterSetups();
 		selectedSources = bvb.selectedSources;
+		
+		transformScale = new TransformScale(converterSetups);
 		transformTranslation = new TransformTranslation(converterSetups);
 		transformTranslationBounds = new TransformTranslationBounds(converterSetups);
 		

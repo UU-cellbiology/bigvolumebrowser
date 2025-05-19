@@ -26,7 +26,6 @@ import bvvpg.ui.panels.BoundedValuePanelPG;
 
 public class TransformTranslationPanel extends JPanel
 {
-	final SelectedSources sourceSelection;
 	
 	final TransformSetups transformSetups;
 	
@@ -41,9 +40,7 @@ public class TransformTranslationPanel extends JPanel
 		super();		
 
 		transformSetups = transformSetups_;
-		
-		sourceSelection = transformSetups.selectedSources;
-		
+	
 		butResetTranslation = new JButton ("Reset");
 		butResetTranslation.setToolTipText( "Reset translation" );
 		butResetTranslation.addActionListener( new ActionListener() 
@@ -57,11 +54,9 @@ public class TransformTranslationPanel extends JPanel
 	
 		});
 		
-		GridBagLayout gridbag = new GridBagLayout();
+		setLayout(new GridBagLayout());
 		
 		GridBagConstraints gbc = new GridBagConstraints();
-
-		setLayout(gridbag);
 		
 		gbc.gridwidth = 0;
 		gbc.gridx = 0;
@@ -94,7 +89,7 @@ public class TransformTranslationPanel extends JPanel
 		translationPanels[2].changeListeners().add( () -> updateTransformAxis(2));
 		
 		//add source selection listener
-		sourceSelection.addSourceSelectionListener(  new SelectedSources.Listener()
+		transformSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
 		{			
 			@Override
 			public void selectedSourcesChanged()
@@ -115,7 +110,7 @@ public class TransformTranslationPanel extends JPanel
 	
 	synchronized void updateTransformAxis(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
@@ -149,7 +144,7 @@ public class TransformTranslationPanel extends JPanel
 	
 	void updateGUI()
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -170,6 +165,7 @@ public class TransformTranslationPanel extends JPanel
 			
 			double [] center = new double [3];
 			center = transformSetups.transformTranslation.getTranslation( cs );
+			
 			if(bFirstCS)
 			{
 				for (int d=0; d<3; d++)
@@ -209,7 +205,7 @@ public class TransformTranslationPanel extends JPanel
 	
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;

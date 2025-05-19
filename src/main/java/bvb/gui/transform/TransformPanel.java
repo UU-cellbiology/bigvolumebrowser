@@ -20,6 +20,8 @@ public class TransformPanel extends JPanel
 	
 	final TransformSetups transformSetups;
 	
+	final TransformScalePanel transformScalePanel;
+	
 	final TransformTranslationPanel transformTranslationPanel;
 	
 	public TransformPanel(final BigVolumeBrowser bvb_)
@@ -33,10 +35,14 @@ public class TransformPanel extends JPanel
 
 		transformSetups = new TransformSetups(bvb);
 		
+		transformScalePanel = new TransformScalePanel(transformSetups);
+		
 		transformTranslationPanel = new TransformTranslationPanel(transformSetups);
+		
 		JTabbedPane tabTrPane = new JTabbedPane(SwingConstants.TOP);
 		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
 	    //ImageIcon tabIcon = new ImageIcon(icon_path);
+		tabTrPane.addTab( "Scale", transformScalePanel );
 		tabTrPane.addTab( "Translation", transformTranslationPanel );
 		
 		
