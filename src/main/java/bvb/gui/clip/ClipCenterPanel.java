@@ -56,8 +56,7 @@ public class ClipCenterPanel extends JPanel
 
 	private BoundedValuePanelPG [] clipCenterPanels = new BoundedValuePanelPG[3];
 
-	private boolean blockUpdates = false;
-	
+	private boolean blockUpdates = false;	
 	
 	public ClipCenterPanel(SelectedSources sourceSelection_, final ClipSetups clipSetups_) 
 	{

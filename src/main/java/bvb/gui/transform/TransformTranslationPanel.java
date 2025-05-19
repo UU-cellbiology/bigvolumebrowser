@@ -2,15 +2,22 @@ package bvb.gui.transform;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
+import net.imglib2.realtransform.AffineTransform3D;
+
 import bdv.tools.brightness.ConverterSetup;
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
+import bdv.viewer.Source;
 import bvb.gui.SelectedSources;
 import bvb.transform.TransformSetups;
 import bvb.utils.BoundedValueDoubleBVB;
@@ -27,6 +34,8 @@ public class TransformTranslationPanel extends JPanel
 
 	private boolean blockUpdates = false;
 	
+	final JButton butResetTranslation;
+	
 	public TransformTranslationPanel(final TransformSetups transformSetups_) 
 	{
 		super();		
@@ -35,26 +44,41 @@ public class TransformTranslationPanel extends JPanel
 		
 		sourceSelection = transformSetups.selectedSources;
 		
+		butResetTranslation = new JButton ("Reset");
+		butResetTranslation.setToolTipText( "Reset translation" );
+		butResetTranslation.addActionListener( new ActionListener() 
+		{
+			@Override
+			public void actionPerformed( ActionEvent arg0 )
+			{
+				
+				resetTranslation();
+			}
+	
+		});
+		
 		GridBagLayout gridbag = new GridBagLayout();
 		
-		GridBagConstraints cd = new GridBagConstraints();
+		GridBagConstraints gbc = new GridBagConstraints();
 
 		setLayout(gridbag);
 		
-		cd.gridwidth = 0;
-		cd.gridy = 0;
-		cd.gridx = 0;
-		cd.fill = GridBagConstraints.BOTH;
-		cd.weightx = 1.0;
+		gbc.gridwidth = 0;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 0.99;
 		final JPopupMenu [] menus = new JPopupMenu[3];
+		
 		for(int d=0;d<3;d++)
 		{
-			cd.gridy++;
+			gbc.gridy++;
 			
 			translationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", translationPanels[d]::setBoundsDialog ) );
-			this.add(translationPanels[d],cd);
+			this.add(translationPanels[d],gbc);
 		}
 
 		menus[0].add( runnableItem(  "reset bounds", () -> resetBounds(0)));
@@ -81,6 +105,10 @@ public class TransformTranslationPanel extends JPanel
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
+		gbc.gridy ++;
+		gbc.anchor = GridBagConstraints.SOUTHEAST;
+		gbc.fill = GridBagConstraints.NONE;
+		this.add( butResetTranslation, gbc );
 		
 		updateGUI();
 	}
@@ -204,6 +232,36 @@ public class TransformTranslationPanel extends JPanel
 		}
 	}
 	
+	void resetTranslation()
+	{
+		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		if(csList == null || csList.isEmpty())
+		{
+			return;
+		}
+		
+		for ( final ConverterSetup cs: csList)
+		{
+			Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
+			AffineTransform3D srcTrFix = new AffineTransform3D();
+			//reset incremental
+			(( TransformedSource< ? > )src).setIncrementalTransform( srcTrFix );
+			//set UI to fixed
+			(( TransformedSource< ? > )src).getFixedTransform( srcTrFix );
+			final double [] defTr = new double[3];
+			for(int d=0; d<3; d++)
+			{
+				defTr[d] = srcTrFix.get( d, 3 );
+			}
+			transformSetups.transformTranslation.setTranslation( cs, defTr );
+			Bounds3D range3D = transformSetups.transformTranslationBounds.getDefaultBounds( cs );
+			transformSetups.transformTranslationBounds.setBounds( cs, range3D );
+			
+		}
+		updateGUI();
+		transformSetups.updateBVV();
+	}
+	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
@@ -211,9 +269,7 @@ public class TransformTranslationPanel extends JPanel
 		{
 			translationPanels[i].setEnabled( bEnabled );
 		}
-	}
-	
-	
+	}	
 	
 	private JMenuItem runnableItem( final String text, final Runnable action )
 	{

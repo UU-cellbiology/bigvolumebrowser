@@ -88,8 +88,8 @@ public class TabPanelView extends JPanel
 
 	    this.add( both, gbc );
 
-	    gbc.gridy++;
-	    this.add(clipPanel,gbc);
+	    //gbc.gridy++;
+	    //this.add(clipPanel,gbc);
 	    
 	    gbc.gridy++;
 	    this.add(transformPanel,gbc);

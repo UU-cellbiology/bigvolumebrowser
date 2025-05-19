@@ -292,7 +292,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	void resetClip()
 	{
 		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
-		if(csList== null || csList.isEmpty())
+		if(csList == null || csList.isEmpty())
 		{
 			return;
 		}

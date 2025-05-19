@@ -61,6 +61,7 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -715,7 +716,13 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		testBVB.startBVB("");
 		//testBVB.run("");
-		testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );
+		ValuePair< AbstractSpimData< ? >, List< BvvStackSource< ? > > > in = testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );
+		BvvStackSource< ? > sourceBVV = in.getB().get( 0 );
+		Source< ? > src = sourceBVV.getSources().get( 0 ).getSpimSource();
+		
+		AffineTransform3D testT = new AffineTransform3D();
+		testT.setTranslation( 50.,50.,0. );
+		(( TransformedSource< ? > )src).setFixedTransform( testT );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 

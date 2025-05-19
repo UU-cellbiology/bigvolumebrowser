@@ -48,4 +48,10 @@ public class TransformSetups
 		(( TransformedSource< ? > )src).setIncrementalTransform( srcTrInc );
 		bvb.updateSceneRender();
 	}
+	
+	public void updateBVV()
+	{
+		bvb.updateSceneRender();
+		
+	}
 }
