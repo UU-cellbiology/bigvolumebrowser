@@ -18,12 +18,10 @@ import javax.swing.UIManager;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.tools.transformation.TransformedSource;
 import bdv.ui.UIUtils;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.Source;
 import bvb.gui.SelectedSources;
-import bvb.utils.Bounds3D;
 import bvb.utils.transform.TransformSetups;
 
 public class TransformScalePanel extends JPanel
@@ -62,6 +60,7 @@ public class TransformScalePanel extends JPanel
 		
 		butResetScale = new JButton ("Reset");
 		butResetScale.setToolTipText( "Reset scale" );
+		butResetScale.addActionListener( (e)->resetScale());
 		
 		String [] axesTitles = new String[] {"X","Y","Z"};
 		String [] voxelSizeS = new String[] {"NA","NA","NA"};

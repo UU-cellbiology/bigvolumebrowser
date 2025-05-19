@@ -88,18 +88,19 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public ClipPanel(final BigVolumeBrowser bvb_)
 	{
 		super();
+		
 		bvb = bvb_;
-
 
 		GridBagLayout gridbag = new GridBagLayout();
 		setLayout(gridbag);
+		
 		this.setBorder(new PanelTitle(" Clip "));
 
 		clipSetups = new ClipSetups(bvb);
 		
-		clipRangePanel = new ClipRangePanel(clipSetups);
-	    clipRotationPanel = new ClipRotationPanel(clipSetups.selectedSources, clipSetups); 
-	    clipCenterPanel = new ClipCenterPanel(clipSetups.selectedSources, clipSetups); 
+		clipRangePanel = new ClipRangePanel( clipSetups );
+	    clipRotationPanel = new ClipRotationPanel( clipSetups ); 
+	    clipCenterPanel = new ClipCenterPanel( clipSetups ); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
 		//URL icon_path = this.getClass().getResource("/icons/rotate.png");

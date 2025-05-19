@@ -50,7 +50,6 @@ import bvvpg.ui.panels.BoundedValuePanelPG;
 
 public class ClipCenterPanel extends JPanel
 {
-	final SelectedSources sourceSelection;
 
 	final ClipSetups clipSetups;
 
@@ -58,12 +57,10 @@ public class ClipCenterPanel extends JPanel
 
 	private boolean blockUpdates = false;	
 	
-	public ClipCenterPanel(SelectedSources sourceSelection_, final ClipSetups clipSetups_) 
+	public ClipCenterPanel( final ClipSetups clipSetups_ ) 
 	{
 		super();
-		
-		sourceSelection = sourceSelection_;
-		
+			
 		clipSetups = clipSetups_;
 		
 		GridBagLayout gridbag = new GridBagLayout();
@@ -101,7 +98,7 @@ public class ClipCenterPanel extends JPanel
 		clipCenterPanels[2].changeListeners().add( () -> updateClipCenter(2));
 		
 		//add source selection listener
-		sourceSelection.addSourceSelectionListener(  new SelectedSources.Listener()
+		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
 		{			
 			@Override
 			public void selectedSourcesChanged()
@@ -127,7 +124,7 @@ public class ClipCenterPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -187,7 +184,7 @@ public class ClipCenterPanel extends JPanel
 	
 	synchronized void updateClipCenter(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
@@ -222,7 +219,7 @@ public class ClipCenterPanel extends JPanel
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;

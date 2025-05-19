@@ -47,18 +47,9 @@ public class TransformCenter
 	public double [] getCurrentOrDefaultCenters(final ConverterSetup setup)
 	{
 		final Source< ? > src = bimap.getSource( setup ).getSpimSource();
-		
-		
+				
 		FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
-//		AffineTransform3D srcTr = new AffineTransform3D();
-//		(( TransformedSource< ? > )src).get.getFixedTransform( srcTr );
-//		final double out [] = new double [3];
-//		
-//		for (int d = 0; d < 3; d++ )
-//		{
-//			out[d] = srcTr.get( d, 3 );
-//		}
-		
+
 		return Misc.getIntervalCenter(interval);		
 		
 	}

@@ -71,10 +71,6 @@ public class ClipRangePanel extends JPanel
 
 		clipSetups = clipSetups_;
 		
-		//sourceSelection = sourceSelection_;
-		
-
-
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints cd = new GridBagConstraints();
 

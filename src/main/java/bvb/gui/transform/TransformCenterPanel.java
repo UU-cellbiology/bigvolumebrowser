@@ -2,8 +2,6 @@ package bvb.gui.transform;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -43,16 +41,7 @@ public class TransformCenterPanel extends JPanel
 	
 		butResetTranslation = new JButton ("Reset");
 		butResetTranslation.setToolTipText( "Reset translation" );
-		butResetTranslation.addActionListener( new ActionListener() 
-		{
-			@Override
-			public void actionPerformed( ActionEvent arg0 )
-			{
-				
-				resetTranslation();
-			}
-	
-		});
+		butResetTranslation.addActionListener( (e)->resetTranslation());
 		
 		setLayout(new GridBagLayout());
 		

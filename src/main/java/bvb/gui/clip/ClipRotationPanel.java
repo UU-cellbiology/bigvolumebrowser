@@ -46,7 +46,6 @@ import bvvpg.ui.panels.BoundedValuePanelPG;
 
 public class ClipRotationPanel extends JPanel
 {
-	final SelectedSources sourceSelection;
 
 	final ClipSetups clipSetups;
 
@@ -56,11 +55,9 @@ public class ClipRotationPanel extends JPanel
 	
 	private double dRange = 180.;
 	
-	public ClipRotationPanel(SelectedSources sourceSelection_, final ClipSetups clipSetups_) 
+	public ClipRotationPanel(final ClipSetups clipSetups_) 
 	{
 		super();
-		
-		sourceSelection = sourceSelection_;
 		
 		clipSetups = clipSetups_;
 		
@@ -88,7 +85,7 @@ public class ClipRotationPanel extends JPanel
 		clipRotationPanels[2].changeListeners().add( () -> updateClipAxisRotation(2));
 		
 		//add source selection listener
-		sourceSelection.addSourceSelectionListener(  new SelectedSources.Listener()
+		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
 		{			
 			@Override
 			public void selectedSourcesChanged()
@@ -116,7 +113,7 @@ public class ClipRotationPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -165,7 +162,7 @@ public class ClipRotationPanel extends JPanel
 	
 	synchronized void updateClipAxisRotation(int nAxis)
 	{
-		final List< ConverterSetup > csList = sourceSelection.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
