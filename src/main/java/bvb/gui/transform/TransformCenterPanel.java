@@ -19,12 +19,12 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.Source;
 import bvb.gui.SelectedSources;
-import bvb.transform.TransformSetups;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
+import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
-public class TransformTranslationPanel extends JPanel
+public class TransformCenterPanel extends JPanel
 {
 	
 	final TransformSetups transformSetups;
@@ -35,7 +35,7 @@ public class TransformTranslationPanel extends JPanel
 	
 	final JButton butResetTranslation;
 	
-	public TransformTranslationPanel(final TransformSetups transformSetups_) 
+	public TransformCenterPanel(final TransformSetups transformSetups_) 
 	{
 		super();		
 
@@ -129,11 +129,17 @@ public class TransformTranslationPanel extends JPanel
 				bounds.getMaxBound()[nAxis] = maxBound;
 				transformSetups.transformTranslationBounds.setBounds( cs, bounds );
 			}
-			final double [] newTranslation = transformSetups.transformTranslation.getTranslation( cs );
-			newTranslation[nAxis] = currVal;
+			final double [] oldCenters = transformSetups.transformCenters.getCenters( cs );
+			final double [] newCenters = new double [3];
+			for(int d=0; d<3; d++)
+			{
+				newCenters[d] = oldCenters[d];
+			}
+			newCenters[nAxis] = currVal;
 			
-			transformSetups.transformTranslation.setTranslation( cs, newTranslation );
-			transformSetups.updateTranslation(cs);
+			transformSetups.transformCenters.setCenters( cs, newCenters );
+			//transformSetups.updateCenters(cs);
+			transformSetups.updateTransform( cs );
 		//	clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
 			//update bounds
 		
@@ -164,7 +170,7 @@ public class TransformTranslationPanel extends JPanel
 			final double [] maxBound = bounds.getMaxBound();
 			
 			double [] center = new double [3];
-			center = transformSetups.transformTranslation.getTranslation( cs );
+			center = transformSetups.transformCenters.getCenters( cs );
 			
 			if(bFirstCS)
 			{
@@ -189,7 +195,7 @@ public class TransformTranslationPanel extends JPanel
 		final BoundedValueDoubleBVB [] finalTranslation = boundValue;
 		final boolean [] isConsistent = allTrEqual;
 		SwingUtilities.invokeLater( () -> {
-			synchronized ( TransformTranslationPanel.this )
+			synchronized ( TransformCenterPanel.this )
 			{
 				blockUpdates = true;
 				for (int d=0;d<3;d++)
@@ -249,7 +255,7 @@ public class TransformTranslationPanel extends JPanel
 			{
 				defTr[d] = srcTrFix.get( d, 3 );
 			}
-			transformSetups.transformTranslation.setTranslation( cs, defTr );
+			transformSetups.transformCenters.setCenters( cs, defTr );
 			Bounds3D range3D = transformSetups.transformTranslationBounds.getDefaultBounds( cs );
 			transformSetups.transformTranslationBounds.setBounds( cs, range3D );
 			

@@ -45,9 +45,9 @@ import net.imglib2.FinalRealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedRange;
-import bvb.clip.ClipSetups;
 import bvb.gui.SelectedSources;
 import bvb.utils.Bounds3D;
+import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedRangePanelPG;
 

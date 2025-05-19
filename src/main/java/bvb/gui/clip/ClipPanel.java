@@ -52,11 +52,11 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
-import bvb.clip.ClipSetups;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.PanelTitle;
 import bvb.gui.SelectedSources;
 import bvb.utils.Bounds3D;
+import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipPanel extends JPanel implements ItemListener, ChangeListener

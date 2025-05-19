@@ -1,4 +1,4 @@
-package bvb.transform;
+package bvb.utils.transform;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,13 +9,13 @@ import bdv.viewer.SourceToConverterSetupBimap;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
 
-public class TransformTranslationBounds
+public class TransformCenterBounds
 {
 	private final SourceToConverterSetupBimap bimap;
 
 	private final Map< ConverterSetup, Bounds3D > setupToBounds = new HashMap<>();
 	
-	public TransformTranslationBounds( final SourceToConverterSetupBimap bimap )
+	public TransformCenterBounds( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
 	}
@@ -39,7 +39,7 @@ public class TransformTranslationBounds
 		if ( sac != null )
 		{			
 			//get the range over all timepoints
-			bounds = new Bounds3D(Misc.getSourceTranlsationRangeAllTP( sac.getSpimSource() ));
+			bounds = new Bounds3D(Misc.getSourceBoundingBoxAllTP(sac.getSpimSource()));
 		}
 		else
 		{

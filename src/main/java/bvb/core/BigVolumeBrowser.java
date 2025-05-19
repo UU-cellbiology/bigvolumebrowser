@@ -114,7 +114,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public BvvHandleFrame bvvHandle;
 	
 	/** control panel **/
-	public BVBControlPanel controlPanel;
+	public BVBControlPanel controlPanel = null;
 	
 	/** actions and behaviors **/
 	public BVBActions bvbActions;
@@ -568,7 +568,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	@Override
 	public void timePointChanged( int timePointIndex )
 	{
-		updateSceneRender();		
+		updateSceneRender();
+		if(controlPanel != null)
+			controlPanel.tabPanelView.transformPanel.updateGUI();
 	}
 	
 	public void settingsDialogBVV()

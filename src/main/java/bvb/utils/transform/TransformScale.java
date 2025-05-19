@@ -1,4 +1,4 @@
-package bvb.transform;
+package bvb.utils.transform;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class TransformScale
 	
 	public double[] getScale( final ConverterSetup setup )
 	{
-		double [] out =  setupToScale.get( setup );
+		double [] out = setupToScale.get( setup );
 		if(out == null)
 		{
 			out = getCurrentOrDefaultScale(setup);
@@ -38,9 +38,9 @@ public class TransformScale
 		setScale( setup, getCurrentOrDefaultScale(setup));
 	}
 	
-	public void setScale( final ConverterSetup setup, final double[] centers)
+	public void setScale( final ConverterSetup setup, final double[] scales)
 	{
-		setupToScale.put( setup, centers );
+		setupToScale.put( setup, scales );
 	}
 	
 	public double [] getCurrentOrDefaultScale(final ConverterSetup setup)
@@ -48,7 +48,11 @@ public class TransformScale
 		Source< ? > src = bimap.getSource( setup ).getSpimSource();
 		
 		AffineTransform3D srcTr = new AffineTransform3D();
+		AffineTransform3D srcInc = new AffineTransform3D();
 		(( TransformedSource< ? > )src).getFixedTransform( srcTr );
+		(( TransformedSource< ? > )src).getIncrementalTransform( srcInc );
+		
+		srcTr = srcTr.preConcatenate( srcInc );
 		
 		final double out [] = new double [3];
 		

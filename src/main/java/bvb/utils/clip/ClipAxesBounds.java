@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package bvb.clip;
+package bvb.utils.clip;
 
 import java.util.HashMap;
 import java.util.Map;

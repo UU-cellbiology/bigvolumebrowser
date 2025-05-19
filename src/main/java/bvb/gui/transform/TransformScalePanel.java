@@ -15,14 +15,16 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import net.imglib2.realtransform.AffineTransform3D;
+
 import bdv.tools.brightness.ConverterSetup;
+import bdv.tools.transformation.TransformedSource;
 import bdv.ui.UIUtils;
-import bdv.util.BoundedValueDouble;
+import bdv.util.Affine3DHelpers;
+import bdv.viewer.Source;
 import bvb.gui.SelectedSources;
-import bvb.gui.clip.ClipRotationPanel;
-import bvb.transform.TransformSetups;
-import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
+import bvb.utils.transform.TransformSetups;
 
 public class TransformScalePanel extends JPanel
 {
@@ -35,6 +37,8 @@ public class TransformScalePanel extends JPanel
 	private JSpinner [] spinners = new JSpinner[3];
 	
 	private JLabel [] axesLabels = new JLabel[3];
+	
+	private JLabel [] voxelSize = new JLabel[3];
 	
 	final JButton butResetScale;
 	
@@ -60,12 +64,16 @@ public class TransformScalePanel extends JPanel
 		butResetScale.setToolTipText( "Reset scale" );
 		
 		String [] axesTitles = new String[] {"X","Y","Z"};
-		
+		String [] voxelSizeS = new String[] {"NA","NA","NA"};
 		
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(0,4,0,4);
-		gbc.gridx = 0;
+		
 		gbc.gridy = 0;
+		gbc.gridx = 2;
+		this.add( new JLabel("Voxel"), gbc );
+		gbc.insets = new Insets(0,4,0,4);
+		gbc.gridy = 1;
+		gbc.gridx = 0;
 		
 		for(int d=0;d<3;d++)
 		{
@@ -82,12 +90,21 @@ public class TransformScalePanel extends JPanel
 			models[d] = new SpinnerNumberModel(1.0,0.001,1000., 0.1);
 			spinners[d] = new JSpinner(models[d]);
 			this.add( spinners[d], gbc );
+			gbc.gridx++;
+			gbc.fill = GridBagConstraints.NONE;
+			gbc.weightx = 0.0;
+			gbc.insets = new Insets(0,4,0,4);			
+			voxelSize[d] =  new JLabel (voxelSizeS[d]);
+			this.add( voxelSize[d], gbc );
 			gbc.gridy++;
 		}
+		spinners[0].addChangeListener( (e)-> updateScaleAxis(0) );
+		spinners[1].addChangeListener( (e)-> updateScaleAxis(1) );
+		spinners[2].addChangeListener( (e)-> updateScaleAxis(2) );
 
 
 		gbc.gridx=0;
-		gbc.gridwidth = 2;
+		gbc.gridwidth = 3;
 		gbc.anchor = GridBagConstraints.SOUTHEAST;
 		gbc.fill = GridBagConstraints.NONE;
 		this.add( butResetScale, gbc );
@@ -115,11 +132,14 @@ public class TransformScalePanel extends JPanel
 			return;	
 		
 		double [] scales = new double[3];
+		double [] voxelSizes = new double[3];
 		boolean bFirstCS = true;
 		boolean [] allScalesEqual = new boolean [3];
+		boolean [] allVoxelsEqual = new boolean [3];
 		for (int d=0;d<3;d++)
 		{
 			allScalesEqual[d] = true;
+			allVoxelsEqual[d] = true;
 		}
 		
 		for ( final ConverterSetup cs: csList)
@@ -127,29 +147,33 @@ public class TransformScalePanel extends JPanel
 			if(bFirstCS)
 			{
 				scales = transformSetups.transformScale.getScale( cs );
+				voxelSizes = getVoxelSize( cs );
 				bFirstCS = false;
 			}
 			else
 			{
 				final double[] currScales = transformSetups.transformScale.getScale( cs );
+				final double[] currVoxels = getVoxelSize( cs );
 
 				for (int d=0; d<3; d++)
 				{
 					allScalesEqual[d] &= (Double.compare( scales[d], currScales[d] )==0);
+					allVoxelsEqual[d] &= (Double.compare( voxelSizes[d], currVoxels[d] )==0);
 				}
 			}
 		}
 		final double [] finalScales = scales;
+		final double [] finalVoxels = voxelSizes;
 		final boolean [] isConsistent = allScalesEqual;
+		final boolean [] isConsistentVox = allVoxelsEqual;
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( TransformScalePanel.this )
 			{
 				blockUpdates = true;
 				for (int d=0;d<3;d++)
 				{
-
-					//clipRotationPanels[d].setConsistent( isConsistent[d] );
 					spinners[d].setValue( finalScales[d]);
+					
 					if(isConsistent[d])
 					{
 						axesLabels[d].setBackground( consistentBg );
@@ -160,11 +184,79 @@ public class TransformScalePanel extends JPanel
 						axesLabels[d].setBackground( inConsistentBg );
 						spinners[d].setBackground( inConsistentBg );
 					}
+					if(isConsistentVox[d])
+					{
+						voxelSize[d].setText( Double.toString( finalVoxels[d] ));
+					}
+					else
+					{
+						voxelSize[d].setText("NC");
+					}
 						
 				}
 				blockUpdates = false;
 			}
 		} );
+	}
+	
+	private double[] getVoxelSize( final ConverterSetup cs )
+	{
+		final Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
+		AffineTransform3D viewTr = new AffineTransform3D();
+		src.getSourceTransform( transformSetups.bvb.bvvViewer.state().getCurrentTimepoint(), 0, viewTr);
+
+		final double [] finScales = new double[3];
+		for(int d=0; d<3; d++)
+		{
+			finScales[d] = Affine3DHelpers.extractScale( viewTr, d );
+		}
+		
+		return finScales;
+	}
+
+	void updateScaleAxis(int nAxis)
+	{
+		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		if ( blockUpdates || csList == null || csList.isEmpty() )
+			return;
+		blockUpdates = true;
+		final double currVal = ((Double)spinners[nAxis].getValue()).doubleValue();
+		for ( final ConverterSetup cs : csList )
+		{
+			final double [] oldScale = transformSetups.transformScale.getScale( cs );
+			final double [] newScale = new double [3];
+			for(int d=0;d<3;d++)
+			{
+				newScale[d] = oldScale[d];
+			}
+			newScale[nAxis] = currVal;
+			transformSetups.transformScale.setScale( cs, newScale );
+			transformSetups.updateTransform( cs );
+		}
+		blockUpdates = false;
+		updateGUI();
+	}
+	
+	void resetScale()
+	{
+		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		if(csList == null || csList.isEmpty())
+		{
+			return;
+		}
+		
+		final double [] unitScale = new double [3];
+		for (int d=0; d<3;d++)
+		{
+			unitScale [d] = 1.0;
+		}
+		for ( final ConverterSetup cs: csList)
+		{
+			
+			transformSetups.transformCenters.setCenters( cs, unitScale );
+			transformSetups.updateTransform( cs );			
+		}
+		updateGUI();
 	}
 	
 	@Override

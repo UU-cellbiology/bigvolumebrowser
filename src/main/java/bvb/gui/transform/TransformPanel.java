@@ -12,7 +12,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.PanelTitle;
 import bvb.gui.SelectedSources;
-import bvb.transform.TransformSetups;
+import bvb.utils.transform.TransformSetups;
 
 public class TransformPanel extends JPanel 
 {
@@ -22,7 +22,7 @@ public class TransformPanel extends JPanel
 	
 	final TransformScalePanel transformScalePanel;
 	
-	final TransformTranslationPanel transformTranslationPanel;
+	final TransformCenterPanel transformTranslationPanel;
 	
 	public TransformPanel(final BigVolumeBrowser bvb_)
 	{
@@ -37,13 +37,13 @@ public class TransformPanel extends JPanel
 		
 		transformScalePanel = new TransformScalePanel(transformSetups);
 		
-		transformTranslationPanel = new TransformTranslationPanel(transformSetups);
+		transformTranslationPanel = new TransformCenterPanel(transformSetups);
 		
 		JTabbedPane tabTrPane = new JTabbedPane(SwingConstants.TOP);
 		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
 	    //ImageIcon tabIcon = new ImageIcon(icon_path);
 		tabTrPane.addTab( "Scale", transformScalePanel );
-		tabTrPane.addTab( "Translation", transformTranslationPanel );
+		tabTrPane.addTab( "Center", transformTranslationPanel );
 		
 		
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -63,7 +63,7 @@ public class TransformPanel extends JPanel
 	    
 
 	}
-	private synchronized void updateGUI()
+	public synchronized void updateGUI()
 	{
 		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
 		if(csList== null || csList.isEmpty())
@@ -72,11 +72,14 @@ public class TransformPanel extends JPanel
 			return;
 		}
 		setPanelsEnabled(true);
+		transformScalePanel.updateGUI();
+		transformTranslationPanel.updateGUI();
 	}
 	
 	private void setPanelsEnabled(boolean bEnabled)
 	{
-		transformTranslationPanel.setEnabled(bEnabled);
+		transformScalePanel.setEnabled( bEnabled );
+		transformTranslationPanel.setEnabled( bEnabled );
 	}
 	
 	public void setSourceListeners()

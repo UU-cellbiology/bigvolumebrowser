@@ -41,10 +41,10 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
-import bvb.clip.ClipSetups;
 import bvb.gui.SelectedSources;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
+import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
