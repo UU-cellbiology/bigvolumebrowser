@@ -80,7 +80,49 @@ public class Misc
 		}
 		return interval;
 	}
-
+	public static FinalRealInterval getSourceTranlsationRange(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformSource = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= (max[d]-min[d]);
+		}
+		final FinalRealInterval interval = new FinalRealInterval(min, max);
+		return transformSource.estimateBounds( interval );
+	}
+	
+	public static FinalRealInterval getSourceTranlsationRangeAllTP(final Source<?> source)
+	{
+		FinalRealInterval interval = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(interval == null)
+				{
+					interval = Misc.getSourceTranlsationRange(source,t,0);
+				}
+				else
+				{
+					interval = Intervals.union( interval, Misc.getSourceTranlsationRange(source,t,0));
+				}
+					
+				t++;
+			}
+		}
+		return interval;
+	}
 	
 	public static double[] getSourceMin(final Source<?> source, int nTimePoint, int baseLevel)
 	{

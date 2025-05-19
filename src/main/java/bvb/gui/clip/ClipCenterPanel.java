@@ -41,8 +41,8 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
+import bvb.clip.ClipSetups;
 import bvb.gui.SelectedSources;
-import bvb.gui.clip.utils.ClipSetups;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -195,6 +195,8 @@ public class ClipCenterPanel extends JPanel
 		double currVal = clipCenterPanels[nAxis].getValue().getCurrentValue();
 		double minBound = clipCenterPanels[nAxis].getValue().getRangeMin();
 		double maxBound = clipCenterPanels[nAxis].getValue().getRangeMax();
+		minBound = Math.min( currVal, minBound );
+		maxBound = Math.max( currVal, maxBound );
 		for ( final ConverterSetup cs : csList )
 		{
 			final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );

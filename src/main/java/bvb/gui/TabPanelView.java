@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.clip.ClipPanel;
+import bvb.gui.transform.TransformPanel;
 
 public class TabPanelView extends JPanel
 {
@@ -48,19 +49,21 @@ public class TabPanelView extends JPanel
 
 	public ClipPanel clipPanel;
 	
+	public TransformPanel transformPanel;
+	
 	public TabPanelView(final BigVolumeBrowser bvb_)
 	{
 		super(new GridBagLayout());	
 		
-		bvb = bvb_;
-			
-	   
+		bvb = bvb_;   
 	    
 	    viewPanel = new ViewPanel(bvb);
 	    
 	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), bvb.selectedSources);
 	    
 	    clipPanel = new ClipPanel(bvb);		
+	    
+	    transformPanel = new TransformPanel(bvb);
 	   
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
@@ -87,6 +90,9 @@ public class TabPanelView extends JPanel
 
 	    gbc.gridy++;
 	    this.add(clipPanel,gbc);
+	    
+	    gbc.gridy++;
+	    this.add(transformPanel,gbc);
 	    
         // Blank/filler component
 	    gbc.gridy++;

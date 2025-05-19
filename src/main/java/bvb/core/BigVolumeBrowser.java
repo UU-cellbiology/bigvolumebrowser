@@ -715,6 +715,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		testBVB.startBVB("");
 		//testBVB.run("");
+		testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
