@@ -738,14 +738,19 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		testBVB.startBVB("");
 		//testBVB.run("");
-		ValuePair< AbstractSpimData< ? >, List< BvvStackSource< ? > > > in = testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );
-		BvvStackSource< ? > sourceBVV = in.getB().get( 0 );
-		Source< ? > src = sourceBVV.getSources().get( 0 ).getSpimSource();
 		
-		AffineTransform3D testT = new AffineTransform3D();
-		testT.setTranslation( 50.,50.,0. );
-		testT.scale( 0.1, 0.2, 0.3 );
-		(( TransformedSource< ? > )src).setFixedTransform( testT );
+		//transform test
+//		ValuePair< AbstractSpimData< ? >, List< BvvStackSource< ? > > > in = testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );
+//		BvvStackSource< ? > sourceBVV = in.getB().get( 0 );
+//		Source< ? > src = sourceBVV.getSources().get( 0 ).getSpimSource();
+//		
+//		AffineTransform3D testT = new AffineTransform3D();
+//		testT.setTranslation( 50.,50.,0. );
+//		testT.scale( 0.1, 0.2, 0.3 );
+//		(( TransformedSource< ? > )src).setFixedTransform( testT );
+		
+		
+		
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
