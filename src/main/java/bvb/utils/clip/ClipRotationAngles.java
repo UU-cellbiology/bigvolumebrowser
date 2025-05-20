@@ -41,14 +41,13 @@ import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipRotationAngles
 {
-	
-
 	private final Map< ConverterSetup, double[]> setupToAngles = new HashMap<>();
+	
 	public ClipRotationAngles( )
 	{
 
-
 	}
+	
 	public double[] getAngles( final ConverterSetup setup )
 	{
 		double [] out =  setupToAngles.get( setup );

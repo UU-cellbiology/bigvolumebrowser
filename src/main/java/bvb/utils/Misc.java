@@ -34,6 +34,7 @@ import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.Affine3DHelpers;
@@ -358,4 +359,29 @@ public class Misc
 		out = out +"  ("+f.getParent()+")";
 		return out;
 	}
+	
+	public static AffineTransform3D getRotationTransform(final double [] eAngles)
+	{
+		final double[] qRotation = new double[4];
+		final double[] q = new double[4];
+
+		final double[] dAxis = new double[3];
+		dAxis[0] = 1.0;
+		LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[0], qRotation );
+		for (int d=1;d<3;d++)
+		{
+			dAxis[d-1] = 0.0;
+			dAxis[d] = 1.0;
+			LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[d], q);
+			LinAlgHelpers.quaternionMultiply( q, qRotation, qRotation );
+		}
+		
+		final double [][] rotMatrix = new double [3][4];  
+		LinAlgHelpers.quaternionToR( qRotation, rotMatrix );
+		final AffineTransform3D clipRot = new AffineTransform3D();
+		
+		clipRot.set( rotMatrix );
+		return clipRot;
+	}
+	
 }

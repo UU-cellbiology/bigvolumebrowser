@@ -185,19 +185,10 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	private synchronized void updateGUI()
 	{
 		updateColors();
-//		switch (selectedSources.getActiveWindow())
-//		{
-//		case 0:
-//			selectionWindow.setText( "Selected: Sources");
-//			break;
-//		case 1:
-//			selectionWindow.setText( "Selected: Groups");
-//			break;
-//		default:
-//			selectionWindow.setText( "Selected: None");
-//		}	
+
 		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
-		if(csList== null || csList.isEmpty())
+		
+		if(csList == null || csList.isEmpty())
 		{
 			setPanelsEnabled(false);
 			return;

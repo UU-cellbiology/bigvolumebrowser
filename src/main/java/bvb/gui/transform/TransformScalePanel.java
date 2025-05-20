@@ -21,7 +21,6 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.Source;
-import bvb.gui.SelectedSources;
 import bvb.utils.transform.TransformSetups;
 
 public class TransformScalePanel extends JPanel
@@ -69,7 +68,9 @@ public class TransformScalePanel extends JPanel
 		
 		gbc.gridy = 0;
 		gbc.gridx = 2;
-		this.add( new JLabel("Voxel"), gbc );
+		final JLabel vxLabel = new JLabel("Voxel");
+		vxLabel.setToolTipText( "Final voxel size" );
+		this.add( vxLabel , gbc );
 		gbc.insets = new Insets(0,4,0,4);
 		gbc.gridy = 1;
 		gbc.gridx = 0;
@@ -94,6 +95,7 @@ public class TransformScalePanel extends JPanel
 			gbc.weightx = 0.0;
 			gbc.insets = new Insets(0,4,0,4);			
 			voxelSize[d] =  new JLabel (voxelSizeS[d]);
+			voxelSize[d].setToolTipText( "Final voxel size" );
 			this.add( voxelSize[d], gbc );
 			gbc.gridy++;
 		}
@@ -108,15 +110,10 @@ public class TransformScalePanel extends JPanel
 		gbc.fill = GridBagConstraints.NONE;
 		this.add( butResetScale, gbc );
 		
-		transformSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged()
-			{
-				updateGUI();
-			}
-		} );
-		 updateColors();
+		transformSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
+		
+		updateColors();
+		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
 		updateGUI();
@@ -245,6 +242,7 @@ public class TransformScalePanel extends JPanel
 		}
 		
 		final double [] unitScale = new double [3];
+		
 		for (int d=0; d<3;d++)
 		{
 			unitScale [d] = 1.0;

@@ -18,7 +18,7 @@ public class TransformCenter
 	
 	private final Map< ConverterSetup, double[]> setupToCenters = new HashMap<>();
 
-	public TransformCenter( final SourceToConverterSetupBimap bimap)
+	public TransformCenter( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
 	}

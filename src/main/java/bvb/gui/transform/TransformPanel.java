@@ -1,5 +1,6 @@
 package bvb.gui.transform;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
@@ -22,7 +23,9 @@ public class TransformPanel extends JPanel
 	
 	final TransformScalePanel transformScalePanel;
 	
-	final TransformCenterPanel transformTranslationPanel;
+	final TransformCenterPanel transformCentersPanel;
+	
+	final TransformRotationPanel transformRotationPanel;
 	
 	public TransformPanel(final BigVolumeBrowser bvb_)
 	{
@@ -37,13 +40,16 @@ public class TransformPanel extends JPanel
 		
 		transformScalePanel = new TransformScalePanel(transformSetups);
 		
-		transformTranslationPanel = new TransformCenterPanel(transformSetups);
+		transformCentersPanel = new TransformCenterPanel(transformSetups);
+		
+		transformRotationPanel = new TransformRotationPanel(transformSetups);
 		
 		JTabbedPane tabTrPane = new JTabbedPane(SwingConstants.TOP);
 		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
 	    //ImageIcon tabIcon = new ImageIcon(icon_path);
 		tabTrPane.addTab( "Scale", transformScalePanel );
-		tabTrPane.addTab( "Center", transformTranslationPanel );
+		tabTrPane.addTab( "Center", transformCentersPanel );
+		tabTrPane.addTab( "Rotation", transformRotationPanel );
 		
 		
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -61,6 +67,13 @@ public class TransformPanel extends JPanel
 	    
 	    updateGUI();
 	    
+	    Color [] colors = new Color[3];
+	    colors[0] =  new Color(198,34,0);
+	    colors[1] =  new Color(67,154,0);
+	    colors[2] =  new Color(0,34,213);
+
+	    this.setSliderColors( colors );
+	    
 
 	}
 	public synchronized void updateGUI()
@@ -73,13 +86,14 @@ public class TransformPanel extends JPanel
 		}
 		setPanelsEnabled(true);
 		transformScalePanel.updateGUI();
-		transformTranslationPanel.updateGUI();
+		transformCentersPanel.updateGUI();
 	}
 	
 	private void setPanelsEnabled(boolean bEnabled)
 	{
 		transformScalePanel.setEnabled( bEnabled );
-		transformTranslationPanel.setEnabled( bEnabled );
+		transformCentersPanel.setEnabled( bEnabled );
+		transformRotationPanel.setEnabled( bEnabled );
 	}
 	
 	public void setSourceListeners()
@@ -97,5 +111,13 @@ public class TransformPanel extends JPanel
 	    //add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
 
+	}
+	
+	void setSliderColors(Color [] colors)
+	{
+		
+		transformCentersPanel.setSliderColors( colors );
+		transformRotationPanel.setSliderColors( colors );
+		
 	}
 }

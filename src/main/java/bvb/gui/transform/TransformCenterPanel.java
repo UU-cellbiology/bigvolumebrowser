@@ -1,5 +1,6 @@
 package bvb.gui.transform;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
@@ -17,7 +18,6 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.Source;
-import bvb.gui.SelectedSources;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
@@ -80,14 +80,7 @@ public class TransformCenterPanel extends JPanel
 		translationPanels[2].changeListeners().add( () -> updateTransformAxis(2));
 		
 		//add source selection listener
-		transformSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged()
-			{
-				updateGUI();
-			}
-		} );
+		transformSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
@@ -266,7 +259,15 @@ public class TransformCenterPanel extends JPanel
 		{
 			translationPanels[i].setEnabled( bEnabled );
 		}
-	}	
+	}
+	
+	void setSliderColors(Color [] colors)
+	{
+		for(int i=0;i<3;i++)
+		{
+			translationPanels[i].setSliderForeground( colors[i] );	
+		}
+	}
 	
 	private JMenuItem runnableItem( final String text, final Runnable action )
 	{

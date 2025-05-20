@@ -39,7 +39,6 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
-import bvb.gui.SelectedSources;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedValuePanelPG;
@@ -63,21 +62,21 @@ public class ClipRotationPanel extends JPanel
 		
 		GridBagLayout gridbag = new GridBagLayout();
 		
-		GridBagConstraints cd = new GridBagConstraints();
+		GridBagConstraints gbc = new GridBagConstraints();
 
 		setLayout(gridbag);
 		
-		cd.gridwidth = 0;
-		cd.gridy = 0;
-		cd.gridx = 0;
-		cd.fill = GridBagConstraints.BOTH;
-		cd.weightx = 1.0;
+		gbc.gridwidth = 0;
+		gbc.gridy = 0;
+		gbc.gridx = 0;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1.0;
 		for(int d=0;d<3;d++)
 		{
-			cd.gridy++;
+			gbc.gridy++;
 			clipRotationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( -dRange, dRange, 0.0 ));
 
-			this.add(clipRotationPanels[d],cd);
+			this.add(clipRotationPanels[d],gbc);
 		}
 		
 		clipRotationPanels[0].changeListeners().add( () -> updateClipAxisRotation(0));
@@ -85,15 +84,7 @@ public class ClipRotationPanel extends JPanel
 		clipRotationPanels[2].changeListeners().add( () -> updateClipAxisRotation(2));
 		
 		//add source selection listener
-		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged()
-			{
-				updateGUI();
-			}
-		} );
-	
+		clipSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
 		
 		//add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );

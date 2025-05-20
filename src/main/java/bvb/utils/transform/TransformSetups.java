@@ -25,6 +25,8 @@ public class TransformSetups
 	
 	final public TransformCenterBounds transformTranslationBounds;
 	
+	final public TransformRotation transformRotation;
+	
 	public TransformSetups (final BigVolumeBrowser bvb_)
 	{
 		this.bvb = bvb_;
@@ -36,6 +38,7 @@ public class TransformSetups
 		transformScale = new TransformScale(converterSetups);
 		transformCenters = new TransformCenter(converterSetups);
 		transformTranslationBounds = new TransformCenterBounds(converterSetups);
+		transformRotation = new TransformRotation(converterSetups);
 		
 	}
 	
@@ -43,6 +46,10 @@ public class TransformSetups
 	{
 		Source< ? > src = converterSetups.getSource( cs ).getSpimSource();
 
+		final double [] eAngles = transformRotation.getAngles( cs );
+		
+		final AffineTransform3D trRot = Misc.getRotationTransform( eAngles );
+		
 		AffineTransform3D srcTrFixed = new AffineTransform3D();
 		
 		//reset both transforms just in case
@@ -60,11 +67,13 @@ public class TransformSetups
 		final AffineTransform3D scaleTr = new AffineTransform3D();
 		scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
 		srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
-		final double [] tr = transformCenters.getCenters( cs );
-
-		//move things to the center
+		//rotate
+		srcTrFixed = srcTrFixed.preConcatenate( trRot );
+		
+		
+		//move things to the current volume's center
+		final double [] tr = transformCenters.getCenters( cs );		
 		final AffineTransform3D translTr = new AffineTransform3D();
-
 		translTr.translate( tr );
 		srcTrFixed = srcTrFixed.preConcatenate( translTr );
 		

@@ -41,7 +41,6 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
-import bvb.gui.SelectedSources;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
@@ -98,14 +97,7 @@ public class ClipCenterPanel extends JPanel
 		clipCenterPanels[2].changeListeners().add( () -> updateClipCenter(2));
 		
 		//add source selection listener
-		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged()
-			{
-				updateGUI();
-			}
-		} );
+		clipSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
 		
 		//add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
