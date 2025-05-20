@@ -65,9 +65,13 @@ public class VolumeBBoxes extends AbstractBasicShape
 	
 	private Color lineColor = Color.WHITE;
 	
-	public VolumeBBoxes(final BigVolumeBrowser bvb_)
+	private boolean bDotted = false;
+	
+	public VolumeBBoxes(final BigVolumeBrowser bvb_, boolean bDotted_ )
 	{
 		bvb = bvb_;
+		
+		bDotted = bDotted_;
 		
 		bvvSourceToBox =  new HashMap<>();
 	}
@@ -155,7 +159,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				final VolumeBox currBox = bvvSourceToBox.get( sac );
 				if(currBox == null)
 				{
-					bvvSourceToBox.put( sac, new VolumeBox(srcInt, null, lineThickness, lineColor) );
+					bvvSourceToBox.put( sac, new VolumeBox(srcInt, null, lineThickness, lineColor, bDotted) );
 				}
 				else
 				{
@@ -210,7 +214,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				if(currBox == null)
 				{
 					cs.getClipTransform( transform );
-					bvvSourceToBox.put( sac, new VolumeBox(cs.getClipInterval(), transform, lineThickness, lineColor) );
+					bvvSourceToBox.put( sac, new VolumeBox(cs.getClipInterval(), transform, lineThickness, lineColor, bDotted) );
 				}
 				else
 				{

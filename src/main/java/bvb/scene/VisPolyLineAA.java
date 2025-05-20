@@ -67,6 +67,8 @@ public class VisPolyLineAA
 	float lineLength = 0.0f;
 	
 	public boolean bIncludeClip = false;
+	
+	public boolean bDotted = false;
 		
 	float vertices[]; 
 	
@@ -90,21 +92,23 @@ public class VisPolyLineAA
 	}
 	
 	
-	public VisPolyLineAA(final ArrayList< RealPoint > points, final float fLineThickness_,final Color color_in)
+	public VisPolyLineAA(final ArrayList< RealPoint > points, final float fLineThickness_,final Color color_in, boolean bDotted_)
 	{
 		this();
 		fLineThickness = fLineThickness_;		
-		l_color = new Vector4f(color_in.getComponents(null));		
+		l_color = new Vector4f(color_in.getComponents(null));	
+		bDotted = bDotted_;
 		setVertices(points);
 		
 	}
 	
-	public VisPolyLineAA(final RealPoint [] points, final float fLineThickness_,final Color color_in)
+	public VisPolyLineAA(final RealPoint [] points, final float fLineThickness_,final Color color_in, boolean bDotted_)
 	{
 		this();
 		fLineThickness = fLineThickness_;		
 		l_color = new Vector4f(color_in.getComponents(null));		
 		setVertices(points);
+		bDotted = bDotted_;
 		
 	}
 
@@ -323,6 +327,7 @@ public class VisPolyLineAA
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );	
 		prog.getUniform4f("color").set(l_color);
 		prog.getUniform1f( "linelength" ).set( lineLength );
+		prog.getUniform1i( "dotted" ).set( bDotted ?1:0);
 		//prog.getUniform1f( "thickness" ).set(3 );
 		prog.getUniform1f( "thickness" ).set( fLineThickness );
 		prog.getUniform1f( "antialias" ).set( 1.5f);

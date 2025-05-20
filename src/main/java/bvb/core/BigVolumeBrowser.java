@@ -169,9 +169,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvSourceToSpimData = new ConcurrentHashMap<>();
 		spimDataToBVVSourceList = new ConcurrentHashMap<>();
 		spimDataToInfo = new ConcurrentHashMap<>();
-		volumeBoxes = new VolumeBBoxes(this);
+		volumeBoxes = new VolumeBBoxes(this, false);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
-		clipBoxes = new VolumeBBoxes(this);
+		clipBoxes = new VolumeBBoxes(this, true);
 		
 	    //sync BVV and Control Panel window closing
 	    closeWA = new WindowAdapter()
@@ -712,7 +712,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		ij.Prefs.set("BVB.canvasBGColor", bgColor.getRGB());
 		final Color bbFrameColor = BVBSettings.getInvertedColor(bgColor);
 		volumeBoxes.setLineColor( bbFrameColor );
-		clipBoxes.setLineColor( bbFrameColor.darker() );
+		clipBoxes.setLineColor( bbFrameColor );
 	}
 	
 	public List<BvvStackSource<?> > getBVVSourcesList(final AbstractSpimData<?> spimData)

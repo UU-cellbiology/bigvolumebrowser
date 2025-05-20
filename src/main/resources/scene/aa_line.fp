@@ -1,3 +1,4 @@
+uniform int dotted;
 uniform vec4 color;
 uniform float antialias;
 uniform float thickness;
@@ -33,21 +34,37 @@ void main()
 
     vec4 colorOut = vec4(color);
 
-    // Cap at start
-    if (v_uv.x < 0)
-    {      
-       d = length(v_uv) - w;
-    }
-    // Cap at end
-    else if (v_uv.x >= linelength)
-    {
-		d = length(v_uv - vec2(linelength,0)) - w;
-    }
-    // Body
-    else
-    {
-        d = abs(v_uv.y) - w;
-    }
+	if(dotted == 0 )
+	{
+	    // Cap at start
+	    if (v_uv.x < 0)
+	    {      
+	       d = length(v_uv) - w;
+	    }
+	    // Cap at end
+	    else if (v_uv.x >= linelength)
+	    {
+			d = length(v_uv - vec2(linelength,0)) - w;
+	    }
+	    // Body
+	    else
+	    {
+	        d = abs(v_uv.y) - w;
+	    }
+	}
+	else
+	{
+	    float spacing = 2.5;
+	    float phase = 0.0;
+	    float center = v_uv.x + spacing/2.0*thickness
+	                 - mod(v_uv.x + phase + spacing/2.0*thickness, spacing*thickness);
+	    if (linelength - center < thickness/2.0)
+	        discard;
+	    else if (center < thickness/2.0)
+	        discard;
+	    else
+	        d = length(v_uv - vec2(center,0.0)) - w;
+	}
         
     if( d < 0) 
     {

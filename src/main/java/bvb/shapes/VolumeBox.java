@@ -51,11 +51,11 @@ public class VolumeBox extends AbstractBasicShape
 	public ArrayList<VisPolyLineAA> edgesVis;
 	public float lineThickness;
 	public Color lineColor;
+	public boolean bDotted = true;
 	public AffineTransform3D transform = null;
-	
 	public RealInterval interval;
 	
-	public VolumeBox(RealInterval nIntervalBox, AffineTransform3D transform_, final float lineThickness_, final Color lineColor_)
+	public VolumeBox(RealInterval nIntervalBox, AffineTransform3D transform_, final float lineThickness_, final Color lineColor_, boolean bDotted_)
 	{
 		interval = nIntervalBox;
 
@@ -63,6 +63,8 @@ public class VolumeBox extends AbstractBasicShape
 		
 		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
 
+		bDotted = bDotted_;
+		
 		if(transform_ == null)
 		{
 			transform = null;
@@ -117,12 +119,13 @@ public class VolumeBox extends AbstractBasicShape
 		edgesVis = new ArrayList<>();
 		for(int i=0; i<edgesPairPoints.size(); i++)
 		{
-			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness, lineColor));
+			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness, lineColor, bDotted));
 		}
 	}
 	
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size) {
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size) 
+	{
 	
 		if(edgesVis != null)
 		{
