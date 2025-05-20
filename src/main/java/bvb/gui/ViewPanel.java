@@ -58,7 +58,7 @@ public class ViewPanel extends JPanel
 //	JToggleButton butOrigin;
 	JToggleButton butVBox;
 	JButton butProjType;
-	public JButton butFullScreen;
+	//public JButton butFullScreen;
 	JButton butSettings;
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];
@@ -131,20 +131,20 @@ public class ViewPanel extends JPanel
 	
 		});
 		
-	    //FULL SCREEN
-		icon_path = this.getClass().getResource("/icons/fullscreen.png");
-	    tabIcon = new ImageIcon(icon_path);
-	    butFullScreen = new JButton(tabIcon);
-	    butFullScreen.setToolTipText("Full Screen");
-	    butFullScreen.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed( ActionEvent arg0 )
-			{
-				bvb.makeFullScreen();								
-			}
-	    	
-	    });	    
+//	    //FULL SCREEN
+//		icon_path = this.getClass().getResource("/icons/fullscreen.png");
+//	    tabIcon = new ImageIcon(icon_path);
+//	    butFullScreen = new JButton(tabIcon);
+//	    butFullScreen.setToolTipText("Full Screen");
+//	    butFullScreen.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed( ActionEvent arg0 )
+//			{
+//				bvb.makeFullScreen();								
+//			}
+//	    	
+//	    });	    
 	    
 		//SETTINGS
 		icon_path = this.getClass().getResource("/icons/settings.png");
@@ -174,8 +174,8 @@ public class ViewPanel extends JPanel
 		gbc.gridx++;	    
 		this.add(butProjType,gbc);
 		
-		gbc.gridx++;	    
-		this.add(butFullScreen,gbc);
+//		gbc.gridx++;	    
+//		this.add(butFullScreen,gbc);
 		
 		gbc.gridx++;	    
 		this.add(butSettings,gbc);

@@ -70,6 +70,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	
 	JPanel panInterpolation;
 	
+	
 	/**
 	 * Panel background if color reflects a set of sources all having the same color
 	 */
@@ -97,7 +98,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		sInterpolation[0] = "Nearest";
 		sInterpolation[1] = "Trilinear";
 		
-		GridBagConstraints gbc = new GridBagConstraints();
 	
 		URL icon_path = this.getClass().getResource("/icons/max_int.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
@@ -121,51 +121,62 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 
 		panRender = new JPanel(new GridBagLayout());		
 		panInterpolation = new JPanel(new GridBagLayout());
-		
-		for(int i = 0; i<2; i++)
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridwidth = 2 ;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		panRender.add( new JLabel("Render"),gbc );
+		panInterpolation.add( new JLabel("Voxels"),gbc );
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 1;
+		for(int i = 0; i < 2; i++)
 		{
 			
 			butRender[i].setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
 			butRender[i].addActionListener( this );
 			renderMode.add( butRender[i] );
-			panRender.add( butRender[i] );
+			panRender.add( butRender[i], gbc );
 			
 			butInter[i].setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
 			butInter[i].addActionListener( this );
 			interpolationMode.add( butInter[i] );
-			panInterpolation.add( butInter[i] );
+			panInterpolation.add( butInter[i], gbc );
+			gbc.gridx++;
 		}
+		
+		gbc = new GridBagConstraints();
 		
 		gbc.insets =  new Insets(1,10,1,10);
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		this.add(new JLabel("Render"),gbc);
 		
+		this.add(panRender,gbc);	
 		gbc.gridx++;
-		gbc.gridheight = 2;
 		gbc.fill = SwingConstants.VERTICAL;
 		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
 		this.add(sp,gbc);
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.gridheight = 1;
+		
 		gbc.gridx++;
-		this.add(new JLabel("Voxels"),gbc);
-
-		gbc.gridx=0;
-		gbc.gridy++;
-		this.add(panRender,gbc);			
-		
-		gbc.gridx+=2;
+		gbc.fill = GridBagConstraints.NONE;
 		this.add( panInterpolation, gbc );
+//		gbc.gridx++;
+//		gbc.gridheight = 2;
+//		gbc.fill = SwingConstants.VERTICAL;
+//		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
+//		this.add(sp,gbc);
+//		gbc.fill = GridBagConstraints.NONE;
+//		gbc.gridheight = 1;
+//		gbc.gridx++;
+//
+//		gbc.gridx = 0;
+//		gbc.gridy++;
+//		this.add(panRender,gbc);			
+//		
+//		gbc.gridx += 2;
+//		this.add( panInterpolation, gbc );
 		
-	    selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged( )
-			{
-				updateGUI();
-			}
-		} );
+	    selectedSources.addSourceSelectionListener(()->	updateGUI());
 	    
 	    //add listener in case number of sources, etc change
 	    convSetups.listeners().add( s -> updateGUI() );
@@ -207,6 +218,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		{
 			butRender[nRenderM].setSelected( true );
 			panRender.setBackground( consistentBg );
+
 		}
 		else
 		{

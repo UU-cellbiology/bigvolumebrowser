@@ -32,7 +32,7 @@ public class PanelAddShapes extends JPanel
 		super(new GridBagLayout());	
 		
 		bvb = bvb_;
-		this.setBorder(new PanelTitle(" Add shapes "));
+		//this.setBorder(new PanelTitle(" Add shapes "));
 	    GridBagConstraints gbc = new GridBagConstraints();
 		URL icon_path = this.getClass().getResource("/icons/spots.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);

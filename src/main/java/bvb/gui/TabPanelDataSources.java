@@ -42,8 +42,8 @@ import bvb.gui.data.PanelAddSources;
 
 public class TabPanelDataSources extends JPanel
 {
-	final PanelAddSources panelAddSources;
-	final PanelData panelData;
+	final public PanelAddSources panelAddSources;
+	final public PanelData panelData;
 	
 	
 	public TabPanelDataSources(final BigVolumeBrowser bvb)

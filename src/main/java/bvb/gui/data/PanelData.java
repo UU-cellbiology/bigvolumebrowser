@@ -71,7 +71,7 @@ public class PanelData extends JPanel
 	{
 		super(new GridBagLayout());	
 		bvb = bvb_;
-		this.setBorder(new PanelTitle(" Loaded data "));
+		//this.setBorder(new PanelTitle(" Loaded data "));
 		
 
         //create the tree by passing in the data model
@@ -128,7 +128,7 @@ public class PanelData extends JPanel
     	
     	GridBagConstraints gbc = new GridBagConstraints();
 	    
-	    gbc.insets = new Insets(4,3,4,3);
+	    //gbc.insets = new Insets(4,3,4,3);
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;

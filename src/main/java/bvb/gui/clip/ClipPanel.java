@@ -94,7 +94,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		GridBagLayout gridbag = new GridBagLayout();
 		setLayout(gridbag);
 		
-		this.setBorder(new PanelTitle(" Clip "));
+		//this.setBorder(new PanelTitle(" Clip "));
 
 		clipSetups = new ClipSetups(bvb);
 		

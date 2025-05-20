@@ -34,7 +34,7 @@ public class TransformPanel extends JPanel
 		
 		GridBagLayout gridbag = new GridBagLayout();
 		setLayout(gridbag);
-		this.setBorder(new PanelTitle(" Transform "));
+		//this.setBorder(new PanelTitle(" Transform "));
 
 		transformSetups = new TransformSetups(bvb);
 		

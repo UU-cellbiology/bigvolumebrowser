@@ -64,7 +64,7 @@ public class PanelAddSources extends JPanel
 		super(new GridBagLayout());	
 		
 		bvb = bvb_;
-		this.setBorder(new PanelTitle(" Add data "));
+		//this.setBorder(new PanelTitle(" Add data "));
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
 		URL icon_path = this.getClass().getResource("/icons/bioformats.png");

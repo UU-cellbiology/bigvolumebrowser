@@ -13,7 +13,7 @@ import bvb.gui.shapes.PanelShapes;
 
 public class TabPanelShapes extends JPanel
 {
-	final PanelAddShapes panelAddShapes;
+	final public PanelAddShapes panelAddShapes;
 	final public PanelShapes panelShapes;
 	
 	public TabPanelShapes(final BigVolumeBrowser bvb)
