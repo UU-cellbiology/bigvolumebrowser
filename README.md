@@ -15,14 +15,15 @@ Hopefully the interface is self-explanatory.
 **For developers**: please check the code in [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).
 
 
-Powered by:   
+Powered (and made possible) by:   
 - [ImageJ](https://github.com/imagej) 
 - [FIJI](https://fiji.sc/) 
 - [imglib2](https://github.com/imglib/imglib2) 
 - [BioFormats](https://github.com/ome/bioformats) 
 - [BigDataViewer (BDV)](https://github.com/bigdataviewer) 
 - [BDV-loaders](https://github.com/BIOP/bigdataviewer-image-loaders) 
-- [BigVolumeViewer (playground edition)](https://github.com/UU-cellbiology/bvv-playground).   
+- [BigVolumeViewer (playground edition)](https://github.com/UU-cellbiology/bvv-playground). 
+
 Thank you all involved!
 
 ----------
