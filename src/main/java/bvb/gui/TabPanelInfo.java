@@ -39,7 +39,7 @@ public class TabPanelInfo extends JPanel
 	public TabPanelInfo()
 	{
 		super(new GridLayout());
-		this.setBorder(new PanelTitle(" Shortcuts "));
+		//this.setBorder(new PanelTitle(" Shortcuts "));
 		String shortCutInfo ="<html><center><b>View/Navigation</b></center><br>"
 					+"&nbsp;<b>P</b> - show sources panel<br><br>"
 					+"&nbsp;<b>S</b> - brightness/color dialog<br><br>"

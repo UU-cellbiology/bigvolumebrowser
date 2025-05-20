@@ -33,7 +33,6 @@ import java.awt.event.KeyListener;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -52,7 +51,6 @@ import javax.swing.tree.TreePath;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.PanelTitle;
 import bvb.gui.SelectedSources;
 import bvvpg.vistools.BvvStackSource;
 

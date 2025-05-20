@@ -84,7 +84,7 @@ public class TabPanelView extends JPanel
 	    c.gridx++;
 	    both.add( sourcesRenderPanel,c );
 	    
-	    both.setBorder(new PanelTitle(" View "));
+	    //both.setBorder(new PanelTitle(" View "));
 
 	    this.add( both, gbc );
 

@@ -11,8 +11,6 @@ import javax.swing.SwingConstants;
 
 import bdv.tools.brightness.ConverterSetup;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.PanelTitle;
-import bvb.gui.SelectedSources;
 import bvb.utils.transform.TransformSetups;
 
 public class TransformPanel extends JPanel 

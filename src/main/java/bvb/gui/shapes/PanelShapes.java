@@ -3,13 +3,11 @@ package bvb.gui.shapes;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.PanelTitle;
 
 public class PanelShapes extends JPanel
 {

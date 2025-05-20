@@ -43,7 +43,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.PanelTitle;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
