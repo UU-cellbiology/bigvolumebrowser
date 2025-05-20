@@ -270,7 +270,7 @@ public class VolumeBox extends AbstractBasicShape
 		return bFinal;
 		
 	}
-	public boolean compareIntervalTransformm(RealInterval int2, AffineTransform3D tr2)
+	public boolean compareIntervalTransform(RealInterval int2, AffineTransform3D tr2)
 	{
 
 		boolean bFinal = true;

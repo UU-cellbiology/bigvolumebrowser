@@ -52,11 +52,13 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedSources;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
+import ij.Prefs;
 
 public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 {
@@ -128,7 +130,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		//selectionWindow = new JLabel("Selected: None");
 		gbc.gridx++;
 		this.add(cbShowClipBoxes ,gbc);
-		
+
 		cbShowClipBoxes.addItemListener( new ItemListener() 
 				{
 					@Override
@@ -137,6 +139,9 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 						boolean bNewState =  (e.getStateChange() 
 								== ItemEvent.SELECTED ? true: false);
 						bvb.clipBoxes.setVisible( bNewState );
+						BVBSettings.bShowClipBoxes = bNewState;
+						Prefs.get("BVB.bShowClipBoxes", BVBSettings.bShowClipBoxes);
+						
 						if(bNewState)
 						{
 							bvb.clipBoxes.updateClipBoxes();
@@ -145,6 +150,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 					}
 				
 				});
+		cbShowClipBoxes.setSelected( BVBSettings.bShowClipBoxes );
 		
 		butResetClip = new JButton("Reset");
 		gbc.gridx ++;
@@ -255,7 +261,12 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		{
 			  ((GammaConverterSetup)cs).setClipActive( bEnabled );
 		}
+		if(bEnabled)
+		{
+			bvb.clipBoxes.updateClipBoxes();
+		}
 	}
+	
 	@Override
 	public void itemStateChanged( ItemEvent arg0 )
 	{

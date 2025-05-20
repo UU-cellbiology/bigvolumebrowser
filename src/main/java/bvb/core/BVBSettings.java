@@ -42,6 +42,9 @@ public class BVBSettings
 	/** status of displaying boxes around sources **/
 	public static boolean bShowVolumeBoxes = Prefs.get("BVB.bShowVolumeBoxes", true);
 
+	/** status of displaying boxes around sources **/
+	public static boolean bShowClipBoxes = Prefs.get("BVB.bShowClipBoxes", true);
+	
 	/** animation speed during zoom in/out , i.e. duration of displayed transform in ms **/
 	public static int nTransformAnimationDuration =  (int)Prefs.get("BVB.nTransformAnimationDuration",400);
 	

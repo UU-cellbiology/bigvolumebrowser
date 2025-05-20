@@ -155,17 +155,21 @@ public class VolumeBBoxes extends AbstractBasicShape
 			final Source< ? > src = sac.getSpimSource();
 			if(src.isPresent( nTimePoint ))
 			{
-				final FinalRealInterval srcInt = Misc.getSourceBoundingBox(src,nTimePoint,0);
+				final FinalRealInterval interval = new FinalRealInterval(src.getSource( nTimePoint, 0 ));
+				final AffineTransform3D transform = new AffineTransform3D();
+				src.getSourceTransform( nTimePoint, 0, transform );
 				final VolumeBox currBox = bvvSourceToBox.get( sac );
 				if(currBox == null)
 				{
-					bvvSourceToBox.put( sac, new VolumeBox(srcInt, null, lineThickness, lineColor, bDotted) );
+				
+					bvvSourceToBox.put( sac, new VolumeBox(interval, transform , lineThickness, lineColor, bDotted) );
 				}
 				else
 				{
-					if(!currBox.interval.equals( srcInt ))
+					if(!currBox.compareIntervalTransform( interval, transform ))
 					{
-						currBox.setInterval( srcInt );
+						currBox.setTransform(transform, false);
+						currBox.setInterval( interval );
 					}
 				}
 			}
@@ -197,7 +201,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		
 		
 		List< SourceAndConverter< ? > > sacList = bvb.bvvViewer.state().getSources();
-		
+		final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 		for(SourceAndConverter< ? > sac : sacList )
 		{
 			GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
@@ -209,16 +213,16 @@ public class VolumeBBoxes extends AbstractBasicShape
 				final AffineTransform3D transform = new AffineTransform3D();
 				FinalRealInterval interval = cs.getClipInterval();
 				if(interval == null)
-					break;
+					interval = Misc.getSourceBoundingBox( sac.getSpimSource(),nTimePoint,0 );
 				cs.getClipTransform( transform );
 				if(currBox == null)
 				{
 					cs.getClipTransform( transform );
-					bvvSourceToBox.put( sac, new VolumeBox(cs.getClipInterval(), transform, lineThickness, lineColor, bDotted) );
+					bvvSourceToBox.put( sac, new VolumeBox(interval, transform, lineThickness, lineColor, bDotted) );
 				}
 				else
 				{
-					if(!currBox.compareIntervalTransformm( interval, transform ))
+					if(!currBox.compareIntervalTransform( interval, transform ))
 					{
 						currBox.setTransform(transform, false);
 						currBox.setInterval( interval );
