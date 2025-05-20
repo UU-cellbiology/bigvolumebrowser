@@ -28,6 +28,8 @@
  */
 package bvb.scene;
 
+import static com.jogamp.opengl.GL.GL_LESS;
+import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_RGBA;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
@@ -199,102 +201,6 @@ public class VisMeshTexture
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
 		gl.glBindVertexArray( 0 );
 
-
-//		gl.glGenVertexArrays( 1, tmp, 0 );
-//		vao = tmp[ 0 ];
-//		gl.glBindVertexArray( vao );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshPosVbo );
-//		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-//		gl.glEnableVertexAttribArray( 0 );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
-//		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-//		gl.glEnableVertexAttribArray( 1 );
-//
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
-//		gl.glVertexAttribPointer( 2, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-//		gl.glEnableVertexAttribArray( 2 );
-//		
-//		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
-//		gl.glBindVertexArray( 0 );		
-		
-		
-//		//build baricentric coordinates for each triangle
-//		final float [] barycenter = new float [mesh.vertices().size()*3];
-//		
-//		final IntBuffer indicesT = mesh.triangles().indices().duplicate();
-//		indicesT.rewind();
-//
-//		final int [] trindices = IntBuffertoArray(indicesT);
-//
-//		for(int i=0; i<trindices.length; i+=3)
-//		{			
-//			for(int j=0;j<3;j++)
-//			{
-//				for(int d=0;d<3;d++)
-//				{
-//					barycenter[trindices[i+j]*3+d] = 0.0f;
-//				}
-//				
-//			}
-//			for(int j=0;j<3;j++)
-//			{
-//				barycenter[trindices[i+j]*3+j] = 1.0f;
-//			}
-//
-//		}
-//
-//		final int[] tmp = new int[ 4 ];
-//		gl.glGenBuffers( 4, tmp, 0 );
-//		final int meshPosVbo = tmp[ 0 ];
-//		final int meshNormalVbo = tmp[ 1 ];
-//		final int meshBaryVbo = tmp[ 2 ];
-//		final int meshEbo = tmp[ 3 ];
-//		
-//		if(mesh == null)
-//			return false;
-//		else
-//			if (mesh.vertices() == null)
-//				return false;
-//
-//		final FloatBuffer vertBuff = mesh.vertices().verts();
-//		vertBuff.rewind();
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshPosVbo );
-//		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertBuff.limit() * Float.BYTES, vertBuff, GL.GL_STATIC_DRAW );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-//
-//		final FloatBuffer normals = mesh.vertices().normals();
-//		normals.rewind();
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
-//		gl.glBufferData( GL.GL_ARRAY_BUFFER, normals.limit() * Float.BYTES, normals, GL.GL_STATIC_DRAW );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-//		
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
-//		gl.glBufferData( GL.GL_ARRAY_BUFFER, barycenter.length * Float.BYTES, FloatBuffer.wrap( barycenter ), GL.GL_STATIC_DRAW );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-//
-//		final IntBuffer indices = mesh.triangles().indices();
-//		indices.rewind();
-//		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
-//		gl.glBufferData( GL.GL_ELEMENT_ARRAY_BUFFER, indices.limit() * Integer.BYTES, indices, GL.GL_STATIC_DRAW );
-//		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, 0 );
-//
-//		gl.glGenVertexArrays( 1, tmp, 0 );
-//		vao = tmp[ 0 ];
-//		gl.glBindVertexArray( vao );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshPosVbo );
-//		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-//		gl.glEnableVertexAttribArray( 0 );
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
-//		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-//		gl.glEnableVertexAttribArray( 1 );
-//
-//		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
-//		gl.glVertexAttribPointer( 2, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-//		gl.glEnableVertexAttribArray( 2 );
-//		
-//		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
-//		gl.glBindVertexArray( 0 );
-
 		initialized = true;
 
 		return true; 
@@ -334,13 +240,13 @@ public class VisMeshTexture
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );
 		prog.setUniforms( context );
 		prog.use( context );
-
+		gl.glEnable( GL_DEPTH_TEST );
+		gl.glDepthFunc( GL_LESS);
 		gl.glActiveTexture( GL_TEXTURE0 );
 		gl.glBindTexture( GL_TEXTURE_2D, texId );
 		gl.glBindVertexArray( vao );
 		gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
-//		gl.glDrawArrays( GL_TRIANGLES, 0, 36 );
 		gl.glBindTexture( GL_TEXTURE_2D, 0 );
 		gl.glBindVertexArray( 0 );
 	
