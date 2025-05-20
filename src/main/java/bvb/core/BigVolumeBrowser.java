@@ -47,9 +47,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.UIManager;
-import javax.swing.WindowConstants;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -559,8 +557,13 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	public void showVolumeBoxes(boolean bShow)
 	{
+		if(bShow)
+		{
+			volumeBoxes.updateVolumeBoxes();
+		}
 		volumeBoxes.setVisible( bShow );
 		ij.Prefs.set("BVB.bShowVolumeBoxes", bShow);
+		
 		repaintBVV();
 	}
 	
@@ -726,8 +729,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
     }
 	
 	public static void main(String... args) throws Exception
-	{
-		
+	{	
 		
 		new ImageJ();
 

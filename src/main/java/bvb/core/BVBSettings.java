@@ -51,7 +51,10 @@ public class BVBSettings
 	public static boolean bFocusOnSourcesOnLoad =  Prefs.get("BVB.bFocusOnSourcesOnLoad", true);
 	
 	public static boolean bShowMultiBox = Prefs.get( "BVB.bShowMultiBox", true );
+	
 	public static boolean bShowScaleBar = Prefs.get( "BVB.bShowScaleBar", true );
+	
+	public static double dFocusScreenFraction =  Prefs.get("BVB.dFocusScreenFraction", 0.95);
 	
 	public static int nDefaultWidthControlPanel = 400;
 	

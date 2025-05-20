@@ -99,15 +99,7 @@ public class TransformPanel extends JPanel
 	public void setSourceListeners()
 	{
 		
-		transformSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
-		{			
-			@Override
-			public void selectedSourcesChanged( )
-			{
-				updateGUI();
-			}
-		} );
-		
+		transformSetups.selectedSources.addSourceSelectionListener( () -> updateGUI());		
 	    //add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
 

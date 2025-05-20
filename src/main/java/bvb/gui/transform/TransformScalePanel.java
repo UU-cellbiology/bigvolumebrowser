@@ -4,7 +4,11 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -49,6 +53,9 @@ public class TransformScalePanel extends JPanel
 	 */
 	private Color inConsistentBg = Color.WHITE;
 	
+	final DecimalFormat formatter = new DecimalFormat("#.####", DecimalFormatSymbols.getInstance( Locale.ENGLISH ));
+	
+	
 	public TransformScalePanel(final TransformSetups transformSetups_) 
 	{
 		super();		
@@ -63,6 +70,8 @@ public class TransformScalePanel extends JPanel
 		
 		String [] axesTitles = new String[] {"X","Y","Z"};
 		String [] voxelSizeS = new String[] {"NA","NA","NA"};
+		
+		formatter.setRoundingMode( RoundingMode.DOWN );
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
@@ -182,7 +191,7 @@ public class TransformScalePanel extends JPanel
 					}
 					if(isConsistentVox[d])
 					{
-						voxelSize[d].setText( Double.toString( finalVoxels[d] ));
+						voxelSize[d].setText( formatter.format( finalVoxels[d] ));
 					}
 					else
 					{

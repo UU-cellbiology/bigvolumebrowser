@@ -36,6 +36,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -188,9 +190,9 @@ public class ViewPanel extends JPanel
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
-//		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-//		symbols.setDecimalSeparator('.');
-//		DecimalFormat df3 = new DecimalFormat ("#.#####", symbols);
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
 		
 		JButton butCanvasBGColor = new JButton( new ColorIcon( BVBSettings.canvasBGColor ) );	
 		butCanvasBGColor.addActionListener( e -> {
@@ -207,6 +209,9 @@ public class ViewPanel extends JPanel
 		NumberField nfAnimationDuration = new NumberField(5);
 		nfAnimationDuration.setIntegersOnly(true);
 		nfAnimationDuration.setText(Integer.toString(BVBSettings.nTransformAnimationDuration));
+		
+		NumberField nfFocusScreenFraction = new NumberField(4);
+		nfFocusScreenFraction.setText( df3.format( BVBSettings.dFocusScreenFraction ) );
 		
 		JCheckBox cbZoomLoad = new JCheckBox();
 		cbZoomLoad.setSelected(BVBSettings.bFocusOnSourcesOnLoad);
@@ -250,6 +255,14 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(new JLabel("Focus on loaded sources "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbZoomLoad, gbc);
+
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Screen fraction on zoom/focus: "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(nfFocusScreenFraction, gbc);
+
+		
 		
 		
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
@@ -283,6 +296,9 @@ public class ViewPanel extends JPanel
 			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
 			bdv.util.Prefs.showMultibox( BVBSettings.bShowMultiBox );
 			
+			BVBSettings.dFocusScreenFraction = Double.parseDouble(nfFocusScreenFraction.getText());
+			Prefs.set("BVB.dFocusScreenFraction",BVBSettings.dFocusScreenFraction);
+					
 
 			if(bRepaintBVV)
 			{

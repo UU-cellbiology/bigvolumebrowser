@@ -34,6 +34,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -56,6 +57,8 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import bdv.tools.brightness.ConverterSetup;
+import bdv.viewer.SourceAndConverter;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.Rotate3DViewerStyle;
 
@@ -99,6 +102,7 @@ public class BVBActions
 	{
 		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
+		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
 		
@@ -364,9 +368,26 @@ public class BVBActions
 			final FinalRealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
 			if(focusInt != null)
 			{
-				CenterZoomBVV.focusAnimateOnInterval(bvb, focusInt, 0.95);
+				CenterZoomBVV.focusAnimateOnInterval(bvb, focusInt, BVBSettings.dFocusScreenFraction);
 			}
 		}
+	}
+	
+	public void actionToggleVisibility()
+	{
+		final List< ConverterSetup > csList = bvb.selectedSources.getSelectedSources();
+		if(csList== null || csList.isEmpty())
+		{
+			return;
+		}
+		for ( final ConverterSetup cs : csList )
+		{
+			
+			SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( cs );
+			bvb.bvvViewer.state().setSourceActive( sac, !bvb.bvvViewer.state().isSourceVisible( sac ) );
+
+		}
+		
 	}
 	
 }
