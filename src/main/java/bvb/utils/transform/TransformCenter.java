@@ -28,7 +28,7 @@ public class TransformCenter
 		double [] out =  setupToCenters.get( setup );
 		if(out == null)
 		{
-			out = getCurrentOrDefaultCenters(setup);
+			out = getDefaultCenters(setup);
 			setCenters( setup, out );
 		}		
 		return out;
@@ -36,7 +36,7 @@ public class TransformCenter
 	
 	public void updateCenters(final ConverterSetup setup)
 	{
-		setCenters( setup, getCurrentOrDefaultCenters(setup));
+		setCenters( setup, getDefaultCenters(setup));
 	}
 	
 	public void setCenters( final ConverterSetup setup, final double[] centers)
@@ -44,7 +44,7 @@ public class TransformCenter
 		setupToCenters.put( setup, centers );
 	}
 	
-	public double [] getCurrentOrDefaultCenters(final ConverterSetup setup)
+	public double [] getDefaultCenters(final ConverterSetup setup)
 	{
 		final Source< ? > src = bimap.getSource( setup ).getSpimSource();
 				

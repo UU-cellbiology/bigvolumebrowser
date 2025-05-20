@@ -49,7 +49,7 @@ public class TabPanelInfo extends JPanel
 					+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
 					+"&nbsp;<b>F10</b> - BVV (canvas) settings<br><br></html>";
 		JLabel jlInfo = new JLabel(shortCutInfo);
-		jlInfo.setVerticalAlignment(SwingConstants.CENTER);
+		jlInfo.setVerticalAlignment(SwingConstants.TOP);
 		jlInfo.setHorizontalAlignment(SwingConstants.CENTER);
 		this.add(jlInfo);
 

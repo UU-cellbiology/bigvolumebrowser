@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -19,6 +20,7 @@ import bdv.viewer.Source;
 import bvb.gui.SelectedSources;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
+import bvb.utils.Misc;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -233,20 +235,24 @@ public class TransformCenterPanel extends JPanel
 		
 		for ( final ConverterSetup cs: csList)
 		{
-			Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
-			AffineTransform3D srcTrFix = new AffineTransform3D();
-			//reset incremental
-			(( TransformedSource< ? > )src).setIncrementalTransform( srcTrFix );
-			//set UI to fixed
-			(( TransformedSource< ? > )src).getFixedTransform( srcTrFix );
-			final double [] defTr = new double[3];
-			for(int d=0; d<3; d++)
-			{
-				defTr[d] = srcTrFix.get( d, 3 );
-			}
-			transformSetups.transformCenters.setCenters( cs, defTr );
-			Bounds3D range3D = transformSetups.transformTranslationBounds.getDefaultBounds( cs );
-			transformSetups.transformTranslationBounds.setBounds( cs, range3D );
+			final Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
+			
+			final AffineTransform3D srcTrFixed = new AffineTransform3D();
+			AffineTransform3D srcTrIc = new AffineTransform3D();
+			
+			//reset both transforms just in case
+			(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
+			(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
+			FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+			
+			//remove both transforms
+			srcTrIc = srcTrIc.inverse().preConcatenate( srcTrFixed.inverse() );
+			
+			interval = srcTrIc.estimateBounds( interval );
+			//srcTrFixed .apply( null, null );
+			final double [] centers = Misc.getIntervalCenter( interval );
+			transformSetups.transformCenters.setCenters( cs, centers );
+			transformSetups.updateTransform( cs );
 			
 		}
 		updateGUI();

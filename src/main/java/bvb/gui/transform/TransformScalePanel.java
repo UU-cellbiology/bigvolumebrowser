@@ -252,7 +252,7 @@ public class TransformScalePanel extends JPanel
 		for ( final ConverterSetup cs: csList)
 		{
 			
-			transformSetups.transformCenters.setCenters( cs, unitScale );
+			transformSetups.transformScale.setScale( cs, unitScale );
 			transformSetups.updateTransform( cs );			
 		}
 		updateGUI();
