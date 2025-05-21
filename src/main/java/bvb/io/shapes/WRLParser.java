@@ -1,4 +1,4 @@
-package bvb.io.meshes;
+package bvb.io.shapes;
 
 import java.awt.Color;
 import java.io.BufferedReader;

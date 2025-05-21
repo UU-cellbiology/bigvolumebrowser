@@ -39,8 +39,8 @@ public class GLB_test
 {
 	public static void main( final String[] args )
 	{
-		String sFilename = "src/test/resources/mesh/teddy.glb";
-		//String sFilename = "/home/eugene/Desktop/projects/BVB/GLB_read/5_20_2025.glb";
+		//String sFilename = "src/test/resources/mesh/teddy.glb";
+		String sFilename = "/home/eugene/Desktop/projects/BVB/GLB_read/5_20_2025.glb";
 		
 		GltfModelReader gltfModelReader = new GltfModelReader();
 		GltfModel gltfModel = null;

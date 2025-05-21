@@ -11,7 +11,7 @@ import net.imglib2.util.Intervals;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.examples.RAIdummy;
-import bvb.io.meshes.WRLParser;
+import bvb.io.shapes.WRLParser;
 import bvb.scene.VisMeshColor;
 import bvb.shapes.MeshColor;
 import ij.ImageJ;

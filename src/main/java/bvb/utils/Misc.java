@@ -355,6 +355,11 @@ public class Misc
 	public static String getSourceStyleName(String sFilename)
 	{
 		final File f = new File(sFilename);
+		return getSourceStyleName(f);
+	}
+	
+	public static String getSourceStyleName(final File f)
+	{
 		String out = f.getName();
 		out = out +"  ("+f.getParent()+")";
 		return out;

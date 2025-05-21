@@ -1,4 +1,4 @@
-package bvb.io.meshes;
+package bvb.io.shapes;
 
 public class VertexWRL
 {

@@ -1,4 +1,4 @@
-package bvb.io.meshes;
+package bvb.io.shapes;
 
 import net.imglib2.mesh.Mesh;
 
