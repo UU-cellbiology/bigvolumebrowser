@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
@@ -58,6 +59,8 @@ public class SpotsLoadDialog
     String[] headers = new String[3];
     
     final ArrayList<String[]> dataParsed = new ArrayList<>();
+    
+    boolean bParsedColumns = false;
 	
 	public SpotsLoadDialog(BigVolumeBrowser bvb_)
 	{
@@ -116,7 +119,7 @@ public class SpotsLoadDialog
 	            
 	            jlFileName.setText( Misc.getSourceStyleName( fileSpots ));
 	            jlFileName.setCaretPosition( 0 );
-	            
+	            bParsedColumns = false;
 	            updateWindow();
 	            //pLoadSpots.updateUI();
 	        }
@@ -138,12 +141,18 @@ public class SpotsLoadDialog
 		cbHasHeader = new JCheckBox("Has header?");
 		cbHasHeader.setHorizontalTextPosition( SwingConstants.LEFT );
 		cbHasHeader.setSelected( Prefs.get( "BVB.bSpotsImportHasHeader", true ));
-		
+		cbHasHeader.addItemListener( (e)->{
+			bParsedColumns = false;
+			updateWindow();							
+		} );
 		String[] sSeparators = { ",", ";", "space", "tab" };
 		cbSeparator = new JComboBox<>(sSeparators);
 		cbSeparator.setSelectedIndex( 0 );
 		
-		cbSeparator.addActionListener( (e)->updateWindow());
+		cbSeparator.addActionListener( (e)->{
+			bParsedColumns = false;
+			updateWindow();				
+			});
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -161,6 +170,9 @@ public class SpotsLoadDialog
 		table.setFillsViewportHeight(true);
 		table.setEnabled( false );
 		table.getTableHeader().setReorderingAllowed(false);
+		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+		
+		JScrollPane scrollTable = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		///FINAL PANEL
 		pLoadSpots = new JPanel(new GridBagLayout());
 		gbc = new GridBagConstraints();
@@ -183,9 +195,8 @@ public class SpotsLoadDialog
 		gbc.gridx = 0;
 	    gbc.gridy++;
 	    gbc.weighty = 0.2;
-	    JScrollPane tableScrollPane = new JScrollPane(table);
 	    gbc.fill = GridBagConstraints.BOTH;
-		pLoadSpots.add(tableScrollPane, gbc);
+		pLoadSpots.add(scrollTable, gbc);
 		
 		
 		//filler
@@ -216,9 +227,13 @@ public class SpotsLoadDialog
 	
 	boolean analyzeFile()
 	{
+		
+		boolean bOut = true;
 		int nRow = 0;
+		int nHeaderCols = -1;
 		dataParsed.clear();
 		sStatus = "Error: ";
+		String headerUnParsed = "";
 		String[] sSeparators = { ",", ";", " ", "\t" };
 		String sSeparator = sSeparators[cbSeparator.getSelectedIndex()];
 		
@@ -237,18 +252,28 @@ public class SpotsLoadDialog
 				la = line.split(sSeparator);
 				if( la.length > 100 )
 				{
-					sStatus = sStatus +" too many (>100) columns. Check separator?";
-					return false;
+					if(bOut)
+					{
+						sStatus = sStatus +" too many (>100) columns. Check separator?";
+						bOut = false;
+					}
 				}
 				if( la.length < 2 )
 				{
-					sStatus = sStatus +" too little (<2) columns. Check separator?";
-					return false;
+					
+					if(bOut)
+					{
+						bOut = false;
+						sStatus = sStatus +" too little (<2) columns. Check separator?";
+					}
+						
 				}
-				//header??
+				//header
 				if(nRow == 1)
 				{
+					headerUnParsed = line;
 					headers = new String[la.length];
+					nHeaderCols = la.length;
 					for(int i=0; i<la.length; i++)
 					{
 						if(cbHasHeader.isSelected())
@@ -260,10 +285,39 @@ public class SpotsLoadDialog
 							headers[i] = "Column" + Integer.toString( i+1 );
 						}
 					}
+					if(!cbHasHeader.isSelected())
+					{
+						dataParsed.add( la );
+					}
 				}
 				else
 				{
-					dataParsed.add( la );
+					if(nHeaderCols != la.length)
+					{
+						if(bOut)
+						{
+							bOut = false;
+							sStatus = sStatus +" # headers column not equal to # data colums";							
+						}		
+						if(cbHasHeader.isSelected())
+						{
+							headers = new String [] {headerUnParsed};
+						}
+						else
+						{	
+							headers = new String [] {"Column1"};
+						}
+						if(nRow == 2 &&  !cbHasHeader.isSelected())
+						{
+							dataParsed.clear();
+							dataParsed.add( new String[] {headerUnParsed });
+						}
+						dataParsed.add( new String[] {line} );
+					}
+					else
+					{
+						dataParsed.add( la );
+					}
 				}
 				if(nRow == 5)
 				{
@@ -284,17 +338,28 @@ public class SpotsLoadDialog
 		}
 		if(nRow == 0 || (nRow == 1 && cbHasHeader.isSelected()))
 		{
-			sStatus = sStatus +" too little rows. Check file?";
+			if(bOut)
+			{
+				sStatus = sStatus +" too little rows. Check file?";
+				bOut = false;
+			}
+		}
+		if(bOut)
+		{
+			sStatus = "Status: file columns parsed ok.";
 		}
 		
-		return true;
+		return bOut;
 	}
+	
 	void updateWindow()
 	{
 		if (fileSpots != null)
 		{
-	        if(analyzeFile())
+			
+	        if(!bParsedColumns)
 	        {
+	        	bParsedColumns = analyzeFile();
 	        	table.setModel(parsedTableModel());
 	        }
 	        jStatus.setText( sStatus );
@@ -304,12 +369,16 @@ public class SpotsLoadDialog
 	
 	DefaultTableModel parsedTableModel()
 	{
+		if(dataParsed.size()==0)
+		{
+			return dummyTableModel();
+		}
 		 String [][] data = new String[dataParsed.size()][headers.length];
 		 for(int i=0;i<dataParsed.size();i++)
 		 {
 			 for(int j=0;j<headers.length; j++)
 			 {
-				 data[i][j]=dataParsed.get( i )[j];
+				 data[i][j] = dataParsed.get( i )[j];
 			 }
 		 }
 		DefaultTableModel tableModel = new DefaultTableModel(data, headers) {
