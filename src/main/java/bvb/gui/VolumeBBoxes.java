@@ -155,7 +155,15 @@ public class VolumeBBoxes extends AbstractBasicShape
 			final Source< ? > src = sac.getSpimSource();
 			if(src.isPresent( nTimePoint ))
 			{
-				final FinalRealInterval interval = new FinalRealInterval(src.getSource( nTimePoint, 0 ));
+				final double [] min = src.getSource( nTimePoint, 0 ).minAsDoubleArray();
+				final double [] max = src.getSource( nTimePoint, 0 ).maxAsDoubleArray();
+				//extend to include all range
+				for(int d=0; d<3; d++)
+				{
+					min[d] -= 0.5;
+					max[d] += 0.5;
+				}
+				final FinalRealInterval interval = new FinalRealInterval(min, max);
 				final AffineTransform3D transform = new AffineTransform3D();
 				src.getSourceTransform( nTimePoint, 0, transform );
 				final VolumeBox currBox = bvvSourceToBox.get( sac );
