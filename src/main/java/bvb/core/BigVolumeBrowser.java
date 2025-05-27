@@ -572,6 +572,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	{
 		shapes.add( shape );
 		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();
+		if(BVBSettings.bFocusOnSourcesOnLoad)
+		{
+			this.focusOnRealInterval( shape.boundingBox());
+		}
 	}
 	
 	public void removeShape(final BasicShape shape)

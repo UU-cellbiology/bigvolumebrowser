@@ -45,7 +45,7 @@ public class SpotsLoadDialog
 
 	JPanel pLoadSpots = null;
 
-	File fileSpots = null;
+	public File fileSpots = null;
 	
 	final JTextField jlFileName = new JTextField("No file selected");
 	
@@ -55,13 +55,13 @@ public class SpotsLoadDialog
 	
 	int panelHeight = 400;
 	
-	JCheckBox cbHasHeader = null;
+	public JCheckBox cbHasHeader = null;
 	
-	JComboBox<String> cbSeparator = null;
+	public JComboBox<String> cbSeparator = null;
 	
-	JComboBox<String> cbUnits = null;
+	public JComboBox<String> cbUnits = null;
 	
-	final ArrayList<JComboBox<String>> cbColumnsAssign = new ArrayList<>();
+	final public ArrayList<JComboBox<String>> cbColumnsAssign = new ArrayList<>();
 	
 	String sStatus = "Error: ";
 	
@@ -76,11 +76,12 @@ public class SpotsLoadDialog
     boolean bColumnsAssigned = false;
     
     JButton butOk = null;
+    
+    public boolean bAllSuccess = false;
 	
 	public SpotsLoadDialog(BigVolumeBrowser bvb_)
 	{
 		bvb = bvb_;
-	
 		
 		///OK/CANCEL PANEL		
 		JPanel pOkCancel = new JPanel(new GridBagLayout());
@@ -88,6 +89,10 @@ public class SpotsLoadDialog
 		butOk = new JButton("OK");
 		GridBagConstraints gbc = new GridBagConstraints();
 		butOk.setEnabled( false );
+		butOk.addActionListener(e -> {
+			bAllSuccess = true;
+			fLoadSpots.dispose();
+			}); 
 		JButton butCancel = new JButton("Cancel");
 		butCancel.addActionListener(e -> {
 			fLoadSpots.dispose();

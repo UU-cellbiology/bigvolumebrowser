@@ -1,29 +1,27 @@
 package bvb.gui.shapes;
 
-import java.awt.Dimension;
+
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.SwingWorker.StateValue;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import bvb.io.shapes.SpotsParser;
+import bvb.scene.VisSpotsSame;
 import bvb.shapes.MeshColor;
-import bvb.utils.Misc;
+import bvb.shapes.SpotsSame;
 import ij.Prefs;
 
 public class PanelAddShapes extends JPanel
@@ -71,6 +69,39 @@ public class PanelAddShapes extends JPanel
 	{
 		SpotsLoadDialog dialSpots = new SpotsLoadDialog(bvb);
 		dialSpots.show();
+		
+		//get the values
+		if(dialSpots.bAllSuccess)
+		{
+			SpotsParser sptParser = new SpotsParser();
+			sptParser.fileSpots = dialSpots.fileSpots;
+			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
+			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
+			final int [] nColInd = new int[3];
+			for(int d=0; d<3;d++)
+			{
+				if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()>0)
+				{
+					nColInd[d] = dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()-1;
+				}
+				else
+				{
+					nColInd[d] = -1;
+				}
+			}
+			sptParser.nColIndices = nColInd;
+			sptParser.execute();
+			sptParser.addPropertyChangeListener( (e)->
+			{
+				if(sptParser.getState() == StateValue.DONE)
+				{
+					SpotsSame importedSpots = new SpotsSame(20.0f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
+					importedSpots.setPoints( sptParser.vertices );
+					bvb.addShape( importedSpots );
+				}
+			}
+			);
+		}
 	}
 	void loadMeshDialog()
 	{
