@@ -77,7 +77,7 @@ public class RAIToSpimDataBvv
 		{
 			case 3:
 				//numSetups = 1;
-				size = new FinalDimensions( rai);
+				size = new FinalDimensions( rai );
 				break;
 			case 4:
 				//numSetups = 1;

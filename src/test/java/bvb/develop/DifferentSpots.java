@@ -26,24 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package bvb.examples;
+package bvb.develop;
 
 import java.awt.Color;
 import java.util.ArrayList;
 
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisSpotsSame;
 import bvb.shapes.Spots;
-import bvb.shapes.SpotsSame;
-import bvvpg.vistools.BvvFunctions;
 import ij.ImageJ;
 
-public class Example002Spots
+public class DifferentSpots
 {
 	public static void main( final String[] args )
 	{
@@ -52,50 +47,37 @@ public class Example002Spots
 
 		//start BVB
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
-		
 		testBVB.startBVB("");
-			
+		
+		//load some data
+		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
+		
 		//add sphere with random values as background		
 		int nRadius = 35;
 		
-		int maxInt = 200;
-		
-//		final RandomAccessibleInterval< UnsignedByteType > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);		
-//		testBVB.addRAI( sphereRai );
-
-		final RandomAccessibleInterval< UnsignedByteType > cubeRai = RandomCube.generateRandomCube(nRadius, maxInt);		
-		testBVB.addRAI( cubeRai );
-
-		BvvFunctions.show( cubeRai, "name" );
-
-		
 		//define point size, color, shape and filling
-		SpotsSame samePoints = new SpotsSame(nRadius*0.08f, Color.YELLOW, VisSpotsSame.SHAPE_SQUARE, VisSpotsSame.RENDER_FILLED);
-		Spots diffPoints = new Spots(nRadius*0.08f, Color.CYAN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
+//		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
+		Spots testPoints = new Spots(nRadius*0.16f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
 
 		//SpotsSame testPoints2 = new SpotsSame(nRadius*0.16f, Color.GREEN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
 
-		final ArrayList<RealPoint> verticesSame = new ArrayList<>();
-		final ArrayList<RealPoint> verticesDiff = new ArrayList<>();
-		
+		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		int nTotNumber = 30;
+		float [] radii = new float[nTotNumber];
+
 		
 		double nScale = nRadius*2.0;
 		
-		float [] radii = new float[nTotNumber];
-		
 		for(int i=0;i<nTotNumber; i++)
 		{
-			verticesSame.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			verticesDiff.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			radii[i] = ( float ) ( Math.random()*nRadius*0.5f);
+			vertices.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
+			radii[i] = ( float ) ( Math.random()*nRadius*2.0f );
 		}
 		
-		samePoints.setPoints( verticesSame );
-		diffPoints.setPoints( verticesDiff, radii );
-
-		testBVB.addShape( samePoints );
-		testBVB.addShape( diffPoints );
+		testPoints.setPoints( vertices, radii );
+		//testPoints2.setPoints( vertices );
+		//testBVB.addShape( testPoints2 );
+		testBVB.addShape( testPoints );
 
 
 	}

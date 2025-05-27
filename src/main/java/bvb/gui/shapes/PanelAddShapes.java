@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.beans.PropertyChangeListener;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -77,6 +76,7 @@ public class PanelAddShapes extends JPanel
 			sptParser.fileSpots = dialSpots.fileSpots;
 			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
 			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
+			//column indices
 			final int [] nColInd = new int[3];
 			for(int d=0; d<3;d++)
 			{
@@ -90,6 +90,20 @@ public class PanelAddShapes extends JPanel
 				}
 			}
 			sptParser.nColIndices = nColInd;
+			//scale factor, convert to micrometers
+			switch (dialSpots.cbUnits.getSelectedIndex())
+			{
+			//milli
+			case 0:
+				sptParser.fScale = 0.001f;
+				break;
+			//nano
+			case 2:
+				sptParser.fScale = 1000.0f;
+				break;
+			default:
+				sptParser.fScale = 1.0f;
+			}
 			sptParser.execute();
 			sptParser.addPropertyChangeListener( (e)->
 			{
@@ -118,7 +132,7 @@ public class PanelAddShapes extends JPanel
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
             
-            final MeshColor loadedMesh = new MeshColor(chooser.getSelectedFile().getPath(), bvb);
+            final MeshColor loadedMesh = new MeshColor(chooser.getSelectedFile().getPath());
             
             bvb.addShape( loadedMesh );
             

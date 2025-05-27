@@ -44,24 +44,20 @@ import net.imglib2.mesh.io.stl.STLMeshIO;
 import org.apache.commons.io.FilenameUtils;
 import org.joml.Matrix4fc;
 
-import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshColor;
 import bvb.utils.Misc;
 
 public class MeshColor extends AbstractBasicShape
 {
-	
-	final BigVolumeBrowser bvb;
-	
+		
 	VisMeshColor meshVis = null;
 	
 	String sName = "";
 	
 	RealInterval boundingBox = null;
 	
-	public MeshColor(String sFilename, BigVolumeBrowser bvb_)
+	public MeshColor(String sFilename)
 	{
-		bvb  = bvb_;
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile( sFilename );
 		
@@ -79,9 +75,8 @@ public class MeshColor extends AbstractBasicShape
 		}
 	}
 	
-	public MeshColor(final Mesh nmesh, BigVolumeBrowser bvb_)
+	public MeshColor(final Mesh nmesh)
 	{
-		bvb  = bvb_;
 		
 		if(nmesh != null)
 		{
@@ -102,7 +97,6 @@ public class MeshColor extends AbstractBasicShape
 		{
 			meshVis.setRenderType( VisMeshColor.POINTS );
 			meshVis.setPointsSize( fPointsSize_ );
-			bvb.repaintBVV();
 		}
 	}
 	
@@ -113,7 +107,6 @@ public class MeshColor extends AbstractBasicShape
 		{
 			meshVis.setRenderType( VisMeshColor.MESH );
 			meshVis.setSurfaceRenderType( nSurfaceRenderType );
-			bvb.repaintBVV();
 		}
 	}
 	
@@ -123,7 +116,6 @@ public class MeshColor extends AbstractBasicShape
 		{
 			meshVis.setRenderType( VisMeshColor.MESH );
 			meshVis.setSurfaceGridType( nSurfaceGridType );
-			bvb.repaintBVV();
 		}
 	}
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
@@ -131,7 +123,6 @@ public class MeshColor extends AbstractBasicShape
 		if(meshVis != null )
 		{
 			meshVis.setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
-			bvb.repaintBVV();
 		}
 	}
 	
@@ -140,7 +131,6 @@ public class MeshColor extends AbstractBasicShape
 		if(meshVis != null )
 		{
 			meshVis.setColor( colorin );
-			bvb.repaintBVV();
 		}
 	}
 	
@@ -182,13 +172,13 @@ public class MeshColor extends AbstractBasicShape
 	}
 
 	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
+	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
 	{
 		if(bVisible)
 		{
 			if(meshVis != null)
 			{
-				if(nTimePoint<0 || nTimePoint == bvb.bvvViewer.state().getCurrentTimepoint())
+				if(nTimePoint<0 || nTimePoint == nTimePoint_)
 				{
 					meshVis.draw( gl, pvm, vm, screen_size );
 				}
@@ -218,14 +208,6 @@ public class MeshColor extends AbstractBasicShape
 	public void reload()
 	{
 		meshVis.reload();
-		
-	}
-
-	@Override
-	public void setVisible( boolean bVisible_ )
-	{
-		bVisible = bVisible_;
-		bvb.repaintBVV();
 		
 	}
 	

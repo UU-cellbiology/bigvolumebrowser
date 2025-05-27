@@ -160,6 +160,7 @@ public class ShapesTable extends JTable
 			shape.setVisible( bVisible );
 		}
 		updateUI();
+		bvb.repaintBVV();
 	}
 	void focusOnSelectedShapes()
 	{

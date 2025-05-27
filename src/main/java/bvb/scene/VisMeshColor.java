@@ -115,8 +115,8 @@ public class VisMeshColor
 		final Segment pointFp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 				
-		final Segment meshVp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh.vp" ).instantiate();
-		final Segment meshFp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh.fp" ).instantiate();
+		final Segment meshVp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh_color.vp" ).instantiate();
+		final Segment meshFp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh_color.fp" ).instantiate();
 		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	

@@ -40,21 +40,22 @@ import net.imglib2.util.Intervals;
 
 import org.joml.Matrix4fc;
 
-import bvb.scene.VisSpotsSame;
+import bvb.scene.VisSpots;
 
-/** Example class that uses points shader **/
+/** Spots of arbitrary color and size **/
 
-public class SpotsSame extends AbstractBasicShape
+public class Spots extends AbstractBasicShape
 {
-	public VisSpotsSame vertexVis = null;
+	public VisSpots vertexVis = null;
 	
 	float pointSize;
 	Color pointColor;
 	int renderType;
 	int pointShape;
+	
 	FinalRealInterval bBox = null;
 	
-	public SpotsSame(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
+	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
 		renderType = nRenderType_;
@@ -63,7 +64,7 @@ public class SpotsSame extends AbstractBasicShape
 	}
 	
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_)
+	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
 	{
 		if(bVisible)
 		{
@@ -79,16 +80,24 @@ public class SpotsSame extends AbstractBasicShape
 	
 	public void setPoints(final ArrayList<RealPoint> vertices)
 	{
+		setPoints(vertices, null);
+	}
+
+	public void setPoints(final ArrayList<RealPoint> vertices, final float[] radii)
+	{
 		if(vertexVis == null)
 		{
-			vertexVis = new VisSpotsSame(vertices, pointSize, pointColor, pointShape, renderType);
+			vertexVis = new VisSpots(pointSize, pointColor, pointShape, renderType);
+		}
+		if(radii==null || radii.length != vertices.size())
+		{	
+			vertexVis.setVertices(vertices);	
 		}
 		else
 		{
-			vertexVis.setVertices(vertices);
+			vertexVis.setVertices(vertices, radii);				
 		}
 		setBoundingBox(vertices);
-
 	}
 	
 	void setBoundingBox(final ArrayList<RealPoint> vertices)
@@ -163,12 +172,6 @@ public class SpotsSame extends AbstractBasicShape
 		if(vertexVis != null)
 			vertexVis.reload();
 		
-	}
-
-	@Override
-	public void setVisible( boolean bVisible_ )
-	{
-		bVisible = bVisible_;
 	}
 
 }

@@ -37,7 +37,7 @@ import org.joml.Matrix4fc;
 public interface BasicShape
 {
 	/** method to draw GPU primitives **/
-	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size);
+	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size, final int nTimePoint);
 
 	/** method required to reload GPU shader/primitives 
 	 * during BVV restart **/

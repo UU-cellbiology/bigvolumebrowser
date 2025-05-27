@@ -38,14 +38,11 @@ import net.imglib2.mesh.Meshes;
 
 import org.joml.Matrix4fc;
 
-import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMeshTexture;
 
 
 public class MeshTexture extends AbstractBasicShape
 {
-	
-	final BigVolumeBrowser bvb;
 	
 	VisMeshTexture meshVis = null;
 	
@@ -73,10 +70,9 @@ public class MeshTexture extends AbstractBasicShape
 //		}
 //	}
 	
-	public MeshTexture(final Mesh nmesh, final BufferedImage imageTexture, BigVolumeBrowser bvb_)
+	public MeshTexture(final Mesh nmesh, final BufferedImage imageTexture)
 	{
-		bvb  = bvb_;
-		
+	
 		if(nmesh != null)
 		{
 			meshVis = new VisMeshTexture( nmesh, imageTexture );
@@ -91,13 +87,13 @@ public class MeshTexture extends AbstractBasicShape
 	}
 	
 	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
+	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
 	{
 		if(bVisible)
 		{
 			if(meshVis != null)
 			{
-				if(nTimePoint<0 || nTimePoint == bvb.bvvViewer.state().getCurrentTimepoint())
+				if(nTimePoint<0 || nTimePoint == nTimePoint_)
 				{
 					meshVis.draw( gl, pvm, vm, screen_size );
 				}
@@ -123,14 +119,6 @@ public class MeshTexture extends AbstractBasicShape
 	public void reload()
 	{
 		meshVis.reload();
-		
-	}
-
-	@Override
-	public void setVisible( boolean bVisible_ )
-	{
-		bVisible = bVisible_;
-		bvb.repaintBVV();
 		
 	}
 	

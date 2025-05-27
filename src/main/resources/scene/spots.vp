@@ -1,0 +1,64 @@
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in float sRad;
+
+uniform float pointSizeReal;
+uniform float pointScale;
+uniform mat4 pvm;
+uniform vec2 windowSize;
+out vec3 posW;
+
+void main()
+{
+ 	
+ 	//projected (on screen) vertex position of the center
+ 	gl_Position = pvm * vec4( aPos, 1.0 );
+ 	
+ 	//let's shift it to the side 
+ 	//for some value in x in the screen coordinates,
+ 	//so we stay in the same z-plane
+ 	
+ 	vec4 shift = gl_Position;
+ 	
+ 	//why 100? why not?
+ 	shift.x = shift.x + 100.;
+
+
+	// let's go back to original (BVV) coordinates
+	// and get now the line in x direction of the screen
+	// (in the same z plane)
+	
+ 	mat4 invPVM = inverse(pvm);
+ 	shift = invPVM * shift;
+ 	
+ 	//inverse transform can lead to rounding errors
+ 	//so make sure we return where we were
+	shift.w = 1.0;
+
+ 	//normalize length along this direction
+ 	//in the absolute units
+ 	shift.xyz = shift.xyz - aPos;
+
+	if(pointSizeReal>0.0)
+ 		shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
+ 	else
+ 		shift.xyz = shift.xyz * 0.5 * sRad / length(shift.xyz);
+ 	
+ 	
+ 	shift.xyz = aPos + shift.xyz ;
+ 	
+ 	//project it back to the screen
+ 	shift = pvm * shift;
+ 	
+ 	//calculate final required radius in pixels
+ 	//(we need to multiply it by w to do a proper projection)
+ 	float dRadius = abs(windowSize.x*(shift.x/shift.w - gl_Position.x/gl_Position.w));
+
+ 	
+ 	//final point size,
+ 	//let's make sure it is not zero
+    gl_PointSize =  max(dRadius/pointScale,1.0);
+    //gl_PointSize =  dRadius/pointScale;
+    
+    posW = aPos;
+
+}

@@ -60,7 +60,6 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -530,17 +529,19 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
 		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
 		
+		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
+		
 		//draw boxes around volume
-		volumeBoxes.draw( gl, pvm, vm, screen_size );
+		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
 		//draw clip boxes
-		clipBoxes.draw( gl, pvm, vm, screen_size );
+		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
 
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		int shapeN = shapes.size();
 		for(int i=0; i<shapeN; i++)
 		{
-			shapes.get( i ).draw( gl, pvm, vm, screen_size );
+			shapes.get( i ).draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
 
 		//DEBUG
@@ -551,7 +552,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		for(VolumeBox box:helpBoxes)
 		{
-			box.draw( gl, pvm, vm, screen_size );
+			box.draw( gl, pvm, vm, screen_size, nTimePoint );
 		}
 	}
 	

@@ -81,7 +81,7 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 	public RAIImgLoaderBvv(final RandomAccessibleInterval<T> rai_, final long [] dims_, final int numSetups)
 	{
 		
-		cache = new VolatileGlobalCellCache( 2, 1 );
+		cache = new VolatileGlobalCellCache( 1, 1 );
 		
 		dimensions = dims_;
 		

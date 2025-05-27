@@ -77,7 +77,7 @@ public class WRL_Parser_Test
 		for(int i=0;i<loadedMeshes.size();i++)
 		{
 		
-			MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ), bvbTest);
+			MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
 
 			meshBVB.setColor(meshColor );
 		

@@ -54,7 +54,7 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 /** example class that draws point of specific shape and filling type **/
 
-public class VisSpotsSame
+public class VisSpots
 {
 	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS = 2; 
 
@@ -74,48 +74,40 @@ public class VisSpotsSame
 	
 	float vertices[]; 
 	
+	float radii[]; 
+	
 	private int nSpotsN;
 	
 	private boolean initialized;
 	
 	volatile boolean bLocked = false;
 	
-	public VisSpotsSame()
+	public VisSpots()
 	{
 		initShader();
 	}
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisSpots.class, "/scene/spots.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisSpots.class, "/scene/spots.fp" ).instantiate();		
 		prog = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 	}
 	
 	/** constructor with multiple vertices **/
-	public VisSpotsSame(final ArrayList< RealPoint > points, final float fSpotSize_, final Color color_in, final int nShape_, final int nRenderType_)
+	public VisSpots(final float fSpotSize_, final Color color_in, final int nShape_, final int nRenderType_)
 	{
 		this();
 		
 		fSpotSize = Math.abs(fSpotSize_);
 		
-		l_color = new Vector4f(color_in.getComponents(null));
-		
-		nSpotsN = points.size();
+		l_color = new Vector4f(color_in.getComponents(null));		
 		
 		renderType = nRenderType_;
 		
 		spotShape = nShape_;
 		
 		vertices = new float [nSpotsN*3];//assume 3D
-
-		for (int i=0;i<nSpotsN; i++)
-		{
-			for (int j=0;j<3; j++)
-			{				
-				vertices[i*3+j]=points.get(i).getFloatPosition(j);
-			}			
-		}
 
 	}
 	
@@ -139,6 +131,29 @@ public class VisSpotsSame
 		initialized = false;
 	}
 	
+	public void setVertices( ArrayList< RealPoint > points, float [] radii_)
+	{
+		
+		if(points.size()!= radii_.length)
+		{
+			System.err.println( "Number of spots coordinates is not equal to radii");
+			return;
+		}
+		
+		setVertices(points);
+		
+		radii = new float[radii_.length];
+		
+		for (int i=0;i<radii_.length; i++)
+		{
+			radii[i] = radii_[i];
+		}
+		
+		fSpotSize = -1.0f;
+		
+		initialized = false;
+	}
+	
 	public void setColor(Color pointColor) 
 	{
 		
@@ -149,6 +164,7 @@ public class VisSpotsSame
 	public void setSize(float fSpotSize_)
 	{
 		fSpotSize = fSpotSize_;
+		initialized = false;
 	}
 	
 	/** 0 - filled, 1 - outline **/
@@ -160,8 +176,7 @@ public class VisSpotsSame
 	/** 0 - round, 1 - square **/
 	public void setShape(int nShape_)
 	{
-		spotShape = nShape_;
-		
+		spotShape = nShape_;		
 	}
 
 	private void init( GL3 gl )
@@ -184,21 +199,35 @@ public class VisSpotsSame
 		// ..:: VERTEX BUFFER ::..
 
 		final int[] tmp = new int[ 2 ];
-		gl.glGenBuffers( 1, tmp, 0 );
-		final int vbo = tmp[ 0 ];
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbo );
+		gl.glGenBuffers( 2, tmp, 0 );
+		final int posVbo = tmp[ 0 ];
+		final int radVbo = tmp[ 1 ];
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 
+		// ..:: RADIUS BUFFER ::..
 
+		if( fSpotSize < 0.0f )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, radVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, radii.length * Float.BYTES, FloatBuffer.wrap( radii ), GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+		}
 		// ..:: VERTEX ARRAY OBJECT ::..
 
 		gl.glGenVertexArrays( 1, tmp, 0 );
 		vao = tmp[ 0 ];
 		gl.glBindVertexArray( vao );
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbo );
+
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
 		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 0 );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, radVbo );
+		gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 1 );
+		
 		gl.glBindVertexArray( 0 );
 		
 		initialized = true;
@@ -215,8 +244,8 @@ public class VisSpotsSame
 	public void draw(final GL3 gl, final Matrix4fc pvm, final int [] screen_size )
 	{
 		
-		if (fSpotSize < 0.0001)
-			return;
+		//if (fSpotSize < 0.0001)
+			//return;
 		if ( !initialized )
 			init( gl );
 		
@@ -265,10 +294,10 @@ public class VisSpotsSame
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform1f( "pointScale" ).set( fPointScale );
-		prog.getUniform4f( "colorin" ).set(l_color);
-		prog.getUniform2f( "windowSize" ).set(window_sizef);
-		prog.getUniform2f( "ellipseAxes" ).set(ellipse_axes);
-		prog.getUniform1i( "renderType" ).set(renderType);
+		prog.getUniform4f( "colorin" ).set( l_color );
+		prog.getUniform2f( "windowSize" ).set( window_sizef );
+		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
+		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		//progRound.getUniform1i("clipactive").set(0);
 		//progRound.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));

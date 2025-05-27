@@ -189,10 +189,11 @@ public class VisMeshTexture
 		gl.glGenVertexArrays( 1, tmp, 0 );
 		vao = tmp[ 0 ];
 		gl.glBindVertexArray( vao );
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshPosVbo );
 		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshPosVbo );		
 		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 0 );
+		
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshUVVbo );
 		gl.glVertexAttribPointer( 1, 2, GL_FLOAT, false, 2 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );		

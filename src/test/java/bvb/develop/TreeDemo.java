@@ -2,7 +2,6 @@ package bvb.develop;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -15,7 +14,7 @@ public class TreeDemo
 		        new DefaultMutableTreeNode("The Java Series");
 		    createNodes(top);
 		    tree = new JTree(top);
-		    JScrollPane treeView = new JScrollPane(tree);
+		   // JScrollPane treeView = new JScrollPane(tree);
 		    JPanel dd = new JPanel();
 		    dd.add( tree );
 		   JFrame dsd =  new JFrame("BVB");

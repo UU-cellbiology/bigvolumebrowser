@@ -77,7 +77,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	}
 
 	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size )
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_)
 	{
 		if(bVisible)
 		{
@@ -96,9 +96,9 @@ public class VolumeBBoxes extends AbstractBasicShape
 			bvvSourceToBox.forEach( (sac, vbox)-> {
 				if(bvb.bvvViewer.state().isSourceVisible( sac ))
 				{
-					if(vbox!=null)
+					if(vbox != null)
 					{
-						vbox.draw( gl, pvm, vm, screen_size );
+						vbox.draw( gl, pvm, vm, screen_size, -1);
 					}
 				}
 			});

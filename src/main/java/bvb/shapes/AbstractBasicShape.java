@@ -13,6 +13,12 @@ public abstract class AbstractBasicShape implements BasicShape
 	}
 	
 	@Override
+	public void setVisible( boolean bVisible_ )
+	{
+		bVisible = bVisible_;
+	}
+	
+	@Override
 	public void setTimePoint(final int nTP)
 	{
 		this.nTimePoint = nTP;

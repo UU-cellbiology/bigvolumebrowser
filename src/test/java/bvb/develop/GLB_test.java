@@ -121,7 +121,7 @@ public class GLB_test
 //			bvbTest.focusOnRealInterval( Meshes.boundingBox( currMesh ) );
 			
 
-			MeshTexture meshTeddyTextured = new MeshTexture(currMesh, image, bvbTest);
+			MeshTexture meshTeddyTextured = new MeshTexture(currMesh, image);
 			bvbTest.addShape( meshTeddyTextured );
 			RealInterval meshBBox =  Meshes.boundingBox( currMesh );
 			bvbTest.focusOnRealInterval(  meshBBox  );
