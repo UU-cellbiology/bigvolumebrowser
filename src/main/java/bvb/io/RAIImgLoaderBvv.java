@@ -199,11 +199,10 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 				intRange[0][d]= min[d];
 				intRange[1][d]= min[d]+dimensions[d]-1;
 			}
-
 			
 			if(raiXYZ.getType() instanceof UnsignedShortType)
 			{
-				Cursor< UnsignedShortType > cur = 
+				final Cursor< UnsignedShortType > cur = 
 						( Cursor< UnsignedShortType > ) Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))).cursor();
 				final short[] data = new short[dimensions[0]*dimensions[1]*dimensions[2]];
 				int nCount = 0;
@@ -218,7 +217,7 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 			
 			if(raiXYZ.getType() instanceof UnsignedByteType)
 			{
-				Cursor< UnsignedByteType > cur = 
+				final Cursor< UnsignedByteType > cur = 
 						( Cursor< UnsignedByteType > ) Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))).cursor();
 				final byte[] data = new byte[dimensions[0]*dimensions[1]*dimensions[2]];
 				int nCount = 0;

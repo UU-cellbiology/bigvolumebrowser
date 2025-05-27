@@ -63,7 +63,9 @@ public class RAIToSpimDataBvv
 			System.err.println( "Error: RAI import of type " + type + " is currently not supported.");
 			return null;
 		}
+		
 		int raiNdim = rai.numDimensions(); 
+		
 		if(rai.numDimensions() < 3)
 		{
 			System.err.println( "Error: RAI dimensions < 3, only volumetric RAI are currently supported.");
@@ -126,6 +128,6 @@ public class RAIToSpimDataBvv
 			}
 		}
 		File dummy = null;
-		return new AbstractSpimData<>( dummy, seq, new ViewRegistrations( registrations) );
+		return new AbstractSpimData<>( dummy, seq, new ViewRegistrations( registrations ) );
 	}
 }

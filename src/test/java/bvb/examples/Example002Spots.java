@@ -33,14 +33,12 @@ import java.util.ArrayList;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisSpotsSame;
 import bvb.shapes.Spots;
 import bvb.shapes.SpotsSame;
-import bvvpg.vistools.BvvFunctions;
+
 import ij.ImageJ;
 
 public class Example002Spots
@@ -56,18 +54,12 @@ public class Example002Spots
 		testBVB.startBVB("");
 			
 		//add sphere with random values as background		
-		int nRadius = 35;
+		int nRadius = 135;
 		
 		int maxInt = 200;
 		
-//		final RandomAccessibleInterval< UnsignedByteType > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);		
-//		testBVB.addRAI( sphereRai );
-
-		final RandomAccessibleInterval< UnsignedByteType > cubeRai = RandomCube.generateRandomCube(nRadius, maxInt);		
-		testBVB.addRAI( cubeRai );
-
-		BvvFunctions.show( cubeRai, "name" );
-
+		final RandomAccessibleInterval< ? > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);		
+		testBVB.addRAI( sphereRai );
 		
 		//define point size, color, shape and filling
 		SpotsSame samePoints = new SpotsSame(nRadius*0.08f, Color.YELLOW, VisSpotsSame.SHAPE_SQUARE, VisSpotsSame.RENDER_FILLED);
