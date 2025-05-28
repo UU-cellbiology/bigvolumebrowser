@@ -1,12 +1,9 @@
 package bvb.gui.shapes;
 
-
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,8 +16,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.io.shapes.SpotsParser;
-import bvb.scene.VisSpots;
-import bvb.scene.VisSpotsSame;
 import bvb.shapes.MeshColor;
 import bvb.shapes.Spots;
 import bvb.shapes.SpotsSame;
@@ -99,6 +94,26 @@ public class PanelAddShapes extends JPanel
 				}
 			}
 			sptParser.nColIndices = nColInd;
+			
+			//scale factor, convert to micrometers
+			switch (dialSpots.cbUnits.getSelectedIndex())
+			{
+			//milli
+			case 0:
+				sptParser.fScale = 0.001f;
+				break;
+			//nano
+			case 2:
+				sptParser.fScale = 1000.0f;
+				break;
+			//micro
+			default:
+				sptParser.fScale = 1.0f;
+			}
+			SpotsShapeDialog sptShape = new SpotsShapeDialog();
+			
+			boolean bAskForSize = true;
+			
 			//parse sizes
 			if(nSizeCols>0)
 			{
@@ -115,22 +130,15 @@ public class PanelAddShapes extends JPanel
 					break;
 					
 				}	
+				bAskForSize = false;
+
+			}
+			if(!sptShape.showSelectionDialog( bAskForSize ))
+			{
+				return;
 			}
 			
-			//scale factor, convert to micrometers
-			switch (dialSpots.cbUnits.getSelectedIndex())
-			{
-			//milli
-			case 0:
-				sptParser.fScale = 0.001f;
-				break;
-			//nano
-			case 2:
-				sptParser.fScale = 1000.0f;
-				break;
-			default:
-				sptParser.fScale = 1.0f;
-			}
+
 			
 			
 			sptParser.addPropertyChangeListener( (e)->
@@ -139,13 +147,13 @@ public class PanelAddShapes extends JPanel
 				{
 					if(!sptParser.parseSize)
 					{
-						final SpotsSame importedSpots = new SpotsSame(20.0f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
+						final SpotsSame importedSpots = new SpotsSame(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices );
 						bvb.addShape( importedSpots );
 					}
 					else
 					{
-						final Spots importedSpots = new Spots(20.0f, Color.WHITE, VisSpots.SHAPE_ROUND, VisSpots.RENDER_GAUSS_NORMALIZED);
+						final Spots importedSpots = new Spots(10.0f, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
 						bvb.addShape( importedSpots );						
 					}

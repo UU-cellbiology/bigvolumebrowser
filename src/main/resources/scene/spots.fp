@@ -55,7 +55,7 @@ void main()
 			{
 				dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
 			}
-			colorout.a = dCol * colorin.a * exp(sd*norm); 
+			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
 			
 			gl_FragDepth = 1.0;
 		}
@@ -77,10 +77,15 @@ void main()
 		}	
 		else
 		{
-			if(renderType == 2)
+			if(renderType >= 2)
 			{
 				vec2 fade = abs((1/sqrt(ellipseAxes))-abs(coord));
-				colorout.a = colorin.a * fade.x * fade.y; 
+				float dCol = 1.0;
+				if(renderType == 3)
+				{
+					dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
+				}
+				colorout.a = dCol *  fade.x * fade.y * colorin.a; 
 				gl_FragDepth = 1.0;
 			}
 		}
