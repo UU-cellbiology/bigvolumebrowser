@@ -44,7 +44,7 @@ void main()
 			if ( norm < 0.6) 
 				discard;
 		}
-		else if(renderType==2)
+		else if(renderType == 2)
 		{
 			
 			float sd = -9.0/2.0; //i.e.  (-1)/(2.0*0.333*0.333);  

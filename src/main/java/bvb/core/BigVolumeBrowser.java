@@ -624,7 +624,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	{
 		if(interval != null)
 		{
-			CenterZoomBVV.focusAnimateOnInterval(this, interval, 0.95);
+			if(Misc.checkInterval(interval))
+			{
+				CenterZoomBVV.focusAnimateOnInterval(this, interval,BVBSettings.dFocusScreenFraction);
+			}
 		}
 	}
 	

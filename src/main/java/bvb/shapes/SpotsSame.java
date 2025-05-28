@@ -56,7 +56,7 @@ public class SpotsSame extends AbstractBasicShape
 	
 	public SpotsSame(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
-		pointSize = pointSize_;		
+		pointSize = Math.abs( pointSize_ );		
 		renderType = nRenderType_;
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		pointShape = nShape_;
@@ -99,18 +99,18 @@ public class SpotsSame extends AbstractBasicShape
 		for ( final RealPoint v : vertices )
 		{
 			final double x = v.getDoublePosition(0), y = v.getDoublePosition(1), z = v.getDoublePosition(2);
-			if ( x < boundingBox[ 0 ] )
-				boundingBox[ 0 ] = x;
-			if ( y < boundingBox[ 1 ] )
-				boundingBox[ 1 ] = y;
-			if ( z < boundingBox[ 2 ] )
-				boundingBox[ 2 ] = z;
-			if ( x > boundingBox[ 3 ] )
-				boundingBox[ 3 ] = x;
-			if ( y > boundingBox[ 4 ] )
-				boundingBox[ 4 ] = y;
-			if ( z > boundingBox[ 5 ] )
-				boundingBox[ 5 ] = z;
+			if ( x - pointSize < boundingBox[ 0 ] )
+				boundingBox[ 0 ] = x - pointSize;
+			if ( y - pointSize < boundingBox[ 1 ] )
+				boundingBox[ 1 ] = y - pointSize;
+			if ( z - pointSize < boundingBox[ 2 ] )
+				boundingBox[ 2 ] = z - pointSize;
+			if ( x + pointSize > boundingBox[ 3 ] )
+				boundingBox[ 3 ] = x + pointSize;
+			if ( y + pointSize > boundingBox[ 4 ] )
+				boundingBox[ 4 ] = y + pointSize;
+			if ( z + pointSize > boundingBox[ 5 ] )
+				boundingBox[ 5 ] = z + pointSize;
 		}
 		
 		bBox =  Intervals.createMinMaxReal( boundingBox[ 0 ], boundingBox[ 1 ], boundingBox[ 2 ], boundingBox[ 3 ], boundingBox[ 4 ], boundingBox[ 5 ] );

@@ -54,7 +54,7 @@ public class Example002Spots
 		testBVB.startBVB("");
 			
 		//add sphere with random values as background		
-		int nRadius = 135;
+		int nRadius = 65;
 		
 		int maxInt = 200;
 		
@@ -62,10 +62,10 @@ public class Example002Spots
 		testBVB.addRAI( sphereRai );
 		
 		//define point size, color, shape and filling
+		//spots with the same radius
 		SpotsSame samePoints = new SpotsSame(nRadius*0.08f, Color.YELLOW, VisSpotsSame.SHAPE_SQUARE, VisSpotsSame.RENDER_FILLED);
+		//spots with different radiuses
 		Spots diffPoints = new Spots(nRadius*0.08f, Color.CYAN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
-
-		//SpotsSame testPoints2 = new SpotsSame(nRadius*0.16f, Color.GREEN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
 
 		final ArrayList<RealPoint> verticesSame = new ArrayList<>();
 		final ArrayList<RealPoint> verticesDiff = new ArrayList<>();
@@ -74,17 +74,17 @@ public class Example002Spots
 		
 		double nScale = nRadius*2.0;
 		
-		float [] radii = new float[nTotNumber];
+		float [] radiuses = new float[nTotNumber];
 		
 		for(int i=0;i<nTotNumber; i++)
 		{
 			verticesSame.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
 			verticesDiff.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			radii[i] = ( float ) ( Math.random()*nRadius*0.5f);
+			radiuses[i] = ( float ) ( Math.random()*nRadius*0.5f);
 		}
 		
 		samePoints.setPoints( verticesSame );
-		diffPoints.setPoints( verticesDiff, radii );
+		diffPoints.setPoints( verticesDiff, radiuses );
 
 		testBVB.addShape( samePoints );
 		testBVB.addShape( diffPoints );

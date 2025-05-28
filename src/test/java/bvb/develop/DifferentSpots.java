@@ -31,11 +31,13 @@ package bvb.develop;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.examples.RandomHyperSphere;
 import bvb.scene.VisSpotsSame;
-import bvb.shapes.Spots;
+import bvb.shapes.SpotsSame;
 import ij.ImageJ;
 
 public class DifferentSpots
@@ -47,38 +49,23 @@ public class DifferentSpots
 
 		//start BVB
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 		
+		
 		testBVB.startBVB("");
-		
-		//load some data
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );		
-		
+			
 		//add sphere with random values as background		
-		int nRadius = 35;
+		int nRadius = 11;
 		
-		//define point size, color, shape and filling
-//		SpotsSame testPoints = new SpotsSame(nRadius*0.08f, Color.RED, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
-		Spots testPoints = new Spots(nRadius*0.16f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
-
-		//SpotsSame testPoints2 = new SpotsSame(nRadius*0.16f, Color.GREEN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
-
+		int maxInt = 200;
+		
+		final RandomAccessibleInterval< ? > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);		
+		testBVB.addRAI( sphereRai );
+		SpotsSame samePoints = new SpotsSame(nRadius*2.0f, Color.YELLOW, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
-		int nTotNumber = 30;
-		float [] radii = new float[nTotNumber];
 
-		
-		double nScale = nRadius*2.0;
-		
-		for(int i=0;i<nTotNumber; i++)
-		{
-			vertices.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			radii[i] = ( float ) ( Math.random()*nRadius*2.0f );
-		}
-		
-		testPoints.setPoints( vertices, radii );
-		//testPoints2.setPoints( vertices );
-		//testBVB.addShape( testPoints2 );
-		testBVB.addShape( testPoints );
+		vertices.add( new RealPoint(nRadius, nRadius, nRadius) )	;
+		samePoints.setPoints( vertices );
 
+		testBVB.addShape( samePoints );
 
 	}
 }

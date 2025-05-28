@@ -42,11 +42,11 @@ public class RandomHyperSphere
 	public static RandomAccessibleInterval<UnsignedByteType> generateRandomSphere(final int nRadius, final int nMaxInt)
 	{
 		//Let's make a hyperSphere (3D ball) with random intensity values 
-		long [] dim = new long[] {2*nRadius+2,2*nRadius+2,2*nRadius+2};
+		long [] dim = new long[] {2*nRadius+1,2*nRadius+1,2*nRadius+1};
 		Point center = new Point( 3 );
-		center.setPosition( nRadius+1 , 0 );
-		center.setPosition( nRadius+1 , 1 );
-		center.setPosition( nRadius+1 , 2 );
+		center.setPosition( nRadius , 0 );
+		center.setPosition( nRadius , 1 );
+		center.setPosition( nRadius , 2 );
 		
 		ArrayImg< UnsignedByteType, ByteArray > sphereRai = ArrayImgs.unsignedBytes(dim);
 		HyperSphere< UnsignedByteType > hyperSphere =

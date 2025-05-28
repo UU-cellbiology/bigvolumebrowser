@@ -74,7 +74,7 @@ public class VisSpots
 	
 	float vertices[]; 
 	
-	float radii[]; 
+	float spotSizes[]; 
 	
 	private int nSpotsN;
 	
@@ -131,10 +131,10 @@ public class VisSpots
 		initialized = false;
 	}
 	
-	public void setVertices( ArrayList< RealPoint > points, float [] radii_)
+	public void setVertices( ArrayList< RealPoint > points, float [] spotSizes_)
 	{
 		
-		if(points.size()!= radii_.length)
+		if(points.size()!= spotSizes_.length)
 		{
 			System.err.println( "Number of spots coordinates is not equal to radii");
 			return;
@@ -142,11 +142,11 @@ public class VisSpots
 		
 		setVertices(points);
 		
-		radii = new float[radii_.length];
+		spotSizes = new float[spotSizes_.length];
 		
-		for (int i=0;i<radii_.length; i++)
+		for (int i=0;i<spotSizes_.length; i++)
 		{
-			radii[i] = radii_[i];
+			spotSizes[i] = spotSizes_[i];
 		}
 		
 		fSpotSize = -1.0f;
@@ -201,7 +201,7 @@ public class VisSpots
 		final int[] tmp = new int[ 2 ];
 		gl.glGenBuffers( 2, tmp, 0 );
 		final int posVbo = tmp[ 0 ];
-		final int radVbo = tmp[ 1 ];
+		final int sizeVbo = tmp[ 1 ];
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
@@ -210,8 +210,8 @@ public class VisSpots
 
 		if( fSpotSize < 0.0f )
 		{
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, radVbo );
-			gl.glBufferData( GL.GL_ARRAY_BUFFER, radii.length * Float.BYTES, FloatBuffer.wrap( radii ), GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, spotSizes.length * Float.BYTES, FloatBuffer.wrap( spotSizes ), GL.GL_STATIC_DRAW );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 		}
 		// ..:: VERTEX ARRAY OBJECT ::..
@@ -224,7 +224,7 @@ public class VisSpots
 		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 0 );
 		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, radVbo );
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
 		gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
 		

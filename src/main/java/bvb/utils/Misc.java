@@ -389,4 +389,35 @@ public class Misc
 		return clipRot;
 	}
 	
+	public static boolean checkInterval(RealInterval interval)
+	{
+		//sanity check
+		final double [][] minmax = new double [2][]; 
+		minmax[0] = interval.minAsDoubleArray();
+		minmax[1] = interval.maxAsDoubleArray();
+		for(int d=0; d<3;d++ )
+		{
+			for(int i=0; i<2; i++)
+			{
+				if(Double.isInfinite( minmax[i][d] ))
+				{
+					System.err.println("Error: interval bounds are infinite.");
+					return false;
+				}
+				if(Double.isNaN( minmax[i][d] ))
+				{
+					System.err.println("Error: interval bounds are NaN.");
+					return false;
+				}
+
+			}
+			if(minmax[0][d]>=minmax[1][d])
+			{
+				System.err.println("Error: interval min bound >= max bound.");				
+				return false;
+			}
+		}
+		return true;
+	}
+	
 }
