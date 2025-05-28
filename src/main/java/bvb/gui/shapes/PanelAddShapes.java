@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -18,8 +19,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.io.shapes.SpotsParser;
+import bvb.scene.VisSpots;
 import bvb.scene.VisSpotsSame;
 import bvb.shapes.MeshColor;
+import bvb.shapes.Spots;
 import bvb.shapes.SpotsSame;
 import ij.Prefs;
 
@@ -77,12 +80,18 @@ public class PanelAddShapes extends JPanel
 			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
 			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
 			//column indices
-			final int [] nColInd = new int[3];
-			for(int d=0; d<3;d++)
+			final int [] nColInd = new int[6];
+			//whether size was provided
+			int nSizeCols = 0;
+			for(int d=0; d<6;d++)
 			{
 				if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()>0)
 				{
 					nColInd[d] = dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()-1;
+					if(d>2)
+					{
+						nSizeCols++;
+					}
 				}
 				else
 				{
@@ -90,6 +99,24 @@ public class PanelAddShapes extends JPanel
 				}
 			}
 			sptParser.nColIndices = nColInd;
+			//parse sizes
+			if(nSizeCols>0)
+			{
+				sptParser.parseSize = true;
+				switch(dialSpots.cbSize.getSelectedIndex())
+				{
+				//radius
+				case 1:
+					sptParser.fSizeScale = 2.0f;
+					break;
+				//SD
+				case 2:
+					sptParser.fSizeScale = 6.0f;
+					break;
+					
+				}	
+			}
+			
 			//scale factor, convert to micrometers
 			switch (dialSpots.cbUnits.getSelectedIndex())
 			{
@@ -104,19 +131,32 @@ public class PanelAddShapes extends JPanel
 			default:
 				sptParser.fScale = 1.0f;
 			}
-			sptParser.execute();
+			
+			
 			sptParser.addPropertyChangeListener( (e)->
 			{
 				if(sptParser.getState() == StateValue.DONE)
 				{
-					SpotsSame importedSpots = new SpotsSame(20.0f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
-					importedSpots.setPoints( sptParser.vertices );
-					bvb.addShape( importedSpots );
+					if(!sptParser.parseSize)
+					{
+						final SpotsSame importedSpots = new SpotsSame(20.0f, Color.WHITE, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_GAUSS);
+						importedSpots.setPoints( sptParser.vertices );
+						bvb.addShape( importedSpots );
+					}
+					else
+					{
+						final Spots importedSpots = new Spots(20.0f, Color.WHITE, VisSpots.SHAPE_ROUND, VisSpots.RENDER_GAUSS_NORMALIZED);
+						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
+						bvb.addShape( importedSpots );						
+					}
 				}
 			}
 			);
+			
+			sptParser.execute();
 		}
 	}
+	
 	void loadMeshDialog()
 	{
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
@@ -137,7 +177,6 @@ public class PanelAddShapes extends JPanel
             bvb.addShape( loadedMesh );
             
             bvb.focusOnRealInterval( loadedMesh.boundingBox() );
-            //bvb.loadBDVHDF5( chooser.getSelectedFile().getPath() );
         }
 	}
 }

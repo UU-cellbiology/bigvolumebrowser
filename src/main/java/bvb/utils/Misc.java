@@ -28,7 +28,11 @@
  */
 package bvb.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -419,5 +423,35 @@ public class Misc
 		}
 		return true;
 	}
-	
+	/** function analyzes a text file with at least 2 strings
+	 * and returns the number of new line characters used in the file **/
+	public static int getBytesPerNewLine(final File inFile) throws FileNotFoundException, IOException
+	{
+		String line1 = "";
+		String line2 = "";
+		int nCount = 0;
+		//read two lines
+		try ( BufferedReader br = new BufferedReader(new FileReader(inFile))) 
+		{
+			line1 = br.readLine();
+			line2 = br.readLine();
+		}
+
+		char [] cFirst = new char[1];
+		line2.getChars( 0, 1, cFirst, 0 );
+		try ( BufferedReader br = new BufferedReader(new FileReader(inFile))) 
+		{
+			char [] cbuf = new char [line1.length()];
+			
+			br.read( cbuf, 0, line1.length());
+			cbuf = new char[1];
+			char val = (char)br.read();
+			while(val != cFirst[0])
+			{
+				val = (char)br.read();
+				nCount++;
+			}
+		}
+		return nCount;
+	}
 }

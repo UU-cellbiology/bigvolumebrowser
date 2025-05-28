@@ -46,7 +46,7 @@ import bvb.scene.VisSpotsSame;
 
 public class SpotsSame extends AbstractBasicShape
 {
-	public VisSpotsSame vertexVis = null;
+	public VisSpotsSame vertVis = null;
 	
 	float pointSize;
 	Color pointColor;
@@ -67,11 +67,11 @@ public class SpotsSame extends AbstractBasicShape
 	{
 		if(bVisible)
 		{
-			if(vertexVis != null)
+			if(vertVis != null)
 			{
 				if(nTimePoint<0 || nTimePoint == nTimePoint_)
 				{
-					vertexVis.draw( gl, pvm, screen_size);
+					vertVis.draw( gl, pvm, screen_size);
 				}
 			}
 		}
@@ -79,13 +79,13 @@ public class SpotsSame extends AbstractBasicShape
 	
 	public void setPoints(final ArrayList<RealPoint> vertices)
 	{
-		if(vertexVis == null)
+		if(vertVis == null)
 		{
-			vertexVis = new VisSpotsSame(vertices, pointSize, pointColor, pointShape, renderType);
+			vertVis = new VisSpotsSame(vertices, pointSize, pointColor, pointShape, renderType);
 		}
 		else
 		{
-			vertexVis.setVertices(vertices);
+			vertVis.setVertices(vertices);
 		}
 		setBoundingBox(vertices);
 
@@ -128,24 +128,23 @@ public class SpotsSame extends AbstractBasicShape
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		
-		if(vertexVis != null)
+		if(vertVis != null)
 		{
-			vertexVis.setColor(pointColor);			
+			vertVis.setColor(pointColor);			
 		}
 	}
 	
 	public void setRenderType(int nRenderType)
 	{
 		pointShape = nRenderType;
-		vertexVis.setShape( pointShape );
-		
+		vertVis.setShape( pointShape );		
 		return;
 	}	
 	
 	public void setPointShape(int nShape)
 	{
 		renderType = nShape;
-		vertexVis.setRenderType(renderType);
+		vertVis.setRenderType(renderType);
 		
 		return;
 	}	
@@ -160,8 +159,8 @@ public class SpotsSame extends AbstractBasicShape
 	@Override
 	public void reload()
 	{
-		if(vertexVis != null)
-			vertexVis.reload();
+		if(vertVis != null)
+			vertVis.reload();
 		
 	}
 

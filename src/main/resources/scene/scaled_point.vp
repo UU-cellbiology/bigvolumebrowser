@@ -51,8 +51,8 @@ void main()
  	
  	//final point size,
  	//let's make sure it is not zero
-   // gl_PointSize =  max(dRadius/pointScale,1.0);
-    gl_PointSize =  dRadius/pointScale;
+    gl_PointSize =  max(dRadius/pointScale,1.0);
+    //gl_PointSize =  dRadius/pointScale;
     
     posW = aPos;
 

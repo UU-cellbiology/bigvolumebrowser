@@ -61,6 +61,8 @@ public class SpotsLoadDialog
 	
 	public JComboBox<String> cbUnits = null;
 	
+	public JComboBox<String> cbSize = null;
+	
 	final public ArrayList<JComboBox<String>> cbColumnsAssign = new ArrayList<>();
 	
 	String sStatus = "Error: ";
@@ -173,10 +175,14 @@ public class SpotsLoadDialog
 			bParsedColumns = false;
 			updateWindow();				
 			});
-		String[] sUnits = { "millimeters", "micrometers", "nanometers"};
+		String[] sUnits = { "milli", "micro", "nano"};
 		cbUnits =  new JComboBox<>(sUnits);
 		cbUnits.setSelectedIndex( 1 );
 		
+		
+		String[] sSize = { "diameter", "radius", "SD"};
+		cbSize =  new JComboBox<>(sSize);
+		cbSize.setSelectedIndex( 0 );
 		
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -194,28 +200,35 @@ public class SpotsLoadDialog
 		gbc.insets = new Insets(0,0,0,0);
 		gbc.gridx++;
 		pHeaderSeparator.add(cbUnits, gbc);
+		
+		gbc.gridx++;
+		gbc.insets = new Insets(0,40,0,0);
+		pHeaderSeparator.add(new JLabel("Size is"),gbc);
+		gbc.insets = new Insets(0,0,0,0);
+		gbc.gridx++;
+		pHeaderSeparator.add(cbSize, gbc);
 
 		///COLUMN ASSIGNMENT PANEL
 		JPanel pColumnsAssign = new JPanel();
-		for (int i=0;i<3;i++)
+		for (int i=0;i<6;i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
 			cbColumnsAssign.get( i ).addActionListener( (e)-> updateWindow());
 		}
 		
-		String [] sAxisLabels = new String [] {"X", "Y", "Z"};		
+		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "SizeX", "SizeY", "SizeZ"};		
 
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.insets = new Insets(0,10,0,30);
-		pColumnsAssign.add(new JLabel("Columns: ") , gbc); 
+		gbc.insets = new Insets(0,5,0,5);
+		pColumnsAssign.add(new JLabel("Map:") , gbc); 
 		gbc.insets = new Insets(0,0,0,0);
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			gbc.gridx++;
-			pColumnsAssign.add(new JLabel(sAxisLabels[i]), gbc);
+			pColumnsAssign.add(new JLabel(sColSelectionLabels[i]), gbc);
 			gbc.gridx++;
 			pColumnsAssign.add( cbColumnsAssign.get( i ), gbc );
 		}
@@ -449,18 +462,25 @@ public class SpotsLoadDialog
 	void checkColumnAssignment()
 	{
 		HashMap< JComboBox<String>, String> mapCols = new HashMap<>();
-		for(JComboBox<String> cbBox: cbColumnsAssign)
+		
+		int nCoordAssign = 0;
+		for(int i=0; i<cbColumnsAssign.size(); i++)
 		{
+			final JComboBox<String> cbBox = cbColumnsAssign.get( i );
 			if(cbBox.getSelectedIndex()!=0)
 			{
 				mapCols.put( cbBox, cbBox.getItemAt( cbBox.getSelectedIndex() ) );
+				if(i<=2)
+				{
+					nCoordAssign++;
+				}
 			}
 		}
 		
 		Collection< String > colNames = mapCols.values();
 		Set<String> colUniq = new HashSet<>();
 		colUniq .addAll( colNames );
-		if(mapCols.size()>1)
+		if(nCoordAssign>1)
 		{
 			butOk.setEnabled( true );
 			if(colUniq.size() != mapCols.size())
@@ -475,7 +495,7 @@ public class SpotsLoadDialog
 		else
 		{
 			butOk.setEnabled( false );
-			jStatus.setText("Need to assign at least 2 columns.");
+			jStatus.setText("Need to assign at least 2 coordinate columns.");
 		}
 	}
 	

@@ -56,7 +56,7 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 public class VisSpots
 {
-	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS = 2; 
+	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS_UNIFORM = 2, RENDER_GAUSS_NORMALIZED  = 3; 
 
 	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
 	
@@ -77,6 +77,8 @@ public class VisSpots
 	float spotSizes[]; 
 	
 	private int nSpotsN;
+	
+	private float fNormGauss = 1.0f;
 	
 	private boolean initialized;
 	
@@ -152,6 +154,11 @@ public class VisSpots
 		fSpotSize = -1.0f;
 		
 		initialized = false;
+	}
+	
+	public void setGaussSDNorm(final float fNormGauss_)
+	{
+		fNormGauss = fNormGauss_*fNormGauss_*fNormGauss_;
 	}
 	
 	public void setColor(Color pointColor) 
@@ -297,6 +304,7 @@ public class VisSpots
 		prog.getUniform4f( "colorin" ).set( l_color );
 		prog.getUniform2f( "windowSize" ).set( window_sizef );
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
+		prog.getUniform1f( "normGauss" ).set( fNormGauss );
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		//progRound.getUniform1i("clipactive").set(0);
@@ -304,7 +312,7 @@ public class VisSpots
 		//progRound.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		if(renderType == RENDER_GAUSS)
+		if(renderType == RENDER_GAUSS_UNIFORM || renderType == RENDER_GAUSS_NORMALIZED)
 		{
 			gl.glDepthFunc( GL.GL_ALWAYS);
 		}

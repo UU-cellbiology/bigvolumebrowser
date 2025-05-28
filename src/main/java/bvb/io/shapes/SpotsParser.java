@@ -2,9 +2,7 @@ package bvb.io.shapes;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +11,7 @@ import javax.swing.SwingWorker;
 
 import net.imglib2.RealPoint;
 
+import bvb.utils.Misc;
 import ij.IJ;
 
 public class SpotsParser extends SwingWorker<Void, Void> 
@@ -27,22 +26,33 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	
 	public float fScale = 1.0f;
 	
+	public float fSizeScale = 1.0f;
+	
+	public boolean parseSize = false;
+	
 	final float [] xyz = new float[3];
+	
+	final float[] size_f = new float[1];
 
 	final public ArrayList<RealPoint> vertices = new ArrayList<>();
+	
+	public float [] sizes = null;
 	
 	@Override
 	protected Void doInBackground() throws Exception
 	{		
 		vertices.clear();
+		ArrayList<Float> sizesList = new ArrayList<>();
+
 		
 		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
 		{
 			IJ.showStatus( "Importing "+ fileSpots.getName());
+			
 			//file size in bytes
 			final double filesize = Files.size( fileSpots.toPath() );
 			long bytesRead = 0;
-			final long bytesNewLine = getBytesPerNewLine();
+			final long bytesNewLine = Misc.getBytesPerNewLine(fileSpots);
 			String line = "";
 			String [] la;
 			
@@ -59,55 +69,91 @@ public class SpotsParser extends SwingWorker<Void, Void>
 					break;
 				bytesRead += line.getBytes().length + bytesNewLine;
 				IJ.showProgress( bytesRead/filesize );
-				la = line.split(sSeparator);	
-				vertices.add(parseCoordinates(la) );
-			}
+				la = line.split(sSeparator);
+				if( parseCoordinates( la ) && !parseSize)
+				{
+					vertices.add( new RealPoint(xyz));					
+				}
+				//make sure we add spot only if sizes were parsed ok
+				if(parseSize)
+				{
+					if( parseSizes( la ) )
+					{
+						vertices.add( new RealPoint(xyz));	
+						sizesList.add( new Float(size_f[0] ));					
+					}
 					
-			return null;
-			
-		}
-	}
-	
-	int getBytesPerNewLine() throws FileNotFoundException, IOException
-	{
-		String line1 = "";
-		String line2 = "";
-		int nCount = 0;
-		//read two lines
-		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
-		{
-			line1 = br.readLine();
-			line2 = br.readLine();
-
-		}
-
-		char [] cFirst = new char[1];
-		line2.getChars( 0, 1, cFirst, 0 );
-		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
-		{
-			char [] cbuf = new char [line1.length()];
-			
-			br.read( cbuf, 0, line1.length());
-			cbuf = new char[1];
-			char val = (char)br.read();
-			while(val != cFirst[0])
-			{
-				val = (char)br.read();
-				nCount++;
+				}
 			}
+			
 		}
-		return nCount;
+		sizes = new float[sizesList.size()];
+		for(int i=0; i<sizesList.size(); i++)
+		{
+			sizes[i] = sizesList.get( i );
+		}
+		
+		return null;
 	}
 	
-	RealPoint parseCoordinates(final String [] la)
+	boolean parseCoordinates(final String [] la)
 	{
 		for(int d=0;d<3;d++)
 		{
 			if(nColIndices[d] >= 0)
-				xyz[d] = fScale * Float.parseFloat( la[nColIndices[d]] );
+			{
+				if(nColIndices[d]>la.length-1)
+				{
+					System.err.println("Spots file import warning: number of columns is wrong.");
+					return false;
+				}
+				try
+				{
+					xyz[d] = fScale * Float.parseFloat( la[nColIndices[d]] );
+				}
+				catch(NumberFormatException e)
+				{
+					System.err.println("Spots file import warning: failed to parse coordinate.");
+					return false;
+				}
+			}
 			
 		}
-		return new RealPoint(xyz);
+		return true;
+	}
+	
+	boolean parseSizes(final String [] la)
+	{
+		float sizeOut = 0.0f;
+		int nNum = 0;
+		for(int d=3; d<6; d++)
+		{
+			if(nColIndices[d] >= 0)
+			{
+				if(nColIndices[d]>la.length-1)
+				{
+					System.err.println("Spots file import warning: number of columns is wrong.");
+					return false;
+				}
+				try
+				{
+					sizeOut += fScale * Float.parseFloat( la[nColIndices[d]] );
+					nNum++;
+					//xyz[d] = fScale * Float.parseFloat( la[nColIndices[d]] );
+				}
+				catch(NumberFormatException e)
+				{
+					System.err.println("Spots file import warning: failed to parse size column.");
+					return false;
+				}
+			}
+			
+		}
+		if(nNum > 0)
+		{
+			size_f[0] = sizeOut/nNum;	
+		}
+		return true;
 	}
 	
     /*

@@ -32,6 +32,7 @@ import com.jogamp.opengl.GL3;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -46,7 +47,7 @@ import bvb.scene.VisSpots;
 
 public class Spots extends AbstractBasicShape
 {
-	public VisSpots vertexVis = null;
+	public VisSpots vertVis = null;
 	
 	float pointSize;
 	Color pointColor;
@@ -68,11 +69,11 @@ public class Spots extends AbstractBasicShape
 	{
 		if(bVisible)
 		{
-			if(vertexVis != null)
+			if(vertVis != null)
 			{
 				if(nTimePoint<0 || nTimePoint == nTimePoint_)
 				{
-					vertexVis.draw( gl, pvm, screen_size);
+					vertVis.draw( gl, pvm, screen_size);
 				}
 			}
 		}
@@ -85,17 +86,17 @@ public class Spots extends AbstractBasicShape
 
 	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{
-		if(vertexVis == null)
+		if(vertVis == null)
 		{
-			vertexVis = new VisSpots(pointSize, pointColor, pointShape, renderType);
+			vertVis = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		}
 		if(spotSizes==null || spotSizes.length != vertices.size())
 		{	
-			vertexVis.setVertices(vertices);	
+			vertVis.setVertices(vertices);	
 		}
 		else
 		{
-			vertexVis.setVertices(vertices, spotSizes);				
+			vertVis.setVertices(vertices, spotSizes);				
 		}
 		setBoundingBox(vertices, spotSizes);
 	}
@@ -126,11 +127,12 @@ public class Spots extends AbstractBasicShape
 		}
 		else
 		{
-			
+			final float [] sortedSize = new float[spotSizes.length];
 			for ( int v=0; v < vertices.size(); v++ )
 			{
 				final double x = vertices.get( v ).getDoublePosition(0), y = vertices.get( v ).getDoublePosition(1), z = vertices.get( v ).getDoublePosition(2);
 				final double pSize = spotSizes[v];
+				sortedSize[v] = spotSizes[v];
 				if ( x - pSize < boundingBox[ 0 ] )
 					boundingBox[ 0 ] = x - pSize;
 				if ( y - pSize < boundingBox[ 1 ] )
@@ -144,6 +146,10 @@ public class Spots extends AbstractBasicShape
 				if ( z + pSize > boundingBox[ 5 ] )
 					boundingBox[ 5 ] = z + pSize;
 			}
+			Arrays.sort( sortedSize );
+			//take 10% quantile
+			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
+			vertVis.setGaussSDNorm(sortedSize[index]);
 			
 		}
 		
@@ -162,16 +168,16 @@ public class Spots extends AbstractBasicShape
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		
-		if(vertexVis != null)
+		if(vertVis != null)
 		{
-			vertexVis.setColor(pointColor);			
+			vertVis.setColor(pointColor);			
 		}
 	}
 	
 	public void setRenderType(int nRenderType)
 	{
 		pointShape = nRenderType;
-		vertexVis.setShape( pointShape );
+		vertVis.setShape( pointShape );
 		
 		return;
 	}	
@@ -179,7 +185,7 @@ public class Spots extends AbstractBasicShape
 	public void setPointShape(int nShape)
 	{
 		renderType = nShape;
-		vertexVis.setRenderType(renderType);
+		vertVis.setRenderType(renderType);
 		
 		return;
 	}	
@@ -194,8 +200,8 @@ public class Spots extends AbstractBasicShape
 	@Override
 	public void reload()
 	{
-		if(vertexVis != null)
-			vertexVis.reload();
+		if(vertVis != null)
+			vertVis.reload();
 		
 	}
 
