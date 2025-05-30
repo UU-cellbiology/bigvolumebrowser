@@ -38,6 +38,11 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import bvb.shapes.BasicShape;
+import bvb.shapes.MeshColor;
+import bvb.shapes.MeshTexture;
+import bvb.shapes.Spots;
+import bvb.shapes.SpotsSame;
 import bvvpg.vistools.BvvStackSource;
 import mpicbg.spim.data.generic.AbstractSpimData;
 
@@ -63,6 +68,12 @@ public class DataTreeModel implements TreeModel
 	
 	final ImageIcon iconOneSource;
 	
+	final ImageIcon iconShapeGroup;
+	
+	final ImageIcon iconMeshColor;
+	
+	final ImageIcon iconSpots;
+	
 	public enum SPIMDataType {
 		  BDV,
 		  BIOFORMATS,
@@ -84,6 +95,9 @@ public class DataTreeModel implements TreeModel
 		iconMoBIE = new ImageIcon(this.getClass().getResource("/icons/mobie-logo-small.png"));		
 		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/data-small-default.png"));
 		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/source-small.png"));
+		iconShapeGroup = new ImageIcon(this.getClass().getResource("/icons/shapes-small.png"));
+		iconMeshColor = new ImageIcon(this.getClass().getResource("/icons/mesh-small.png"));
+		iconSpots = new ImageIcon(this.getClass().getResource("/icons/spots-small.png"));
 
 	}
 	
@@ -113,6 +127,46 @@ public class DataTreeModel implements TreeModel
 			
 		}
 		dataParentChildren.put( spimNode, sourcesTN );
+		
+		fireTreeStructureChanged();
+	}
+	
+	public void addData(BasicShape shape_, String dataName, final ImageIcon shapeIcon)
+	{
+		final ArrayList<BasicShape> shList = new ArrayList<>();
+		shList.add( shape_ );
+		addData(shList, dataName, shapeIcon);
+	}
+	
+	public void addData(final ArrayList<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
+	{
+		List<DataTreeNode> listNodes =  dataParentChildren.get( rootNode );
+		if(listNodes == null)
+			listNodes = new ArrayList<>();
+		final DataTreeNode shapesNode = new DataTreeNode(this, shapes_);
+		shapesNode.setDescription( dataName );
+		shapesNode.setIcon( shapeIcon );
+		listNodes.add( shapesNode );
+		dataParentChildren.put( rootNode, listNodes );
+		dataChildParent.put( shapesNode, rootNode );
+		ArrayList<DataTreeNode> shapesTN = new ArrayList<>(); 
+		for(BasicShape sh :shapes_)
+		{
+			final DataTreeNode shNode = new DataTreeNode(this, sh);
+			shNode.setDescription( sh.toString() );
+			if(sh instanceof MeshColor || sh instanceof MeshTexture)
+			{
+				shNode.setIcon( iconMeshColor );
+			}
+			if(sh instanceof Spots || sh instanceof SpotsSame)
+			{
+				shNode.setIcon( iconSpots );
+			}
+			shapesTN.add( shNode );
+			dataChildParent.put( shNode, shapesNode );
+			
+		}
+		dataParentChildren.put( shapesNode, shapesTN );
 		
 		fireTreeStructureChanged();
 	}
@@ -246,5 +300,10 @@ public class DataTreeModel implements TreeModel
 	public ImageIcon getIconOneSource()
 	{
 		return iconOneSource;
+	}
+	
+	public ImageIcon getIconGroupShape()
+	{
+		return iconShapeGroup;
 	}
 }

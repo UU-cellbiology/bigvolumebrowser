@@ -517,6 +517,22 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		return out;
 	}
 	
+	public synchronized void addShape(final BasicShape shape)
+	{
+		shapes.add( shape );
+		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();
+		dataTreeModel.addData( shape, shape.toString(), dataTreeModel.getIconGroupShape() );
+		if(BVBSettings.bFocusOnSourcesOnLoad)
+		{
+			this.focusOnRealInterval( shape.boundingBox());
+		}
+	}
+	
+	public void removeShape(final BasicShape shape)
+	{
+		shapes.remove( shape );
+	}
+	
 	public void renderScene(final GL3 gl, final RenderData data)
 	{
 		//set canvas background color
@@ -568,21 +584,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		repaintBVV();
 	}
 	
-	
-	public synchronized void addShape(final BasicShape shape)
-	{
-		shapes.add( shape );
-		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();
-		if(BVBSettings.bFocusOnSourcesOnLoad)
-		{
-			this.focusOnRealInterval( shape.boundingBox());
-		}
-	}
-	
-	public void removeShape(final BasicShape shape)
-	{
-		shapes.remove( shape );
-	}
 	
 	public void updateSceneRender()
 	{

@@ -28,6 +28,7 @@
  */
 package bvb.gui.data;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.tree.TreeNode;
 
+import bvb.shapes.BasicShape;
 import bvvpg.vistools.BvvStackSource;
 import mpicbg.spim.data.generic.AbstractSpimData;
 
@@ -43,6 +45,10 @@ public class DataTreeNode implements TreeNode
 	DataTreeNode root = null;
 	public AbstractSpimData< ? > spimData = null;
 	public BvvStackSource<?> bvvSource = null;
+	public BasicShape shape = null;
+	
+	public ArrayList<BasicShape> shapesArr = null;
+	
 	final DataTreeModel dataModel;
 
 	boolean isLeaf = false;
@@ -62,6 +68,30 @@ public class DataTreeNode implements TreeNode
 	{
 		dataModel = dataModel_;
 		bvvSource = bvvSource_;
+		isLeaf = true;		
+	}
+	
+	//spimdata source	
+	public DataTreeNode(final DataTreeModel dataModel_, AbstractSpimData<?> spimData_)
+	{
+		dataModel = dataModel_;
+		spimData = spimData_;
+		isLeaf = false;		
+	}
+	
+	//shape collection
+	public DataTreeNode(final DataTreeModel dataModel_, ArrayList<BasicShape> shapes_)
+	{
+		dataModel = dataModel_;
+		shapesArr = shapes_;
+		isLeaf = false;		
+	}
+	
+	//shape source	
+	public DataTreeNode(final DataTreeModel dataModel_, BasicShape shape_)
+	{
+		dataModel = dataModel_;
+		shape = shape_;
 		isLeaf = true;		
 	}
 
@@ -84,15 +114,6 @@ public class DataTreeNode implements TreeNode
 	public String toString()
 	{
 		return sDescription;
-	}
-
-	
-	//spimdata source	
-	public DataTreeNode(final DataTreeModel dataModel_, AbstractSpimData<?> spimData_)
-	{
-		dataModel = dataModel_;
-		spimData = spimData_;
-		isLeaf = false;		
 	}
 	
 	@Override

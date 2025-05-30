@@ -57,14 +57,14 @@ public class DataTreeCellRenderer extends DefaultTreeCellRenderer
 			final ImageIcon currIcon = ((DataTreeNode)value).getIcon();
 			if(((DataTreeNode)value).getIcon() != null)
 			{
-				if(leaf)
-				{
+//				if(leaf)
+//				{
 					this.setIcon( currIcon );
-				}
-				else
-				{
-					this.setIcon( currIcon );
-				}
+//				}
+//				else
+//				{
+//					this.setIcon( currIcon );
+//				}
 			}
 		}
 		return this;
