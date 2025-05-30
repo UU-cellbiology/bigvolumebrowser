@@ -91,7 +91,7 @@ public class PanelData extends JPanel
 					@Override
 					public void valueChanged( TreeSelectionEvent arg0 )
 					{						
-						selectSetups();						
+						selectObjects();						
 					}
         		});
         
@@ -110,7 +110,7 @@ public class PanelData extends JPanel
                 	if(SwingUtilities.isRightMouseButton(e))
                 	{
                 		treeData.clearSelection();
-                		selectSetups();
+                		selectObjects();
                 	}
                 }
             }
@@ -149,23 +149,26 @@ public class PanelData extends JPanel
 			@Override
 			public void selectedObjectsChanged()
 			{
-				updateSourcesSelection();
+				updateObjectsSelection();
 			}
 		} );
 	}
 	
-	synchronized void selectSetups()
+	/** updates Sources and Shapes tables selections **/
+	synchronized void selectObjects()
 	{
 		if(bLocked)
 			return;
 		
 		bLocked = true;
 		final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+		final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
 		TreePath[] selPaths = treeData.getSelectionPaths();
 		if(selPaths == null)
 		{
 			bLocked = false;
 			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
+			bvb.controlPanel.tabPanelShapes.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 			return;
 		}
 		
@@ -177,6 +180,11 @@ public class PanelData extends JPanel
 			{
 				selectedSAC.add( getSAC(node.bvvSource) );
 			}
+			if(node.shape != null)
+			{
+				selectedShapes.add( node.shape );
+			}
+			
 			if(node.spimData != null)
 			{
 				List< DataTreeNode > listBvvSourcesNodes = bvb.dataTreeModel.dataParentChildren.get(node);
@@ -188,13 +196,28 @@ public class PanelData extends JPanel
 					}
 				}
 			}
+			
+			if(node.shapesArr != null)
+			{
+				List< DataTreeNode > listShapeNodes = bvb.dataTreeModel.dataParentChildren.get(node);
+				for(DataTreeNode leafnode :listShapeNodes)
+				{
+					if(leafnode.shape != null)
+					{
+						selectedShapes.add( leafnode.shape );
+					}
+				}				
+			}
 
 		}
 		bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
+		bvb.controlPanel.tabPanelShapes.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 		bLocked = false;
 	}
 	
-	synchronized void updateSourcesSelection()
+	/** if Sources or Shapes tables selection is changed,
+	 *  updates the tree selection **/
+	synchronized void updateObjectsSelection()
 	{
 		if(bLocked)
 			return;

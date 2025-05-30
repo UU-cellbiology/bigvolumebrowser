@@ -65,7 +65,7 @@ public class BVBControlPanel extends JPanel
 	
 	final TabPanelView tabPanelView;
 	
-	final TabPanelShapes tabPanelShapes;
+	final public TabPanelShapes tabPanelShapes;
 	
 	final TabPanelInfo tabPanelInfo;
 	
@@ -105,9 +105,8 @@ public class BVBControlPanel extends JPanel
 	    tabIcon = new ImageIcon(icon_path);
 	    tabPanelInfo = new TabPanelInfo();	    
 		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
+
 		
-
-
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
 	    

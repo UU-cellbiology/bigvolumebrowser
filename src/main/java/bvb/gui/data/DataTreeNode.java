@@ -45,9 +45,9 @@ public class DataTreeNode implements TreeNode
 	DataTreeNode root = null;
 	public AbstractSpimData< ? > spimData = null;
 	public BvvStackSource<?> bvvSource = null;
-	public BasicShape shape = null;
 	
 	public ArrayList<BasicShape> shapesArr = null;
+	public BasicShape shape = null;
 	
 	final DataTreeModel dataModel;
 

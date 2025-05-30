@@ -34,13 +34,11 @@ import java.util.List;
 import bdv.tools.brightness.ConverterSetup;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
-import bvvpg.core.VolumeViewerPanel;
 import bvvpg.pgcards.sourcetable.SourceSelectionState;
 import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
 
-/** Class that keeps track on sources currently selected in BVV (Cards panel).
- *  Fires an event on selection change or focus change
- *  between the Sources and Groups panels switch. **/
+/** Class that keeps track on sources currently selected in BVV (Cards panel)
+ *  and shapes in Shapes Cards panel. **/
 
 public class SelectedObjects implements SourceSelectionWindowState.Listener, 
 										SourceSelectionState.Listener,

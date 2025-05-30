@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.imglib2.RealInterval;
+
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
 
@@ -152,6 +153,29 @@ public class ShapesTable extends JTable
 			shapes.add( bvb.shapes.get( row ));
 		return shapes;
 	}
+	public void setSelectedShapes(List< BasicShape > shList)
+	{
+		this.clearSelection();
+		final ArrayList<Integer> selectedIndices = new ArrayList<>();
+		for(BasicShape sh:shList)
+		{
+			//for now
+			final int nIndex = bvb.shapes.indexOf( sh );
+			selectedIndices.add( new Integer ( nIndex ));
+		}
+		
+		for(int i=0;i<selectedIndices.size(); i++)
+		{
+			if(i==0)
+			{
+				this.setRowSelectionInterval( selectedIndices.get( i ).intValue(), selectedIndices.get( i ).intValue() );
+			}
+			else
+			{
+				this.getSelectionModel().addSelectionInterval( selectedIndices.get( i ).intValue(), selectedIndices.get( i ).intValue() );				
+			}
+		}
+	}
 	
 	void setShapesVisible(final List<BasicShape> shapes, boolean bVisible)
 	{
@@ -162,6 +186,7 @@ public class ShapesTable extends JTable
 		updateUI();
 		bvb.repaintBVV();
 	}
+	
 	void focusOnSelectedShapes()
 	{
 		final List< BasicShape > shapes = new ArrayList<>();

@@ -16,7 +16,7 @@ public class PanelShapes extends JPanel
 	
 	boolean bLocked = false;
 	
-	final private ShapesTable tableShapes;
+	final public ShapesTable tableShapes;
 	
 	final JScrollPane tableScroller;
 	
