@@ -83,7 +83,8 @@ import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
 import bvb.gui.CenterZoomBVV;
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
+import bvb.gui.ShapeSelectionState;
 import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
@@ -127,8 +128,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** flag to lock BVB while it is busy **/
 	public boolean bLocked;
 	
-	/** currently selected source + listener for update **/
-	public SelectedSources selectedSources;
+	/** status of curretly selected groups + listener **/
+	public ShapeSelectionState shapeSelection;
+	
+	/** currently selected sources and shapes + listener for update **/
+	public SelectedObjects selectedObjects;
 	
 	/** maps bvv sources to the input data **/
 	private final ConcurrentHashMap < BvvStackSource<?>, AbstractSpimData<?> > bvvSourceToSpimData;
@@ -249,7 +253,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		    bvvFrame.getCardPanel().addCard("Add volumes", controlPanel.tabPanelDataSources.panelAddSources, true, new Insets( 0, 0, 0, 0 ) );		   
 		    bvvFrame.getCardPanel().addCard("Add shapes", controlPanel.tabPanelShapes.panelAddShapes, true, new Insets( 0, 0, 0, 0 ) );		   
 
-		    //		    controlPanel.tabPanelView.viewPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+//		    controlPanel.tabPanelView.viewPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 //		    controlPanel.tabPanelView.viewPanel.butFullScreen.setVisible( false );
 //		    controlPanel.tabPanelView.sourcesRenderPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 //		    controlPanel.tabPanelView.clipPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -257,6 +261,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 //		    bvvFrame.getCardPanel().addCard( "View", controlPanel.tabPanelView.viewPanel, false);
 //		    bvvFrame.getCardPanel().addCard( "Sources render", controlPanel.tabPanelView.sourcesRenderPanel, false);
 //		    bvvFrame.getCardPanel().addCard( "Clipping", controlPanel.tabPanelView.clipPanel, true );
+		    
+		   
 		    bvvFrame.getSplitPanel().setCollapsed( false );
 		    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
 			bLocked = false;
@@ -288,9 +294,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		//listen to timepoint change
 		bvvViewer.addTimePointListener(this);
-		
-		//bind updater on selected sources
-		selectedSources = new SelectedSources(bvvViewer);
 		
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		

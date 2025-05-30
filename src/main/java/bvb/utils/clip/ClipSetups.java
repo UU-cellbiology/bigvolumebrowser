@@ -32,7 +32,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.viewer.ConverterSetups;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -48,12 +48,12 @@ public class ClipSetups
 	
 	public ConverterSetups converterSetups;
 	
-	public SelectedSources selectedSources;
+	public SelectedObjects selectedSources;
 	
 	public ClipSetups (final BigVolumeBrowser bvb)
 	{
 		converterSetups = bvb.bvvViewer.getConverterSetups();
-		selectedSources = bvb.selectedSources;
+		selectedSources = bvb.selectedObjects;
 		clipAxesBounds = new ClipAxesBounds(converterSetups);
 		clipCenters = new ClipCenters(converterSetups);
 		clipCenterBounds = new ClipCenterBounds(converterSetups);

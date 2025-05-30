@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bdv.tools.brightness.ConverterSetup;
+import bvb.core.BigVolumeBrowser;
+import bvb.shapes.BasicShape;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.pgcards.sourcetable.SourceSelectionState;
 import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
@@ -40,35 +42,36 @@ import bvvpg.pgcards.sourcetable.SourceSelectionWindowState;
  *  Fires an event on selection change or focus change
  *  between the Sources and Groups panels switch. **/
 
-public class SelectedSources implements SourceSelectionWindowState.Listener, SourceSelectionState.Listener
+public class SelectedObjects implements SourceSelectionWindowState.Listener, 
+										SourceSelectionState.Listener,
+										ShapeSelectionState.Listener
 {
-	/** -1 - none focused, 0 - source window, 1 - group window**/
-	private int nActiveWindow = -1;
 	
 	private List< ConverterSetup > csList = new ArrayList<>();
+	private List< BasicShape > shList = new ArrayList<>();
 	
 	private ArrayList<Listener> listeners =	new ArrayList<>();
 
 	
 	public static interface Listener 
 	{
-		public void selectedSourcesChanged();
+		public void selectedObjectsChanged();
 	}
 	
-	public SelectedSources(final VolumeViewerPanel viewer)
+	public SelectedObjects(final BigVolumeBrowser bvb)
 	{
-		viewer.sourceSelection.addSourceSelectionStateListener( this );
-		viewer.sourceGroupSelection.addSourceSelectionStateListener( this );
-		viewer.sourceSelectionWindowState.addSourceSelectionWindowStateListener( this );				
+		bvb.bvvViewer.sourceSelection.addSourceSelectionStateListener( this );
+		bvb.bvvViewer.sourceGroupSelection.addSourceSelectionStateListener( this );
+		bvb.bvvViewer.sourceSelectionWindowState.addSourceSelectionWindowStateListener( this );	
+		bvb.shapeSelection.addShapesSelectionStateListener( this );
 	}
 
 	@Override
 	public void selectionWindowChanged( int nWindow, List< ConverterSetup > csList_ )
 	{
-		nActiveWindow = nWindow;
 		this.csList = csList_;
 		for(Listener l : listeners)
-				l.selectedSourcesChanged();
+				l.selectedObjectsChanged();
 	}
 	
 	@Override
@@ -76,7 +79,15 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
 	{
 		this.csList = csList_;
 		for(Listener l : listeners)
-				l.selectedSourcesChanged();		
+				l.selectedObjectsChanged();		
+	}
+	
+	@Override
+	public void selectionShapesChanged( List< BasicShape > shList_ )
+	{
+		this.shList = shList_;
+		for(Listener l : listeners)
+				l.selectedObjectsChanged();				
 	}
 	
 	public void addSourceSelectionListener(Listener l) 
@@ -84,13 +95,32 @@ public class SelectedSources implements SourceSelectionWindowState.Listener, Sou
         listeners.add(l);
     }
 	
+	public boolean isAnythingSelected()
+	{
+		if(csList.isEmpty() && shList.isEmpty())
+			return false;
+		return true;
+	}
+	
+	public boolean areSourcesSelected()
+	{
+		return !csList.isEmpty();
+	}
+	
+	public boolean areShapesSelected()
+	{
+		return !shList.isEmpty();
+	}
+	
 	public List< ConverterSetup > getSelectedSources()
 	{
 		return csList;
 	}
 	
-	public int getActiveWindow()
+	public List< BasicShape > getSelectedShapes()
 	{
-		return nActiveWindow;
+		return shList;
 	}
+
+
 }

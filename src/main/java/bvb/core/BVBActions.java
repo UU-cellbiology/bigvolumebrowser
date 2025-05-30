@@ -375,7 +375,7 @@ public class BVBActions
 	
 	public void actionToggleVisibility()
 	{
-		final List< ConverterSetup > csList = bvb.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
 		if(csList== null || csList.isEmpty())
 		{
 			return;

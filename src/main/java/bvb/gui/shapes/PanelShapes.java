@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.ShapeSelectionState;
 
 public class PanelShapes extends JPanel
 {
@@ -31,7 +32,7 @@ public class PanelShapes extends JPanel
 		tableScroller = new JScrollPane(tableShapes);
 		tableScroller.setMinimumSize(new Dimension(170, 300));
 		//tableScroller.setPreferredSize(new Dimension(400, 600));
-    	
+    	bvb.shapeSelection = new ShapeSelectionState(tableShapes);
     	GridBagConstraints gbc = new GridBagConstraints();
 	    
 	    //gbc.insets = new Insets(4,3,4,3);

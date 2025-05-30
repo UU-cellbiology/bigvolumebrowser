@@ -45,7 +45,7 @@ import net.imglib2.FinalRealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedRange;
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -114,11 +114,11 @@ public class ClipRangePanel extends JPanel
 	public void setBVVSourceListener()
 	{
 		//add source selection listener
-		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
+		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedObjects.Listener()
 		{
 			
 			@Override
-			public void selectedSourcesChanged()
+			public void selectedObjectsChanged()
 			{
 				updateGUI();
 			}

@@ -56,7 +56,7 @@ import bvvpg.source.converters.GammaConverterSetup;
 public class SourcesRenderPanel extends JPanel implements ActionListener
 {	
 	
-	final SelectedSources selectedSources;
+	final SelectedObjects selectedSources;
 	
 	ButtonGroup renderMode = new ButtonGroup();
 	
@@ -81,7 +81,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	 */
 	private Color inConsistentBg = Color.WHITE;
 
-	public SourcesRenderPanel(final ConverterSetups convSetups, final SelectedSources selectedSources_)
+	public SourcesRenderPanel(final ConverterSetups convSetups, final SelectedObjects selectedSources_)
 	{
 		
 		super(new GridBagLayout());

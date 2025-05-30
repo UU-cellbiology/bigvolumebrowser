@@ -54,7 +54,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -319,10 +319,10 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public void setSourceListeners()
 	{
 		
-		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
+		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedObjects.Listener()
 		{			
 			@Override
-			public void selectedSourcesChanged( )
+			public void selectedObjectsChanged( )
 			{
 				updateGUI();
 			}

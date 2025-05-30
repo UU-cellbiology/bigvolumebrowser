@@ -73,7 +73,7 @@ public class TabPanelDataSources extends JPanel
 	    gbc.weightx = 0.01;
 	    gbc.weighty = 0.01;
 	    this.add(new JLabel(), gbc);
-	    updateBVVlisteners();
+	    //updateBVVlisteners();
 	}
 	
 	public void updateBVVlisteners()

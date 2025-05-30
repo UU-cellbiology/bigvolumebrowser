@@ -8,7 +8,7 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
 import bvb.utils.Misc;
 
 public class TransformSetups
@@ -17,7 +17,7 @@ public class TransformSetups
 	
 	public ConverterSetups converterSetups;
 	
-	public SelectedSources selectedSources;
+	public SelectedObjects selectedSources;
 	
 	final public TransformScale transformScale;
 	
@@ -33,7 +33,7 @@ public class TransformSetups
 		
 		converterSetups = bvb.bvvViewer.getConverterSetups();
 		
-		selectedSources = bvb.selectedSources;
+		selectedSources = bvb.selectedObjects;
 		
 		transformScale = new TransformScale(converterSetups);
 		transformCenters = new TransformCenter(converterSetups);

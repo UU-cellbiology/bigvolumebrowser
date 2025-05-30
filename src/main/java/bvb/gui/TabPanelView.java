@@ -59,7 +59,7 @@ public class TabPanelView extends JPanel
 	    
 	    viewPanel = new ViewPanel(bvb);
 	    
-	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), bvb.selectedSources);
+	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), bvb.selectedObjects);
 	    
 	    clipPanel = new ClipPanel(bvb);		
 	    

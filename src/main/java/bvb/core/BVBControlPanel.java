@@ -43,7 +43,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
 import bvb.gui.TabPanelDataSources;
 import bvb.gui.TabPanelInfo;
 import bvb.gui.TabPanelShapes;
@@ -59,7 +59,7 @@ public class BVBControlPanel extends JPanel
 	
 	public JTabbedPane tabPane;
 
-	final SelectedSources selectedSources;
+	final SelectedObjects selectedSources;
 	
 	final public TabPanelDataSources tabPanelDataSources;
 	
@@ -76,31 +76,38 @@ public class BVBControlPanel extends JPanel
 	{
 		super(new GridBagLayout());
 		bvb = bvb_;
-		this.selectedSources = bvb.selectedSources;
+		this.selectedSources = bvb.selectedObjects;
 		
 		tabPane = new JTabbedPane(SwingConstants.LEFT);
 		
 		
-		URL  icon_path = this.getClass().getResource("/icons/load_sources.png");
+		URL icon_path = this.getClass().getResource("/icons/shapes.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
+	    tabPanelShapes = new TabPanelShapes(bvb);	    
+		tabPane.addTab("",tabIcon, tabPanelShapes, "Shapes");
+		
+		icon_path = this.getClass().getResource("/icons/load_sources.png");
+		tabIcon = new ImageIcon(icon_path);
 	    tabPanelDataSources = new TabPanelDataSources(bvb_);	    
 		tabPane.addTab("",tabIcon, tabPanelDataSources, "Data sources");
+		
+		//bind updater on selected sources
+		bvb.selectedObjects = new SelectedObjects(bvb);
+		tabPanelDataSources.updateBVVlisteners();
 		
 		icon_path = this.getClass().getResource("/icons/view.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    tabPanelView = new TabPanelView(bvb);
 		tabPane.addTab("",tabIcon, tabPanelView, "View/Clip");
 		
-		icon_path = this.getClass().getResource("/icons/shapes.png");
-		tabIcon = new ImageIcon(icon_path);
-	    tabPanelShapes = new TabPanelShapes(bvb);	    
-		tabPane.addTab("",tabIcon, tabPanelShapes, "Shapes");
 		
 		icon_path = this.getClass().getResource("/icons/shortcut.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    tabPanelInfo = new TabPanelInfo();	    
 		tabPane.addTab("",tabIcon, tabPanelInfo, "Shortcuts");
 		
+
+
 	    tabPane.setSize(350, 300);
 	    tabPane.setSelectedIndex(0);
 	    

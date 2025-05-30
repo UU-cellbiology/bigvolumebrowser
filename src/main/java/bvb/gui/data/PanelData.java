@@ -51,7 +51,8 @@ import javax.swing.tree.TreePath;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.SelectedSources;
+import bvb.gui.SelectedObjects;
+import bvb.shapes.BasicShape;
 import bvvpg.vistools.BvvStackSource;
 
 
@@ -142,11 +143,11 @@ public class PanelData extends JPanel
 	/** called by parent **/
 	public void addSourceStateListener()
 	{
-    	bvb.selectedSources.addSourceSelectionListener(  new SelectedSources.Listener()
+    	bvb.selectedObjects.addSourceSelectionListener(  new SelectedObjects.Listener()
 		{
 			
 			@Override
-			public void selectedSourcesChanged()
+			public void selectedObjectsChanged()
 			{
 				updateSourcesSelection();
 			}
@@ -198,36 +199,62 @@ public class PanelData extends JPanel
 		if(bLocked)
 			return;
 		bLocked = true;
-		final List< ConverterSetup > csList = bvb.selectedSources.getSelectedSources();
 		
-		if(csList == null || csList.size()==0)
+		if(! bvb.selectedObjects.isAnythingSelected())
 		{
 			bLocked = false;
 			return;
 		}
 		
 		treeData.getSelectionModel().clearSelection();//.setSelectionPath( null );
-		
-		for (Entry< DataTreeNode, DataTreeNode > entry : bvb.dataTreeModel.dataChildParent.entrySet()) 
+
+		//sources
+		if(bvb.selectedObjects.areSourcesSelected())
 		{
-			final DataTreeNode node = entry.getKey();
-			if(node.isLeaf && node.bvvSource != null)
+			final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
+	
+			for (Entry< DataTreeNode, DataTreeNode > entry : bvb.dataTreeModel.dataChildParent.entrySet()) 
 			{
-				for(ConverterSetup cs: csList)
+				final DataTreeNode node = entry.getKey();
+				if(node.isLeaf && node.bvvSource != null)
 				{
-					if(node.bvvSource.getConverterSetups().get( 0 ).equals( cs ))	
+					for(ConverterSetup cs: csList)
 					{
-						TreePath tp = new TreePath(bvb.dataTreeModel.getRoot());
-						tp = tp.pathByAddingChild( node.getParent() );
-						tp = tp.pathByAddingChild( node );
-						treeData.addSelectionPath( tp );	
+						if(node.bvvSource.getConverterSetups().get( 0 ).equals( cs ))	
+						{
+							TreePath tp = new TreePath(bvb.dataTreeModel.getRoot());
+							tp = tp.pathByAddingChild( node.getParent() );
+							tp = tp.pathByAddingChild( node );
+							treeData.addSelectionPath( tp );	
+						}
 					}
-				}
-
+	
+				}						
 			}
-				
-
-		}	   
+		}
+		
+		//shapes
+		if(bvb.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = bvb.selectedObjects.getSelectedShapes();
+			for (Entry< DataTreeNode, DataTreeNode > entry : bvb.dataTreeModel.dataChildParent.entrySet()) 
+			{
+				final DataTreeNode node = entry.getKey();
+				if(node.isLeaf && node.shape != null)
+				{
+					for(BasicShape sh: shList)
+					{
+						if(node.shape.equals( sh ))	
+						{
+							TreePath tp = new TreePath(bvb.dataTreeModel.getRoot());
+							tp = tp.pathByAddingChild( node.getParent() );
+							tp = tp.pathByAddingChild( node );
+							treeData.addSelectionPath( tp );	
+						}
+					}
+				}						
+			}
+		}
 		bLocked = false;
 	}
 	
