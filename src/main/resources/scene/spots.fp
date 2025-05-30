@@ -1,11 +1,11 @@
 out vec4 fragColor;
 
-uniform float pointSizeReal;
 uniform vec4 colorin;
 uniform vec2 ellipseAxes;
 uniform int renderType;
 uniform int pointShape;
 in vec3 posW;
+in float sRadfp;
 uniform float normGauss;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -53,7 +53,8 @@ void main()
 			float dCol = 1.0;
 			if(renderType == 3)
 			{
-				dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
+				//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
+				dCol = normGauss/(sRadfp*sRadfp*sRadfp);
 			}
 			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
 			
@@ -83,7 +84,8 @@ void main()
 				float dCol = 1.0;
 				if(renderType == 3)
 				{
-					dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
+					dCol = normGauss/(sRadfp*sRadfp*sRadfp);
+					//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
 				}
 				colorout.a = dCol *  fade.x * fade.y * colorin.a; 
 				gl_FragDepth = 1.0;

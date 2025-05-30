@@ -38,6 +38,9 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	
 	public float [] sizes = null;
 	
+	public long nTotSpots = 0;
+
+	
 	@Override
 	protected Void doInBackground() throws Exception
 	{		
@@ -55,7 +58,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 			final long bytesNewLine = Misc.getBytesPerNewLine(fileSpots);
 			String line = "";
 			String [] la;
-			
+			boolean bCoordinateParsedOK;
 			//header
 			if(bHeader)
 			{
@@ -70,12 +73,13 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				bytesRead += line.getBytes().length + bytesNewLine;
 				IJ.showProgress( bytesRead/filesize );
 				la = line.split(sSeparator);
-				if( parseCoordinates( la ) && !parseSize)
+				bCoordinateParsedOK = parseCoordinates( la );
+				if( bCoordinateParsedOK && !parseSize)
 				{
 					vertices.add( new RealPoint(xyz));					
 				}
 				//make sure we add spot only if sizes were parsed ok
-				if(parseSize)
+				if(bCoordinateParsedOK && parseSize)
 				{
 					if( parseSizes( la ) )
 					{
@@ -92,14 +96,16 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		{
 			sizes[i] = sizesList.get( i );
 		}
-		
+		nTotSpots = vertices.size();
 		return null;
 	}
 	
 	boolean parseCoordinates(final String [] la)
 	{
+		float coord = 0.0f;
 		for(int d=0;d<3;d++)
 		{
+			coord = 0.0f;
 			if(nColIndices[d] >= 0)
 			{
 				if(nColIndices[d]>la.length-1)
@@ -107,13 +113,33 @@ public class SpotsParser extends SwingWorker<Void, Void>
 					System.err.println("Spots file import warning: number of columns is wrong.");
 					return false;
 				}
+				
 				try
 				{
-					xyz[d] = fScale * Float.parseFloat( la[nColIndices[d]] );
+					coord = Float.parseFloat( la[nColIndices[d]] );
+					if(Float.isInfinite( coord ))
+					{
+						System.err.println("Spots file import warning: found infinite coord value, skipping.");
+						return false;
+					}
+					if(Float.isNaN( coord ))
+					{
+						System.err.println("Spots file import warning: found NaN coord value, skipping.");
+						return false;
+					}
+					
 				}
 				catch(NumberFormatException e)
 				{
 					System.err.println("Spots file import warning: failed to parse coordinate.");
+					return false;
+				}
+				
+				xyz[d] = fScale * coord;
+				//sanity check
+				if(Float.isInfinite( xyz[d]))
+				{
+					System.err.println("Spots file import warning: found infinite coord value, skipping.");
 					return false;
 				}
 			}
@@ -126,8 +152,10 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	{
 		float sizeOut = 0.0f;
 		int nNum = 0;
+		float finsize = 0.0f;
 		for(int d=3; d<6; d++)
 		{
+			finsize = 0.0f;
 			if(nColIndices[d] >= 0)
 			{
 				if(nColIndices[d]>la.length-1)
@@ -137,21 +165,38 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				}
 				try
 				{
-					sizeOut += fScale * Float.parseFloat( la[nColIndices[d]] );
+					finsize = Float.parseFloat( la[nColIndices[d]] );
+					if(Float.isInfinite( finsize ))
+					{
+						System.err.println("Spots file import warning: found infinite size value, skipping.");
+						return false;
+					}
+					if(Float.isNaN( finsize ))
+					{
+						System.err.println("Spots file import warning: found NaN size value, skipping.");
+						return false;
+					}
 					nNum++;
-					//xyz[d] = fScale * Float.parseFloat( la[nColIndices[d]] );
 				}
 				catch(NumberFormatException e)
 				{
 					System.err.println("Spots file import warning: failed to parse size column.");
 					return false;
 				}
+				sizeOut += fScale * Math.abs(finsize);
 			}
 			
 		}
-		if(nNum > 0)
+		
+		//sanity check		
+		if(nNum > 0 && Float.isFinite( sizeOut ))
 		{
 			size_f[0] = sizeOut/nNum;	
+		}
+		else
+		{
+			System.err.println("Spots file import warning: found infinite size value, skipping.");
+			return false;
 		}
 		return true;
 	}

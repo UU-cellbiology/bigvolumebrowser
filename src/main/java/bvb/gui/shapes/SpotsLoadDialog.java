@@ -158,7 +158,7 @@ public class SpotsLoadDialog
 		gbc.fill = GridBagConstraints.NONE;
 		pFileSelect.add(butSelectFile, gbc);	
 
-		///HEADER/SEPARATOR/UNITS PANEL
+		///HEADER/SEPARATOR/UNITS/SIZE PANEL
 		JPanel pHeaderSeparator = new JPanel(new GridBagLayout());
 		cbHasHeader = new JCheckBox("Has header?");
 		cbHasHeader.setHorizontalTextPosition( SwingConstants.LEFT );
@@ -208,9 +208,9 @@ public class SpotsLoadDialog
 		gbc.gridx++;
 		pHeaderSeparator.add(cbSize, gbc);
 
-		///COLUMN ASSIGNMENT PANEL
-		JPanel pColumnsAssign = new JPanel();
-		for (int i=0;i<6;i++)
+		///COLUMN ASSIGNMENT PANEL COORDINATES
+		JPanel pColumnsAssignCoords = new JPanel();
+		for (int i=0;i<3;i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
@@ -223,15 +223,37 @@ public class SpotsLoadDialog
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.insets = new Insets(0,5,0,5);
-		pColumnsAssign.add(new JLabel("Map:") , gbc); 
+		pColumnsAssignCoords.add(new JLabel("Coords:") , gbc); 
 		gbc.insets = new Insets(0,0,0,0);
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			gbc.gridx++;
-			pColumnsAssign.add(new JLabel(sColSelectionLabels[i]), gbc);
+			pColumnsAssignCoords.add(new JLabel(sColSelectionLabels[i]), gbc);
 			gbc.gridx++;
-			pColumnsAssign.add( cbColumnsAssign.get( i ), gbc );
+			pColumnsAssignCoords.add( cbColumnsAssign.get( i ), gbc );
 		}
+
+		///COLUMN ASSIGNMENT PANEL SIZES
+		JPanel pColumnsAssignSize = new JPanel();
+		for (int i=3;i<6;i++)
+		{
+			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
+			cbColumnsAssign.get( i ).setEnabled( false );
+			cbColumnsAssign.get( i ).addActionListener( (e)-> updateWindow());
+		}
+	
+		gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(0,0,0,0);
+		for (int i = 3; i < 6; i++)
+		{
+			pColumnsAssignSize.add(new JLabel(sColSelectionLabels[i]), gbc);
+			gbc.gridx++;
+			pColumnsAssignSize.add( cbColumnsAssign.get( i ), gbc );
+			gbc.gridx++;
+		}
+		
 		
 		//TABLE WITH PARSED FILE CONTENT
 
@@ -268,7 +290,13 @@ public class SpotsLoadDialog
 		gbc.insets = new Insets(0,0,0,0);
 		gbc.gridx = 0;
 	    gbc.gridy++;
-		pLoadSpots.add(pColumnsAssign, gbc);		
+		pLoadSpots.add(pColumnsAssignCoords, gbc);		
+		
+		gbc.insets = new Insets(0,0,0,0);
+		gbc.gridx = 0;
+	    gbc.gridy++;
+		pLoadSpots.add(pColumnsAssignSize, gbc);		
+		
 		
 		gbc.gridx = 0;
 	    gbc.gridy++;

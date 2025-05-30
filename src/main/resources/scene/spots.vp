@@ -6,6 +6,7 @@ uniform float pointScale;
 uniform mat4 pvm;
 uniform vec2 windowSize;
 out vec3 posW;
+out float sRadfp;
 
 void main()
 {
@@ -39,10 +40,15 @@ void main()
  	shift.xyz = shift.xyz - aPos;
 
 	if(pointSizeReal>0.0)
+	{
  		shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
+ 		sRadfp = pointSizeReal;
+ 	}
  	else
+ 	{
  		shift.xyz = shift.xyz * 0.5 * sRad / length(shift.xyz);
- 	
+ 		sRadfp = sRad;
+ 	}	
  	
  	shift.xyz = aPos + shift.xyz ;
  	
@@ -56,8 +62,8 @@ void main()
  	
  	//final point size,
  	//let's make sure it is not zero
-    gl_PointSize =  max(dRadius/pointScale,1.0);
-    //gl_PointSize =  dRadius/pointScale;
+    //gl_PointSize =  max(dRadius/pointScale,1.0);
+    gl_PointSize =  dRadius/pointScale;
     
     posW = aPos;
 

@@ -19,6 +19,7 @@ import bvb.io.shapes.SpotsParser;
 import bvb.shapes.MeshColor;
 import bvb.shapes.Spots;
 import bvb.shapes.SpotsSame;
+import ij.IJ;
 import ij.Prefs;
 
 public class PanelAddShapes extends JPanel
@@ -100,11 +101,11 @@ public class PanelAddShapes extends JPanel
 			{
 			//milli
 			case 0:
-				sptParser.fScale = 0.001f;
+				sptParser.fScale = 1000.0f;
 				break;
 			//nano
 			case 2:
-				sptParser.fScale = 1000.0f;
+				sptParser.fScale = 0.001f;
 				break;
 			//micro
 			default:
@@ -145,8 +146,10 @@ public class PanelAddShapes extends JPanel
 			{
 				if(sptParser.getState() == StateValue.DONE)
 				{
+					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...");
 					if(!sptParser.parseSize)
 					{
+						
 						final SpotsSame importedSpots = new SpotsSame(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices );
 						bvb.addShape( importedSpots );
@@ -157,6 +160,7 @@ public class PanelAddShapes extends JPanel
 						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
 						bvb.addShape( importedSpots );						
 					}
+					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
 				}
 			}
 			);

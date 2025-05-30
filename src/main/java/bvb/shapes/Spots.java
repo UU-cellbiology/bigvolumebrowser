@@ -106,6 +106,7 @@ public class Spots extends AbstractBasicShape
 		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
 				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
 				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
+		
 		if(spotSizes == null)
 		{
 			for ( final RealPoint v : vertices )
@@ -145,10 +146,11 @@ public class Spots extends AbstractBasicShape
 					boundingBox[ 4 ] = y + pSize;
 				if ( z + pSize > boundingBox[ 5 ] )
 					boundingBox[ 5 ] = z + pSize;
+				
 			}
 			Arrays.sort( sortedSize );
-			//take 10% quantile
-			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
+			//take 99.0% quantile as max
+			int index = ( int ) Math.round( 0.01 * (sortedSize.length-1));
 			vertVis.setGaussSDNorm(sortedSize[index]);
 			
 		}
