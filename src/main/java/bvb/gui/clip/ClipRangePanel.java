@@ -114,7 +114,7 @@ public class ClipRangePanel extends JPanel
 	public void setBVVSourceListener()
 	{
 		//add source selection listener
-		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedObjects.Listener()
+		clipSetups.selectedObjects.addSourceSelectionListener(  new SelectedObjects.Listener()
 		{
 			
 			@Override
@@ -136,7 +136,7 @@ public class ClipRangePanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;	
 		
@@ -210,7 +210,7 @@ public class ClipRangePanel extends JPanel
 	
 	public void updateClipAxisRangeBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		//System.out.println(nAxis);
@@ -246,7 +246,7 @@ public class ClipRangePanel extends JPanel
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;

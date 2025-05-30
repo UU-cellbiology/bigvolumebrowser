@@ -6,9 +6,10 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec3 posW;
 in vec3 bary;
+uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
-uniform int clipactive;
+uniform mat4 cliptransform;
 uniform float silDecay;
 uniform int silType;
 uniform int gridType;
@@ -86,15 +87,15 @@ void main()
 		vec3 viewDir = normalize(-FragPos);
 		vec4 colorOut;
 		
-		//ROI clipping
+		//check if in the clipping area
 		if(clipactive>0)
-		{
-			vec3 s = step(clipmin, posW) - step(clipmax, posW);
+		{		
+			vec3 posclip = (cliptransform*posW).xyz;
+			vec3 s = step(clipmin, posclip) - step(clipmax, posclip);				
 			if(s.x * s.y * s.z == 0.0)
-			{
 				discard;
-			}
-		}							
+		}	
+							
 		gl_FragDepth = gl_FragCoord.z;
 		
 		//plain, shaded or shiny surface

@@ -84,7 +84,7 @@ public class ClipRotationPanel extends JPanel
 		clipRotationPanels[2].changeListeners().add( () -> updateClipAxisRotation(2));
 		
 		//add source selection listener
-		clipSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
+		clipSetups.selectedObjects.addSourceSelectionListener(()->updateGUI());
 		
 		//add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
@@ -104,7 +104,7 @@ public class ClipRotationPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -153,7 +153,7 @@ public class ClipRotationPanel extends JPanel
 	
 	synchronized void updateClipAxisRotation(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;

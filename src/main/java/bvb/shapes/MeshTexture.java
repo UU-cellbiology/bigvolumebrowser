@@ -28,54 +28,28 @@
  */
 package bvb.shapes;
 
-import com.jogamp.opengl.GL3;
-
 import java.awt.image.BufferedImage;
 
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 
-import org.joml.Matrix4fc;
-
 import bvb.scene.VisMeshTexture;
 
 
-public class MeshTexture extends AbstractBasicShape
+public class MeshTexture extends AbstractClipTransformShape
 {
-	
-	VisMeshTexture meshVis = null;
 	
 	String sName = "";
 	
 	RealInterval boundingBox = null;
-	
-//	public MeshTexture(String sFilename, BigVolumeBrowser bvb_)
-//	{
-//		bvb  = bvb_;
-//		//load mesh from file
-//		Mesh nmesh = loadMeshFromFile( sFilename );
-//		
-//		//Mesh nmesh = createMeshWithNoise(15);
-//		
-//		if(nmesh != null)
-//		{			
-//			meshVis = new VisMeshTexture( nmesh );
-//			boundingBox = Meshes.boundingBox( nmesh );
-//			setName(Misc.getSourceStyleName( sFilename ));
-//		}
-//		else
-//		{
-//			System.err.println("Sorry, cannot load mesh. Only STL and PLY formats are supported for now.");
-//		}
-//	}
 	
 	public MeshTexture(final Mesh nmesh, final BufferedImage imageTexture)
 	{
 	
 		if(nmesh != null)
 		{
-			meshVis = new VisMeshTexture( nmesh, imageTexture );
+			visRender = new VisMeshTexture( nmesh, imageTexture );
 			boundingBox = Meshes.boundingBox( nmesh );
 		}
 	}
@@ -86,20 +60,6 @@ public class MeshTexture extends AbstractBasicShape
 		return boundingBox;
 	}
 	
-	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
-	{
-		if(bVisible)
-		{
-			if(meshVis != null)
-			{
-				if(nTimePoint<0 || nTimePoint == nTimePoint_)
-				{
-					meshVis.draw( gl, pvm, vm, screen_size );
-				}
-			}
-		}
-	}
 	public void setName(String sName_)
 	{
 		sName = sName_;
@@ -113,13 +73,6 @@ public class MeshTexture extends AbstractBasicShape
 			return "mesh"+this.hashCode();
 		}
 		return sName;
-	}
-
-	@Override
-	public void reload()
-	{
-		meshVis.reload();
-		
 	}
 	
 

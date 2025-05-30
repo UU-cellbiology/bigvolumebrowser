@@ -28,8 +28,6 @@
  */
 package bvb.shapes;
 
-import com.jogamp.opengl.GL3;
-
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -42,15 +40,12 @@ import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
 
 import org.apache.commons.io.FilenameUtils;
-import org.joml.Matrix4fc;
 
 import bvb.scene.VisMeshColor;
 import bvb.utils.Misc;
 
-public class MeshColor extends AbstractBasicShape
+public class MeshColor extends AbstractClipTransformShape
 {
-		
-	VisMeshColor meshVis = null;
 	
 	String sName = "";
 	
@@ -65,7 +60,7 @@ public class MeshColor extends AbstractBasicShape
 		
 		if(nmesh != null)
 		{			
-			meshVis = new VisMeshColor( nmesh );
+			visRender = new VisMeshColor( nmesh );
 			boundingBox = Meshes.boundingBox( nmesh );
 			setName(Misc.getSourceStyleName( sFilename ));
 		}
@@ -80,7 +75,7 @@ public class MeshColor extends AbstractBasicShape
 		
 		if(nmesh != null)
 		{
-			meshVis = new VisMeshColor( nmesh );
+			visRender = new VisMeshColor( nmesh );
 			boundingBox = Meshes.boundingBox( nmesh );
 		}
 	}
@@ -93,44 +88,44 @@ public class MeshColor extends AbstractBasicShape
 	
 	public void setPointsRender(final float fPointsSize_)
 	{
-		if(meshVis != null )
+		if(visRender != null )
 		{
-			meshVis.setRenderType( VisMeshColor.POINTS );
-			meshVis.setPointsSize( fPointsSize_ );
+			((VisMeshColor)visRender).setRenderType( VisMeshColor.POINTS );
+			((VisMeshColor)visRender).setPointsSize( fPointsSize_ );
 		}
 	}
 	
 	
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{
-		if(meshVis != null )
+		if(visRender != null )
 		{
-			meshVis.setRenderType( VisMeshColor.MESH );
-			meshVis.setSurfaceRenderType( nSurfaceRenderType );
+			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
+			((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );
 		}
 	}
 	
 	public void setSurfaceGrid(final int nSurfaceGridType)
 	{
-		if(meshVis != null )
+		if(visRender != null )
 		{
-			meshVis.setRenderType( VisMeshColor.MESH );
-			meshVis.setSurfaceGridType( nSurfaceGridType );
+			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
+			((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
 		}
 	}
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
-		if(meshVis != null )
+		if(visRender != null )
 		{
-			meshVis.setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
+			((VisMeshColor)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
 		}
 	}
 	
 	public void setColor(final Color colorin)
 	{
-		if(meshVis != null )
+		if(visRender != null )
 		{
-			meshVis.setColor( colorin );
+			((VisMeshColor)visRender).setColor( colorin );
 		}
 	}
 	
@@ -171,20 +166,7 @@ public class MeshColor extends AbstractBasicShape
 		return nmesh;
 	}
 
-	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
-	{
-		if(bVisible)
-		{
-			if(meshVis != null)
-			{
-				if(nTimePoint<0 || nTimePoint == nTimePoint_)
-				{
-					meshVis.draw( gl, pvm, vm, screen_size );
-				}
-			}
-		}
-	}
+
 	public void setName(String sName_)
 	{
 		sName = sName_;
@@ -204,36 +186,5 @@ public class MeshColor extends AbstractBasicShape
 		return sName;
 	}
 
-	@Override
-	public void reload()
-	{
-		meshVis.reload();
-		
-	}
 	
-//	private static Mesh createMeshWithNoise(final double dScale)
-//	{
-//		final RealPoint p1 = new RealPoint( 0., 0., 0. );
-//
-//		final RealPoint p2 = new RealPoint( dScale, 0., 0. );
-//
-//		final RealPoint p3 = new RealPoint( dScale, dScale, 0.0 );
-//
-//	    final RealPoint p4 = new RealPoint( dScale, dScale, dScale );
-//		
-//	    final Mesh mesh = new NaiveDoubleMesh();
-//
-//		// Make mesh with two triangles sharing two points with each other.
-//		// The points are a bit off in the third decimal digit.
-//		mesh.vertices().add( p1.getDoublePosition( 0 ) + 0.001, p1.getDoublePosition( 1 ) - 0.001, p1.getDoublePosition( 2 ) - 0.004 );
-//		mesh.vertices().add( p2.getDoublePosition( 0 ) + 0.004, p2.getDoublePosition( 1 ) - 0.000, p2.getDoublePosition( 2 ) + 0.002 );
-//		mesh.vertices().add( p3.getDoublePosition( 0 ) - 0.002, p3.getDoublePosition( 1 ) + 0.003, p3.getDoublePosition( 2 ) + 0.001 );
-//		mesh.triangles().add( 0, 1, 2 );
-//		mesh.vertices().add( p2.getDoublePosition( 0 ) + dScale, p2.getDoublePosition( 1 ) + dScale, p2.getDoublePosition( 2 ) + dScale);
-//		mesh.vertices().add( p4.getDoublePosition( 0 ) + 0.004, p4.getDoublePosition( 1 ) - 0.000, p4.getDoublePosition( 2 ) + 0.002 );
-//		mesh.vertices().add( p3.getDoublePosition( 0 ) + dScale, p3.getDoublePosition( 1 ) + dScale, p3.getDoublePosition( 2 )+ dScale );
-//		mesh.triangles().add( 3, 4, 5 );
-//		//mesh.triangles().add( 0, 4, 5 );
-//		return mesh;
-//	}
 }

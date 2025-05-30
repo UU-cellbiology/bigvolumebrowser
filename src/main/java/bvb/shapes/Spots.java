@@ -28,8 +28,6 @@
  */
 package bvb.shapes;
 
-import com.jogamp.opengl.GL3;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,15 +37,12 @@ import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.util.Intervals;
 
-import org.joml.Matrix4fc;
-
 import bvb.scene.VisSpots;
 
 /** Spots of arbitrary color and size **/
 
-public class Spots extends AbstractBasicShape
+public class Spots extends AbstractClipTransformShape
 {
-	public VisSpots vertVis = null;
 	
 	float pointSize;
 	Color pointColor;
@@ -64,20 +59,6 @@ public class Spots extends AbstractBasicShape
 		pointShape = nShape_;
 	}
 	
-	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
-	{
-		if(bVisible)
-		{
-			if(vertVis != null)
-			{
-				if(nTimePoint<0 || nTimePoint == nTimePoint_)
-				{
-					vertVis.draw( gl, pvm, screen_size);
-				}
-			}
-		}
-	}
 	
 	public void setPoints(final ArrayList<RealPoint> vertices)
 	{
@@ -86,17 +67,17 @@ public class Spots extends AbstractBasicShape
 
 	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{
-		if(vertVis == null)
+		if(visRender == null)
 		{
-			vertVis = new VisSpots(pointSize, pointColor, pointShape, renderType);
+			visRender = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		}
 		if(spotSizes==null || spotSizes.length != vertices.size())
 		{	
-			vertVis.setVertices(vertices);	
+			((VisSpots)visRender).setVertices(vertices);	
 		}
 		else
 		{
-			vertVis.setVertices(vertices, spotSizes);				
+			((VisSpots)visRender).setVertices(vertices, spotSizes);				
 		}
 		setBoundingBox(vertices, spotSizes);
 	}
@@ -151,7 +132,7 @@ public class Spots extends AbstractBasicShape
 			Arrays.sort( sortedSize );
 			//take 99.0% quantile as max
 			int index = ( int ) Math.round( 0.01 * (sortedSize.length-1));
-			vertVis.setGaussSDNorm(sortedSize[index]);
+			((VisSpots)visRender).setGaussSDNorm(sortedSize[index]);
 			
 		}
 		
@@ -170,16 +151,16 @@ public class Spots extends AbstractBasicShape
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		
-		if(vertVis != null)
+		if(visRender != null)
 		{
-			vertVis.setColor(pointColor);			
+			((VisSpots)visRender).setColor(pointColor);			
 		}
 	}
 	
 	public void setRenderType(int nRenderType)
 	{
 		pointShape = nRenderType;
-		vertVis.setShape( pointShape );
+		((VisSpots)visRender).setShape( pointShape );
 		
 		return;
 	}	
@@ -187,7 +168,7 @@ public class Spots extends AbstractBasicShape
 	public void setPointShape(int nShape)
 	{
 		renderType = nShape;
-		vertVis.setRenderType(renderType);
+		((VisSpots)visRender).setRenderType(renderType);
 		
 		return;
 	}	
@@ -199,12 +180,5 @@ public class Spots extends AbstractBasicShape
 
 	}
 
-	@Override
-	public void reload()
-	{
-		if(vertVis != null)
-			vertVis.reload();
-		
-	}
 
 }

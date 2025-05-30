@@ -48,12 +48,12 @@ public class ClipSetups
 	
 	public ConverterSetups converterSetups;
 	
-	public SelectedObjects selectedSources;
+	public SelectedObjects selectedObjects;
 	
 	public ClipSetups (final BigVolumeBrowser bvb)
 	{
 		converterSetups = bvb.bvvViewer.getConverterSetups();
-		selectedSources = bvb.selectedObjects;
+		selectedObjects = bvb.selectedObjects;
 		clipAxesBounds = new ClipAxesBounds(converterSetups);
 		clipCenters = new ClipCenters(converterSetups);
 		clipCenterBounds = new ClipCenterBounds(converterSetups);

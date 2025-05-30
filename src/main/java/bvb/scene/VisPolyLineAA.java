@@ -111,7 +111,6 @@ public class VisPolyLineAA
 		bDotted = bDotted_;
 		
 	}
-
 	
 	public void setThickness(final float fLineThickness_)
 	{

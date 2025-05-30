@@ -191,7 +191,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	{
 		updateColors();
 
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		
 		if(csList == null || csList.isEmpty())
 		{
@@ -251,7 +251,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	{
 		boolean bEnabled = cbClipEnabled.isSelected();
 		
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if(csList== null || csList.isEmpty())
 		{
 			cbClipEnabled.setSelected( false );
@@ -293,7 +293,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	void resetClip()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if(csList == null || csList.isEmpty())
 		{
 			return;
@@ -319,7 +319,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public void setSourceListeners()
 	{
 		
-		clipSetups.selectedSources.addSourceSelectionListener(  new SelectedObjects.Listener()
+		clipSetups.selectedObjects.addSourceSelectionListener(  new SelectedObjects.Listener()
 		{			
 			@Override
 			public void selectedObjectsChanged( )

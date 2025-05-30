@@ -334,4 +334,46 @@ public class VolumeBox extends AbstractBasicShape
 	{
 		return interval;
 	}
+
+	@Override
+	public boolean clipActive()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setClipInterval( RealInterval clipInt )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setClipActive( boolean bEnabled )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public FinalRealInterval getClipInterval()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void getClipTransform( AffineTransform3D t )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setClipTransform( AffineTransform3D t )
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }

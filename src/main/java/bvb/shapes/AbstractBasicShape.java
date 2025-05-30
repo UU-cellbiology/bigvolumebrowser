@@ -1,10 +1,12 @@
 package bvb.shapes;
 
+
 public abstract class AbstractBasicShape implements BasicShape
 {
 	boolean bVisible = true;
 	
 	int nTimePoint = -1; 
+
 	
 	@Override
 	public boolean isVisible()
@@ -29,4 +31,6 @@ public abstract class AbstractBasicShape implements BasicShape
 	{
 		return nTimePoint;
 	}
+	
+
 }

@@ -63,7 +63,7 @@ import net.imglib2.util.LinAlgHelpers;
 
 /** example class showing different ways to render a mesh**/
 
-public class VisMeshColor 
+public class VisMeshColor extends AbstractClipTransformVis
 {	
 	private Shader progPoints;
 	
@@ -187,6 +187,7 @@ public class VisMeshColor
 		return initGPUBufferMesh(gl);	
 	}
 	
+	@Override
 	public void reload()
 	{
 		initShader();
@@ -280,7 +281,8 @@ public class VisMeshColor
 		return true; 
 	}
 
-	public void draw( final GL3 gl, final Matrix4fc pvm, Matrix4fc vm,  final int [] screen_size)
+	@Override
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size)
 	{
 		
 		while (bLocked)

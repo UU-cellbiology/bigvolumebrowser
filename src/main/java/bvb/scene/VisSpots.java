@@ -54,7 +54,7 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 /** example class that draws point of specific shape and filling type **/
 
-public class VisSpots
+public class VisSpots extends AbstractClipTransformVis
 {
 	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS_UNIFORM = 2, RENDER_GAUSS_NORMALIZED  = 3; 
 
@@ -242,13 +242,15 @@ public class VisSpots
 
 	}
 	
+	@Override
 	public void reload()
 	{
 		initShader();
 		initialized = false;
 	}
 
-	public void draw(final GL3 gl, final Matrix4fc pvm, final int [] screen_size )
+	@Override
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size )
 	{
 		
 		//if (fSpotSize < 0.0001)

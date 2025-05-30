@@ -28,8 +28,6 @@
  */
 package bvb.shapes;
 
-import com.jogamp.opengl.GL3;
-
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -38,16 +36,12 @@ import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.util.Intervals;
 
-import org.joml.Matrix4fc;
-
 import bvb.scene.VisSpotsSame;
 
 /** Example class that uses points shader **/
 
-public class SpotsSame extends AbstractBasicShape
-{
-	public VisSpotsSame vertVis = null;
-	
+public class SpotsSame extends AbstractClipTransformShape
+{	
 	float pointSize;
 	Color pointColor;
 	int renderType;
@@ -62,30 +56,16 @@ public class SpotsSame extends AbstractBasicShape
 		pointShape = nShape_;
 	}
 	
-	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_)
-	{
-		if(bVisible)
-		{
-			if(vertVis != null)
-			{
-				if(nTimePoint<0 || nTimePoint == nTimePoint_)
-				{
-					vertVis.draw( gl, pvm, screen_size);
-				}
-			}
-		}
-	}
 	
 	public void setPoints(final ArrayList<RealPoint> vertices)
 	{
-		if(vertVis == null)
+		if(visRender == null)
 		{
-			vertVis = new VisSpotsSame(vertices, pointSize, pointColor, pointShape, renderType);
+			visRender = new VisSpotsSame(vertices, pointSize, pointColor, pointShape, renderType);
 		}
 		else
 		{
-			vertVis.setVertices(vertices);
+			((VisSpotsSame)visRender).setVertices(vertices);
 		}
 		setBoundingBox(vertices);
 
@@ -128,23 +108,23 @@ public class SpotsSame extends AbstractBasicShape
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		
-		if(vertVis != null)
+		if(visRender != null)
 		{
-			vertVis.setColor(pointColor);			
+			((VisSpotsSame)visRender).setColor(pointColor);			
 		}
 	}
 	
 	public void setRenderType(int nRenderType)
 	{
 		pointShape = nRenderType;
-		vertVis.setShape( pointShape );		
+		((VisSpotsSame)visRender).setShape( pointShape );		
 		return;
 	}	
 	
 	public void setPointShape(int nShape)
 	{
 		renderType = nShape;
-		vertVis.setRenderType(renderType);
+		((VisSpotsSame)visRender).setRenderType(renderType);
 		
 		return;
 	}	
@@ -154,14 +134,6 @@ public class SpotsSame extends AbstractBasicShape
 	{
 		return "spots"+Integer.toString(this.hashCode());
 
-	}
-
-	@Override
-	public void reload()
-	{
-		if(vertVis != null)
-			vertVis.reload();
-		
 	}
 
 	@Override

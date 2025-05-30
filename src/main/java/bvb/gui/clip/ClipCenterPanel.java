@@ -97,7 +97,7 @@ public class ClipCenterPanel extends JPanel
 		clipCenterPanels[2].changeListeners().add( () -> updateClipCenter(2));
 		
 		//add source selection listener
-		clipSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
+		clipSetups.selectedObjects.addSourceSelectionListener(()->updateGUI());
 		
 		//add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
@@ -116,7 +116,7 @@ public class ClipCenterPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -176,7 +176,7 @@ public class ClipCenterPanel extends JPanel
 	
 	synchronized void updateClipCenter(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
@@ -211,7 +211,7 @@ public class ClipCenterPanel extends JPanel
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;

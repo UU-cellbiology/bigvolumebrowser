@@ -30,7 +30,9 @@ package bvb.shapes;
 
 import com.jogamp.opengl.GL3;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import org.joml.Matrix4fc;
 
@@ -54,4 +56,18 @@ public interface BasicShape
 	public void setTimePoint(final int nTP);
 	
 	public int getTimePoint();
+	
+	/** whether the source's clipping is active **/
+	public boolean clipActive();
+	
+	public void setClipInterval(final RealInterval clipInt);
+	
+	public void setClipActive(boolean bEnabled);
+	
+	public FinalRealInterval getClipInterval();
+	
+	public void getClipTransform(final AffineTransform3D t);
+	
+	public void setClipTransform(final AffineTransform3D t);	
+	
 }
