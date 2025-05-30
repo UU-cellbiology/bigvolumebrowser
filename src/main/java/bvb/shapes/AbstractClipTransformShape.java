@@ -57,6 +57,18 @@ public abstract class AbstractClipTransformShape extends AbstractBasicShape
 	}	
 	
 	@Override
+	public void getTransform(final AffineTransform3D t)
+	{
+		visRender.getTransform( t );
+	}
+	
+	@Override
+	public void setTransform(final AffineTransform3D t)
+	{
+		visRender.setTransform( t );
+	}
+	
+	@Override
 	public void reload()
 	{
 		if(visRender != null)
@@ -65,7 +77,7 @@ public abstract class AbstractClipTransformShape extends AbstractBasicShape
 	}
 	
 	@Override
-	public void draw( GL3 gl, Matrix4fc pvm, Matrix4fc vm, int[] screen_size , int nTimePoint_)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_)
 	{
 		if(bVisible)
 		{
@@ -78,4 +90,5 @@ public abstract class AbstractClipTransformShape extends AbstractBasicShape
 			}
 		}
 	}
+	
 }

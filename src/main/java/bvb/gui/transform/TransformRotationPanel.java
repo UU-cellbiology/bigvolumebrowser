@@ -61,7 +61,7 @@ public class TransformRotationPanel extends JPanel
 		trRotationPanels[2].changeListeners().add( () -> updateAxisRotation(2));
 		
 		//add source selection listener
-		transformSetups.selectedSources.addSourceSelectionListener(()-> updateGUI());
+		transformSetups.selectedObjects.addObjectSelectionListener(()-> updateGUI());
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
@@ -74,7 +74,7 @@ public class TransformRotationPanel extends JPanel
 	
 	void updateGUI()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -124,7 +124,7 @@ public class TransformRotationPanel extends JPanel
 	
 	void updateAxisRotation(int nAxis)
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
@@ -143,7 +143,7 @@ public class TransformRotationPanel extends JPanel
 	
 	void resetRotation()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if(csList == null || csList.isEmpty())
 		{
 			return;

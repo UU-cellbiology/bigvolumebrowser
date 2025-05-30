@@ -29,6 +29,7 @@
 package bvb.utils;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 
 public class Bounds3D
 {
@@ -47,12 +48,13 @@ public class Bounds3D
 		this.minBound = minBound;
 		this.maxBound = maxBound;
 	}
-	public Bounds3D( FinalRealInterval bounds3D)
+	
+	public Bounds3D( RealInterval realInterval)
 	{
-		if(bounds3D.numDimensions() != 3)
+		if(realInterval.numDimensions() != 3)
 			throw new IllegalArgumentException();
-		this.minBound = bounds3D.minAsDoubleArray();
-		this.maxBound = bounds3D.maxAsDoubleArray();
+		this.minBound = realInterval.minAsDoubleArray();
+		this.maxBound = realInterval.maxAsDoubleArray();
 
 	}
 	public double [] getMinBound()

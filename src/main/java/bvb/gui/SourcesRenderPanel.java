@@ -176,7 +176,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 //		gbc.gridx += 2;
 //		this.add( panInterpolation, gbc );
 		
-	    selectedSources.addSourceSelectionListener(()->	updateGUI());
+	    selectedSources.addObjectSelectionListener(()->	updateGUI());
 	    
 	    //add listener in case number of sources, etc change
 	    convSetups.listeners().add( s -> updateGUI() );

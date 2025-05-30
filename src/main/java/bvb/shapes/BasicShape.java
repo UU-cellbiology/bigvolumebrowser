@@ -69,5 +69,9 @@ public interface BasicShape
 	public void getClipTransform(final AffineTransform3D t);
 	
 	public void setClipTransform(final AffineTransform3D t);	
+
+	public void getTransform(final AffineTransform3D t);
 	
+	public void setTransform(final AffineTransform3D t);	
+
 }

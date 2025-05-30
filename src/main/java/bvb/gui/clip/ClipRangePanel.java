@@ -114,7 +114,7 @@ public class ClipRangePanel extends JPanel
 	public void setBVVSourceListener()
 	{
 		//add source selection listener
-		clipSetups.selectedObjects.addSourceSelectionListener(  new SelectedObjects.Listener()
+		clipSetups.selectedObjects.addObjectSelectionListener(  new SelectedObjects.Listener()
 		{
 			
 			@Override

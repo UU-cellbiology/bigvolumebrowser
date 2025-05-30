@@ -376,4 +376,18 @@ public class VolumeBox extends AbstractBasicShape
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void getTransform( AffineTransform3D t )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setTransform( AffineTransform3D t )
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }

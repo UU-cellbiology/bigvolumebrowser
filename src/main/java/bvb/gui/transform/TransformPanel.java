@@ -3,13 +3,11 @@ package bvb.gui.transform;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-import bdv.tools.brightness.ConverterSetup;
 import bvb.core.BigVolumeBrowser;
 import bvb.utils.transform.TransformSetups;
 
@@ -76,12 +74,14 @@ public class TransformPanel extends JPanel
 	}
 	public synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
-		if(csList== null || csList.isEmpty())
+//		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+//		if(csList== null || csList.isEmpty())
+		if(!transformSetups.selectedObjects.isAnythingSelected())
 		{
 			setPanelsEnabled(false);
 			return;
 		}
+		
 		setPanelsEnabled(true);
 		transformScalePanel.updateGUI();
 		transformCentersPanel.updateGUI();
@@ -97,7 +97,7 @@ public class TransformPanel extends JPanel
 	public void setSourceListeners()
 	{
 		
-		transformSetups.selectedSources.addSourceSelectionListener( () -> updateGUI());		
+		transformSetups.selectedObjects.addObjectSelectionListener( () -> updateGUI());		
 	    //add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
 

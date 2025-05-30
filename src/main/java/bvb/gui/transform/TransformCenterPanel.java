@@ -18,6 +18,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.Source;
+import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
@@ -80,7 +81,7 @@ public class TransformCenterPanel extends JPanel
 		translationPanels[2].changeListeners().add( () -> updateTransformAxis(2));
 		
 		//add source selection listener
-		transformSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
+		transformSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
@@ -94,39 +95,68 @@ public class TransformCenterPanel extends JPanel
 	
 	synchronized void updateTransformAxis(int nAxis)
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+		
 		blockUpdates = true;
+		
 		double currVal = translationPanels[nAxis].getValue().getCurrentValue();
 		double minBound = translationPanels[nAxis].getValue().getRangeMin();
 		double maxBound = translationPanels[nAxis].getValue().getRangeMax();
+		
 		minBound = Math.min( currVal, minBound );
 		maxBound = Math.max( currVal, maxBound );
-		for ( final ConverterSetup cs : csList )
-		{
-			final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( cs );
-			
-			if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
-			{
-				bounds.getMinBound()[nAxis] = minBound;
-				bounds.getMaxBound()[nAxis] = maxBound;
-				transformSetups.transformTranslationBounds.setBounds( cs, bounds );
-			}
-			final double [] oldCenters = transformSetups.transformCenters.getCenters( cs );
-			final double [] newCenters = new double [3];
-			for(int d=0; d<3; d++)
-			{
-				newCenters[d] = oldCenters[d];
-			}
-			newCenters[nAxis] = currVal;
-			
-			transformSetups.transformCenters.setCenters( cs, newCenters );
-			//transformSetups.updateCenters(cs);
-			transformSetups.updateTransform( cs );
-		//	clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
-			//update bounds
 		
+		if(transformSetups.selectedObjects.areSourcesSelected())
+		{
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{
+				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( cs );
+				
+				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = minBound;
+					bounds.getMaxBound()[nAxis] = maxBound;
+					transformSetups.transformTranslationBounds.setBounds( cs, bounds );
+				}
+				final double [] oldCenters = transformSetups.transformCenters.getCenters( cs );
+				final double [] newCenters = new double [3];
+				for(int d=0; d<3; d++)
+				{
+					newCenters[d] = oldCenters[d];
+				}
+				newCenters[nAxis] = currVal;
+				
+				transformSetups.transformCenters.setCenters( cs, newCenters );
+				transformSetups.updateTransform( cs );			
+			}
+		}
+		
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( sh );
+				
+				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = minBound;
+					bounds.getMaxBound()[nAxis] = maxBound;
+					transformSetups.transformTranslationBounds.setBounds( sh, bounds );
+				}
+				final double [] oldCenters = transformSetups.transformCenters.getCenters( sh );
+				final double [] newCenters = new double [3];
+				for(int d=0; d<3; d++)
+				{
+					newCenters[d] = oldCenters[d];
+				}
+				newCenters[nAxis] = currVal;
+				
+				transformSetups.transformCenters.setCenters( sh, newCenters );
+				transformSetups.updateTransform( sh );			
+			}
 		}
 		blockUpdates = false;
 		updateGUI();
@@ -134,9 +164,8 @@ public class TransformCenterPanel extends JPanel
 	
 	void updateGUI()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
-			return;	
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;
 		
 		
 		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
@@ -146,35 +175,70 @@ public class TransformCenterPanel extends JPanel
 		{
 			allTrEqual[d] = true;
 		}
-
-		for ( final ConverterSetup cs: csList)
+		
+		if(transformSetups.selectedObjects.areSourcesSelected())
 		{
-			final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( cs );
-			final double [] minBound = bounds.getMinBound();
-			final double [] maxBound = bounds.getMaxBound();
-			
-			double [] center = new double [3];
-			center = transformSetups.transformCenters.getCenters( cs );
-			
-			if(bFirstCS)
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs: csList)
 			{
-				for (int d=0; d<3; d++)
+				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( cs );
+				final double [] minBound = bounds.getMinBound();
+				final double [] maxBound = bounds.getMaxBound();
+				
+				double [] center = new double [3];
+				center = transformSetups.transformCenters.getCenters( cs );
+				
+				if(bFirstCS)
 				{
-					boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					for (int d=0; d<3; d++)
+					{
+						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					}
+					bFirstCS = false;
 				}
-				bFirstCS = false;
-			}
-			else
-			{
-				for (int d=0; d<3; d++)
+				else
 				{
-					final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-					allTrEqual[d] &= boundValue[d].equals( translationRange );
-					boundValue[d] = boundValue[d].join( translationRange );
+					for (int d=0; d<3; d++)
+					{
+						final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						allTrEqual[d] &= boundValue[d].equals( translationRange );
+						boundValue[d] = boundValue[d].join( translationRange );
+					}
 				}
 			}
 		}
 		
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shList)
+			{
+				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( sh );
+				final double [] minBound = bounds.getMinBound();
+				final double [] maxBound = bounds.getMaxBound();
+				
+				double [] center = new double [3];
+				center = transformSetups.transformCenters.getCenters( sh );
+				
+				if(bFirstCS)
+				{
+					for (int d=0; d<3; d++)
+					{
+						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					}
+					bFirstCS = false;
+				}
+				else
+				{
+					for (int d=0; d<3; d++)
+					{
+						final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						allTrEqual[d] &= boundValue[d].equals( translationRange );
+						boundValue[d] = boundValue[d].join( translationRange );
+					}
+				}
+			}
+		}
 		
 		final BoundedValueDoubleBVB [] finalTranslation = boundValue;
 		final boolean [] isConsistent = allTrEqual;
@@ -195,7 +259,7 @@ public class TransformCenterPanel extends JPanel
 	
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
 		Bounds3D range3D = null;
@@ -220,7 +284,7 @@ public class TransformCenterPanel extends JPanel
 	
 	void resetTranslation()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if(csList == null || csList.isEmpty())
 		{
 			return;

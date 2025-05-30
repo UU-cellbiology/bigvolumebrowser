@@ -319,7 +319,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public void setSourceListeners()
 	{
 		
-		clipSetups.selectedObjects.addSourceSelectionListener(  new SelectedObjects.Listener()
+		clipSetups.selectedObjects.addObjectSelectionListener(  new SelectedObjects.Listener()
 		{			
 			@Override
 			public void selectedObjectsChanged( )

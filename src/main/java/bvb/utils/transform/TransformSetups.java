@@ -9,6 +9,7 @@ import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
+import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 
 public class TransformSetups
@@ -17,7 +18,7 @@ public class TransformSetups
 	
 	public ConverterSetups converterSetups;
 	
-	public SelectedObjects selectedSources;
+	public SelectedObjects selectedObjects;
 	
 	final public TransformScale transformScale;
 	
@@ -33,13 +34,51 @@ public class TransformSetups
 		
 		converterSetups = bvb.bvvViewer.getConverterSetups();
 		
-		selectedSources = bvb.selectedObjects;
+		selectedObjects = bvb.selectedObjects;
 		
 		transformScale = new TransformScale(converterSetups);
 		transformCenters = new TransformCenter(converterSetups);
 		transformTranslationBounds = new TransformCenterBounds(converterSetups);
 		transformRotation = new TransformRotation(converterSetups);
 		
+	}
+
+	public void updateTransform(final BasicShape sh)
+	{
+
+		
+		AffineTransform3D srcTrFixed = new AffineTransform3D();
+		
+		//reset both transforms just in case
+		sh.setTransform( srcTrFixed );
+	//	(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
+	//	(( TransformedSource< ? > )src).setIncrementalTransform( srcTrFixed );
+		
+		//FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+		final double [] center =  Misc.getIntervalCenterNegative( sh.boundingBox() );
+		//final double [] dCurrScale = transformScale.getScale( cs );		
+
+		//move to the origin
+		srcTrFixed.translate( center );
+
+		//scale
+		//final AffineTransform3D scaleTr = new AffineTransform3D();
+		//scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
+		//srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
+		//rotate
+		//srcTrFixed = srcTrFixed.preConcatenate( trRot );
+		
+		
+		//move things to the current volume's center
+		final double [] tr = transformCenters.getCenters( sh );		
+		final AffineTransform3D translTr = new AffineTransform3D();
+		translTr.translate( tr );
+		srcTrFixed = srcTrFixed.preConcatenate( translTr );
+		
+		
+		sh.setTransform( srcTrFixed );
+		//(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
+		bvb.updateSceneRender();	
 	}
 	
 	public void updateTransform(final ConverterSetup cs)

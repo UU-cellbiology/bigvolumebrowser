@@ -38,6 +38,7 @@ import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -83,7 +84,10 @@ public class MeshColor extends AbstractClipTransformShape
 	@Override
 	public RealInterval boundingBox()
 	{
-		return boundingBox;
+		final AffineTransform3D t = new AffineTransform3D();
+		visRender.getTransform( t );
+		
+		return t.estimateBounds( boundingBox );
 	}
 	
 	public void setPointsRender(final float fPointsSize_)

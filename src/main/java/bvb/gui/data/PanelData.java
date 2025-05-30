@@ -143,7 +143,7 @@ public class PanelData extends JPanel
 	/** called by parent **/
 	public void addSourceStateListener()
 	{
-    	bvb.selectedObjects.addSourceSelectionListener(  new SelectedObjects.Listener()
+    	bvb.selectedObjects.addObjectSelectionListener(  new SelectedObjects.Listener()
 		{
 			
 			@Override

@@ -6,11 +6,13 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 public abstract class AbstractClipTransformVis implements BasicVis
 {
-	private boolean clipActive = false;
+	boolean clipActive = false;
 	
-	private FinalRealInterval clipInt = null;
+	FinalRealInterval clipInt = null;
 	
-	private AffineTransform3D clipTransform = new AffineTransform3D();
+	AffineTransform3D clipTransform = new AffineTransform3D();
+	
+	AffineTransform3D transform = new AffineTransform3D();
 	
 	public boolean clipActive() 
 	{		
@@ -47,5 +49,15 @@ public abstract class AbstractClipTransformVis implements BasicVis
 		clipTransform.set( t );
 	}	
 	
+	public void getTransform(final AffineTransform3D t) 
+	{	
+		t.set( transform );			
+		return;
+	}
+	
+	public void setTransform(final AffineTransform3D t) 
+	{
+		transform.set( t );
+	}
 
 }

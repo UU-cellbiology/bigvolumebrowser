@@ -119,7 +119,7 @@ public class TransformScalePanel extends JPanel
 		gbc.fill = GridBagConstraints.NONE;
 		this.add( butResetScale, gbc );
 		
-		transformSetups.selectedSources.addSourceSelectionListener(()->updateGUI());
+		transformSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
 		
 		updateColors();
 		
@@ -132,7 +132,7 @@ public class TransformScalePanel extends JPanel
 	void updateGUI()
 	{
 		
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;	
 		
@@ -221,7 +221,7 @@ public class TransformScalePanel extends JPanel
 
 	void updateScaleAxis(int nAxis)
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList == null || csList.isEmpty() )
 			return;
 		blockUpdates = true;
@@ -244,7 +244,7 @@ public class TransformScalePanel extends JPanel
 	
 	void resetScale()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 		if(csList == null || csList.isEmpty())
 		{
 			return;

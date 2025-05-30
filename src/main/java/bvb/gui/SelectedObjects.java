@@ -88,7 +88,7 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 				l.selectedObjectsChanged();				
 	}
 	
-	public void addSourceSelectionListener(Listener l) 
+	public void addObjectSelectionListener(Listener l) 
 	{
         listeners.add(l);
     }

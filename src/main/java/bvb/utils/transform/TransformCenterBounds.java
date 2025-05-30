@@ -6,6 +6,7 @@ import java.util.Map;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
+import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
 
@@ -14,6 +15,7 @@ public class TransformCenterBounds
 	private final SourceToConverterSetupBimap bimap;
 
 	private final Map< ConverterSetup, Bounds3D > setupToBounds = new HashMap<>();
+	private final Map< BasicShape, Bounds3D > shapeToBounds = new HashMap<>();
 	
 	public TransformCenterBounds( final SourceToConverterSetupBimap bimap )
 	{
@@ -25,12 +27,21 @@ public class TransformCenterBounds
 		return setupToBounds.compute( setup, this::getExtendedBounds );
 	}
 	
+	public Bounds3D getBounds( final BasicShape shape )
+	{
+		return shapeToBounds.compute( shape, this::getExtendedBoundsShape );
+	}
+	
 	public void setBounds( final ConverterSetup setup, final Bounds3D bounds )
 	{
 		setupToBounds.put( setup, bounds );
-
 	}
-	
+
+	public void setBounds( final BasicShape shape, final Bounds3D bounds )
+	{
+		shapeToBounds.put( shape, bounds );
+	}
+
 	public Bounds3D getDefaultBounds( final ConverterSetup setup )
 	{
 		Bounds3D bounds = null;
@@ -47,6 +58,11 @@ public class TransformCenterBounds
 		}
 		return bounds;
 	}
+	
+	public Bounds3D getDefaultBounds( final BasicShape shape)
+	{		
+		return new Bounds3D(shape.boundingBox());
+	}
 
 	private Bounds3D getExtendedBounds( final ConverterSetup setup, Bounds3D bounds )
 	{
@@ -56,15 +72,18 @@ public class TransformCenterBounds
 		{
 			 bounds.join( getDefaultBounds( setup ) );
 		}
-//		if(setup instanceof GammaConverterSetup)
-//		{
-//			GammaConverterSetup gsetup = (GammaConverterSetup)setup;
-//			final FinalRealInterval clipInterval = gsetup.getClipInterval();
-//			if(clipInterval == null)
-//				return bounds;
-//			
-//			return bounds.join( new Bounds3D( clipInterval) );
-//		}
 		return bounds;
 	}
+	
+	private Bounds3D getExtendedBoundsShape( final BasicShape shape, Bounds3D bounds )
+	{
+		if ( bounds == null )
+			bounds = getDefaultBounds( shape );
+		else
+		{
+			 bounds.join( getDefaultBounds( shape ) );
+		}
+		return bounds;
+	}
+
 }
