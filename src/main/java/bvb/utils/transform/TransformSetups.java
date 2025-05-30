@@ -45,7 +45,9 @@ public class TransformSetups
 
 	public void updateTransform(final BasicShape sh)
 	{
-
+		final double [] eAngles = transformRotation.getAngles( sh );
+		
+		final AffineTransform3D trRot = Misc.getRotationTransform( eAngles );
 		
 		AffineTransform3D srcTrFixed = new AffineTransform3D();
 		
@@ -65,8 +67,9 @@ public class TransformSetups
 		//final AffineTransform3D scaleTr = new AffineTransform3D();
 		//scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
 		//srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
+		
 		//rotate
-		//srcTrFixed = srcTrFixed.preConcatenate( trRot );
+		srcTrFixed = srcTrFixed.preConcatenate( trRot );
 		
 		
 		//move things to the current volume's center

@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
+import bvb.shapes.BasicShape;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -74,10 +75,9 @@ public class TransformRotationPanel extends JPanel
 	
 	void updateGUI()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
-			return;	
 		
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;
 		
 		double [] angles = new double[3];
 		boolean bFirstCS = true;
@@ -87,22 +87,48 @@ public class TransformRotationPanel extends JPanel
 			allAnglesEqual[d] = true;
 		}
 		
-		for ( final ConverterSetup cs: csList)
+		if(transformSetups.selectedObjects.areSourcesSelected())
 		{
-			if(bFirstCS)
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs: csList)
 			{
-				angles = transformSetups.transformRotation.getAngles( cs );
-				bFirstCS = false;
-			}
-			else
-			{
-				final double[] currAngles = transformSetups.transformRotation.getAngles( cs );
-
-				for (int d=0; d<3; d++)
+				if(bFirstCS)
 				{
-					allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+					angles = transformSetups.transformRotation.getAngles( cs );
+					bFirstCS = false;
+				}
+				else
+				{
+					final double[] currAngles = transformSetups.transformRotation.getAngles( cs );
+	
+					for (int d=0; d<3; d++)
+					{
+						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+					}
 				}
 			}
+		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shList)
+			{
+				if(bFirstCS)
+				{
+					angles = transformSetups.transformRotation.getAngles( sh );
+					bFirstCS = false;
+				}
+				else
+				{
+					final double[] currAngles = transformSetups.transformRotation.getAngles( sh );
+	
+					for (int d=0; d<3; d++)
+					{
+						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+					}
+				}
+			}
+			
 		}
 		
 		final double [] finalAngles = angles;
@@ -124,19 +150,36 @@ public class TransformRotationPanel extends JPanel
 	
 	void updateAxisRotation(int nAxis)
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+		
 		blockUpdates = true;
-		for ( final ConverterSetup cs : csList )
-		{			
-			final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
-			eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-			
-			transformSetups.transformRotation.setAngles( cs, eAngles );
-			transformSetups.updateTransform( cs );
-
+		if(transformSetups.selectedObjects.areSourcesSelected())
+		{
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{			
+				final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
+				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+				
+				transformSetups.transformRotation.setAngles( cs, eAngles );
+				transformSetups.updateTransform( cs );
+	
+			}
 		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				final double [] eAngles = transformSetups.transformRotation.getAngles( sh );
+				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+				
+				transformSetups.transformRotation.setAngles( sh, eAngles );
+				transformSetups.updateTransform( sh );
+			}
+		}
+		
 		blockUpdates = false;
 		updateGUI();
 	}
