@@ -58,15 +58,15 @@ public class TransformSetups
 		
 		//FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
 		final double [] center =  Misc.getIntervalCenterNegative( sh.boundingBox() );
-		//final double [] dCurrScale = transformScale.getScale( cs );		
+		final double [] dCurrScale = transformScale.getScale( sh );		
 
 		//move to the origin
 		srcTrFixed.translate( center );
 
 		//scale
-		//final AffineTransform3D scaleTr = new AffineTransform3D();
-		//scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
-		//srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
+		final AffineTransform3D scaleTr = new AffineTransform3D();
+		scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
+		srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
 		
 		//rotate
 		srcTrFixed = srcTrFixed.preConcatenate( trRot );

@@ -28,7 +28,6 @@
  */
 package bvb.utils;
 
-import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 
 public class Bounds3D

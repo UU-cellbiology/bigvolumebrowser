@@ -25,6 +25,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.Source;
+import bvb.shapes.BasicShape;
 import bvb.utils.transform.TransformSetups;
 
 public class TransformScalePanel extends JPanel
@@ -132,8 +133,7 @@ public class TransformScalePanel extends JPanel
 	void updateGUI()
 	{
 		
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;	
 		
 		double [] scales = new double[3];
@@ -146,31 +146,60 @@ public class TransformScalePanel extends JPanel
 			allScalesEqual[d] = true;
 			allVoxelsEqual[d] = true;
 		}
-		
-		for ( final ConverterSetup cs: csList)
+		boolean bOnlyShapes = true;
+		if(transformSetups.selectedObjects.areSourcesSelected())
 		{
-			if(bFirstCS)
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+		
+			for ( final ConverterSetup cs: csList)
 			{
-				scales = transformSetups.transformScale.getScale( cs );
-				voxelSizes = getVoxelSize( cs );
-				bFirstCS = false;
-			}
-			else
-			{
-				final double[] currScales = transformSetups.transformScale.getScale( cs );
-				final double[] currVoxels = getVoxelSize( cs );
-
-				for (int d=0; d<3; d++)
+				if(bFirstCS)
 				{
-					allScalesEqual[d] &= (Double.compare( scales[d], currScales[d] )==0);
-					allVoxelsEqual[d] &= (Double.compare( voxelSizes[d], currVoxels[d] )==0);
+					scales = transformSetups.transformScale.getScale( cs );
+					voxelSizes = getVoxelSize( cs );
+					bFirstCS = false;
+					bOnlyShapes = false;
+				}
+				else
+				{
+					final double[] currScales = transformSetups.transformScale.getScale( cs );
+					final double[] currVoxels = getVoxelSize( cs );
+	
+					for (int d=0; d<3; d++)
+					{
+						allScalesEqual[d] &= (Double.compare( scales[d], currScales[d] )==0);
+						allVoxelsEqual[d] &= (Double.compare( voxelSizes[d], currVoxels[d] )==0);
+					}
 				}
 			}
 		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shList)
+			{
+				if(bFirstCS)
+				{
+					scales = transformSetups.transformScale.getScale( sh );
+					bFirstCS = false;
+				}
+				else
+				{
+					final double[] currScales = transformSetups.transformScale.getScale( sh );
+	
+					for (int d=0; d<3; d++)
+					{
+						allScalesEqual[d] &= (Double.compare( scales[d], currScales[d] )==0);
+					}
+				}
+			}
+		}
+		
 		final double [] finalScales = scales;
 		final double [] finalVoxels = voxelSizes;
 		final boolean [] isConsistent = allScalesEqual;
 		final boolean [] isConsistentVox = allVoxelsEqual;
+		final boolean bOnlyShapesFinal = bOnlyShapes ;
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( TransformScalePanel.this )
 			{
@@ -197,11 +226,60 @@ public class TransformScalePanel extends JPanel
 					{
 						voxelSize[d].setText("NC");
 					}
+					if(bOnlyShapesFinal)
+					{
+						voxelSize[d].setText("NA");
+					}
 						
 				}
 				blockUpdates = false;
 			}
 		} );
+	}
+
+
+	void updateScaleAxis(int nAxis)
+	{
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;
+		
+		blockUpdates = true;
+		final double currVal = ((Double)spinners[nAxis].getValue()).doubleValue();
+		if(transformSetups.selectedObjects.areSourcesSelected())
+		{
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+
+			for ( final ConverterSetup cs : csList )
+			{
+				final double [] oldScale = transformSetups.transformScale.getScale( cs );
+				final double [] newScale = new double [3];
+				for(int d=0;d<3;d++)
+				{
+					newScale[d] = oldScale[d];
+				}
+				newScale[nAxis] = currVal;
+				transformSetups.transformScale.setScale( cs, newScale );
+				transformSetups.updateTransform( cs );
+			}
+		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				final double [] oldScale = transformSetups.transformScale.getScale( sh );
+				final double [] newScale = new double [3];
+				for(int d=0;d<3;d++)
+				{
+					newScale[d] = oldScale[d];
+				}
+				newScale[nAxis] = currVal;
+				transformSetups.transformScale.setScale( sh, newScale );
+				transformSetups.updateTransform( sh );
+			}
+		}
+		blockUpdates = false;
+		updateGUI();
 	}
 	
 	private double[] getVoxelSize( final ConverterSetup cs )
@@ -218,37 +296,12 @@ public class TransformScalePanel extends JPanel
 		
 		return finScales;
 	}
-
-	void updateScaleAxis(int nAxis)
-	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
-			return;
-		blockUpdates = true;
-		final double currVal = ((Double)spinners[nAxis].getValue()).doubleValue();
-		for ( final ConverterSetup cs : csList )
-		{
-			final double [] oldScale = transformSetups.transformScale.getScale( cs );
-			final double [] newScale = new double [3];
-			for(int d=0;d<3;d++)
-			{
-				newScale[d] = oldScale[d];
-			}
-			newScale[nAxis] = currVal;
-			transformSetups.transformScale.setScale( cs, newScale );
-			transformSetups.updateTransform( cs );
-		}
-		blockUpdates = false;
-		updateGUI();
-	}
 	
 	void resetScale()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if(csList == null || csList.isEmpty())
-		{
+		
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
-		}
 		
 		final double [] unitScale = new double [3];
 		
@@ -256,11 +309,25 @@ public class TransformScalePanel extends JPanel
 		{
 			unitScale [d] = 1.0;
 		}
-		for ( final ConverterSetup cs: csList)
+		
+		if(transformSetups.selectedObjects.areSourcesSelected())
 		{
-			
-			transformSetups.transformScale.setScale( cs, unitScale );
-			transformSetups.updateTransform( cs );			
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs: csList)
+			{
+				
+				transformSetups.transformScale.setScale( cs, unitScale );
+				transformSetups.updateTransform( cs );			
+			}
+		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				transformSetups.transformScale.setScale( sh, unitScale );
+				transformSetups.updateTransform( sh );	
+			}
 		}
 		updateGUI();
 	}
