@@ -261,16 +261,33 @@ public class TransformCenterPanel extends JPanel
 	
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList== null || csList.isEmpty() )
+		
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+		blockUpdates = true;
+		
 		Bounds3D range3D = null;
-		for ( final ConverterSetup cs : csList )
+		if(transformSetups.selectedObjects.areSourcesSelected())
 		{
-			if(range3D == null)
-				range3D = transformSetups.transformTranslationBounds.getDefaultBounds( cs );
-			else
-				range3D = range3D.join( transformSetups.transformTranslationBounds.getDefaultBounds( cs ) );			
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{
+				if(range3D == null)
+					range3D = transformSetups.transformTranslationBounds.getDefaultBounds( cs );
+				else
+					range3D = range3D.join( transformSetups.transformTranslationBounds.getDefaultBounds( cs ) );			
+			}
+		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				if(range3D == null)
+					range3D = transformSetups.transformTranslationBounds.getDefaultBounds( sh );
+				else
+					range3D = range3D.join( transformSetups.transformTranslationBounds.getDefaultBounds( sh ) );							
+			}
 		}
 		if(range3D != null)
 		{
@@ -282,6 +299,9 @@ public class TransformCenterPanel extends JPanel
 			translationPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
 			updateTransformAxis(nAxis);
 		}
+		
+		
+		blockUpdates = false;
 	}
 	
 	void resetTranslation()
