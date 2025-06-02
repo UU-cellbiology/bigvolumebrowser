@@ -319,7 +319,8 @@ public class VisSpots extends AbstractClipTransformVis
 			prog.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 			prog.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 			final AffineTransform3D t = new AffineTransform3D();
-			t.set( clipTransform.inverse() );
+			t.set( transform );
+			t.preConcatenate( clipTransform.inverse() );
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 		}		
 		

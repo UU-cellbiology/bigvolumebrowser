@@ -348,7 +348,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 				t.set( transform );
 				t.preConcatenate( clipTransform.inverse() );
 				//t.set( clipTransform.inverse() );
-				//t.set( transform.preConcatenate( t ));
+		
 				progMesh.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 
@@ -393,8 +393,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 				progPoints.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 				progPoints.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 				AffineTransform3D t = new AffineTransform3D();
-				t.set( clipTransform.inverse() );
-				t = transform.preConcatenate( t );
+				t.set( transform );
+				t.preConcatenate( clipTransform.inverse() );
 				progPoints.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 			progPoints.setUniforms( context );			
