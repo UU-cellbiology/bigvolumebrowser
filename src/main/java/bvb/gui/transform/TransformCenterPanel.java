@@ -12,6 +12,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -285,34 +286,53 @@ public class TransformCenterPanel extends JPanel
 	
 	void resetTranslation()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if(csList == null || csList.isEmpty())
-		{
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+		blockUpdates = true;
+		
+		if(transformSetups.selectedObjects.areSourcesSelected())
+		{
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
+			
+			for ( final ConverterSetup cs: csList)
+			{
+				final Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
+				
+				final AffineTransform3D srcTrFixed = new AffineTransform3D();
+				AffineTransform3D srcTrIc = new AffineTransform3D();
+				
+				//get both transforms just in case
+				(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
+				(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
+				FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+				
+				//remove both transforms
+				srcTrIc = srcTrIc.inverse().preConcatenate( srcTrFixed.inverse() );
+				interval = srcTrIc.estimateBounds( interval );
+
+				final double [] centers = Misc.getIntervalCenter( interval );
+				transformSetups.transformCenters.setCenters( cs, centers );
+				transformSetups.updateTransform( cs );
+				
+			}
+		}
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				AffineTransform3D srcTrIc = new AffineTransform3D();
+				sh.getTransform( srcTrIc );
+				RealInterval interval = sh.boundingBox();
+				srcTrIc = srcTrIc.inverse();
+				interval = srcTrIc.estimateBounds( interval );
+				final double [] centers = Misc.getIntervalCenter( interval );
+				transformSetups.transformCenters.setCenters( sh, centers );
+				transformSetups.updateTransform( sh );
+			}
 		}
 		
-		for ( final ConverterSetup cs: csList)
-		{
-			final Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
-			
-			final AffineTransform3D srcTrFixed = new AffineTransform3D();
-			AffineTransform3D srcTrIc = new AffineTransform3D();
-			
-			//reset both transforms just in case
-			(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
-			(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
-			FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
-			
-			//remove both transforms
-			srcTrIc = srcTrIc.inverse().preConcatenate( srcTrFixed.inverse() );
-			
-			interval = srcTrIc.estimateBounds( interval );
-			//srcTrFixed .apply( null, null );
-			final double [] centers = Misc.getIntervalCenter( interval );
-			transformSetups.transformCenters.setCenters( cs, centers );
-			transformSetups.updateTransform( cs );
-			
-		}
+		blockUpdates = false;
 		updateGUI();
 		transformSetups.updateBVV();
 	}
