@@ -345,8 +345,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 				progMesh.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 				progMesh.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 				final AffineTransform3D t = new AffineTransform3D();
-				t.set( transform.inverse() );
-				progMesh.getUniformMatrix4f( "cliptransform ").set( MatrixMath.affine(t, new Matrix4f()) );
+				t.set( clipTransform.inverse() );
+				progMesh.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 
 			progMesh.setUniforms( context );
@@ -382,6 +382,17 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progPoints.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
 			progPoints.getUniform1i( "renderType" ).set( VisSpotsSame.RENDER_FILLED );
 			progPoints.getUniform1i( "pointShape" ).set( VisSpotsSame.SHAPE_ROUND );
+			progPoints.getUniform1i("clipactive").set(0);
+			
+			if(clipActive && clipInt != null)
+			{
+				progPoints.getUniform1i("clipactive").set(1);
+				progPoints.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
+				progPoints.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
+				final AffineTransform3D t = new AffineTransform3D();
+				t.set( clipTransform.inverse() );
+				progPoints.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
+			}
 			progPoints.setUniforms( context );			
 			progPoints.use( context );
 			

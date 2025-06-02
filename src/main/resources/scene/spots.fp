@@ -7,21 +7,28 @@ uniform int pointShape;
 in vec3 posW;
 in float sRadfp;
 uniform float normGauss;
+uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
-uniform int clipactive;
+uniform mat4 cliptransform;
 
-void main()
+void checkClipping()
 {
     //ROI clipping
 	if(clipactive>0)
 	{
-		vec3 s = step(clipmin, posW) - step(clipmax, posW);
+		vec3 posclip = ( cliptransform * vec4(posW,1.0) ).xyz;
+		vec3 s = step(clipmin, posclip) - step(clipmax, posclip);
 		if(s.x * s.y * s.z == 0.0)
 		{
 			discard;
 		}
 	}
+}
+
+void main()
+{
+	checkClipping();
 	
     //transform coordinates to NDC
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;

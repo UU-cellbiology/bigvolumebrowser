@@ -36,12 +36,14 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Affine3DHelpers;
+import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipRotationAngles
 {
 	private final Map< ConverterSetup, double[]> setupToAngles = new HashMap<>();
+	private final Map< BasicShape, double[]> shapeToAngles = new HashMap<>();
 	
 	public ClipRotationAngles( )
 	{
@@ -60,9 +62,26 @@ public class ClipRotationAngles
 		return out;
 	}
 	
+	public double[] getAngles( final BasicShape shape )
+	{
+		double [] out =  shapeToAngles.get( shape );
+		if(out == null)
+		{
+			out = getCurrentEulerAngles(shape);
+			setAngles(shape, out);
+		}
+		
+		return out;
+	}
+	
 	public void setAngles( final ConverterSetup setup, final double[] eAngles)
 	{
 		setupToAngles.put( setup, eAngles );
+	}
+	
+	public void setAngles( final BasicShape shape, final double[] eAngles)
+	{
+		shapeToAngles.put( shape, eAngles );
 	}
 	
 	public double [] getCurrentEulerAngles(final ConverterSetup setup)
@@ -70,6 +89,28 @@ public class ClipRotationAngles
 		final AffineTransform3D clipTr = new AffineTransform3D();
 		((GammaConverterSetup)setup).getClipTransform(clipTr);
 		final FinalRealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
+		final double [] center;
+		if(interval == null)
+		{
+			center = new double[3];
+		}
+		else
+		{
+			center = Misc.getIntervalCenterNegative( interval);
+		}
+		clipTr.translate( center );
+		final double[] qRotation = new double[4];
+
+		Affine3DHelpers.extractRotationAnisotropic( clipTr, qRotation );
+		return Misc.quaternionToEulerAngles(qRotation);
+		
+	}
+	
+	public double [] getCurrentEulerAngles(final BasicShape shape)
+	{
+		final AffineTransform3D clipTr = new AffineTransform3D();
+		shape.getClipTransform(clipTr);
+		final FinalRealInterval interval = shape.getClipInterval(); 
 		final double [] center;
 		if(interval == null)
 		{

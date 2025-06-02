@@ -62,7 +62,6 @@ import bdv.viewer.SourceAndConverter;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.Rotate3DViewerStyle;
 import bvb.shapes.BasicShape;
-import bvb.utils.BoundedValueDoubleBVB;
 import bvvpg.vistools.BvvHandle;
 
 import ij.Prefs;

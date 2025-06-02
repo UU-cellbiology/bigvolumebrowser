@@ -38,6 +38,7 @@ import bdv.util.BoundedRange;
 
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
+import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -49,6 +50,8 @@ public class ClipAxesBounds
 
 	private final Map< ConverterSetup, Bounds3D > setupToBounds = new HashMap<>();
 	
+	private final Map< BasicShape, Bounds3D > shapeToBounds = new HashMap<>();
+	
 	
 	public ClipAxesBounds( final SourceToConverterSetupBimap bimap )
 	{
@@ -58,6 +61,11 @@ public class ClipAxesBounds
 	public Bounds3D getBounds( final ConverterSetup setup )
 	{
 		return setupToBounds.compute( setup, this::getExtendedBounds );
+	}
+	
+	public Bounds3D getBounds( final BasicShape shape )
+	{
+		return shapeToBounds.compute( shape, this::getExtendedBoundsShape );
 	}
 	
 	public void setBounds( final ConverterSetup setup, final Bounds3D bounds )
@@ -97,6 +105,42 @@ public class ClipAxesBounds
 			}
 		}
 	}
+	
+	public void setBounds( final BasicShape shape, final Bounds3D bounds )
+	{
+		shapeToBounds.put( shape, bounds );
+
+
+		FinalRealInterval clipInterval = shape.getClipInterval();
+		if(clipInterval == null)
+		{
+			Bounds3D defBounds = getDefaultBounds( shape );
+			clipInterval  =  new FinalRealInterval(defBounds.getMinBound(),defBounds.getMaxBound());
+		}
+		final double [] min = clipInterval.minAsDoubleArray( );
+		final double [] max = clipInterval.maxAsDoubleArray( );
+
+		final BoundedRange [] range = new BoundedRange[3];
+		for (int d=0; d<3; d++)
+		{
+			range[d] = new BoundedRange( min[d], max[d], min[d], max[d] ).withMinBound( bounds.getMinBound()[d] ).withMaxBound( bounds.getMaxBound()[d] );
+		}
+		boolean bUpdate = false;
+		for(int d=0;d<3;d++)
+		{
+			if ( range[d].getMin() != min[d] || range[d].getMax() != max[d] )
+			{
+				min[d] = range[d].getMin();
+				max[d] = range[d].getMax();
+				bUpdate = true;
+			}
+		}
+		if(bUpdate)
+		{
+			shape.setClipInterval( new FinalRealInterval(min,max) );
+		}
+
+	}
 
 	public Bounds3D getDefaultBounds( final ConverterSetup setup )
 	{
@@ -114,6 +158,11 @@ public class ClipAxesBounds
 		}
 		return bounds;
 	}
+	
+	public Bounds3D getDefaultBounds( final BasicShape shape )
+	{
+		return new Bounds3D(shape.boundingBox());
+	}
 
 	private Bounds3D getExtendedBounds( final ConverterSetup setup, Bounds3D bounds )
 	{
@@ -128,6 +177,17 @@ public class ClipAxesBounds
 			return bounds.join( new Bounds3D( clipInterval ) );
 		}
 		return bounds;
+	}
+	
+	private Bounds3D getExtendedBoundsShape( final BasicShape shape, Bounds3D bounds )
+	{
+		if ( bounds == null )
+			bounds = getDefaultBounds( shape );
+
+		FinalRealInterval clipInterval = shape.getClipInterval();
+		if(clipInterval == null)
+			return bounds;
+		return bounds.join( new Bounds3D( clipInterval ) );
 	}
 
 }

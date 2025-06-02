@@ -33,6 +33,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import bdv.viewer.ConverterSetups;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
+import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -50,8 +51,11 @@ public class ClipSetups
 	
 	public SelectedObjects selectedObjects;
 	
-	public ClipSetups (final BigVolumeBrowser bvb)
+	public final BigVolumeBrowser bvb;
+	
+	public ClipSetups (final BigVolumeBrowser bvb_)
 	{
+		bvb = bvb_;
 		converterSetups = bvb.bvvViewer.getConverterSetups();
 		selectedObjects = bvb.selectedObjects;
 		clipAxesBounds = new ClipAxesBounds(converterSetups);
@@ -78,6 +82,28 @@ public class ClipSetups
 		clipTr.translate( centerNew );	
 
 		cs.setClipTransform(clipTr);
+		
+	}
+	
+	public synchronized void updateClipTransform( final BasicShape sh)
+	{
+		final double [] eAngles = clipRotationAngles.getAngles( sh );
+		
+		final AffineTransform3D clipRot = Misc.getRotationTransform( eAngles );
+		
+		AffineTransform3D clipTr = new AffineTransform3D();
+
+		final double [] center =  Misc.getIntervalCenterNegative( sh.getClipInterval() );
+		
+		final double [] centerNew = clipCenters.getCenters( sh );
+
+		clipTr.translate( center );
+		
+		clipTr = clipTr.preConcatenate( clipRot );
+
+		clipTr.translate( centerNew );	
+
+		sh.setClipTransform(clipTr);
 		
 	}
 	

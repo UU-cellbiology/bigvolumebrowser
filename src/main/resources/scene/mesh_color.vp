@@ -14,7 +14,7 @@ uniform mat3 itvm;
 void main()
 {
 	gl_Position = pvm * vec4( aPos, 1.0 );
-	FragPos = vec3(vm * vec4(aPos, 1.0));
+	FragPos = vec3(vm * vec4( aPos, 1.0 ));
 	Normal = itvm * aNormal;
 	posW = aPos;
 	bary = baryin;

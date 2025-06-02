@@ -80,23 +80,28 @@ vec4 getGridColor(vec4 colorInp)
 	return colorInp;
 }
 
+void checkClipping()
+{
+    //ROI clipping
+	if(clipactive>0)
+	{
+		vec3 posclip = ( cliptransform * vec4(posW,1.0) ).xyz;
+		vec3 s = step(clipmin, posclip) - step(clipmax, posclip);
+		if(s.x * s.y * s.z == 0.0)
+		{
+			discard;
+		}
+	}
+}
 
 void main()
 {
 
+		checkClipping();
+		
 		vec3 norm = normalize(Normal);
 		vec3 viewDir = normalize(-FragPos);
-		vec4 colorOut;
-		
-		if(clipactive>0)
-		{
-			vec3 posclip = (cliptransform*vec4(posW,0.0)).xyz;
-			vec3 s = step(clipmin, posclip) - step(clipmax, posclip);
-			if(s.x * s.y * s.z == 0.0)
-			{
-				discard;
-			}
-		}
+		vec4 colorOut;		
 							
 		gl_FragDepth = gl_FragCoord.z;
 		

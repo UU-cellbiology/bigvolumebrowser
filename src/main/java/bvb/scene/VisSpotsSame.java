@@ -35,11 +35,13 @@ import com.jogamp.opengl.GL3;
 import bvb.core.BVVSettings;
 
 import net.imglib2.RealPoint;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -49,6 +51,7 @@ import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
+import bvvpg.core.util.MatrixMath;
 
 import static com.jogamp.opengl.GL.GL_FLOAT;
 
@@ -272,11 +275,21 @@ public class VisSpotsSame extends AbstractClipTransformVis
 		prog.getUniform2f( "ellipseAxes" ).set(ellipse_axes);
 		prog.getUniform1i( "renderType" ).set(renderType);
 		prog.getUniform1i( "pointShape" ).set( spotShape );
-		//progRound.getUniform1i("clipactive").set(0);
-		//progRound.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
-		//progRound.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
+		
+		prog.getUniform1i("clipactive").set(0);
+		if(clipActive && clipInt != null)
+		{
+			prog.getUniform1i("clipactive").set(1);
+			prog.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
+			prog.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
+			final AffineTransform3D t = new AffineTransform3D();
+			t.set( clipTransform.inverse() );
+			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
+		}
+		
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		
 		if(renderType == RENDER_GAUSS)
 		{
 			gl.glDepthFunc( GL.GL_ALWAYS);

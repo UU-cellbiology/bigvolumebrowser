@@ -39,6 +39,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
+import bvb.shapes.BasicShape;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedValuePanelPG;
@@ -99,15 +100,13 @@ public class ClipRotationPanel extends JPanel
 		{
 			clipRotationPanels[i].setEnabled( bEnabled );
 		}
-	}
-	
+	}	
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
-			return;	
 		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;		
 		
 		double [] angles = new double[3];
 		boolean bFirstCS = true;
@@ -116,21 +115,46 @@ public class ClipRotationPanel extends JPanel
 		{
 			allAnglesEqual[d] = true;
 		}
-		
-		for ( final ConverterSetup cs: csList)
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			if(bFirstCS)
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs: csList)
 			{
-				angles = clipSetups.clipRotationAngles.getAngles( cs );
-				bFirstCS = false;
-			}
-			else
-			{
-				final double[] currAngles = clipSetups.clipRotationAngles.getAngles( cs );
-
-				for (int d=0; d<3; d++)
+				if(bFirstCS)
 				{
-					allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+					angles = clipSetups.clipRotationAngles.getAngles( cs );
+					bFirstCS = false;
+				}
+				else
+				{
+					final double[] currAngles = clipSetups.clipRotationAngles.getAngles( cs );
+	
+					for (int d=0; d<3; d++)
+					{
+						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+					}
+				}
+			}
+		}
+		
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				if(bFirstCS)
+				{
+					angles = clipSetups.clipRotationAngles.getAngles( sh );
+					bFirstCS = false;
+				}
+				else
+				{
+					final double[] currAngles = clipSetups.clipRotationAngles.getAngles( sh );
+	
+					for (int d=0; d<3; d++)
+					{
+						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+					}
 				}
 			}
 		}
@@ -153,20 +177,38 @@ public class ClipRotationPanel extends JPanel
 	
 	synchronized void updateClipAxisRotation(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
-			return;
+		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;	
+		
 		blockUpdates = true;
-		for ( final ConverterSetup cs : csList )
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			
-			final double [] eAngles = clipSetups.clipRotationAngles.getAngles( cs );
-			eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-			
-			clipSetups.clipRotationAngles.setAngles( cs, eAngles );
-			clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
-
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{				
+				final double [] eAngles = clipSetups.clipRotationAngles.getAngles( cs );
+				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+				
+				clipSetups.clipRotationAngles.setAngles( cs, eAngles );
+				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
+	
+			}
 		}
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				final double [] eAngles = clipSetups.clipRotationAngles.getAngles( sh );
+				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+				
+				clipSetups.clipRotationAngles.setAngles( sh, eAngles );
+				clipSetups.updateClipTransform( sh );
+			}
+			clipSetups.bvb.updateSceneRender();
+		}
+		
 		blockUpdates = false;
 		updateGUI();
 	}

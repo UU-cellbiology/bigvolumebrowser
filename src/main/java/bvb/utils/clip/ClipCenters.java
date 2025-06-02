@@ -38,6 +38,7 @@ import bdv.tools.brightness.ConverterSetup;
 
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
+import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -46,6 +47,8 @@ public class ClipCenters
 	private final SourceToConverterSetupBimap bimap;
 	
 	private final Map< ConverterSetup, double[]> setupToCenters = new HashMap<>();
+	
+	private final Map< BasicShape, double[]> shapeToCenters = new HashMap<>();
 	
 	public ClipCenters( final SourceToConverterSetupBimap bimap)
 	{
@@ -63,14 +66,35 @@ public class ClipCenters
 		return out;
 	}
 	
+	public double[] getCenters( final BasicShape shape )
+	{
+		double [] out =  shapeToCenters.get( shape );
+		if(out == null)
+		{
+			out = getCurrentOrDefaultCenters(shape);
+			setCenters( shape, out );
+		}		
+		return out;
+	}
+	
 	public void updateCenters(final ConverterSetup setup)
 	{
 		setCenters( setup, getCurrentOrDefaultCenters(setup));
 	}
 	
+	public void updateCenters(final BasicShape shape )
+	{
+		setCenters( shape, getCurrentOrDefaultCenters(shape));
+	}
+	
 	public void setCenters( final ConverterSetup setup, final double[] centers)
 	{
 		setupToCenters.put( setup, centers );
+	}
+	
+	public void setCenters( final BasicShape shape, final double[] centers)
+	{
+		shapeToCenters.put( shape, centers );
 	}
 	
 	public double [] getCurrentOrDefaultCenters(final ConverterSetup setup)
@@ -87,6 +111,25 @@ public class ClipCenters
 		}
 		if(interval == null)
 			return null;
+			
+		final double [] center = Misc.getIntervalCenter(interval);
+		
+		clipTr.apply( center, center );
+
+		return center;
+		
+	}
+	
+	public double [] getCurrentOrDefaultCenters(final BasicShape shape)
+	{
+		AffineTransform3D clipTr = new AffineTransform3D();
+		shape.getClipTransform(clipTr);
+		FinalRealInterval interval = shape.getClipInterval(); 
+
+		if(interval == null)
+		{
+			interval =  new FinalRealInterval (shape.boundingBox());
+		}
 			
 		final double [] center = Misc.getIntervalCenter(interval);
 		

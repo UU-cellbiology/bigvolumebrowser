@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
+import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
@@ -116,9 +117,9 @@ public class ClipCenterPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
-			return;	
+		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;
 		
 		
 		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
@@ -128,34 +129,67 @@ public class ClipCenterPanel extends JPanel
 		{
 			allCenterEqual[d] = true;
 		}
-
-		for ( final ConverterSetup cs: csList)
+		
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
-			final double [] minBound = bounds.getMinBound();
-			final double [] maxBound = bounds.getMaxBound();
-			
-			double [] center = new double [3];
-			center = clipSetups.clipCenters.getCenters( cs );
-			if(bFirstCS)
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs: csList)
 			{
-				for (int d=0; d<3; d++)
+				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
+				final double [] minBound = bounds.getMinBound();
+				final double [] maxBound = bounds.getMaxBound();
+				
+				double [] center = new double [3];
+				center = clipSetups.clipCenters.getCenters( cs );
+				if(bFirstCS)
 				{
-					boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					for (int d=0; d<3; d++)
+					{
+						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					}
+					bFirstCS = false;
 				}
-				bFirstCS = false;
-			}
-			else
-			{
-				for (int d=0; d<3; d++)
+				else
 				{
-					final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-					allCenterEqual[d] &= boundValue[d].equals( centerRange );
-					boundValue[d] = boundValue[d].join( centerRange );
+					for (int d=0; d<3; d++)
+					{
+						final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						allCenterEqual[d] &= boundValue[d].equals( centerRange );
+						boundValue[d] = boundValue[d].join( centerRange );
+					}
 				}
 			}
 		}
-		
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( sh );
+				final double [] minBound = bounds.getMinBound();
+				final double [] maxBound = bounds.getMaxBound();
+				
+				double [] center = new double [3];
+				center = clipSetups.clipCenters.getCenters( sh );
+				if(bFirstCS)
+				{
+					for (int d=0; d<3; d++)
+					{
+						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					}
+					bFirstCS = false;
+				}
+				else
+				{
+					for (int d=0; d<3; d++)
+					{
+						final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						allCenterEqual[d] &= boundValue[d].equals( centerRange );
+						boundValue[d] = boundValue[d].join( centerRange );
+					}
+				}
+			}
+		}
 		
 		final BoundedValueDoubleBVB [] finalCenter = boundValue;
 		final boolean [] isConsistent = allCenterEqual;
@@ -165,7 +199,6 @@ public class ClipCenterPanel extends JPanel
 				blockUpdates = true;
 				for (int d=0;d<3;d++)
 				{
-
 					clipCenterPanels[d].setConsistent( isConsistent[d] );
 					clipCenterPanels[d].setValue( finalCenter[d] );
 				}
@@ -176,8 +209,8 @@ public class ClipCenterPanel extends JPanel
 	
 	synchronized void updateClipCenter(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList == null || csList.isEmpty() )
+		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		blockUpdates = true;
 		double currVal = clipCenterPanels[nAxis].getValue().getCurrentValue();
@@ -185,24 +218,46 @@ public class ClipCenterPanel extends JPanel
 		double maxBound = clipCenterPanels[nAxis].getValue().getRangeMax();
 		minBound = Math.min( currVal, minBound );
 		maxBound = Math.max( currVal, maxBound );
-		for ( final ConverterSetup cs : csList )
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
-			
-			if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
 			{
-				bounds.getMinBound()[nAxis] = minBound;
-				bounds.getMaxBound()[nAxis] = maxBound;
-				clipSetups.clipCenterBounds.setBounds( cs, bounds );
+				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
+				
+				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = minBound;
+					bounds.getMaxBound()[nAxis] = maxBound;
+					clipSetups.clipCenterBounds.setBounds( cs, bounds );
+				}
+				final double [] newCenter = clipSetups.clipCenters.getCenters( cs );
+				newCenter[nAxis] = currVal;
+				
+				clipSetups.clipCenters.setCenters( cs, newCenter );
+				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
 			}
-			final double [] newCenter = clipSetups.clipCenters.getCenters( cs );
-			newCenter[nAxis] = currVal;
-			
-			clipSetups.clipCenters.setCenters( cs, newCenter );
-			clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
-			//update bounds
-			
-
+		}
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( sh );
+				
+				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = minBound;
+					bounds.getMaxBound()[nAxis] = maxBound;
+					clipSetups.clipCenterBounds.setBounds( sh, bounds );
+				}
+				final double [] newCenter = clipSetups.clipCenters.getCenters( sh );
+				newCenter[nAxis] = currVal;
+				
+				clipSetups.clipCenters.setCenters( sh, newCenter );
+				clipSetups.updateClipTransform( sh );
+			}
+			clipSetups.bvb.updateSceneRender();
 		}
 		blockUpdates = false;
 		updateGUI();
@@ -211,16 +266,31 @@ public class ClipCenterPanel extends JPanel
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList== null || csList.isEmpty() )
+		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		Bounds3D range3D = null;
-		for ( final ConverterSetup cs : csList )
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			if(range3D == null)
-				range3D = clipSetups.clipCenterBounds.getDefaultBounds( cs );
-			else
-				range3D = range3D.join( clipSetups.clipCenterBounds.getDefaultBounds( cs ) );			
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{
+				if(range3D == null)
+					range3D = clipSetups.clipCenterBounds.getDefaultBounds( cs );
+				else
+					range3D = range3D.join( clipSetups.clipCenterBounds.getDefaultBounds( cs ) );			
+			}
+		}
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				if(range3D == null)
+					range3D = clipSetups.clipCenterBounds.getDefaultBounds( sh );
+				else
+					range3D = range3D.join( clipSetups.clipCenterBounds.getDefaultBounds( sh ) );
+			}
 		}
 		if(range3D != null)
 		{

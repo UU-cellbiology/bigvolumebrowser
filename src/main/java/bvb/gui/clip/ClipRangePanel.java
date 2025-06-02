@@ -46,6 +46,7 @@ import net.imglib2.FinalRealInterval;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedRange;
 import bvb.gui.SelectedObjects;
+import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -135,10 +136,9 @@ public class ClipRangePanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList== null || csList.isEmpty() )
-			return;	
-		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
+			return;
+	
 		BoundedRange [] range = new BoundedRange[3];
 		boolean bFirstCS = true;
 		boolean [] allRangesEqual = new boolean [3];
@@ -150,42 +150,87 @@ public class ClipRangePanel extends JPanel
 		//update bounds
 		final double [] min = new double [3];
 		final double [] max = new double [3];
-
-		for ( final ConverterSetup cs: csList)
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
-			final double [] minBound = bounds.getMinBound();
-			final double [] maxBound = bounds.getMaxBound();
-			final FinalRealInterval clipInterval = ((GammaConverterSetup)cs).getClipInterval();
-			if(clipInterval == null)
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs: csList)
 			{
-				for(int d=0;d<3;d++)
+				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
+				final double [] minBound = bounds.getMinBound();
+				final double [] maxBound = bounds.getMaxBound();
+				final FinalRealInterval clipInterval = ((GammaConverterSetup)cs).getClipInterval();
+				if(clipInterval == null)
 				{
-					min[d] = minBound[d];
-					max[d] = maxBound[d];
+					for(int d=0;d<3;d++)
+					{
+						min[d] = minBound[d];
+						max[d] = maxBound[d];
+					}
+				}
+				else
+				{
+					clipInterval.realMin( min );
+					clipInterval.realMax( max );
+				}
+				if(bFirstCS)
+				{
+					for (int d=0; d<3; d++)
+					{
+						range[d] = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
+					}
+					bFirstCS = false;
+				}
+				else
+				{
+					for (int d=0; d<3; d++)
+					{
+						final BoundedRange axisRange = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
+						allRangesEqual[d] &= range[d].equals( axisRange );
+						range[d] = range[d].join( axisRange );
+					}
 				}
 			}
-			else
+		}
+		
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
 			{
-				clipInterval.realMin( min );
-				clipInterval.realMax( max );
-			}
-			if(bFirstCS)
-			{
-				for (int d=0; d<3; d++)
+				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( sh );
+				final double [] minBound = bounds.getMinBound();
+				final double [] maxBound = bounds.getMaxBound();
+				final FinalRealInterval clipInterval = sh.getClipInterval();
+				if(clipInterval == null)
 				{
-					range[d] = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
+					for(int d=0;d<3;d++)
+					{
+						min[d] = minBound[d];
+						max[d] = maxBound[d];
+					}
 				}
-				bFirstCS = false;
-			}
-			else
-			{
-				for (int d=0; d<3; d++)
+				else
 				{
-					final BoundedRange axisRange = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
-					allRangesEqual[d] &= range[d].equals( axisRange );
-					range[d] = range[d].join( axisRange );
+					clipInterval.realMin( min );
+					clipInterval.realMax( max );
 				}
+				if(bFirstCS)
+				{
+					for (int d=0; d<3; d++)
+					{
+						range[d] = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
+					}
+					bFirstCS = false;
+				}
+				else
+				{
+					for (int d=0; d<3; d++)
+					{
+						final BoundedRange axisRange = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
+						allRangesEqual[d] &= range[d].equals( axisRange );
+						range[d] = range[d].join( axisRange );
+					}
+				}				
 			}
 		}
 		
@@ -209,53 +254,102 @@ public class ClipRangePanel extends JPanel
 	
 	public void updateClipAxisRangeBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList== null || csList.isEmpty() )
+		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
-		//System.out.println(nAxis);
+		
+		blockUpdates = true;
 		final BoundedRange range = clipAxesPanels[nAxis].getRange();
-
-		for ( final ConverterSetup cs : csList )
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
-			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
-			if(clipInt == null)
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
 			{
-				clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
+				FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
+				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
+				if(clipInt == null)
+				{
+					clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
+				}
+				if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = range.getMinBound();
+					bounds.getMaxBound()[nAxis] = range.getMaxBound();
+					clipSetups.clipAxesBounds.setBounds( cs, bounds );
+				}
+				
+				final double [] min = clipInt.minAsDoubleArray();
+				final double [] max = clipInt.maxAsDoubleArray();
+				min[nAxis] = range.getMin();
+				max[nAxis] = range.getMax();
+				
+				((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
+				clipSetups.clipCenters.updateCenters( cs );
+	
 			}
-			if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
-			{
-				bounds.getMinBound()[nAxis] = range.getMinBound();
-				bounds.getMaxBound()[nAxis] = range.getMaxBound();
-				clipSetups.clipAxesBounds.setBounds( cs, bounds );
-			}
-			
-			final double [] min = clipInt.minAsDoubleArray();
-			final double [] max = clipInt.maxAsDoubleArray();
-			min[nAxis] = range.getMin();
-			max[nAxis] = range.getMax();
-			
-			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(min,max) );
-			clipSetups.clipCenters.updateCenters( cs );
-
 		}
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				FinalRealInterval clipInt = sh.getClipInterval();
+				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( sh );
+				if(clipInt == null)
+				{
+					clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
+				}
+				if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = range.getMinBound();
+					bounds.getMaxBound()[nAxis] = range.getMaxBound();
+					clipSetups.clipAxesBounds.setBounds( sh, bounds );
+				}
+				
+				final double [] min = clipInt.minAsDoubleArray();
+				final double [] max = clipInt.maxAsDoubleArray();
+				min[nAxis] = range.getMin();
+				max[nAxis] = range.getMax();
+				
+				sh.setClipInterval( new FinalRealInterval(min,max) );
+				clipSetups.clipCenters.updateCenters( sh );
+			}
+			clipSetups.bvb.updateSceneRender();
+		}
+		
+		blockUpdates = false;
 		updateGUI();
 	}
 	
 	/** sets bounds along the axis including all selected sources **/
 	public void resetBounds(int nAxis)
 	{
-		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-		if ( blockUpdates || csList== null || csList.isEmpty() )
+		
+		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		Bounds3D range3D = null;
-		for ( final ConverterSetup cs : csList )
+		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
-			if(range3D == null)
-				range3D = clipSetups.clipAxesBounds.getDefaultBounds( cs );
-			else
-				range3D = range3D.join( clipSetups.clipAxesBounds.getDefaultBounds( cs ) );			
+			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{
+				if(range3D == null)
+					range3D = clipSetups.clipAxesBounds.getDefaultBounds( cs );
+				else
+					range3D = range3D.join( clipSetups.clipAxesBounds.getDefaultBounds( cs ) );			
+			}
+		}
+		if(clipSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				if(range3D == null)
+					range3D = clipSetups.clipAxesBounds.getDefaultBounds( sh );
+				else
+					range3D = range3D.join( clipSetups.clipAxesBounds.getDefaultBounds( sh ) );		
+			}
 		}
 		if(range3D != null)
 		{
