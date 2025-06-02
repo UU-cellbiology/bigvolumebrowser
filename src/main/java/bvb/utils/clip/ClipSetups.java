@@ -28,6 +28,7 @@
  */
 package bvb.utils.clip;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.viewer.ConverterSetups;
@@ -70,8 +71,15 @@ public class ClipSetups
 		final AffineTransform3D clipRot = Misc.getRotationTransform( eAngles );
 		
 		AffineTransform3D clipTr = new AffineTransform3D();
+		
+		FinalRealInterval clipInt = cs.getClipInterval();
+		
+		if (clipInt == null)
+		{
+			clipInt = Misc.getSourceBoundingBoxAllTP(converterSetups.getSource( cs ).getSpimSource() );
+		}
 
-		final double [] center =  Misc.getIntervalCenterNegative( cs.getClipInterval() );
+		final double [] center =  Misc.getIntervalCenterNegative( clipInt );
 		
 		final double [] centerNew = clipCenters.getCenters( cs );
 
@@ -92,8 +100,14 @@ public class ClipSetups
 		final AffineTransform3D clipRot = Misc.getRotationTransform( eAngles );
 		
 		AffineTransform3D clipTr = new AffineTransform3D();
+		
+		FinalRealInterval clipInt = sh.getClipInterval();
+		if(clipInt == null)
+		{
+			clipInt = new FinalRealInterval (sh.boundingBox());
+		}
 
-		final double [] center =  Misc.getIntervalCenterNegative( sh.getClipInterval() );
+		final double [] center =  Misc.getIntervalCenterNegative( clipInt );
 		
 		final double [] centerNew = clipCenters.getCenters( sh );
 

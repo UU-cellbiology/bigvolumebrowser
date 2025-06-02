@@ -11,6 +11,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
+import bvvpg.source.converters.GammaConverterSetup;
 
 public class TransformSetups
 {
@@ -47,7 +48,7 @@ public class TransformSetups
 	{
 		final double [] eAngles = transformRotation.getAngles( sh );
 		
-		final AffineTransform3D trRot = Misc.getRotationTransform( eAngles );
+		final AffineTransform3D trRot = Misc.getRotationTransform( eAngles );		
 		
 		AffineTransform3D srcTrFixed = new AffineTransform3D();
 		
@@ -89,6 +90,9 @@ public class TransformSetups
 		
 		AffineTransform3D srcTrFixed = new AffineTransform3D();
 		
+		
+		AffineTransform3D oldTr = new AffineTransform3D();
+		(( TransformedSource< ? > )src).getFixedTransform( oldTr );
 		//reset both transforms just in case
 		(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
 		(( TransformedSource< ? > )src).setIncrementalTransform( srcTrFixed );
@@ -113,10 +117,27 @@ public class TransformSetups
 		final AffineTransform3D translTr = new AffineTransform3D();
 		translTr.translate( tr );
 		srcTrFixed = srcTrFixed.preConcatenate( translTr );
-		
-		
-		
 		(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
+		
+		
+		//update clip transform
+		double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( cs );
+		//go to absolute coordinates
+		oldTr.applyInverse( clipCent, clipCent );
+		//account for the new transform
+		srcTrFixed.apply( clipCent, clipCent );
+		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( cs, clipCent );
+//		double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.getAngles( cs );
+//		
+//		double [] dAngUpdated = new double[3];
+//		for(int d=0;d<3;d++)
+//		{
+//			dAngUpdated [d] = dAnglesOld[d] + eAngles[d]; 
+//		}
+//		 bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.setAngles( cs, dAngUpdated );
+		
+		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs);
+		
 		bvb.updateSceneRender();		
 		
 	}

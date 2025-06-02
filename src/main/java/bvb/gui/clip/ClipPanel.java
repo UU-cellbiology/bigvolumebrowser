@@ -66,7 +66,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	
 	final BigVolumeBrowser bvb;
 	
-	final ClipSetups clipSetups;
+	final public ClipSetups clipSetups;
 	
 	public JCheckBox cbClipEnabled;
 	public JButton butResetClip;
