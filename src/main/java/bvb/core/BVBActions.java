@@ -61,7 +61,8 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.Rotate3DViewerStyle;
-
+import bvb.shapes.BasicShape;
+import bvb.utils.BoundedValueDoubleBVB;
 import bvvpg.vistools.BvvHandle;
 
 import ij.Prefs;
@@ -375,19 +376,28 @@ public class BVBActions
 	
 	public void actionToggleVisibility()
 	{
-		final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
-		if(csList== null || csList.isEmpty())
-		{
+		if(!bvb.selectedObjects.isAnythingSelected() )
 			return;
-		}
-		for ( final ConverterSetup cs : csList )
-		{
-			
-			SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( cs );
-			bvb.bvvViewer.state().setSourceActive( sac, !bvb.bvvViewer.state().isSourceVisible( sac ) );
-
-		}
 		
+		if(bvb.selectedObjects.areSourcesSelected())
+		{
+			final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
+			for ( final ConverterSetup cs : csList )
+			{				
+				SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( cs );
+				bvb.bvvViewer.state().setSourceActive( sac, !bvb.bvvViewer.state().isSourceVisible( sac ) );	
+			}
+		}
+		if(bvb.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = bvb.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				sh.setVisible( !sh.isVisible() );
+			}
+			bvb.controlPanel.tabPanelShapes.panelShapes.updateUI();
+			bvb.repaintBVV();
+		}
 	}
 	
 }

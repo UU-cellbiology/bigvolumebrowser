@@ -106,20 +106,7 @@ public class ClipAxesBounds
 		if ( source != null )
 		{
 			//get the range over all timepoints
-			int t = 0;
-			while(source.getSpimSource().isPresent( t ))
-			{
-				if(bounds == null)
-				{
-					bounds = new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0));
-				}
-				else
-				{
-					bounds = bounds.join( new Bounds3D(Misc.getSourceBoundingBox(source.getSpimSource(),t,0)) );
-				}
-					
-				t++;
-			}
+			bounds = new Bounds3D(Misc.getSourceBoundingBoxAllTP( source.getSpimSource() ));
 		}
 		else
 		{

@@ -76,7 +76,6 @@ public class ClipRangePanel extends JPanel
 
 		setLayout(gridbag);
 
-
 		cd.gridy = 0;
 		cd.gridx = 0;
 		cd.fill = GridBagConstraints.BOTH;
@@ -249,6 +248,7 @@ public class ClipRangePanel extends JPanel
 		final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 		if ( blockUpdates || csList== null || csList.isEmpty() )
 			return;
+		
 		Bounds3D range3D = null;
 		for ( final ConverterSetup cs : csList )
 		{
