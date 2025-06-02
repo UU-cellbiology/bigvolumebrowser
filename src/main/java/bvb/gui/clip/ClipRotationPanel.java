@@ -120,18 +120,21 @@ public class ClipRotationPanel extends JPanel
 			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 			for ( final ConverterSetup cs: csList)
 			{
-				if(bFirstCS)
+				if(((GammaConverterSetup)cs).clipActive())
 				{
-					angles = clipSetups.clipRotationAngles.getAngles( cs );
-					bFirstCS = false;
-				}
-				else
-				{
-					final double[] currAngles = clipSetups.clipRotationAngles.getAngles( cs );
-	
-					for (int d=0; d<3; d++)
+					if(bFirstCS)
 					{
-						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+						angles = clipSetups.clipRotationAngles.getAngles( cs );
+						bFirstCS = false;
+					}
+					else
+					{
+						final double[] currAngles = clipSetups.clipRotationAngles.getAngles( cs );
+		
+						for (int d=0; d<3; d++)
+						{
+							allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+						}
 					}
 				}
 			}
@@ -142,37 +145,43 @@ public class ClipRotationPanel extends JPanel
 			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh : shList )
 			{
-				if(bFirstCS)
+				if(sh.clipActive())
 				{
-					angles = clipSetups.clipRotationAngles.getAngles( sh );
-					bFirstCS = false;
-				}
-				else
-				{
-					final double[] currAngles = clipSetups.clipRotationAngles.getAngles( sh );
-	
-					for (int d=0; d<3; d++)
+					if(bFirstCS)
 					{
-						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+						angles = clipSetups.clipRotationAngles.getAngles( sh );
+						bFirstCS = false;
+					}
+					else
+					{
+						final double[] currAngles = clipSetups.clipRotationAngles.getAngles( sh );
+		
+						for (int d=0; d<3; d++)
+						{
+							allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+						}
 					}
 				}
 			}
 		}
-		final double [] finalAngles = angles;
-		final boolean [] isConsistent = allAnglesEqual;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( ClipRotationPanel.this )
-			{
-				blockUpdates = true;
-				for (int d=0;d<3;d++)
+		if(bFirstCS)
+		{
+			final double [] finalAngles = angles;
+			final boolean [] isConsistent = allAnglesEqual;
+			SwingUtilities.invokeLater( () -> {
+				synchronized ( ClipRotationPanel.this )
 				{
-
-					clipRotationPanels[d].setConsistent( isConsistent[d] );
-					clipRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
+					blockUpdates = true;
+					for (int d=0;d<3;d++)
+					{
+	
+						clipRotationPanels[d].setConsistent( isConsistent[d] );
+						clipRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
+					}
+					blockUpdates = false;
 				}
-				blockUpdates = false;
-			}
-		} );
+			} );
+		}
 	}
 	
 	synchronized void updateClipAxisRotation(int nAxis)

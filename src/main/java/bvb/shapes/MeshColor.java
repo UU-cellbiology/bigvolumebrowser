@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
@@ -50,7 +51,7 @@ public class MeshColor extends AbstractClipTransformShape
 	
 	String sName = "";
 	
-	RealInterval boundingBox = null;
+	RealInterval boundBox = null;
 	
 	public MeshColor(String sFilename)
 	{
@@ -62,7 +63,7 @@ public class MeshColor extends AbstractClipTransformShape
 		if(nmesh != null)
 		{			
 			visRender = new VisMeshColor( nmesh );
-			boundingBox = Meshes.boundingBox( nmesh );
+			boundBox = Meshes.boundingBox( nmesh );
 			setName(Misc.getSourceStyleName( sFilename ));
 		}
 		else
@@ -77,7 +78,7 @@ public class MeshColor extends AbstractClipTransformShape
 		if(nmesh != null)
 		{
 			visRender = new VisMeshColor( nmesh );
-			boundingBox = Meshes.boundingBox( nmesh );
+			boundBox = Meshes.boundingBox( nmesh );
 		}
 	}
 	
@@ -87,7 +88,14 @@ public class MeshColor extends AbstractClipTransformShape
 		final AffineTransform3D t = new AffineTransform3D();
 		visRender.getTransform( t );
 		
-		return t.estimateBounds( boundingBox );
+		return t.estimateBounds( boundBox );
+	}
+	
+	@Override
+	public RealInterval boundingBoxNotTransformed()
+	{
+		
+		return new FinalRealInterval(boundBox);
 	}
 	
 	public void setPointsRender(final float fPointsSize_)

@@ -30,6 +30,7 @@ package bvb.shapes;
 
 import java.awt.image.BufferedImage;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
@@ -58,6 +59,13 @@ public class MeshTexture extends AbstractClipTransformShape
 	public RealInterval boundingBox()
 	{
 		return boundingBox;
+	}
+	
+	@Override
+	public RealInterval boundingBoxNotTransformed()
+	{
+		
+		return new FinalRealInterval(boundingBox);
 	}
 	
 	public void setName(String sName_)

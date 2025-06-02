@@ -53,10 +53,7 @@ public class TransformSetups
 		
 		//reset both transforms just in case
 		sh.setTransform( srcTrFixed );
-	//	(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
-	//	(( TransformedSource< ? > )src).setIncrementalTransform( srcTrFixed );
-		
-		//FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+
 		final double [] center =  Misc.getIntervalCenterNegative( sh.boundingBox() );
 		final double [] dCurrScale = transformScale.getScale( sh );		
 
@@ -69,18 +66,16 @@ public class TransformSetups
 		srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
 		
 		//rotate
-		srcTrFixed = srcTrFixed.preConcatenate( trRot );
-		
+		srcTrFixed = srcTrFixed.preConcatenate( trRot );		
 		
 		//move things to the current volume's center
 		final double [] tr = transformCenters.getCenters( sh );		
 		final AffineTransform3D translTr = new AffineTransform3D();
 		translTr.translate( tr );
-		srcTrFixed = srcTrFixed.preConcatenate( translTr );
-		
+		srcTrFixed = srcTrFixed.preConcatenate( translTr );		
 		
 		sh.setTransform( srcTrFixed );
-		//(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
+
 		bvb.updateSceneRender();	
 	}
 	

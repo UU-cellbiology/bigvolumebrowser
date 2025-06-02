@@ -525,10 +525,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		shapes.add( shape );
 		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();
 		dataTreeModel.addData( shape, shape.toString(), dataTreeModel.getIconGroupShape() );
+		updateSceneRender();
 		if(BVBSettings.bFocusOnSourcesOnLoad)
 		{
 			this.focusOnRealInterval( shape.boundingBox());
 		}
+		
 	}
 	
 	public void removeShape(final BasicShape shape)
@@ -591,6 +593,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void updateSceneRender()
 	{
 		volumeBoxes.updateVolumeBoxes();
+		clipBoxes.updateClipBoxes();
 		
 		bvvViewer.requestRepaint();
 	}

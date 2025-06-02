@@ -35,6 +35,7 @@ import java.util.Arrays;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
 import bvb.scene.VisSpots;
@@ -49,7 +50,7 @@ public class Spots extends AbstractClipTransformShape
 	int renderType;
 	int pointShape;
 	
-	FinalRealInterval bBox = null;
+	FinalRealInterval boundBox = null;
 	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -136,14 +137,24 @@ public class Spots extends AbstractClipTransformShape
 			
 		}
 		
-		bBox =  Intervals.createMinMaxReal( boundingBox[ 0 ], boundingBox[ 1 ], boundingBox[ 2 ], boundingBox[ 3 ], boundingBox[ 4 ], boundingBox[ 5 ] );
+		boundBox =  Intervals.createMinMaxReal( boundingBox[ 0 ], boundingBox[ 1 ], boundingBox[ 2 ], boundingBox[ 3 ], boundingBox[ 4 ], boundingBox[ 5 ] );
 		
 	}
 	
 	@Override
 	public RealInterval boundingBox()
 	{
-		return bBox;
+		final AffineTransform3D t = new AffineTransform3D();
+		visRender.getTransform( t );
+		
+		return t.estimateBounds( boundBox );
+	}
+	
+	@Override
+	public RealInterval boundingBoxNotTransformed()
+	{
+		
+		return new FinalRealInterval(boundBox);
 	}
 	
 	public void setPointsColor(Color pointColor_) 

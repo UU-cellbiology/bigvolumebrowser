@@ -289,7 +289,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 			{
 				sh.setClipActive( bEnabled );
 			}
-			clipSetups.bvb.repaintBVV();
+			bvb.updateSceneRender();
 		}
 		if(bEnabled)
 		{
@@ -367,7 +367,9 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 					sh.setClipActive( true );
 				}
 			}
+			bvb.updateSceneRender();
 		}
+		updateGUI();
 	}
 	
 	public void setSourceListeners()

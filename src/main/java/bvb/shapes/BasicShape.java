@@ -53,6 +53,8 @@ public interface BasicShape
 	
 	public RealInterval boundingBox();
 	
+	public RealInterval boundingBoxNotTransformed();
+	
 	public void setTimePoint(final int nTP);
 	
 	public int getTimePoint();

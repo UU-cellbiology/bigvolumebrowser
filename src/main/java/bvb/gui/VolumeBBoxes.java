@@ -45,6 +45,7 @@ import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.AbstractBasicShape;
+import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
@@ -56,6 +57,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	final BigVolumeBrowser bvb;
 	
 	private final Map < SourceAndConverter< ? >, VolumeBox > bvvSourceToBox;
+	private final Map < BasicShape, VolumeBox > shapeToBox;
 	
 	private boolean bVisible = false;
 	
@@ -73,7 +75,8 @@ public class VolumeBBoxes extends AbstractBasicShape
 		
 		bDotted = bDotted_;
 		
-		bvvSourceToBox =  new HashMap<>();
+		bvvSourceToBox = new HashMap<>();
+		shapeToBox = new HashMap<>();
 	}
 
 	@Override
@@ -92,9 +95,21 @@ public class VolumeBBoxes extends AbstractBasicShape
 					exc.printStackTrace();
 				}
 			}
-			bLocked = true;
+			
+			bLocked = true;			
+			
 			bvvSourceToBox.forEach( (sac, vbox)-> {
 				if(bvb.bvvViewer.state().isSourceVisible( sac ))
+				{
+					if(vbox != null)
+					{
+						vbox.draw( gl, pvm, vm, screen_size, -1);
+					}
+				}
+			});
+			
+			shapeToBox.forEach( (sh, vbox)-> {
+				if(sh.isVisible())
 				{
 					if(vbox != null)
 					{
@@ -115,6 +130,9 @@ public class VolumeBBoxes extends AbstractBasicShape
 		bvvSourceToBox.forEach( (src, vbox)-> {
 			vbox.setLineColor( lineColor );
 		});
+		shapeToBox.forEach( (src, vbox)-> {
+			vbox.setLineColor( lineColor );
+		});
 		
 	}
 	
@@ -123,7 +141,10 @@ public class VolumeBBoxes extends AbstractBasicShape
 		lineThickness = fThickness;
 		bvvSourceToBox.forEach( (src, vbox)-> {
 			vbox.setLineThickness( lineThickness );
-		});		
+		});	
+		shapeToBox.forEach( (src, vbox)-> {
+			vbox.setLineThickness( lineThickness );
+		});	
 	}
 	
 	@Override
@@ -150,7 +171,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 		List< SourceAndConverter< ? > > sacList = bvb.bvvViewer.state().getSources();
 		
-		for(SourceAndConverter< ? > sac : sacList )
+		for(final SourceAndConverter< ? > sac : sacList )
 		{
 			final Source< ? > src = sac.getSpimSource();
 			if(src.isPresent( nTimePoint ))
@@ -168,8 +189,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				src.getSourceTransform( nTimePoint, 0, transform );
 				final VolumeBox currBox = bvvSourceToBox.get( sac );
 				if(currBox == null)
-				{
-				
+				{				
 					bvvSourceToBox.put( sac, new VolumeBox(interval, transform , lineThickness, lineColor, bDotted) );
 				}
 				else
@@ -186,6 +206,35 @@ public class VolumeBBoxes extends AbstractBasicShape
 				bvvSourceToBox.remove( sac );
 			}
 		}
+		
+		for(final BasicShape sh:bvb.shapes)
+		{
+			if(sh.getTimePoint()<0 || sh.getTimePoint() == nTimePoint)
+			{
+
+				final FinalRealInterval interval = new FinalRealInterval(sh.boundingBoxNotTransformed());
+				final AffineTransform3D transform = new AffineTransform3D();
+				sh.getTransform( transform );
+
+				final VolumeBox currBox = shapeToBox.get( sh );
+				if(currBox == null)
+				{				
+					shapeToBox.put( sh, new VolumeBox(interval, transform , lineThickness, lineColor, bDotted) );
+				}
+				else
+				{
+					if(!currBox.compareIntervalTransform( interval, transform ))
+					{
+						currBox.setTransform(transform, false);
+						currBox.setInterval( interval );
+					}
+				}
+			}
+			else
+			{
+				shapeToBox.remove( sh );
+			}
+		}		
 
 		bLocked = false;
 	}
@@ -240,6 +289,38 @@ public class VolumeBBoxes extends AbstractBasicShape
 			}
 			
 		}
+		
+		for(final BasicShape sh:bvb.shapes)
+		{
+			final VolumeBox currBox = shapeToBox.get( sh );
+			
+			if(sh.clipActive())
+			{
+				final AffineTransform3D transform = new AffineTransform3D();
+				FinalRealInterval interval = sh.getClipInterval();
+				if(interval == null)
+					interval = new FinalRealInterval (sh.boundingBox());
+				sh.getClipTransform( transform );
+				if(currBox == null)
+				{
+					sh.getClipTransform( transform );
+					shapeToBox.put( sh, new VolumeBox(interval, transform, lineThickness, lineColor, bDotted) );
+				}
+				else
+				{
+					if(!currBox.compareIntervalTransform( interval, transform ))
+					{
+						currBox.setTransform(transform, false);
+						currBox.setInterval( interval );
+						
+					}
+				}
+			}
+			else
+			{
+				shapeToBox.remove( sh );
+			}
+		}
 
 		bLocked = false;
 	}
@@ -259,56 +340,55 @@ public class VolumeBBoxes extends AbstractBasicShape
 	@Override
 	public boolean clipActive()
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public void setClipInterval( RealInterval clipInt )
 	{
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void setClipActive( boolean bEnabled )
 	{
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public FinalRealInterval getClipInterval()
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void getClipTransform( AffineTransform3D t )
 	{
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void setClipTransform( AffineTransform3D t )
 	{
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void getTransform( AffineTransform3D t )
 	{
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void setTransform( AffineTransform3D t )
 	{
-		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public RealInterval boundingBoxNotTransformed()
+	{
+		return null;
 	}
 }

@@ -135,27 +135,30 @@ public class ClipCenterPanel extends JPanel
 			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 			for ( final ConverterSetup cs: csList)
 			{
-				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
-				final double [] minBound = bounds.getMinBound();
-				final double [] maxBound = bounds.getMaxBound();
-				
-				double [] center = new double [3];
-				center = clipSetups.clipCenters.getCenters( cs );
-				if(bFirstCS)
+				if(((GammaConverterSetup)cs).clipActive())
 				{
-					for (int d=0; d<3; d++)
+					final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
+					final double [] minBound = bounds.getMinBound();
+					final double [] maxBound = bounds.getMaxBound();
+					
+					double [] center = new double [3];
+					center = clipSetups.clipCenters.getCenters( cs );
+					if(bFirstCS)
 					{
-						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						for (int d=0; d<3; d++)
+						{
+							boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						}
+						bFirstCS = false;
 					}
-					bFirstCS = false;
-				}
-				else
-				{
-					for (int d=0; d<3; d++)
+					else
 					{
-						final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-						allCenterEqual[d] &= boundValue[d].equals( centerRange );
-						boundValue[d] = boundValue[d].join( centerRange );
+						for (int d=0; d<3; d++)
+						{
+							final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+							allCenterEqual[d] &= boundValue[d].equals( centerRange );
+							boundValue[d] = boundValue[d].join( centerRange );
+						}
 					}
 				}
 			}
@@ -165,46 +168,52 @@ public class ClipCenterPanel extends JPanel
 			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh : shList )
 			{
-				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( sh );
-				final double [] minBound = bounds.getMinBound();
-				final double [] maxBound = bounds.getMaxBound();
-				
-				double [] center = new double [3];
-				center = clipSetups.clipCenters.getCenters( sh );
-				if(bFirstCS)
+				if(sh.clipActive())
 				{
-					for (int d=0; d<3; d++)
+					final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( sh );
+					final double [] minBound = bounds.getMinBound();
+					final double [] maxBound = bounds.getMaxBound();
+					
+					double [] center = new double [3];
+					center = clipSetups.clipCenters.getCenters( sh );
+					if(bFirstCS)
 					{
-						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						for (int d=0; d<3; d++)
+						{
+							boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						}
+						bFirstCS = false;
 					}
-					bFirstCS = false;
-				}
-				else
-				{
-					for (int d=0; d<3; d++)
+					else
 					{
-						final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-						allCenterEqual[d] &= boundValue[d].equals( centerRange );
-						boundValue[d] = boundValue[d].join( centerRange );
+						for (int d=0; d<3; d++)
+						{
+							final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+							allCenterEqual[d] &= boundValue[d].equals( centerRange );
+							boundValue[d] = boundValue[d].join( centerRange );
+						}
 					}
 				}
 			}
 		}
-		
-		final BoundedValueDoubleBVB [] finalCenter = boundValue;
-		final boolean [] isConsistent = allCenterEqual;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( ClipCenterPanel.this )
-			{
-				blockUpdates = true;
-				for (int d=0;d<3;d++)
+		//if anything is present and changed
+		if(!bFirstCS)
+		{
+			final BoundedValueDoubleBVB [] finalCenter = boundValue;
+			final boolean [] isConsistent = allCenterEqual;
+			SwingUtilities.invokeLater( () -> {
+				synchronized ( ClipCenterPanel.this )
 				{
-					clipCenterPanels[d].setConsistent( isConsistent[d] );
-					clipCenterPanels[d].setValue( finalCenter[d] );
+					blockUpdates = true;
+					for (int d=0;d<3;d++)
+					{
+						clipCenterPanels[d].setConsistent( isConsistent[d] );
+						clipCenterPanels[d].setValue( finalCenter[d] );
+					}
+					blockUpdates = false;
 				}
-				blockUpdates = false;
-			}
-		} );
+			} );
+		}
 	}
 	
 	synchronized void updateClipCenter(int nAxis)
