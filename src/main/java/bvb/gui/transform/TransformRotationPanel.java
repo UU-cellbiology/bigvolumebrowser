@@ -186,18 +186,32 @@ public class TransformRotationPanel extends JPanel
 	
 	void resetRotation()
 	{
-		final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-		if(csList == null || csList.isEmpty())
-		{
+		
+		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+		
+		blockUpdates = true;
+		final double [] eAngles = new double [3];
+		if(transformSetups.selectedObjects.areSourcesSelected())
+		{
+			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();	
+			for ( final ConverterSetup cs: csList)
+			{			
+				transformSetups.transformRotation.setAngles( cs, eAngles );
+				transformSetups.updateTransform( cs );			
+			}
 		}
 		
-		final double [] eAngles = new double [3];
-		for ( final ConverterSetup cs: csList)
-		{			
-			transformSetups.transformRotation.setAngles( cs, eAngles );
-			transformSetups.updateTransform( cs );			
+		if(transformSetups.selectedObjects.areShapesSelected())
+		{
+			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh : shList )
+			{
+				transformSetups.transformRotation.setAngles( sh, eAngles );
+				transformSetups.updateTransform( sh );	
+			}
 		}
+		blockUpdates = false;
 		updateGUI();
 	}
 	
