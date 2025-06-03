@@ -42,6 +42,7 @@ import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.Affine3DHelpers;
+import bdv.util.BoundedRange;
 import bdv.viewer.Source;
 
 public class Misc
@@ -453,5 +454,28 @@ public class Misc
 			}
 		}
 		return nCount;
+	}
+	
+	/** a bit more permissive comparison of bounded ranges **/
+	public static boolean compareRanges(final BoundedRange r1, final BoundedRange r2)
+	{
+		if ( r1 == r2 )
+			return true;
+		if(r1 == null || r2 == null)
+			return false;		
+		if (compareRelativeDouble(r1.getMinBound(),r2.getMinBound()))
+			return false;
+		if (compareRelativeDouble(r1.getMaxBound(),r2.getMaxBound()))
+			return false;
+		if (compareRelativeDouble(r1.getMin(),r2.getMin()))
+			return false;
+		if (compareRelativeDouble(r1.getMax(),r2.getMax()))
+			return false;
+		
+		return true;
+	}
+	public static boolean compareRelativeDouble(final double v1, final double v2)
+	{
+		return (Math.abs( v1- v2)/Math.max( Math.abs( v1 ), Math.abs( v2 ) )) >0.1 ;
 	}
 }
