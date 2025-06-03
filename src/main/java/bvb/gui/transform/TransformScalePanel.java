@@ -259,6 +259,7 @@ public class TransformScalePanel extends JPanel
 				}
 				newScale[nAxis] = currVal;
 				transformSetups.transformScale.setScale( cs, newScale );
+				transformSetups.oldAngles = null;
 				transformSetups.updateTransform( cs );
 			}
 		}

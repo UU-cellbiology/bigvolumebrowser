@@ -142,7 +142,32 @@ public class Misc
 			min[d] -= 0.5;
 			max[d] += 0.5;
 		}
-		final FinalRealInterval interval =transformSource.estimateBounds( new FinalRealInterval(min, max) );
+		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) );
+		
+		return interval.minAsDoubleArray();
+	}
+	
+	public static double[] getSourceMinNoFixedTransform(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformFullSource = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformFullSource);
+		final AffineTransform3D transformFixed = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getFixedTransform( transformFixed );
+		
+		//remove fixed transform
+		final AffineTransform3D transformSource = new AffineTransform3D ();
+		transformSource.set( transformFullSource );
+		transformSource.preConcatenate( transformFixed.inverse() );
+		
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) );
 		
 		return interval.minAsDoubleArray();
 	}
@@ -163,6 +188,31 @@ public class Misc
 				else
 				{
 					final double [] minCurr = Misc.getSourceMin(source,t,0);
+					for(int d=0; d<3; d++)
+						min[d] = Math.min( min[d], minCurr[d] );
+				}					
+				t++;
+			}
+		}
+		return min;
+	}
+	
+	public static double[] getSourceMinNoFixedTransformAllTP(final Source<?> source)
+	{
+		double [] min = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(min == null)
+				{
+					min = Misc.getSourceMinNoFixedTransform(source,t,0);
+				}
+				else
+				{
+					final double [] minCurr = Misc.getSourceMinNoFixedTransform(source,t,0);
 					for(int d=0; d<3; d++)
 						min[d] = Math.min( min[d], minCurr[d] );
 				}					
@@ -457,7 +507,7 @@ public class Misc
 	}
 	
 	/** a bit more permissive comparison of bounded ranges **/
-	public static boolean compareRanges(final BoundedRange r1, final BoundedRange r2)
+	public static boolean compareBoundedRanges(final BoundedRange r1, final BoundedRange r2)
 	{
 		if ( r1 == r2 )
 			return true;
@@ -474,8 +524,42 @@ public class Misc
 		
 		return true;
 	}
+
+	/** a bit more permissive comparison of bounded values **/
+	public static boolean compareBoundedValues(final BoundedValueDoubleBVB r1, final BoundedValueDoubleBVB r2)
+	{
+		if ( r1 == r2 )
+			return true;
+		if(r1 == null || r2 == null)
+			return false;		
+		if (compareRelativeDouble(r1.getRangeMin(),r2.getRangeMin()))
+			return false;
+		if (compareRelativeDouble(r1.getRangeMax(),r2.getRangeMax()))
+			return false;
+		if (compareRelativeDouble(r1.getCurrentValue(),r2.getCurrentValue()))
+			return false;
+		
+		return true;
+	}
+
+	
 	public static boolean compareRelativeDouble(final double v1, final double v2)
 	{
 		return (Math.abs( v1- v2)/Math.max( Math.abs( v1 ), Math.abs( v2 ) )) >0.1 ;
+	}
+	
+	public static BoundedRange translateBoundedRange(final BoundedRange rangeOld, final double  translation)
+	{
+		final double [] rangeX = new double [4];
+		rangeX[0] = rangeOld.getMin();
+		rangeX[1] = rangeOld.getMax();
+		rangeX[2] = rangeOld.getMinBound();
+		rangeX[3] = rangeOld.getMaxBound();
+		for(int i=0;i<4;i++)
+		{
+			rangeX[i] += translation;
+		}
+		return new BoundedRange (rangeX[2], rangeX[3], rangeX[0], rangeX[1]);
+		
 	}
 }

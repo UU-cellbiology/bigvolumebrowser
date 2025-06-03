@@ -87,7 +87,9 @@ public class ClipRotationAngles
 	public double [] getCurrentEulerAngles(final ConverterSetup setup)
 	{
 		final AffineTransform3D clipTr = new AffineTransform3D();
+		
 		((GammaConverterSetup)setup).getClipTransform(clipTr);
+		
 		final FinalRealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
 		final double [] center;
 		if(interval == null)

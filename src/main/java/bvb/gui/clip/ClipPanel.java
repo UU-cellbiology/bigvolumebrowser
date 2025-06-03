@@ -74,7 +74,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	//public JLabel selectionWindow;
 	
 	final ClipRangePanel clipRangePanel;
-	final ClipRotationPanel clipRotationPanel;
+	final public ClipRotationPanel clipRotationPanel;
 	final ClipCenterPanel clipCenterPanel;
 
 	/**

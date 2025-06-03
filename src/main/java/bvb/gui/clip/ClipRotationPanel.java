@@ -102,7 +102,7 @@ public class ClipRotationPanel extends JPanel
 		}
 	}	
 	
-	synchronized void updateGUI()
+	public synchronized void updateGUI()
 	{
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
@@ -164,7 +164,7 @@ public class ClipRotationPanel extends JPanel
 				}
 			}
 		}
-		if(bFirstCS)
+		if(!bFirstCS)
 		{
 			final double [] finalAngles = angles;
 			final boolean [] isConsistent = allAnglesEqual;

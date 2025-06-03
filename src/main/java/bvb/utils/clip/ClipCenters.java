@@ -57,7 +57,7 @@ public class ClipCenters
 	
 	public double[] getCenters( final ConverterSetup setup )
 	{
-		double [] out =  setupToCenters.get( setup );
+		double [] out = setupToCenters.get( setup );
 		if(out == null)
 		{
 			out = getCurrentOrDefaultCenters(setup);

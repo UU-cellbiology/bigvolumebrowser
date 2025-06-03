@@ -15,7 +15,7 @@ public class TransformPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	
-	final TransformSetups transformSetups;
+	final public TransformSetups transformSetups;
 	
 	final TransformScalePanel transformScalePanel;
 	

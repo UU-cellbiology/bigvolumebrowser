@@ -160,6 +160,11 @@ public class TransformRotationPanel extends JPanel
 			for ( final ConverterSetup cs : csList )
 			{			
 				final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
+				transformSetups.oldAngles =  new double[3];
+				for(int d=0;d<3;d++)
+				{
+					transformSetups.oldAngles[d] = eAngles[d];
+				}
 				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
 				
 				transformSetups.transformRotation.setAngles( cs, eAngles );

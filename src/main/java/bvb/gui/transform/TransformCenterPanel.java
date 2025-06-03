@@ -225,6 +225,7 @@ public class TransformCenterPanel extends JPanel
 				newCenters[nAxis] = currVal;
 				
 				transformSetups.transformCenters.setCenters( cs, newCenters );
+				transformSetups.oldAngles = null;
 				transformSetups.updateTransform( cs );			
 			}
 		}

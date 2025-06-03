@@ -40,10 +40,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
-
 import net.imglib2.FinalRealInterval;
-
-import org.apache.commons.math3.exception.MathArithmeticException;
+import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedRange;
@@ -180,8 +178,9 @@ public class ClipRangePanel extends JPanel
 						clipInterval.realMin( min );
 						clipInterval.realMax( max );
 					}
+					
 					//convert to relative
-					double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( gcs ).getSpimSource() );
+					double [] relShift = clipSetups.getSourceMinWithScale(cs);				
 					
 					for(int d=0;d<3;d++)
 					{
@@ -205,7 +204,7 @@ public class ClipRangePanel extends JPanel
 						for (int d=0; d<3; d++)
 						{
 							final BoundedRange axisRange = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
-							allRangesEqual[d] &= Misc.compareRanges(range[d], axisRange );
+							allRangesEqual[d] &= Misc.compareBoundedRanges(range[d], axisRange );
 							range[d] = range[d].join( axisRange );
 						}
 					}
@@ -292,18 +291,11 @@ public class ClipRangePanel extends JPanel
 			for ( final ConverterSetup cs : csList )
 			{
 				//convert to relative
-				double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
-				double [] rangeX = new double [4];
-				rangeX[0] = rangeOld.getMin();
-				rangeX[1] = rangeOld.getMax();
-				rangeX[2] = rangeOld.getMinBound();
-				rangeX[3] = rangeOld.getMaxBound();
-				for(int i=0;i<4;i++)
-				{
-					rangeX[i]+=relShift[nAxis];
-				}
-				BoundedRange range = new BoundedRange (rangeX[2], rangeX[3], rangeX[0], rangeX[1]);
-
+				//double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+				double [] relShift = clipSetups.getSourceMinWithScale(cs);
+				
+				BoundedRange range = Misc.translateBoundedRange( rangeOld, relShift[nAxis] );
+				
 				//convert range to absolute
 				FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
 				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );

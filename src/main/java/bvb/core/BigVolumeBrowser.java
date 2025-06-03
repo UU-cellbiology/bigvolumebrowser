@@ -754,6 +754,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		testBVB.startBVB("");
 		//testBVB.run("");
 		
+		
+		testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_cliptest.tif" );
+		
 		//transform test
 //		ValuePair< AbstractSpimData< ? >, List< BvvStackSource< ? > > > in = testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );
 //		BvvStackSource< ? > sourceBVV = in.getB().get( 0 );
