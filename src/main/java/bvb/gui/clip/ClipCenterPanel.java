@@ -153,23 +153,30 @@ public class ClipCenterPanel extends JPanel
 //					final double [] scales = centerclipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( cs );
 //					for(int d=0;d<3; d++)
 //						relShift[d] *= scales[d];
-					AffineTransform3D tr = new AffineTransform3D();
-					(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
-					tr.inverse().apply( centerIn, center );
-//					for(int d=0; d<3; d++)
-//					{
-//						System.out.print(center [d]+" ");
-//					}
-//					System.out.print("\n");
-					final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+					
+					if(clipSetups.bLocalCoordinates)
+					{
+						AffineTransform3D tr = new AffineTransform3D();
+						(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
+						tr.inverse().apply( centerIn, center );
+						//final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+						final double [] relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+						for(int d=0;d<3;d++)
+						{
+							//center[d] = centerIn[d]-relShift[d];
+							minBound[d] -= relShift[d];
+							maxBound[d] -= relShift[d];
+						}
+					}
+					else
+					{
+						center = centerIn;
+					}
 					for(int d=0;d<3;d++)
 					{
-						//center[d] = centerIn[d]-relShift[d];
-						minBound[d] -= relShift[d];
-						maxBound[d] -= relShift[d];
+						minBound[d] = Math.min(minBound[d], center[d]);
+						maxBound[d] = Math.max(maxBound[d], center[d]);
 					}
-					
-					
 					if(bFirstCS)
 					{
 						for (int d=0; d<3; d++)
@@ -266,12 +273,17 @@ public class ClipCenterPanel extends JPanel
 			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 			for ( final ConverterSetup cs : csList )
 			{
+				double [] relShift  = new double [3];
+			
+				if(clipSetups.bLocalCoordinates)
+				{
 				//relative coordinates
-				final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+					relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
 				//final double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+				}
 
 				//tr.apply( currValAbs, currVal );
-				double currVal = currValAbs + relShift[nAxis];
+				double currVal = currValAbs ;//+ relShift[nAxis];
 				double minBound = minBoundAbs + relShift[nAxis];
 				double maxBound = maxBoundAbs + relShift[nAxis];
 				
@@ -285,12 +297,16 @@ public class ClipCenterPanel extends JPanel
 				}
 				AffineTransform3D tr = new AffineTransform3D();
 				(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
-				
 				final double [] newCenter = clipSetups.clipCenters.getCenters( cs );
-				tr.inverse().apply( newCenter, newCenter );
+				if(clipSetups.bLocalCoordinates)
+				{
+					tr.inverse().apply( newCenter, newCenter );
+				}
 				newCenter[nAxis] = currVal;
-				tr.apply( newCenter, newCenter );
-				
+				if(clipSetups.bLocalCoordinates)
+				{
+					tr.apply( newCenter, newCenter );
+				}
 				clipSetups.clipCenters.setCenters( cs, newCenter );
 				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs, null );
 			}

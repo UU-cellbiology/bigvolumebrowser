@@ -175,19 +175,21 @@ public class ClipRangePanel extends JPanel
 						clipInterval.realMin( min );
 						clipInterval.realMax( max );
 					}
-					
-					//convert to relative
-					double [] relShift = clipSetups.getSourceMinWithScale(cs);				
-					
-					for(int d=0;d<3;d++)
+					if(clipSetups.bLocalCoordinates)
 					{
-						min[d] -= relShift[d];
-						max[d] -= relShift[d];
+						//convert to relative
+						//double [] relShift = clipSetups.getSourceMinWithScale(cs);				
+						double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );				
 						
-						minBound[d] -= relShift[d];
-						maxBound[d] -= relShift[d];	
+						for(int d=0;d<3;d++)
+						{
+							min[d] -= relShift[d];
+							max[d] -= relShift[d];
+							
+							minBound[d] -= relShift[d];
+							maxBound[d] -= relShift[d];	
+						}
 					}
-					
 					if(bFirstCS)
 					{
 						for (int d=0; d<3; d++)
@@ -289,10 +291,17 @@ public class ClipRangePanel extends JPanel
 			{
 				//convert to relative
 				//double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
-				double [] relShift = clipSetups.getSourceMinWithScale(cs);
-				
-				BoundedRange range = Misc.translateBoundedRange( rangeOld, relShift[nAxis] );
-				
+				//double [] relShift = clipSetups.getSourceMinWithScale(cs);
+				double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+				BoundedRange range = null;
+				if(clipSetups.bLocalCoordinates)
+				{
+					range = Misc.translateBoundedRange( rangeOld, relShift[nAxis] );
+				}
+				else
+				{
+					range = rangeOld;
+				}
 				//convert range to absolute
 				FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
 				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );

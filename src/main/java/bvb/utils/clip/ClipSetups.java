@@ -58,6 +58,8 @@ public class ClipSetups
 	
 	public final BigVolumeBrowser bvb;
 	
+	public boolean bLocalCoordinates = true;
+	
 	public ClipSetups (final BigVolumeBrowser bvb_)
 	{
 		bvb = bvb_;

@@ -101,6 +101,8 @@ public class TransformSetups
 		{
 			if(previousAngles != null )
 			{
+				//update it once in a while (when safe)
+				//to reset accumulating errors				
 				if(Math.abs( eAngles[1] )<1.0 || Math.abs( eAngles[1] )>2.0)
 				{
 					final double [] qNew = Misc.getRotationQuaternion( eAngles );

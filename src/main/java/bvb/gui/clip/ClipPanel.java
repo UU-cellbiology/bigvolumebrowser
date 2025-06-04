@@ -71,7 +71,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public JCheckBox cbClipEnabled;
 	public JButton butResetClip;
 	public JCheckBox cbShowClipBoxes;
-	//public JLabel selectionWindow;
+	public JButton butCoordSystem;
 	
 	final ClipRangePanel clipRangePanel;
 	final public ClipRotationPanel clipRotationPanel;
@@ -125,8 +125,32 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		
 		cbClipEnabled = new JCheckBox("Clipping", false);
 		this.add(cbClipEnabled,gbc);
-		cbClipEnabled.addItemListener( this );		
+		
+		cbClipEnabled.addItemListener( this );	
+		
+		gbc.gridx++;
+		butCoordSystem = new JButton("Local");
+		butCoordSystem.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent arg0 )
+			{
+				clipSetups.bLocalCoordinates = !clipSetups.bLocalCoordinates;
+				if(clipSetups.bLocalCoordinates)
+				{
+					butCoordSystem.setText( "Loc" );
+				}
+				else
+				{
+					butCoordSystem.setText( "Glob" );
+				}
+				updateGUI();
+			}
+	
+		});
 					
+		this.add(butCoordSystem ,gbc);
+
 		cbShowClipBoxes = new JCheckBox ("Box",false);
 		//selectionWindow = new JLabel("Selected: None");
 		gbc.gridx++;
@@ -171,7 +195,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		gbc.gridx = 0;
 	    gbc.gridy ++;
 	    gbc.weightx = 1.0;
-	    gbc.gridwidth = 3;
+	    gbc.gridwidth = 4;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add(tabClipPane,gbc);
 
