@@ -101,31 +101,18 @@ public class TransformSetups
 		{
 			if(previousAngles != null )
 			{
-				//update it once in a while (when safe)
-				//to reset accumulating errors				
-				if(Math.abs( eAngles[1] )<1.0 || Math.abs( eAngles[1] )>2.0)
+				//add quaternion rotation
+				//calculate changes in angles
+				final double [] dChangeAngle = new double [3];
+				for (int d=0;d<3;d++)
 				{
-					final double [] qNew = Misc.getRotationQuaternion( eAngles );
-					for (int d=0;d<4;d++)
-					{
-						qCurr[d] = qNew[d];
-					}
+					dChangeAngle[d] = eAngles[d] - previousAngles[d];
 				}
-				else
-				{
-					//add quaternion rotation
-					//calculate changes in angles
-					final double [] dChangeAngle = new double [3];
-					for (int d=0;d<3;d++)
-					{
-						dChangeAngle[d] = eAngles[d] - previousAngles[d];
-					}
-					//construct quaternion
-					final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
-					LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
-					LinAlgHelpers.normalize( qCurr );
-				}
-				
+				//construct quaternion
+				final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
+				LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
+				LinAlgHelpers.normalize( qCurr );
+
 			}
 		}
 		
@@ -167,84 +154,77 @@ public class TransformSetups
 		
 		/////   update clipping, if needed
 		
-		// get change in the transform
-		AffineTransform3D clipBake = new AffineTransform3D ();
-		
-		//go to absolute coordinates
-		clipBake.set( oldTr.inverse() );
-		//account for the new transform
-		clipBake.preConcatenate( srcTrFixed );
-		AffineTransform3D clipUpdate = new AffineTransform3D ();
-		clipUpdate.set( clipBake );
-		//first account for the translation and scale
-//		for(int d=0;d<3;d++)
-//		{
-//			clipUpdate.set(Affine3DHelpers.extractScale( clipBake, d ),d,d);
-//			clipUpdate.set(clipBake.get( d, 3 ),d,3);
-//		}
-
-		//update centers bounds
-		//bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenterBounds.getBounds( cs ).applyTransform( clipUpdate );
-
-		//update centers
-		double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( cs );
-		clipUpdate.apply( clipCent, clipCent );
-		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( cs, clipCent );		
-
-
-		//update clipping range bounds
-//		Bounds3D bounds = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipAxesBounds.getBounds( cs );
-//		bounds.applyTransform( clipUpdate );
-		
-		//update clip interval		
-//		FinalRealInterval intOld = ((GammaConverterSetup)cs).getClipInterval();
-//		if(intOld != null)
-//		{
-//			final double [][] minmax = new double [2][3];
-//			minmax[0] = intOld.minAsDoubleArray();
-//			minmax[1] = intOld.maxAsDoubleArray();
-//			
-//			for(int i=0;i<2;i++)
-//			{
-//				clipUpdate.apply( minmax[i],minmax[i] );
-//			}
-//			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(minmax[0],minmax[1]) );
-//		}
-		
-		double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs );
-		
-//		AffineTransform3D rotationTr = new AffineTransform3D();
-//		
-//		rotationTr.set( clipUpdate );
-		//for(int d=0;d<3;d++)
-		//	clipCent[d]*=(-1);
-		//rotationTr.translate( clipCent );
-		
-		final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs);		
-		if(previousAngles != null)
+		if(((GammaConverterSetup)cs).clipActive())
 		{
-			//final double[] qRotation = new double[4];
-	
-	//		Affine3DHelpers.extractRotationAnisotropic( srcTrFixed, qRotation );
-	//		double [] dAngAdditional =  Misc.quaternionToEulerAngles(qRotation);
-			//Affine3DHelpers.extractRotationAnisotropic( oldTr, qRotation );
-			//double [] dAngOldTrans = Misc.quaternionToEulerAngles(qRotation);
-			double [] dAngUpdated  = new double [3]; 
-			for(int d=0;d<3;d++)
-			{
-				dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
-			}
 			
-			bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( cs, dAngUpdated );
-			//bvb.controlPanel.tabPanelView.clipPanel.clipRotationPanel.updateGUI();
+			// get change in the transform
+			AffineTransform3D clipBake = new AffineTransform3D ();
+			
+			//go to absolute coordinates
+			clipBake.set( oldTr.inverse() );
+			//account for the new transform
+			clipBake.preConcatenate( srcTrFixed );
+			AffineTransform3D clipUpdate = new AffineTransform3D ();
+			clipUpdate.set( clipBake );
+			//first account for the translation and scale
+	//		for(int d=0;d<3;d++)
+	//		{
+	//			clipUpdate.set(Affine3DHelpers.extractScale( clipBake, d ),d,d);
+	//			clipUpdate.set(clipBake.get( d, 3 ),d,3);
+	//		}
+	
+			//update centers bounds
+			//bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenterBounds.getBounds( cs ).applyTransform( clipUpdate );
+	
+			//update centers
+			double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( cs );
+			clipUpdate.apply( clipCent, clipCent );
+			bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( cs, clipCent );		
+	
+	
+			//update clipping range bounds
+	//		Bounds3D bounds = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipAxesBounds.getBounds( cs );
+	//		bounds.applyTransform( clipUpdate );
+			
+			//update clip interval		
+	//		FinalRealInterval intOld = ((GammaConverterSetup)cs).getClipInterval();
+	//		if(intOld != null)
+	//		{
+	//			final double [][] minmax = new double [2][3];
+	//			minmax[0] = intOld.minAsDoubleArray();
+	//			minmax[1] = intOld.maxAsDoubleArray();
+	//			
+	//			for(int i=0;i<2;i++)
+	//			{
+	//				clipUpdate.apply( minmax[i],minmax[i] );
+	//			}
+	//			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(minmax[0],minmax[1]) );
+	//		}
+			
+			double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs );
+			
+	//		AffineTransform3D rotationTr = new AffineTransform3D();
+	//		
+	//		rotationTr.set( clipUpdate );
+			//for(int d=0;d<3;d++)
+			//	clipCent[d]*=(-1);
+			//rotationTr.translate( clipCent );
+			
+			final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs);		
+			if(previousAngles != null)
+			{
+				double [] dAngUpdated  = new double [3]; 
+				for(int d=0;d<3;d++)
+				{
+					dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
+				}
+				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( cs, dAngUpdated );
+			}
+	
+	
+			
+			bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs, prevClipRotAngles);
 		}
-		//bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.setAngles( cs, dAngAdditional );
-		//bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.setAngles( cs, eAngles );
-
-
-		
-		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs, prevClipRotAngles);
-		
 		bvb.updateSceneRender();		
 		
 	}

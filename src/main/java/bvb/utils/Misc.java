@@ -311,23 +311,35 @@ public class Misc
 				}
 
 			}
-			double [] sq = new double[3];
-			for(int d=0;d<3;d++)
-			{
-				sq[d] = q[d+1]*q[d+1];
-			}
+//			double [] sq = new double[3];
+//			for(int d=0;d<3;d++)
+//			{
+//				sq[d] = q[d+1]*q[d+1];
+//			}
 			switch (nAxis)
 			{
 			case 0:
-				return Math.atan2(2.0*q[1]*q[0]-2.0*q[2]*q[3] , 1.0 - 2.0*sq[1] - 2.0*sq[3]);
+				return Math.atan2(2.0*q[1]*q[0]-2.0*q[2]*q[3] , 1.0 );//- 2.0*sq[1] - 2.0*sq[3]);
 			case 1:
-				return Math.atan2(2.0*q[2]*q[0]-2.0*q[1]*q[3] , 1.0 - 2.0*sq[2] - 2.0*sq[3]);
+				return Math.atan2(2.0*q[2]*q[0]-2.0*q[1]*q[3] , 1.0 );//- 2.0*sq[2] - 2.0*sq[3]);
 			case 2:
 				return Math.asin(2.0*test);
 			default:
 				return 0.0;
 			}	
 
+	}
+	
+	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/
+	public static double[]  quaternionToEulerAnglesSecond(double [] q)
+	{
+		final double [] eAngles = new double[3];
+		
+		for (int d=0;d<3;d++)
+		{
+			eAngles[d] = quaternionToAngleSecond(d,q);
+		}
+		return eAngles;
 	}
 	
 	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/

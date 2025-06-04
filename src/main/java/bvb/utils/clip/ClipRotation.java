@@ -72,7 +72,7 @@ public class ClipRotation
 			out = getCurrentEulerAngles(setup);
 			setAngles(setup, out);
 		}
-		out =  setupToQuaternion.get( setup );
+		out = setupToQuaternion.get( setup );
 		return out;
 	}
 	

@@ -71,8 +71,7 @@ public class ClipSetups
 	}
 	
 	public synchronized void updateClipTransform( final GammaConverterSetup cs, final double [] previousAngles)
-	{		
-		
+	{				
 		//rotation
 		final AffineTransform3D trRot = new AffineTransform3D();		
 		final double [] qCurr = clipRotation.getQuaternion( cs );
@@ -86,42 +85,26 @@ public class ClipSetups
 		}
 		else
 		{
-
 			if(previousAngles != null )
 			{
-				//update it once in a while (when safe)
-				//to reset accumulating errors				
-				if(Math.abs( eAngles[1] )<1.0 || Math.abs( eAngles[1] )>2.0)
+
+				//add quaternion rotation
+				//calculate changes in angles
+				final double [] dChangeAngle = new double [3];
+				for (int d=0;d<3;d++)
 				{
-					final double [] qNew = Misc.getRotationQuaternion( eAngles );
-					for (int d=0;d<4;d++)
-					{
-						qCurr[d] = qNew[d];
-					}
+					dChangeAngle[d] = eAngles[d] - previousAngles[d];
 				}
-				else
-				{
-					//add quaternion rotation
-					//calculate changes in angles
-					final double [] dChangeAngle = new double [3];
-					for (int d=0;d<3;d++)
-					{
-						dChangeAngle[d] = eAngles[d] - previousAngles[d];
-					}
-					//construct quaternion
-					final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
-					LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
-					LinAlgHelpers.normalize( qCurr );
-				}
-				
+				//construct quaternion
+				final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
+				LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
+				LinAlgHelpers.normalize( qCurr );
+
 			}
 		}		
 		final double [][] rotMatrix = new double [3][4];  
 		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
-		trRot.set( rotMatrix );	
-		
-		
-		
+		trRot.set( rotMatrix );			
 		
 		AffineTransform3D clipTr = new AffineTransform3D();
 		

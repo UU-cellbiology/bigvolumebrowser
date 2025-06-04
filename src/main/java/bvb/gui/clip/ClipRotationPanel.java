@@ -124,16 +124,42 @@ public class ClipRotationPanel extends JPanel
 				{
 					if(bFirstCS)
 					{
-						angles = clipSetups.clipRotation.getAngles( cs );
+						final double [] tempAngles = clipSetups.clipRotation.getAngles( cs );
+						
+						if(clipSetups.bLocalCoordinates)
+						{
+							final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( cs );
+							for(int d=0;d<3;d++)
+							{
+								angles[d] = tempAngles[d] - trAngles[d];
+							}
+						}
+						else
+						{
+							angles = tempAngles;
+						}
 						bFirstCS = false;
 					}
 					else
 					{
-						final double[] currAngles = clipSetups.clipRotation.getAngles( cs );
+						final double [] tempAngles = clipSetups.clipRotation.getAngles( cs );
+						double[] currAngles = new double [3];//clipSetups.clipRotation.getAngles( cs );
 		
+						if(clipSetups.bLocalCoordinates)
+						{
+							final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( cs );
+							for(int d=0;d<3;d++)
+							{
+								currAngles[d] = tempAngles[d] - trAngles[d];
+							}
+						}
+						else
+						{
+							currAngles = tempAngles;
+						}
 						for (int d=0; d<3; d++)
 						{
-							allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+							allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
 						}
 					}
 				}
@@ -203,8 +229,13 @@ public class ClipRotationPanel extends JPanel
 					prevAngles[d] = eAngles[d];
 				}
 				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-				
+				if(clipSetups.bLocalCoordinates)
+				{
+					final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( cs );
+					eAngles[nAxis] += trAngles[nAxis];
+				}
 				clipSetups.clipRotation.setAngles( cs, eAngles );
+				
 				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs, prevAngles );
 	
 			}
