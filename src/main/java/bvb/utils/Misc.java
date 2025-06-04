@@ -420,7 +420,29 @@ public class Misc
 		return out;
 	}
 	
-	public static AffineTransform3D getRotationTransform(final double [] eAngles)
+	public static double[] getRotationQuaternion(final double [] eAngles)
+	{
+		final double[] qRotation = new double[4];
+		final double[] q = new double[4];
+
+		final double[] dAxis = new double[3];
+		dAxis[0] = 1.0;
+		LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[0], qRotation );
+		for (int d=1;d<3;d++)
+		{
+			dAxis[d-1] = 0.0;
+			dAxis[d] = 1.0;
+			LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[d], q);
+			LinAlgHelpers.quaternionMultiply( q, qRotation, qRotation );
+			LinAlgHelpers.normalize( qRotation );
+		}
+		LinAlgHelpers.normalize( qRotation );
+		
+		return qRotation;
+	}
+	
+	/** produces gimbal lock **/
+	public static AffineTransform3D getRotationTransformQuaternion(final double [] eAngles)
 	{
 		final double[] qRotation = new double[4];
 		final double[] q = new double[4];
@@ -442,6 +464,53 @@ public class Misc
 		
 		clipRot.set( rotMatrix );
 		return clipRot;
+	}
+	
+	/** produces gimbal lock **/
+	public static AffineTransform3D getRotationTransformMatrix(final double [] eAngles)
+	{
+		
+		final double [] cos = new double[3];
+		final double [] sin = new double[3];
+		
+		for(int d=0;d<3;d++)
+		{
+			cos[d] = Math.cos( eAngles[d] );
+			sin[d] = Math.sin( eAngles[d] );
+		}
+		
+		final double [][] rotMatrix = new double [3][4];  
+
+		rotMatrix[0][0] = cos[1]*cos[2];
+		rotMatrix[1][0] = cos[1]*sin[2];
+		rotMatrix[2][0] = (-1)*sin[1];
+		
+		rotMatrix[0][1] = sin[0]*sin[1]*cos[2] - cos[0]*sin[2];
+		rotMatrix[1][1] = sin[0]*sin[1]*sin[2] + cos[0]*cos[2];
+		rotMatrix[2][1] = sin[0]*cos[1];
+		
+		rotMatrix[0][2] = cos[0]*sin[1]*cos[2] + sin[0]*sin[2];
+		rotMatrix[1][2] = cos[0]*sin[1]*sin[2] - sin[0]*cos[2];
+		rotMatrix[2][2] = cos[0]*cos[1];
+		
+		final AffineTransform3D clipRot = new AffineTransform3D();
+		
+		clipRot.set( rotMatrix );
+		return clipRot;
+	}
+	
+	/** gives gimbal lock **/
+	public static AffineTransform3D getRotationTransform(final double [] eAngles)
+	{
+			
+		final AffineTransform3D trRot = new AffineTransform3D();
+		
+		for(int d=0;d<3;d++)
+		{
+			trRot.rotate( d, eAngles[d]);
+		}
+
+		return trRot;
 	}
 	
 	public static boolean checkInterval(RealInterval interval)

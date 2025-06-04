@@ -130,7 +130,7 @@ public class TransformScalePanel extends JPanel
 
 	}
 	
-	void updateGUI()
+	synchronized void updateGUI()
 	{
 		
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
@@ -238,7 +238,7 @@ public class TransformScalePanel extends JPanel
 	}
 
 
-	void updateScaleAxis(int nAxis)
+	synchronized void updateScaleAxis(int nAxis)
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
@@ -259,8 +259,7 @@ public class TransformScalePanel extends JPanel
 				}
 				newScale[nAxis] = currVal;
 				transformSetups.transformScale.setScale( cs, newScale );
-				transformSetups.oldAngles = null;
-				transformSetups.updateTransform( cs );
+				transformSetups.updateTransform( cs, null );
 			}
 		}
 		if(transformSetups.selectedObjects.areShapesSelected())
@@ -318,7 +317,7 @@ public class TransformScalePanel extends JPanel
 			{
 				
 				transformSetups.transformScale.setScale( cs, unitScale );
-				transformSetups.updateTransform( cs );			
+				transformSetups.updateTransform( cs, null );			
 			}
 		}
 		if(transformSetups.selectedObjects.areShapesSelected())

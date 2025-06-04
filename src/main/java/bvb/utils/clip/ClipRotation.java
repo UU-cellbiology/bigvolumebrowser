@@ -40,12 +40,15 @@ import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
-public class ClipRotationAngles
+public class ClipRotation
 {
 	private final Map< ConverterSetup, double[]> setupToAngles = new HashMap<>();
+	
+	private final Map< ConverterSetup, double[]> setupToQuaternion = new HashMap<>();
+	
 	private final Map< BasicShape, double[]> shapeToAngles = new HashMap<>();
 	
-	public ClipRotationAngles( )
+	public ClipRotation( )
 	{
 
 	}
@@ -61,6 +64,17 @@ public class ClipRotationAngles
 		
 		return out;
 	}
+	public double[] getQuaternion( final ConverterSetup setup )
+	{
+		double [] out =  setupToQuaternion.get( setup );
+		if(out == null)
+		{
+			out = getCurrentEulerAngles(setup);
+			setAngles(setup, out);
+		}
+		out =  setupToQuaternion.get( setup );
+		return out;
+	}
 	
 	public double[] getAngles( final BasicShape shape )
 	{
@@ -73,10 +87,16 @@ public class ClipRotationAngles
 		
 		return out;
 	}
+
 	
 	public void setAngles( final ConverterSetup setup, final double[] eAngles)
 	{
 		setupToAngles.put( setup, eAngles );
+	}
+	
+	public void setQuaternion( final ConverterSetup setup, final double[] quat)
+	{
+		setupToQuaternion.put( setup, quat );
 	}
 	
 	public void setAngles( final BasicShape shape, final double[] eAngles)
@@ -104,6 +124,7 @@ public class ClipRotationAngles
 		final double[] qRotation = new double[4];
 
 		Affine3DHelpers.extractRotationAnisotropic( clipTr, qRotation );
+		setupToQuaternion.put( setup, qRotation );
 		return Misc.quaternionToEulerAngles(qRotation);
 		
 	}

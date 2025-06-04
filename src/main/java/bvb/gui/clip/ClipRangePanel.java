@@ -41,7 +41,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import net.imglib2.FinalRealInterval;
-import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedRange;
@@ -57,8 +56,6 @@ public class ClipRangePanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1885320351623882576L;
-	
-	//final SelectedSources sourceSelection;
 
 	final ClipSetups clipSetups;
 	

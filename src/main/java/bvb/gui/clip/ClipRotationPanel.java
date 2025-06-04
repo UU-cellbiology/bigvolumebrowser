@@ -124,12 +124,12 @@ public class ClipRotationPanel extends JPanel
 				{
 					if(bFirstCS)
 					{
-						angles = clipSetups.clipRotationAngles.getAngles( cs );
+						angles = clipSetups.clipRotation.getAngles( cs );
 						bFirstCS = false;
 					}
 					else
 					{
-						final double[] currAngles = clipSetups.clipRotationAngles.getAngles( cs );
+						final double[] currAngles = clipSetups.clipRotation.getAngles( cs );
 		
 						for (int d=0; d<3; d++)
 						{
@@ -149,12 +149,12 @@ public class ClipRotationPanel extends JPanel
 				{
 					if(bFirstCS)
 					{
-						angles = clipSetups.clipRotationAngles.getAngles( sh );
+						angles = clipSetups.clipRotation.getAngles( sh );
 						bFirstCS = false;
 					}
 					else
 					{
-						final double[] currAngles = clipSetups.clipRotationAngles.getAngles( sh );
+						final double[] currAngles = clipSetups.clipRotation.getAngles( sh );
 		
 						for (int d=0; d<3; d++)
 						{
@@ -184,23 +184,28 @@ public class ClipRotationPanel extends JPanel
 		}
 	}
 	
-	synchronized void updateClipAxisRotation(int nAxis)
+	void updateClipAxisRotation(int nAxis)
 	{
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;	
 		
-		blockUpdates = true;
+		//blockUpdates = true;
 		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
 			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 			for ( final ConverterSetup cs : csList )
 			{				
-				final double [] eAngles = clipSetups.clipRotationAngles.getAngles( cs );
+				final double [] eAngles = clipSetups.clipRotation.getAngles( cs );
+				final double [] prevAngles =  new double[3];
+				for(int d=0;d<3;d++)
+				{
+					prevAngles[d] = eAngles[d];
+				}
 				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
 				
-				clipSetups.clipRotationAngles.setAngles( cs, eAngles );
-				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
+				clipSetups.clipRotation.setAngles( cs, eAngles );
+				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs, prevAngles );
 	
 			}
 		}
@@ -209,16 +214,16 @@ public class ClipRotationPanel extends JPanel
 			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh : shList )
 			{
-				final double [] eAngles = clipSetups.clipRotationAngles.getAngles( sh );
+				final double [] eAngles = clipSetups.clipRotation.getAngles( sh );
 				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
 				
-				clipSetups.clipRotationAngles.setAngles( sh, eAngles );
+				clipSetups.clipRotation.setAngles( sh, eAngles );
 				clipSetups.updateClipTransform( sh );
 			}
 			clipSetups.bvb.updateSceneRender();
 		}
 		
-		blockUpdates = false;
+		//blockUpdates = false;
 		updateGUI();
 	}
 	

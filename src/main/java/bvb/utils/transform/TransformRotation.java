@@ -20,6 +20,8 @@ public class TransformRotation
 	
 	private final Map< ConverterSetup, double[]> setupToAngles = new HashMap<>();
 	
+	private final Map< ConverterSetup, double[]> setupToQuaternion = new HashMap<>();
+	
 	private final Map< BasicShape, double[]> shapeToAngles = new HashMap<>();
 	
 	public TransformRotation( final SourceToConverterSetupBimap bimap )
@@ -36,6 +38,17 @@ public class TransformRotation
 			setAngles(setup, out);
 		}
 		
+		return out;
+	}
+	public double[] getQuaternion( final ConverterSetup setup )
+	{
+		double [] out =  setupToQuaternion.get( setup );
+		if(out == null)
+		{
+			out = getCurrentEulerAngles(setup);
+			setAngles(setup, out);
+		}
+		out =  setupToQuaternion.get( setup );
 		return out;
 	}
 	
@@ -55,6 +68,11 @@ public class TransformRotation
 	{
 		setupToAngles.put( setup, eAngles );
 	}
+
+	public void setQuaternion( final ConverterSetup setup, final double[] quat)
+	{
+		setupToQuaternion.put( setup, quat );
+	}
 	
 	public void setAngles( final BasicShape shape, final double[] eAngles)
 	{
@@ -66,14 +84,14 @@ public class TransformRotation
 		
 		final Source< ? > src = bimap.getSource( setup ).getSpimSource();
 		
-		AffineTransform3D srcTrFixed = new AffineTransform3D();
+		final AffineTransform3D srcTrFixed = new AffineTransform3D();
 		final AffineTransform3D srcTrIc = new AffineTransform3D();
 		
 		//reset both transforms just in case
 		(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
 		(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
 		
-		srcTrFixed = srcTrFixed.preConcatenate( srcTrIc );
+		srcTrFixed.preConcatenate( srcTrIc );
 		final FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
 		
 		final double [] center = Misc.getIntervalCenterNegative( interval );
@@ -82,7 +100,7 @@ public class TransformRotation
 		final double[] qRotation = new double[4];
 
 		Affine3DHelpers.extractRotationAnisotropic( srcTrFixed, qRotation );
-		
+		setupToQuaternion.put( setup, qRotation );
 		return Misc.quaternionToEulerAngles(qRotation);
 		
 	}

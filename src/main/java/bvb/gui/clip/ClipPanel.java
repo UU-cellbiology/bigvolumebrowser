@@ -337,12 +337,12 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				if(range3D != null)
 				{
 					clipSetups.clipAxesBounds.setBounds( cs, range3D );
-					clipSetups.clipRotationAngles.setAngles(cs, new double [3]);
+					clipSetups.clipRotation.setAngles(cs, new double [3]);
 					((GammaConverterSetup)cs).setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
 					((GammaConverterSetup)cs).setClipTransform( new AffineTransform3D() );
 					clipSetups.clipCenters.setCenters(cs, clipSetups.clipCenters.getCurrentOrDefaultCenters( cs ));
 					clipSetups.clipCenterBounds.setBounds( cs, clipSetups.clipCenterBounds.getDefaultBounds( cs ) );
-					clipSetups.updateClipTransform( (GammaConverterSetup) cs);
+					clipSetups.updateClipTransform( (GammaConverterSetup) cs, null);
 					((GammaConverterSetup)cs).setClipActive( true );
 				}
 			}
@@ -358,7 +358,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				if(range3D != null)
 				{
 					clipSetups.clipAxesBounds.setBounds( sh, range3D );
-					clipSetups.clipRotationAngles.setAngles(sh, new double [3]);
+					clipSetups.clipRotation.setAngles(sh, new double [3]);
 					sh.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
 					sh.setClipTransform( new AffineTransform3D() );
 					clipSetups.clipCenters.setCenters(sh, clipSetups.clipCenters.getCurrentOrDefaultCenters( sh ));

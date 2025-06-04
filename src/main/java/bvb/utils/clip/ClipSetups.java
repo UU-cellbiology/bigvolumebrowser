@@ -30,6 +30,7 @@ package bvb.utils.clip;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
@@ -43,7 +44,7 @@ import bvvpg.source.converters.GammaConverterSetup;
 
 public class ClipSetups
 {
-	final public ClipRotationAngles clipRotationAngles = new ClipRotationAngles();
+	final public ClipRotation clipRotation = new ClipRotation();
 	
 	final public ClipAxesBounds clipAxesBounds;
 	
@@ -67,11 +68,58 @@ public class ClipSetups
 		clipCenterBounds = new ClipCenterBounds(converterSetups);
 	}
 	
-	public synchronized void updateClipTransform( final GammaConverterSetup cs)
-	{
-		final double [] eAngles = clipRotationAngles.getAngles( cs );
+	public synchronized void updateClipTransform( final GammaConverterSetup cs, final double [] previousAngles)
+	{		
 		
-		final AffineTransform3D clipRot = Misc.getRotationTransform( eAngles );
+		//rotation
+		final AffineTransform3D trRot = new AffineTransform3D();		
+		final double [] qCurr = clipRotation.getQuaternion( cs );
+		final double [] eAngles = clipRotation.getAngles( cs );
+		//reset rotation
+		if(LinAlgHelpers.length( eAngles )<0.0001)
+		{
+			qCurr[0] = 1.0;
+			for(int d=1;d<4;d++)
+				qCurr[d] = 0.0;
+		}
+		else
+		{
+
+			if(previousAngles != null )
+			{
+				//update it once in a while (when safe)
+				//to reset accumulating errors				
+				if(Math.abs( eAngles[1] )<1.0 || Math.abs( eAngles[1] )>2.0)
+				{
+					final double [] qNew = Misc.getRotationQuaternion( eAngles );
+					for (int d=0;d<4;d++)
+					{
+						qCurr[d] = qNew[d];
+					}
+				}
+				else
+				{
+					//add quaternion rotation
+					//calculate changes in angles
+					final double [] dChangeAngle = new double [3];
+					for (int d=0;d<3;d++)
+					{
+						dChangeAngle[d] = eAngles[d] - previousAngles[d];
+					}
+					//construct quaternion
+					final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
+					LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
+					LinAlgHelpers.normalize( qCurr );
+				}
+				
+			}
+		}		
+		final double [][] rotMatrix = new double [3][4];  
+		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
+		trRot.set( rotMatrix );	
+		
+		
+		
 		
 		AffineTransform3D clipTr = new AffineTransform3D();
 		
@@ -88,7 +136,7 @@ public class ClipSetups
 
 		clipTr.translate( center );
 		
-		clipTr = clipTr.preConcatenate( clipRot );
+		clipTr = clipTr.preConcatenate( trRot );
 
 		clipTr.translate( centerNew );	
 
@@ -98,7 +146,7 @@ public class ClipSetups
 	
 	public synchronized void updateClipTransform( final BasicShape sh)
 	{
-		final double [] eAngles = clipRotationAngles.getAngles( sh );
+		final double [] eAngles = clipRotation.getAngles( sh );
 		
 		final AffineTransform3D clipRot = Misc.getRotationTransform( eAngles );
 		

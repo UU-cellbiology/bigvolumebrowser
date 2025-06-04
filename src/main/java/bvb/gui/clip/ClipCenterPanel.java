@@ -38,8 +38,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
+import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
 import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
@@ -148,13 +150,21 @@ public class ClipCenterPanel extends JPanel
 					//convert to relative if needed
 					//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
 //					double [] relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
-//					final double [] scales = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( cs );
+//					final double [] scales = centerclipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( cs );
 //					for(int d=0;d<3; d++)
 //						relShift[d] *= scales[d];
+					AffineTransform3D tr = new AffineTransform3D();
+					(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
+					tr.inverse().apply( centerIn, center );
+//					for(int d=0; d<3; d++)
+//					{
+//						System.out.print(center [d]+" ");
+//					}
+//					System.out.print("\n");
 					final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
 					for(int d=0;d<3;d++)
 					{
-						center[d] = centerIn[d]-relShift[d];
+						//center[d] = centerIn[d]-relShift[d];
 						minBound[d] -= relShift[d];
 						maxBound[d] -= relShift[d];
 					}
@@ -257,8 +267,10 @@ public class ClipCenterPanel extends JPanel
 			for ( final ConverterSetup cs : csList )
 			{
 				//relative coordinates
-				//final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
-				final double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+				final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+				//final double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+
+				//tr.apply( currValAbs, currVal );
 				double currVal = currValAbs + relShift[nAxis];
 				double minBound = minBoundAbs + relShift[nAxis];
 				double maxBound = maxBoundAbs + relShift[nAxis];
@@ -271,11 +283,16 @@ public class ClipCenterPanel extends JPanel
 					bounds.getMaxBound()[nAxis] = maxBound;
 					clipSetups.clipCenterBounds.setBounds( cs, bounds );
 				}
+				AffineTransform3D tr = new AffineTransform3D();
+				(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
+				
 				final double [] newCenter = clipSetups.clipCenters.getCenters( cs );
+				tr.inverse().apply( newCenter, newCenter );
 				newCenter[nAxis] = currVal;
+				tr.apply( newCenter, newCenter );
 				
 				clipSetups.clipCenters.setCenters( cs, newCenter );
-				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
+				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs, null );
 			}
 		}
 //		if(clipSetups.selectedObjects.areShapesSelected())

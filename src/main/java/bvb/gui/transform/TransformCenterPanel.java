@@ -94,7 +94,7 @@ public class TransformCenterPanel extends JPanel
 		updateGUI();
 	}
 	
-	void updateGUI()
+	synchronized void updateGUI()
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
@@ -225,8 +225,7 @@ public class TransformCenterPanel extends JPanel
 				newCenters[nAxis] = currVal;
 				
 				transformSetups.transformCenters.setCenters( cs, newCenters );
-				transformSetups.oldAngles = null;
-				transformSetups.updateTransform( cs );			
+				transformSetups.updateTransform( cs, null );			
 			}
 		}
 		
@@ -333,7 +332,7 @@ public class TransformCenterPanel extends JPanel
 
 				final double [] centers = Misc.getIntervalCenter( interval );
 				transformSetups.transformCenters.setCenters( cs, centers );
-				transformSetups.updateTransform( cs );
+				transformSetups.updateTransform( cs, null );
 				
 			}
 		}

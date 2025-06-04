@@ -2,16 +2,15 @@ package bvb.utils.transform;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
-import bdv.util.Affine3DHelpers;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
-import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -30,8 +29,7 @@ public class TransformSetups
 	final public TransformCenterBounds transformTranslationBounds;
 	
 	final public TransformRotation transformRotation;
-	
-	public double [] oldAngles = null;
+
 	
 	public TransformSetups (final BigVolumeBrowser bvb_)
 	{
@@ -83,17 +81,59 @@ public class TransformSetups
 		bvb.updateSceneRender();	
 	}
 	
-	public void updateTransform(final ConverterSetup cs)
+	public synchronized void updateTransform(final ConverterSetup cs, final double [] previousAngles)
 	{
 		Source< ? > src = converterSetups.getSource( cs ).getSpimSource();
-
+		
+		//rotation
+		final AffineTransform3D trRot = new AffineTransform3D();		
+		final double [] qCurr = transformRotation.getQuaternion( cs );
 		final double [] eAngles = transformRotation.getAngles( cs );
 		
-		final AffineTransform3D trRot = Misc.getRotationTransform( eAngles );
+		//reset rotation
+		if(LinAlgHelpers.length( eAngles )<0.0001)
+		{
+			qCurr[0] = 1.0;
+			for(int d=1;d<4;d++)
+				qCurr[d] = 0.0;
+		}
+		else
+		{
+			if(previousAngles != null )
+			{
+				if(Math.abs( eAngles[1] )<1.0 || Math.abs( eAngles[1] )>2.0)
+				{
+					final double [] qNew = Misc.getRotationQuaternion( eAngles );
+					for (int d=0;d<4;d++)
+					{
+						qCurr[d] = qNew[d];
+					}
+				}
+				else
+				{
+					//add quaternion rotation
+					//calculate changes in angles
+					final double [] dChangeAngle = new double [3];
+					for (int d=0;d<3;d++)
+					{
+						dChangeAngle[d] = eAngles[d] - previousAngles[d];
+					}
+					//construct quaternion
+					final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
+					LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
+					LinAlgHelpers.normalize( qCurr );
+				}
+				
+			}
+		}
+		
+		final double [][] rotMatrix = new double [3][4];  
+		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
+		trRot.set( rotMatrix );	
+		
+		
 		
 		AffineTransform3D srcTrFixed = new AffineTransform3D();
-		
-		
 		AffineTransform3D oldTr = new AffineTransform3D();
 		(( TransformedSource< ? > )src).getFixedTransform( oldTr );
 		//reset both transforms just in case
@@ -142,7 +182,7 @@ public class TransformSetups
 //		}
 
 		//update centers bounds
-		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenterBounds.getBounds( cs ).applyTransform( clipUpdate );
+		//bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenterBounds.getBounds( cs ).applyTransform( clipUpdate );
 
 		//update centers
 		double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( cs );
@@ -169,17 +209,17 @@ public class TransformSetups
 //			((GammaConverterSetup)cs).setClipInterval( new FinalRealInterval(minmax[0],minmax[1]) );
 //		}
 		
-		double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.getAngles( cs );
+		double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs );
 		
-		AffineTransform3D rotationTr = new AffineTransform3D();
-		
-		rotationTr.set( clipUpdate );
+//		AffineTransform3D rotationTr = new AffineTransform3D();
+//		
+//		rotationTr.set( clipUpdate );
 		//for(int d=0;d<3;d++)
 		//	clipCent[d]*=(-1);
 		//rotationTr.translate( clipCent );
 		
-		
-		if(oldAngles != null)
+		final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs);		
+		if(previousAngles != null)
 		{
 			//final double[] qRotation = new double[4];
 	
@@ -190,10 +230,10 @@ public class TransformSetups
 			double [] dAngUpdated  = new double [3]; 
 			for(int d=0;d<3;d++)
 			{
-				dAngUpdated [d] = dAnglesOld[d] - oldAngles[d]+eAngles[d]; 
+				dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
 			}
 			
-			bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.setAngles( cs, dAngUpdated );
+			bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( cs, dAngUpdated );
 			//bvb.controlPanel.tabPanelView.clipPanel.clipRotationPanel.updateGUI();
 		}
 		//bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotationAngles.setAngles( cs, dAngAdditional );
@@ -201,7 +241,7 @@ public class TransformSetups
 
 
 		
-		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs);
+		bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs, prevClipRotAngles);
 		
 		bvb.updateSceneRender();		
 		
