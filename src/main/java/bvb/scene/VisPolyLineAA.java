@@ -111,6 +111,16 @@ public class VisPolyLineAA
 		bDotted = bDotted_;
 		
 	}
+
+	public VisPolyLineAA(final float [][] points, final float fLineThickness_,final Color color_in, boolean bDotted_)
+	{
+		this();
+		fLineThickness = fLineThickness_;		
+		l_color = new Vector4f(color_in.getComponents(null));		
+		setVertices(points);
+		bDotted = bDotted_;
+		
+	}
 	
 	public void setThickness(final float fLineThickness_)
 	{
@@ -129,7 +139,6 @@ public class VisPolyLineAA
 		
 	public void setParams(final ArrayList< RealPoint > points, final float fLineThickness_, final Color color_in)
 	{
-
 		fLineThickness= fLineThickness_;
 		l_color = new Vector4f(color_in.getComponents(null));		
 		setVertices(points);
@@ -143,7 +152,7 @@ public class VisPolyLineAA
 		setVertices(points);
 	}
 	
-	public void setVertices( ArrayList< RealPoint > points)
+	public void setVertices(final  ArrayList< RealPoint > points)
 	{
 		RealPoint[] pointsArr = new RealPoint[points.size()];
 		for (int i=0;i<points.size();i++)
@@ -153,9 +162,8 @@ public class VisPolyLineAA
 		setVertices(pointsArr);
 	}
 	
-	public void setVertices( RealPoint [] points)
-	{
-				
+	public void setVertices(final RealPoint [] points)
+	{				
 		nPointsN = points.length;
 
 		vertices = new float [nPointsN*3]; //assume 3D	
@@ -165,12 +173,29 @@ public class VisPolyLineAA
 			for (int j=0;j<3; j++)
 			{
 				vertices[i*3+j]=points[i].getFloatPosition(j);
-			}
-			
+			}		
 		}
 		
 		initialized = false;
 	}
+	
+	public void setVertices(final float [][] points)
+	{				
+		nPointsN = points.length;
+
+		vertices = new float [nPointsN*3]; //assume 3D	
+
+		for (int i=0; i<nPointsN; i++)
+		{
+			for (int j=0;j<3; j++)
+			{
+				vertices[i*3+j] = points[i][j];
+			}		
+		}
+		
+		initialized = false;
+	}
+
 
 	private void init( GL3 gl )
 	{
@@ -182,15 +207,15 @@ public class VisPolyLineAA
 		// Python & OpenGL for Scientific Visualization
 		// Copyright (c) 2018 - Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 		
-		int nTotLength = (nPointsN)*3*2;
+		final int nTotLength = (nPointsN)*3*2;
 		nTotVert = nPointsN*2;
-		float [] nCumLength = new float [nPointsN];
-		float [] UV = new float [nPointsN*2*2];
+		final float [] nCumLength = new float [nPointsN];
+		final float [] UV = new float [nPointsN*2*2];
 		//calculate new arrays
-		float [] vertAll = new float [nTotLength+2*3*2];
-		float [] vertCurr = new float [nTotLength];
-		float [] vertPrev = new float [nTotLength];
-		float [] vertNext = new float [nTotLength];
+		final float [] vertAll = new float [nTotLength+2*3*2];
+		final float [] vertCurr = new float [nTotLength];
+		final float [] vertPrev = new float [nTotLength];
+		final float [] vertNext = new float [nTotLength];
 		
 	
 		for(int nV = 1; nV<nPointsN+1; nV++)
@@ -273,8 +298,6 @@ public class VisPolyLineAA
 		
 		
 		// ..:: VERTEX ARRAY OBJECT ::..
-
-		
 		gl.glGenVertexArrays( 1, tmp, 0 );
 		vao = tmp[ 0 ];
 		gl.glBindVertexArray( vao );
@@ -313,10 +336,8 @@ public class VisPolyLineAA
 
 		JoglGpuContext context = JoglGpuContext.get( gl );
 		
-		
 		int noffset = 0;
-		
-		
+			
 		int[] sizeVP = new int[4];
 		
 		gl.glGetIntegerv( GL.GL_VIEWPORT, sizeVP, noffset );
@@ -338,7 +359,6 @@ public class VisPolyLineAA
 		//	prog.getUniform1i("clipactive").set(BigTraceData.nClipROI);
 		//	prog.getUniform3f("clipmin").set(new Vector3f(BigTraceData.nDimCurr[0][0],BigTraceData.nDimCurr[0][1],BigTraceData.nDimCurr[0][2]));
 		//	prog.getUniform3f("clipmax").set(new Vector3f(BigTraceData.nDimCurr[1][0],BigTraceData.nDimCurr[1][1],BigTraceData.nDimCurr[1][2]));
-
 		}
 		else
 		{
@@ -347,19 +367,17 @@ public class VisPolyLineAA
 		
 		prog.setUniforms( context );
 		prog.use( context );
-		
-		
-		
-		gl.glDepthFunc( GL.GL_ALWAYS);
+			
 		//gl.glDepthFunc( GL.GL_LESS);
+		gl.glDepthFunc( GL.GL_ALWAYS);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
 		gl.glBindVertexArray( vao );
-		gl.glDepthMask(false);
 		
-		gl.glDrawArrays( GL.GL_TRIANGLE_STRIP, 0, nTotVert);
-		
+		gl.glDepthMask(false);		
+		gl.glDrawArrays( GL.GL_TRIANGLE_STRIP, 0, nTotVert);		
 		gl.glDepthMask(true);
+		
 		gl.glBindVertexArray( 0 );
 		
 	}
