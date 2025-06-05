@@ -105,6 +105,8 @@ public class VolumeBox extends AbstractBasicShape
 			nDimBox[1][d] = (float)maxI[d];
 
 		}
+		
+//      //somehow not working yet
 //		final float[][][] edgesV = getEdgesFloat(nDimBox);
 //		if(transform != null)
 //		{
@@ -287,10 +289,11 @@ public class VolumeBox extends AbstractBasicShape
 //		
 		int [][] edgesxy = new int [5][2];
 		
+		
 		edgesxy[0] = new int[]{0,0};
-		edgesxy[1] = new int[]{0,1};
+		edgesxy[1] = new int[]{1,0};
 		edgesxy[2] = new int[]{1,1};
-		edgesxy[3] = new int[]{1,0};
+		edgesxy[3] = new int[]{0,1};
 		edgesxy[4] = new int[]{0,0};
 		
 		int nCount = 0;
