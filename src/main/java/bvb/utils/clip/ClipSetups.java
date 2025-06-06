@@ -41,6 +41,7 @@ import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.source.converters.GammaConverterSetup;
+import ij.Prefs;
 
 public class ClipSetups
 {
@@ -58,7 +59,7 @@ public class ClipSetups
 	
 	public final BigVolumeBrowser bvb;
 	
-	public boolean bLocalCoordinates = true;
+	public boolean bLocalCoordinates = Prefs.get( "BVB.bClipLocalCoordinates", true );
 	
 	public ClipSetups (final BigVolumeBrowser bvb_)
 	{

@@ -29,14 +29,17 @@
 package bvb.gui.clip;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.net.URL;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -71,6 +74,9 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	public JButton butResetClip;
 	public JCheckBox cbShowClipBoxes;
 	public JButton butCoordSystem;
+	
+	final ImageIcon [] coordIcon = new ImageIcon[2];
+	final String[] coordToolTip = new String[2];
 	
 	final ClipRangePanel clipRangePanel;
 	final public ClipRotationPanel clipRotationPanel;
@@ -128,21 +134,36 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		cbClipEnabled.addItemListener( this );	
 		
 		gbc.gridx++;
-		butCoordSystem = new JButton("Local");
+		
+		//CLIP COORDINATE SYSTEM
+	    //PROJECTION MATRIX
+	    coordToolTip[0] = "Global world coordinates";
+	    coordToolTip[1] = "Local volume coordinates";
+		URL icon_path = this.getClass().getResource("/icons/clip_global.png");
+		coordIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource("/icons/clip_local.png");
+		coordIcon[1] = new ImageIcon(icon_path);
+		
+		butCoordSystem = new JButton(coordIcon[clipSetups.bLocalCoordinates?1:0]);
+		butCoordSystem.setToolTipText(coordToolTip[clipSetups.bLocalCoordinates?1:0]);
+//		Dimension butDim = butCoordSystem.getPreferredSize();
+//		butDim.width = 40;
+//		butCoordSystem.setPreferredSize( butDim );
 		butCoordSystem.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed( ActionEvent arg0 )
 			{
 				clipSetups.bLocalCoordinates = !clipSetups.bLocalCoordinates;
+				int ind = 0;
+				
 				if(clipSetups.bLocalCoordinates)
 				{
-					butCoordSystem.setText( "Loc" );
+					ind = 1;
 				}
-				else
-				{
-					butCoordSystem.setText( "Glob" );
-				}
+				butCoordSystem.setIcon( coordIcon[ind]  );
+				butCoordSystem.setToolTipText(coordToolTip[ind]);
+				Prefs.set( "BVB.bClipLocalCoordinates", clipSetups.bLocalCoordinates );
 				updateGUI();
 			}
 	

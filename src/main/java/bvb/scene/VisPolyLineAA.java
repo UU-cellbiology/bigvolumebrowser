@@ -214,6 +214,9 @@ public class VisPolyLineAA
 			vaos[i] = vbos[i];
 		gl.glGenVertexArrays( 1, vaos, 0 );
 		vao = vaos[ 0 ];
+		
+		//this can be done once
+		
 		gl.glBindVertexArray( vao );
 		
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbos[ 0 ] );
@@ -311,13 +314,14 @@ public class VisPolyLineAA
 		}
 
 
-		// ..:: VERTEX BUFFER ::..
+		// ..:: VERTEX BUFFERS & ARRAY OBJECTS ::..
 
 		if(!bBuffersGenerated)
 		{
 			generateBuffers( gl );
 		}	
 
+		//upload data to GPU
 		
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbos[ 0 ] );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertCurr.length * Float.BYTES, FloatBuffer.wrap( vertCurr ), GL.GL_STATIC_DRAW );
@@ -334,9 +338,6 @@ public class VisPolyLineAA
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vbos[ 3 ] );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, UV.length * Float.BYTES, FloatBuffer.wrap( UV ), GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-
-		
-		// ..:: VERTEX ARRAY OBJECT ::..
 
 		
 
