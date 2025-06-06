@@ -5,7 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -25,8 +24,6 @@ public class TransformRotationPanel extends JPanel
 	
 	private double dRange = 180.;
 	
-	final JButton butResetRotation;
-	
 	public TransformRotationPanel(final TransformSetups transformSetups_) 
 	{
 		super();
@@ -38,10 +35,6 @@ public class TransformRotationPanel extends JPanel
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		setLayout(gridbag);
-		
-		butResetRotation = new JButton ("Reset");
-		butResetRotation.setToolTipText( "Reset rotation" );
-		butResetRotation.addActionListener( (e)->resetRotation());
 		
 		gbc.gridwidth = 0;
 		gbc.gridy = 0;
@@ -66,10 +59,7 @@ public class TransformRotationPanel extends JPanel
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
-		gbc.gridy ++;
-		gbc.anchor = GridBagConstraints.SOUTHEAST;
-		gbc.fill = GridBagConstraints.NONE;
-		this.add( butResetRotation, gbc );
+
 		updateGUI();
 	}
 	
@@ -190,7 +180,7 @@ public class TransformRotationPanel extends JPanel
 		updateGUI();
 	}
 	
-	void resetRotation()
+	public void resetRotation()
 	{
 		
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)

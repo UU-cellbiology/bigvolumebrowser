@@ -29,7 +29,6 @@
 package bvb.gui.clip;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -46,8 +45,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -63,18 +60,23 @@ import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import ij.Prefs;
 
-public class ClipPanel extends JPanel implements ItemListener, ChangeListener
+public class ClipPanel extends JPanel implements ItemListener
 {
 	
 	final BigVolumeBrowser bvb;
 	
 	final public ClipSetups clipSetups;
 	
-	public JCheckBox cbClipEnabled;
-	public JButton butResetClip;
-	public JCheckBox cbShowClipBoxes;
-	public JButton butCoordSystem;
+	JCheckBox cbClipEnabled;
 	
+	JButton butCoordSystem;
+	
+	JCheckBox cbShowClipBoxes;
+
+	JButton butResetClipCurrent;
+
+	JButton butResetClipAll;
+
 	final ImageIcon [] coordIcon = new ImageIcon[2];
 	final String[] coordToolTip = new String[2];
 	
@@ -110,10 +112,8 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	    clipCenterPanel = new ClipCenterPanel( clipSetups ); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
-		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
-	    //ImageIcon tabIcon = new ImageIcon(icon_path);
+
 		tabClipPane.addTab( "Range", clipRangePanel );
-		//tabClipPane.addTab("",tabIcon, clipRotationPanel , "Rotation");
 		tabClipPane.addTab ("Rotate", clipRotationPanel);
 		tabClipPane.addTab( "Center", clipCenterPanel );
 		
@@ -124,7 +124,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
-		gbc.weightx = 0.1;
+		gbc.weightx = 0.5;
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.WEST;
 		
@@ -145,10 +145,9 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		coordIcon[1] = new ImageIcon(icon_path);
 		
 		butCoordSystem = new JButton(coordIcon[clipSetups.bLocalCoordinates?1:0]);
+		
 		butCoordSystem.setToolTipText(coordToolTip[clipSetups.bLocalCoordinates?1:0]);
-//		Dimension butDim = butCoordSystem.getPreferredSize();
-//		butDim.width = 40;
-//		butCoordSystem.setPreferredSize( butDim );
+
 		butCoordSystem.addActionListener(new ActionListener()
 		{
 			@Override
@@ -172,7 +171,6 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		this.add(butCoordSystem ,gbc);
 
 		cbShowClipBoxes = new JCheckBox ("Box",false);
-		//selectionWindow = new JLabel("Selected: None");
 		gbc.gridx++;
 		this.add(cbShowClipBoxes ,gbc);
 
@@ -197,38 +195,49 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				});
 		cbShowClipBoxes.setSelected( BVBSettings.bShowClipBoxes );
 		
-		butResetClip = new JButton("Reset");
+		gbc.weightx = 0.1;
+		//gbc.anchor = GridBagConstraints.EAST;
+		icon_path = this.getClass().getResource("/icons/red_cross.png");
+		ImageIcon icon = new ImageIcon(icon_path);
+		butResetClipCurrent = new JButton(icon);
+		butResetClipCurrent.setToolTipText( "Reset current panel" );
 		gbc.gridx ++;
-		this.add(butResetClip,gbc);	
-		butResetClip.addActionListener( new ActionListener() 
+		this.add(butResetClipCurrent,gbc);	
+		
+		icon_path = this.getClass().getResource("/icons/red_crossx2.png");
+		icon = new ImageIcon(icon_path);
+		butResetClipAll = new JButton(icon);
+		butResetClipAll.setToolTipText( "Reset all clip" );
+		gbc.gridx ++;
+		this.add(butResetClipAll,gbc);	
+		
+		butResetClipAll.addActionListener( new ActionListener() 
     		{
 				@Override
 				public void actionPerformed( ActionEvent arg0 )
-				{
-					
+				{					
 					resetClip();
 				}
     	
-    		});
-    
+    		});   
 		
 		gbc.gridx = 0;
 	    gbc.gridy ++;
 	    gbc.weightx = 1.0;
-	    gbc.gridwidth = 4;
+	    gbc.gridwidth = 5;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add(tabClipPane,gbc);
 
-
 	    setSourceListeners();
-
-	    updateGUI();
+	    
 	    Color [] colors = new Color[3];
 	    colors[0] =  new Color(198,34,0);
 	    colors[1] =  new Color(67,154,0);
 	    colors[2] =  new Color(0,34,213);
 
 	    this.setSliderColors( colors );
+	    
+	    updateGUI();
 	}
 	
 	
@@ -348,20 +357,12 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 			updateClipEnabled();
 		updateGUI();
 	}
-
-
-	@Override
-	public void stateChanged( ChangeEvent arg0 )
-	{
-		updateGUI();
-	}
 	
 	void setSliderColors(Color [] colors)
 	{		
 		clipRangePanel.setSliderColors( colors );
 		clipRotationPanel.setSliderColors( colors );
-		clipCenterPanel.setSliderColors( colors );
-		
+		clipCenterPanel.setSliderColors( colors );		
 	}
 	
 	void resetClip()
