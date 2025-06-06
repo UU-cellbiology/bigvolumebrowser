@@ -91,7 +91,7 @@ public class VolumeBox extends AbstractBasicShape
 	
 	public void setInterval(RealInterval nIntervalBox)
 	{
-		float [][] nDimBox = new float [2][3];
+		final float [][] nDimBox = new float [2][3];
 		
 		final double [] minI = nIntervalBox.minAsDoubleArray();
 		
@@ -141,7 +141,7 @@ public class VolumeBox extends AbstractBasicShape
 		{
 			for(int i=0; i<edgesPairPoints.size(); i++)
 			{
-				for(RealPoint pt : edgesPairPoints.get( i ))
+				for(final RealPoint pt : edgesPairPoints.get( i ))
 				{
 					transform.apply( pt, pt);
 				}
@@ -170,7 +170,7 @@ public class VolumeBox extends AbstractBasicShape
 	
 		if(edgesVis != null)
 		{
-			for (VisPolyLineAA edge : edgesVis)
+			for (final VisPolyLineAA edge : edgesVis)
 			{
 				edge.draw(gl, pvm);
 			}
@@ -205,9 +205,9 @@ public class VolumeBox extends AbstractBasicShape
 	{
 		int i,j,z;
 		
-		ArrayList<ArrayList< RealPoint >> out = new ArrayList<>();
+		final ArrayList<ArrayList< RealPoint >> out = new ArrayList<>();
 		
-		int [][] edgesxy = new int [5][2];
+		final int [][] edgesxy = new int [5][2];
 		
 		edgesxy[0] = new int[]{0,0};
 		edgesxy[1] = new int[]{1,0};
@@ -216,8 +216,8 @@ public class VolumeBox extends AbstractBasicShape
 		edgesxy[4] = new int[]{0,0};
 		
 		//draw front and back
-		RealPoint vertex1 = new RealPoint(0,0,0);
-		RealPoint vertex2 = new RealPoint(0,0,0);
+		final RealPoint vertex1 = new RealPoint(0,0,0);
+		final RealPoint vertex2 = new RealPoint(0,0,0);
 		
 		for (z=0;z<2;z++)
 		{
@@ -269,7 +269,7 @@ public class VolumeBox extends AbstractBasicShape
 	 * no checks on provided coordinates performed  **/
 	public static float[][][] getEdgesFloat(final float [][] nDimBox)
 	{
-		float [][][] out = new float[4][][];
+		final float [][][] out = new float[4][][];
 		int i,z;
 	
 		//front and back faces vertices
@@ -287,7 +287,7 @@ public class VolumeBox extends AbstractBasicShape
 //		out[0][2][1]= nDimBox[1][1];
 //		
 //		
-		int [][] edgesxy = new int [5][2];
+		final int [][] edgesxy = new int [5][2];
 		
 		
 		edgesxy[0] = new int[]{0,0};
@@ -335,9 +335,9 @@ public class VolumeBox extends AbstractBasicShape
 	/** returns vertices of box specified by provided interval in no particular order **/
 	public static ArrayList<RealPoint > getBoxVertices(final RealInterval interval)
 	{	
-		ArrayList<RealPoint> out = new ArrayList<>();
+		final ArrayList<RealPoint> out = new ArrayList<>();
 		
-		RealPoint [] rpBounds = new RealPoint [2];
+		final RealPoint [] rpBounds = new RealPoint [2];
 		
 		rpBounds[0]= interval.minAsRealPoint();
 		rpBounds[1]= interval.maxAsRealPoint();
@@ -369,7 +369,7 @@ public class VolumeBox extends AbstractBasicShape
 				compareVBoxes(  ( VolumeBox ) obj );
 	}
 	
-	boolean compareVBoxes(VolumeBox v2)
+	boolean compareVBoxes(final VolumeBox v2)
 	{
 		if (v2==null)
 			return false;
@@ -381,7 +381,7 @@ public class VolumeBox extends AbstractBasicShape
 		return bFinal;
 		
 	}
-	public boolean compareIntervalTransform(RealInterval int2, AffineTransform3D tr2)
+	public boolean compareIntervalTransform(final RealInterval int2, final AffineTransform3D tr2)
 	{
 
 		boolean bFinal = true;
@@ -425,7 +425,7 @@ public class VolumeBox extends AbstractBasicShape
 	{
 		if(edgesVis != null)
 		{
-			for (VisPolyLineAA edge : edgesVis)
+			for (final VisPolyLineAA edge : edgesVis)
 			{
 				edge.reload();
 			}

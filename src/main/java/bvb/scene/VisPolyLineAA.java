@@ -154,7 +154,7 @@ public class VisPolyLineAA
 	
 	public void setVertices(final  ArrayList< RealPoint > points)
 	{
-		RealPoint[] pointsArr = new RealPoint[points.size()];
+		final RealPoint[] pointsArr = new RealPoint[points.size()];
 		for (int i=0;i<points.size();i++)
 		{
 			pointsArr[i] = points.get( i );
