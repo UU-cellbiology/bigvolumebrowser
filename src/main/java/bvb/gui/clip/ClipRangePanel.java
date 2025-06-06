@@ -40,7 +40,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
-
 import net.imglib2.FinalRealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -48,6 +47,7 @@ import bdv.util.BoundedRange;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
+import bvb.utils.Misc;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedRangePanelPG;
@@ -56,8 +56,6 @@ public class ClipRangePanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1885320351623882576L;
-	
-	//final SelectedSources sourceSelection;
 
 	final ClipSetups clipSetups;
 	
@@ -139,6 +137,7 @@ public class ClipRangePanel extends JPanel
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 	
+		blockUpdates = true;
 		BoundedRange [] range = new BoundedRange[3];
 		boolean bFirstCS = true;
 		boolean [] allRangesEqual = new boolean [3];
@@ -158,7 +157,7 @@ public class ClipRangePanel extends JPanel
 				final GammaConverterSetup gcs = ((GammaConverterSetup)cs);
 				if(gcs.clipActive())
 				{
-					final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
+					final Bounds3D bounds = new Bounds3D(clipSetups.clipAxesBounds.getBounds( cs ));
 					final double [] minBound = bounds.getMinBound();
 					final double [] maxBound = bounds.getMaxBound();
 					final FinalRealInterval clipInterval = gcs.getClipInterval();
@@ -169,11 +168,27 @@ public class ClipRangePanel extends JPanel
 							min[d] = minBound[d];
 							max[d] = maxBound[d];
 						}
+						gcs.setClipInterval( new FinalRealInterval(min,max));
 					}
 					else
 					{
 						clipInterval.realMin( min );
 						clipInterval.realMax( max );
+					}
+					if(clipSetups.bLocalCoordinates)
+					{
+						//convert to relative
+						//double [] relShift = clipSetups.getSourceMinWithScale(cs);				
+						double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );				
+						
+						for(int d=0;d<3;d++)
+						{
+							min[d] -= relShift[d];
+							max[d] -= relShift[d];
+							
+							minBound[d] -= relShift[d];
+							maxBound[d] -= relShift[d];	
+						}
 					}
 					if(bFirstCS)
 					{
@@ -188,7 +203,7 @@ public class ClipRangePanel extends JPanel
 						for (int d=0; d<3; d++)
 						{
 							final BoundedRange axisRange = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
-							allRangesEqual[d] &= range[d].equals( axisRange );
+							allRangesEqual[d] &= Misc.compareBoundedRanges(range[d], axisRange );
 							range[d] = range[d].join( axisRange );
 						}
 					}
@@ -240,7 +255,7 @@ public class ClipRangePanel extends JPanel
 				}
 			}
 		}
-		
+		blockUpdates = false;
 		if(!bFirstCS)
 		{		
 			final BoundedRange [] finalRange = range;
@@ -268,12 +283,26 @@ public class ClipRangePanel extends JPanel
 			return;
 		
 		blockUpdates = true;
-		final BoundedRange range = clipAxesPanels[nAxis].getRange();
+		final BoundedRange rangeOld = clipAxesPanels[nAxis].getRange();
 		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
 			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 			for ( final ConverterSetup cs : csList )
 			{
+				//convert to relative
+				//double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+				//double [] relShift = clipSetups.getSourceMinWithScale(cs);
+				double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+				BoundedRange range = null;
+				if(clipSetups.bLocalCoordinates)
+				{
+					range = Misc.translateBoundedRange( rangeOld, relShift[nAxis] );
+				}
+				else
+				{
+					range = rangeOld;
+				}
+				//convert range to absolute
 				FinalRealInterval clipInt = ((GammaConverterSetup)cs).getClipInterval();
 				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( cs );
 				if(clipInt == null)
@@ -297,34 +326,34 @@ public class ClipRangePanel extends JPanel
 	
 			}
 		}
-		if(clipSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				FinalRealInterval clipInt = sh.getClipInterval();
-				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( sh );
-				if(clipInt == null)
-				{
-					clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
-				}
-				if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
-				{
-					bounds.getMinBound()[nAxis] = range.getMinBound();
-					bounds.getMaxBound()[nAxis] = range.getMaxBound();
-					clipSetups.clipAxesBounds.setBounds( sh, bounds );
-				}
-				
-				final double [] min = clipInt.minAsDoubleArray();
-				final double [] max = clipInt.maxAsDoubleArray();
-				min[nAxis] = range.getMin();
-				max[nAxis] = range.getMax();
-				
-				sh.setClipInterval( new FinalRealInterval(min,max) );
-				clipSetups.clipCenters.updateCenters( sh );
-			}
-			clipSetups.bvb.updateSceneRender();
-		}
+//		if(clipSetups.selectedObjects.areShapesSelected())
+//		{
+//			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+//			for ( final BasicShape sh : shList )
+//			{
+//				FinalRealInterval clipInt = sh.getClipInterval();
+//				final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( sh );
+//				if(clipInt == null)
+//				{
+//					clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
+//				}
+//				if(range.getMinBound() != bounds.getMinBound()[nAxis] || range.getMaxBound() != bounds.getMaxBound()[nAxis])
+//				{
+//					bounds.getMinBound()[nAxis] = range.getMinBound();
+//					bounds.getMaxBound()[nAxis] = range.getMaxBound();
+//					clipSetups.clipAxesBounds.setBounds( sh, bounds );
+//				}
+//				
+//				final double [] min = clipInt.minAsDoubleArray();
+//				final double [] max = clipInt.maxAsDoubleArray();
+//				min[nAxis] = range.getMin();
+//				max[nAxis] = range.getMax();
+//				
+//				sh.setClipInterval( new FinalRealInterval(min,max) );
+//				clipSetups.clipCenters.updateCenters( sh );
+//			}
+//			clipSetups.bvb.updateSceneRender();
+//		}
 		
 		blockUpdates = false;
 		updateGUI();

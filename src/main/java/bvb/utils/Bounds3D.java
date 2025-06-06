@@ -29,6 +29,7 @@
 package bvb.utils;
 
 import net.imglib2.RealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
 
 public class Bounds3D
 {
@@ -46,6 +47,17 @@ public class Bounds3D
 		}
 		this.minBound = minBound;
 		this.maxBound = maxBound;
+	}
+	
+	public Bounds3D( final Bounds3D bounds)
+	{
+		minBound = new double[3];
+		maxBound = new double[3];
+		for(int d=0; d<3; d++ )
+		{
+			minBound[d] = bounds.minBound[d];
+			maxBound[d] = bounds.maxBound[d];
+		}
 	}
 	
 	public Bounds3D( RealInterval realInterval)
@@ -120,5 +132,11 @@ public class Bounds3D
 			hash = hash * 23 + Double.hashCode(maxBound[d]);
 		}
 		return hash;
+	}
+	
+	public void applyTransform(final AffineTransform3D transform)
+	{
+		transform.apply( minBound, minBound );
+		transform.apply( maxBound, maxBound );
 	}
 }

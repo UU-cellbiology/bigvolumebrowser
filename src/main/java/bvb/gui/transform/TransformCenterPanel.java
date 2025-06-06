@@ -5,7 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -35,17 +34,11 @@ public class TransformCenterPanel extends JPanel
 
 	private boolean blockUpdates = false;
 	
-	final JButton butResetTranslation;
-	
 	public TransformCenterPanel(final TransformSetups transformSetups_) 
 	{
 		super();		
 
 		transformSetups = transformSetups_;
-	
-		butResetTranslation = new JButton ("Reset");
-		butResetTranslation.setToolTipText( "Reset translation" );
-		butResetTranslation.addActionListener( (e)->resetTranslation());
 		
 		setLayout(new GridBagLayout());
 		
@@ -86,15 +79,11 @@ public class TransformCenterPanel extends JPanel
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
-		gbc.gridy ++;
-		gbc.anchor = GridBagConstraints.SOUTHEAST;
-		gbc.fill = GridBagConstraints.NONE;
-		this.add( butResetTranslation, gbc );
 		
 		updateGUI();
 	}
 	
-	void updateGUI()
+	synchronized void updateGUI()
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
@@ -225,7 +214,7 @@ public class TransformCenterPanel extends JPanel
 				newCenters[nAxis] = currVal;
 				
 				transformSetups.transformCenters.setCenters( cs, newCenters );
-				transformSetups.updateTransform( cs );			
+				transformSetups.updateTransform( cs, null );			
 			}
 		}
 		
@@ -304,7 +293,7 @@ public class TransformCenterPanel extends JPanel
 		blockUpdates = false;
 	}
 	
-	void resetTranslation()
+	public void resetCenters()
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
@@ -332,7 +321,7 @@ public class TransformCenterPanel extends JPanel
 
 				final double [] centers = Misc.getIntervalCenter( interval );
 				transformSetups.transformCenters.setCenters( cs, centers );
-				transformSetups.updateTransform( cs );
+				transformSetups.updateTransform( cs, null );
 				
 			}
 		}

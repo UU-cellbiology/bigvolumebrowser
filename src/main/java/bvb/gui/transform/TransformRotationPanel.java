@@ -5,7 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -25,8 +24,6 @@ public class TransformRotationPanel extends JPanel
 	
 	private double dRange = 180.;
 	
-	final JButton butResetRotation;
-	
 	public TransformRotationPanel(final TransformSetups transformSetups_) 
 	{
 		super();
@@ -38,10 +35,6 @@ public class TransformRotationPanel extends JPanel
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		setLayout(gridbag);
-		
-		butResetRotation = new JButton ("Reset");
-		butResetRotation.setToolTipText( "Reset rotation" );
-		butResetRotation.addActionListener( (e)->resetRotation());
 		
 		gbc.gridwidth = 0;
 		gbc.gridy = 0;
@@ -66,14 +59,11 @@ public class TransformRotationPanel extends JPanel
 		
 		//add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
-		gbc.gridy ++;
-		gbc.anchor = GridBagConstraints.SOUTHEAST;
-		gbc.fill = GridBagConstraints.NONE;
-		this.add( butResetRotation, gbc );
+
 		updateGUI();
 	}
 	
-	void updateGUI()
+	synchronized void updateGUI()
 	{
 		
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
@@ -103,7 +93,7 @@ public class TransformRotationPanel extends JPanel
 	
 					for (int d=0; d<3; d++)
 					{
-						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
+						allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
 					}
 				}
 			}
@@ -160,10 +150,16 @@ public class TransformRotationPanel extends JPanel
 			for ( final ConverterSetup cs : csList )
 			{			
 				final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
-				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+				final double [] prevAngles =  new double[3];
+				for(int d=0;d<3;d++)
+				{
+					prevAngles[d] = eAngles[d];
+				}
 				
+				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+
 				transformSetups.transformRotation.setAngles( cs, eAngles );
-				transformSetups.updateTransform( cs );
+				transformSetups.updateTransform( cs, prevAngles );
 	
 			}
 		}
@@ -184,21 +180,27 @@ public class TransformRotationPanel extends JPanel
 		updateGUI();
 	}
 	
-	void resetRotation()
+	public void resetRotation()
 	{
 		
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		blockUpdates = true;
-		final double [] eAngles = new double [3];
+		
 		if(transformSetups.selectedObjects.areSourcesSelected())
 		{
 			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();	
 			for ( final ConverterSetup cs: csList)
 			{			
-				transformSetups.transformRotation.setAngles( cs, eAngles );
-				transformSetups.updateTransform( cs );			
+				final double [] prevAngles =  new double[3];
+				final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
+				for(int d=0;d<3;d++)
+				{
+					prevAngles[d] = eAngles [d];
+				}
+				transformSetups.transformRotation.setAngles( cs,  new double [3] );
+				transformSetups.updateTransform( cs, prevAngles );			
 			}
 		}
 		
@@ -207,6 +209,7 @@ public class TransformRotationPanel extends JPanel
 			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh : shList )
 			{
+				final double [] eAngles = new double [3];
 				transformSetups.transformRotation.setAngles( sh, eAngles );
 				transformSetups.updateTransform( sh );	
 			}

@@ -35,17 +35,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.net.URL;
 import java.util.List;
 
-
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -61,20 +60,28 @@ import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import ij.Prefs;
 
-public class ClipPanel extends JPanel implements ItemListener, ChangeListener
+public class ClipPanel extends JPanel implements ItemListener
 {
 	
 	final BigVolumeBrowser bvb;
 	
-	final ClipSetups clipSetups;
+	final public ClipSetups clipSetups;
 	
-	public JCheckBox cbClipEnabled;
-	public JButton butResetClip;
-	public JCheckBox cbShowClipBoxes;
-	//public JLabel selectionWindow;
+	JCheckBox cbClipEnabled;
+	
+	JButton butCoordSystem;
+	
+	JCheckBox cbShowClipBoxes;
+
+	JButton butResetClipCurrent;
+
+	JButton butResetClipAll;
+
+	final ImageIcon [] coordIcon = new ImageIcon[2];
+	final String[] coordToolTip = new String[2];
 	
 	final ClipRangePanel clipRangePanel;
-	final ClipRotationPanel clipRotationPanel;
+	final public ClipRotationPanel clipRotationPanel;
 	final ClipCenterPanel clipCenterPanel;
 
 	/**
@@ -105,10 +112,8 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 	    clipCenterPanel = new ClipCenterPanel( clipSetups ); 
 
 		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
-		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
-	    //ImageIcon tabIcon = new ImageIcon(icon_path);
+
 		tabClipPane.addTab( "Range", clipRangePanel );
-		//tabClipPane.addTab("",tabIcon, clipRotationPanel , "Rotation");
 		tabClipPane.addTab ("Rotate", clipRotationPanel);
 		tabClipPane.addTab( "Center", clipCenterPanel );
 		
@@ -119,16 +124,53 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
-		gbc.weightx = 0.1;
+		gbc.weightx = 0.5;
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.WEST;
 		
 		cbClipEnabled = new JCheckBox("Clipping", false);
 		this.add(cbClipEnabled,gbc);
-		cbClipEnabled.addItemListener( this );		
+		
+		cbClipEnabled.addItemListener( this );	
+		
+		gbc.gridx++;
+		
+		//CLIP COORDINATE SYSTEM
+	    //PROJECTION MATRIX
+	    coordToolTip[0] = "Global world coordinates";
+	    coordToolTip[1] = "Local volume coordinates";
+		URL icon_path = this.getClass().getResource("/icons/clip_global.png");
+		coordIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource("/icons/clip_local.png");
+		coordIcon[1] = new ImageIcon(icon_path);
+		
+		butCoordSystem = new JButton(coordIcon[clipSetups.bLocalCoordinates?1:0]);
+		
+		butCoordSystem.setToolTipText(coordToolTip[clipSetups.bLocalCoordinates?1:0]);
+
+		butCoordSystem.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent arg0 )
+			{
+				clipSetups.bLocalCoordinates = !clipSetups.bLocalCoordinates;
+				int ind = 0;
+				
+				if(clipSetups.bLocalCoordinates)
+				{
+					ind = 1;
+				}
+				butCoordSystem.setIcon( coordIcon[ind]  );
+				butCoordSystem.setToolTipText(coordToolTip[ind]);
+				Prefs.set( "BVB.bClipLocalCoordinates", clipSetups.bLocalCoordinates );
+				updateGUI();
+			}
+	
+		});
 					
+		this.add(butCoordSystem ,gbc);
+
 		cbShowClipBoxes = new JCheckBox ("Box",false);
-		//selectionWindow = new JLabel("Selected: None");
 		gbc.gridx++;
 		this.add(cbShowClipBoxes ,gbc);
 
@@ -153,38 +195,49 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				});
 		cbShowClipBoxes.setSelected( BVBSettings.bShowClipBoxes );
 		
-		butResetClip = new JButton("Reset");
+		gbc.weightx = 0.1;
+		//gbc.anchor = GridBagConstraints.EAST;
+		icon_path = this.getClass().getResource("/icons/red_cross.png");
+		ImageIcon icon = new ImageIcon(icon_path);
+		butResetClipCurrent = new JButton(icon);
+		butResetClipCurrent.setToolTipText( "Reset current panel" );
 		gbc.gridx ++;
-		this.add(butResetClip,gbc);	
-		butResetClip.addActionListener( new ActionListener() 
+		this.add(butResetClipCurrent,gbc);	
+		
+		icon_path = this.getClass().getResource("/icons/red_crossx2.png");
+		icon = new ImageIcon(icon_path);
+		butResetClipAll = new JButton(icon);
+		butResetClipAll.setToolTipText( "Reset all clip" );
+		gbc.gridx ++;
+		this.add(butResetClipAll,gbc);	
+		
+		butResetClipAll.addActionListener( new ActionListener() 
     		{
 				@Override
 				public void actionPerformed( ActionEvent arg0 )
-				{
-					
+				{					
 					resetClip();
 				}
     	
-    		});
-    
+    		});   
 		
 		gbc.gridx = 0;
 	    gbc.gridy ++;
 	    gbc.weightx = 1.0;
-	    gbc.gridwidth = 3;
+	    gbc.gridwidth = 5;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add(tabClipPane,gbc);
 
-
 	    setSourceListeners();
-
-	    updateGUI();
+	    
 	    Color [] colors = new Color[3];
 	    colors[0] =  new Color(198,34,0);
 	    colors[1] =  new Color(67,154,0);
 	    colors[2] =  new Color(0,34,213);
 
 	    this.setSliderColors( colors );
+	    
+	    updateGUI();
 	}
 	
 	
@@ -304,20 +357,12 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 			updateClipEnabled();
 		updateGUI();
 	}
-
-
-	@Override
-	public void stateChanged( ChangeEvent arg0 )
-	{
-		updateGUI();
-	}
 	
 	void setSliderColors(Color [] colors)
 	{		
 		clipRangePanel.setSliderColors( colors );
 		clipRotationPanel.setSliderColors( colors );
-		clipCenterPanel.setSliderColors( colors );
-		
+		clipCenterPanel.setSliderColors( colors );		
 	}
 	
 	void resetClip()
@@ -337,12 +382,12 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				if(range3D != null)
 				{
 					clipSetups.clipAxesBounds.setBounds( cs, range3D );
-					clipSetups.clipRotationAngles.setAngles(cs, new double [3]);
+					clipSetups.clipRotation.setAngles(cs, new double [3]);
 					((GammaConverterSetup)cs).setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
 					((GammaConverterSetup)cs).setClipTransform( new AffineTransform3D() );
 					clipSetups.clipCenters.setCenters(cs, clipSetups.clipCenters.getCurrentOrDefaultCenters( cs ));
 					clipSetups.clipCenterBounds.setBounds( cs, clipSetups.clipCenterBounds.getDefaultBounds( cs ) );
-					clipSetups.updateClipTransform( (GammaConverterSetup) cs);
+					clipSetups.updateClipTransform( (GammaConverterSetup) cs, null);
 					((GammaConverterSetup)cs).setClipActive( true );
 				}
 			}
@@ -358,7 +403,7 @@ public class ClipPanel extends JPanel implements ItemListener, ChangeListener
 				if(range3D != null)
 				{
 					clipSetups.clipAxesBounds.setBounds( sh, range3D );
-					clipSetups.clipRotationAngles.setAngles(sh, new double [3]);
+					clipSetups.clipRotation.setAngles(sh, new double [3]);
 					sh.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
 					sh.setClipTransform( new AffineTransform3D() );
 					clipSetups.clipCenters.setCenters(sh, clipSetups.clipCenters.getCurrentOrDefaultCenters( sh ));

@@ -46,9 +46,9 @@ import bvb.utils.Misc;
 
 public class VolumeBox extends AbstractBasicShape
 {
-	public ArrayList<RealPoint> vertices;
-	public ArrayList<ArrayList<RealPoint>> edges;
-	public ArrayList<VisPolyLineAA> edgesVis;
+
+	public ArrayList<ArrayList<RealPoint>> edges;	
+	final ArrayList<VisPolyLineAA> edgesVis = new ArrayList<>();
 	public float lineThickness;
 	public Color lineColor;
 	public boolean bDotted = true;
@@ -91,7 +91,7 @@ public class VolumeBox extends AbstractBasicShape
 	
 	public void setInterval(RealInterval nIntervalBox)
 	{
-		float [][] nDimBox = new float [2][3];
+		final float [][] nDimBox = new float [2][3];
 		
 		final double [] minI = nIntervalBox.minAsDoubleArray();
 		
@@ -105,21 +105,62 @@ public class VolumeBox extends AbstractBasicShape
 			nDimBox[1][d] = (float)maxI[d];
 
 		}
+		
+//      //somehow not working yet
+//		final float[][][] edgesV = getEdgesFloat(nDimBox);
+//		if(transform != null)
+//		{
+//			for(int i=0; i<edgesV.length; i++)
+//			{
+//				for(int j =0; j<edgesV[i].length; j++)
+//				{
+//					transform.apply( edgesV[i][j], edgesV[i][j]);
+//				}
+//			}
+//		}
+//		if(edgesVis.size() == 0)
+//		{
+//			for(int i=0; i<edgesV.length; i++)
+//			{
+//				final VisPolyLineAA pL = new VisPolyLineAA(edgesV[i], lineThickness, lineColor, bDotted);
+//				edgesVis.add(pL);
+//			}
+//		}
+//		else
+//		{
+//			for(int i=0; i<edgesV.length; i++)
+//			{
+//				edgesVis.get( i ).setVertices( edgesV[i] );
+//			}
+//		}
+
+		
+		
 		final ArrayList<ArrayList< RealPoint >> edgesPairPoints = getEdgesPairPoints(nDimBox);
 		if(transform != null)
 		{
 			for(int i=0; i<edgesPairPoints.size(); i++)
 			{
-				for(RealPoint pt : edgesPairPoints.get( i ))
+				for(final RealPoint pt : edgesPairPoints.get( i ))
 				{
 					transform.apply( pt, pt);
 				}
 			}
 		}
-		edgesVis = new ArrayList<>();
-		for(int i=0; i<edgesPairPoints.size(); i++)
+		if(edgesVis.size() == 0)
 		{
-			edgesVis.add(new VisPolyLineAA(edgesPairPoints.get(i), lineThickness, lineColor, bDotted));
+			for(int i=0; i<edgesPairPoints.size(); i++)
+			{
+				final VisPolyLineAA pL = new VisPolyLineAA(edgesPairPoints.get(i), lineThickness, lineColor, bDotted);
+				edgesVis.add(pL);
+			}
+		}
+		else
+		{
+			for(int i=0; i<edgesPairPoints.size(); i++)
+			{
+				edgesVis.get( i ).setVertices( edgesPairPoints.get(i) );
+			}
 		}
 	}
 	
@@ -129,7 +170,7 @@ public class VolumeBox extends AbstractBasicShape
 	
 		if(edgesVis != null)
 		{
-			for (VisPolyLineAA edge : edgesVis)
+			for (final VisPolyLineAA edge : edgesVis)
 			{
 				edge.draw(gl, pvm);
 			}
@@ -164,9 +205,9 @@ public class VolumeBox extends AbstractBasicShape
 	{
 		int i,j,z;
 		
-		ArrayList<ArrayList< RealPoint >> out = new ArrayList<>();
+		final ArrayList<ArrayList< RealPoint >> out = new ArrayList<>();
 		
-		int [][] edgesxy = new int [5][2];
+		final int [][] edgesxy = new int [5][2];
 		
 		edgesxy[0] = new int[]{0,0};
 		edgesxy[1] = new int[]{1,0};
@@ -175,8 +216,8 @@ public class VolumeBox extends AbstractBasicShape
 		edgesxy[4] = new int[]{0,0};
 		
 		//draw front and back
-		RealPoint vertex1 = new RealPoint(0,0,0);
-		RealPoint vertex2 = new RealPoint(0,0,0);
+		final RealPoint vertex1 = new RealPoint(0,0,0);
+		final RealPoint vertex2 = new RealPoint(0,0,0);
 		
 		for (z=0;z<2;z++)
 		{
@@ -221,12 +262,82 @@ public class VolumeBox extends AbstractBasicShape
 		return out;
 	}
 	
+	/** returns array of 4 arrays of vertices coordinates:
+	 * 0 - front face+connecting edge + back face
+	 * 1,2,3 - the rest of edges.
+	 * The box is specified by nDimBox[0] - one corner, nDimBox[1] - opposite corner.
+	 * no checks on provided coordinates performed  **/
+	public static float[][][] getEdgesFloat(final float [][] nDimBox)
+	{
+		final float [][][] out = new float[4][][];
+		int i,z;
+	
+		//front and back faces vertices
+		out [0] = new float[10][3];
+		
+//		for(int d=0;d<3;d++)
+//		{
+//			out[0][0][d] = nDimBox[0][d];
+//			out[0][1][d] = nDimBox[0][d];
+//			out[0][2][d] = nDimBox[0][d];
+//
+//		}
+//		out[0][1][1]= nDimBox[1][1];
+//		out[0][2][0]= nDimBox[1][0];
+//		out[0][2][1]= nDimBox[1][1];
+//		
+//		
+		final int [][] edgesxy = new int [5][2];
+		
+		
+		edgesxy[0] = new int[]{0,0};
+		edgesxy[1] = new int[]{1,0};
+		edgesxy[2] = new int[]{1,1};
+		edgesxy[3] = new int[]{0,1};
+		edgesxy[4] = new int[]{0,0};
+		
+		int nCount = 0;
+		
+		//front/back faces
+		for (z=0;z<2;z++)
+		{
+			for (i=0;i<5;i++)
+			{
+				for(int d=0;d<2;d++)
+				{
+					out[0][nCount][d] = nDimBox[edgesxy[i][d]][d];
+				}
+				out[0][nCount][2] = nDimBox[z][2];
+				nCount++;
+			}			
+		}	
+		
+		//remaining 3 edges
+		for(i=1;i<4;i++)
+		{
+			out [i] = new float[2][3];
+		}
+		for(i=1;i<4;i++)
+		{
+			for (z=0;z<2;z++)
+			{
+				for(int d=0;d<2;d++)
+				{
+					out[i][z][d] = nDimBox[edgesxy[i][d]][d];
+				}
+				out[i][z][2] = nDimBox[z][2];
+			}
+			
+		}		
+		return out;
+	}
+	
 	/** returns vertices of box specified by provided interval in no particular order **/
 	public static ArrayList<RealPoint > getBoxVertices(final RealInterval interval)
 	{	
-		ArrayList<RealPoint> out = new ArrayList<>();
+		final ArrayList<RealPoint> out = new ArrayList<>();
 		
-		RealPoint [] rpBounds = new RealPoint [2];
+		final RealPoint [] rpBounds = new RealPoint [2];
 		
 		rpBounds[0]= interval.minAsRealPoint();
 		rpBounds[1]= interval.maxAsRealPoint();
@@ -258,7 +369,7 @@ public class VolumeBox extends AbstractBasicShape
 				compareVBoxes(  ( VolumeBox ) obj );
 	}
 	
-	boolean compareVBoxes(VolumeBox v2)
+	boolean compareVBoxes(final VolumeBox v2)
 	{
 		if (v2==null)
 			return false;
@@ -270,7 +381,7 @@ public class VolumeBox extends AbstractBasicShape
 		return bFinal;
 		
 	}
-	public boolean compareIntervalTransform(RealInterval int2, AffineTransform3D tr2)
+	public boolean compareIntervalTransform(final RealInterval int2, final AffineTransform3D tr2)
 	{
 
 		boolean bFinal = true;
@@ -314,7 +425,7 @@ public class VolumeBox extends AbstractBasicShape
 	{
 		if(edgesVis != null)
 		{
-			for (VisPolyLineAA edge : edgesVis)
+			for (final VisPolyLineAA edge : edgesVis)
 			{
 				edge.reload();
 			}

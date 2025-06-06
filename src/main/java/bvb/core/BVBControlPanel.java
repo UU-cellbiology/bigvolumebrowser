@@ -63,7 +63,7 @@ public class BVBControlPanel extends JPanel
 	
 	final public TabPanelDataSources tabPanelDataSources;
 	
-	final TabPanelView tabPanelView;
+	final public TabPanelView tabPanelView;
 	
 	final public TabPanelShapes tabPanelShapes;
 	

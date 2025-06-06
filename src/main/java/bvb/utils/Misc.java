@@ -42,6 +42,7 @@ import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.Affine3DHelpers;
+import bdv.util.BoundedRange;
 import bdv.viewer.Source;
 
 public class Misc
@@ -141,7 +142,32 @@ public class Misc
 			min[d] -= 0.5;
 			max[d] += 0.5;
 		}
-		final FinalRealInterval interval =transformSource.estimateBounds( new FinalRealInterval(min, max) );
+		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) );
+		
+		return interval.minAsDoubleArray();
+	}
+	
+	public static double[] getSourceMinNoFixedTransform(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformFullSource = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformFullSource);
+		final AffineTransform3D transformFixed = new AffineTransform3D();
+		(( TransformedSource< ? > ) source).getFixedTransform( transformFixed );
+		
+		//remove fixed transform
+		final AffineTransform3D transformSource = new AffineTransform3D ();
+		transformSource.set( transformFullSource );
+		transformSource.preConcatenate( transformFixed.inverse() );
+		
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d=0; d<3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) );
 		
 		return interval.minAsDoubleArray();
 	}
@@ -162,6 +188,31 @@ public class Misc
 				else
 				{
 					final double [] minCurr = Misc.getSourceMin(source,t,0);
+					for(int d=0; d<3; d++)
+						min[d] = Math.min( min[d], minCurr[d] );
+				}					
+				t++;
+			}
+		}
+		return min;
+	}
+	
+	public static double[] getSourceMinNoFixedTransformAllTP(final Source<?> source)
+	{
+		double [] min = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(min == null)
+				{
+					min = Misc.getSourceMinNoFixedTransform(source,t,0);
+				}
+				else
+				{
+					final double [] minCurr = Misc.getSourceMinNoFixedTransform(source,t,0);
 					for(int d=0; d<3; d++)
 						min[d] = Math.min( min[d], minCurr[d] );
 				}					
@@ -260,23 +311,35 @@ public class Misc
 				}
 
 			}
-			double [] sq = new double[3];
-			for(int d=0;d<3;d++)
-			{
-				sq[d] = q[d+1]*q[d+1];
-			}
+//			double [] sq = new double[3];
+//			for(int d=0;d<3;d++)
+//			{
+//				sq[d] = q[d+1]*q[d+1];
+//			}
 			switch (nAxis)
 			{
 			case 0:
-				return Math.atan2(2.0*q[1]*q[0]-2.0*q[2]*q[3] , 1.0 - 2.0*sq[1] - 2.0*sq[3]);
+				return Math.atan2(2.0*q[1]*q[0]-2.0*q[2]*q[3] , 1.0 );//- 2.0*sq[1] - 2.0*sq[3]);
 			case 1:
-				return Math.atan2(2.0*q[2]*q[0]-2.0*q[1]*q[3] , 1.0 - 2.0*sq[2] - 2.0*sq[3]);
+				return Math.atan2(2.0*q[2]*q[0]-2.0*q[1]*q[3] , 1.0 );//- 2.0*sq[2] - 2.0*sq[3]);
 			case 2:
 				return Math.asin(2.0*test);
 			default:
 				return 0.0;
 			}	
 
+	}
+	
+	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/
+	public static double[]  quaternionToEulerAnglesSecond(double [] q)
+	{
+		final double [] eAngles = new double[3];
+		
+		for (int d=0;d<3;d++)
+		{
+			eAngles[d] = quaternionToAngleSecond(d,q);
+		}
+		return eAngles;
 	}
 	
 	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/
@@ -369,7 +432,29 @@ public class Misc
 		return out;
 	}
 	
-	public static AffineTransform3D getRotationTransform(final double [] eAngles)
+	public static double[] getRotationQuaternion(final double [] eAngles)
+	{
+		final double[] qRotation = new double[4];
+		final double[] q = new double[4];
+
+		final double[] dAxis = new double[3];
+		dAxis[0] = 1.0;
+		LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[0], qRotation );
+		for (int d=1;d<3;d++)
+		{
+			dAxis[d-1] = 0.0;
+			dAxis[d] = 1.0;
+			LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[d], q);
+			LinAlgHelpers.quaternionMultiply( q, qRotation, qRotation );
+			LinAlgHelpers.normalize( qRotation );
+		}
+		LinAlgHelpers.normalize( qRotation );
+		
+		return qRotation;
+	}
+	
+	/** produces gimbal lock **/
+	public static AffineTransform3D getRotationTransformQuaternion(final double [] eAngles)
 	{
 		final double[] qRotation = new double[4];
 		final double[] q = new double[4];
@@ -391,6 +476,53 @@ public class Misc
 		
 		clipRot.set( rotMatrix );
 		return clipRot;
+	}
+	
+	/** produces gimbal lock **/
+	public static AffineTransform3D getRotationTransformMatrix(final double [] eAngles)
+	{
+		
+		final double [] cos = new double[3];
+		final double [] sin = new double[3];
+		
+		for(int d=0;d<3;d++)
+		{
+			cos[d] = Math.cos( eAngles[d] );
+			sin[d] = Math.sin( eAngles[d] );
+		}
+		
+		final double [][] rotMatrix = new double [3][4];  
+
+		rotMatrix[0][0] = cos[1]*cos[2];
+		rotMatrix[1][0] = cos[1]*sin[2];
+		rotMatrix[2][0] = (-1)*sin[1];
+		
+		rotMatrix[0][1] = sin[0]*sin[1]*cos[2] - cos[0]*sin[2];
+		rotMatrix[1][1] = sin[0]*sin[1]*sin[2] + cos[0]*cos[2];
+		rotMatrix[2][1] = sin[0]*cos[1];
+		
+		rotMatrix[0][2] = cos[0]*sin[1]*cos[2] + sin[0]*sin[2];
+		rotMatrix[1][2] = cos[0]*sin[1]*sin[2] - sin[0]*cos[2];
+		rotMatrix[2][2] = cos[0]*cos[1];
+		
+		final AffineTransform3D clipRot = new AffineTransform3D();
+		
+		clipRot.set( rotMatrix );
+		return clipRot;
+	}
+	
+	/** gives gimbal lock **/
+	public static AffineTransform3D getRotationTransform(final double [] eAngles)
+	{
+			
+		final AffineTransform3D trRot = new AffineTransform3D();
+		
+		for(int d=0;d<3;d++)
+		{
+			trRot.rotate( d, eAngles[d]);
+		}
+
+		return trRot;
 	}
 	
 	public static boolean checkInterval(RealInterval interval)
@@ -453,5 +585,62 @@ public class Misc
 			}
 		}
 		return nCount;
+	}
+	
+	/** a bit more permissive comparison of bounded ranges **/
+	public static boolean compareBoundedRanges(final BoundedRange r1, final BoundedRange r2)
+	{
+		if ( r1 == r2 )
+			return true;
+		if(r1 == null || r2 == null)
+			return false;		
+		if (compareRelativeDouble(r1.getMinBound(),r2.getMinBound()))
+			return false;
+		if (compareRelativeDouble(r1.getMaxBound(),r2.getMaxBound()))
+			return false;
+		if (compareRelativeDouble(r1.getMin(),r2.getMin()))
+			return false;
+		if (compareRelativeDouble(r1.getMax(),r2.getMax()))
+			return false;
+		
+		return true;
+	}
+
+	/** a bit more permissive comparison of bounded values **/
+	public static boolean compareBoundedValues(final BoundedValueDoubleBVB r1, final BoundedValueDoubleBVB r2)
+	{
+		if ( r1 == r2 )
+			return true;
+		if(r1 == null || r2 == null)
+			return false;		
+		if (compareRelativeDouble(r1.getRangeMin(),r2.getRangeMin()))
+			return false;
+		if (compareRelativeDouble(r1.getRangeMax(),r2.getRangeMax()))
+			return false;
+		if (compareRelativeDouble(r1.getCurrentValue(),r2.getCurrentValue()))
+			return false;
+		
+		return true;
+	}
+
+	
+	public static boolean compareRelativeDouble(final double v1, final double v2)
+	{
+		return (Math.abs( v1- v2)/Math.max( Math.abs( v1 ), Math.abs( v2 ) )) >0.1 ;
+	}
+	
+	public static BoundedRange translateBoundedRange(final BoundedRange rangeOld, final double  translation)
+	{
+		final double [] rangeX = new double [4];
+		rangeX[0] = rangeOld.getMin();
+		rangeX[1] = rangeOld.getMax();
+		rangeX[2] = rangeOld.getMinBound();
+		rangeX[3] = rangeOld.getMaxBound();
+		for(int i=0;i<4;i++)
+		{
+			rangeX[i] += translation;
+		}
+		return new BoundedRange (rangeX[2], rangeX[3], rangeX[0], rangeX[1]);
+		
 	}
 }

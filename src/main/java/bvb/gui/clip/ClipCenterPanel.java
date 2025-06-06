@@ -38,12 +38,15 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
+import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
 import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
+import bvb.utils.Misc;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 import bvvpg.ui.panels.BoundedValuePanelPG;
@@ -121,7 +124,7 @@ public class ClipCenterPanel extends JPanel
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
-		
+		blockUpdates = true;
 		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
 		boolean bFirstCS = true;
 		boolean [] allCenterEqual = new boolean [3];
@@ -137,12 +140,43 @@ public class ClipCenterPanel extends JPanel
 			{
 				if(((GammaConverterSetup)cs).clipActive())
 				{
-					final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
+					final Bounds3D bounds = new Bounds3D(clipSetups.clipCenterBounds.getBounds( cs ));
 					final double [] minBound = bounds.getMinBound();
 					final double [] maxBound = bounds.getMaxBound();
 					
 					double [] center = new double [3];
-					center = clipSetups.clipCenters.getCenters( cs );
+					final double [] centerIn = clipSetups.clipCenters.getCenters( cs );
+					
+					//convert to relative if needed
+					//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+//					double [] relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+//					final double [] scales = centerclipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( cs );
+//					for(int d=0;d<3; d++)
+//						relShift[d] *= scales[d];
+					
+					if(clipSetups.bLocalCoordinates)
+					{
+						AffineTransform3D tr = new AffineTransform3D();
+						(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
+						tr.inverse().apply( centerIn, center );
+						//final double [] relShift = Misc.getSourceMinAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+						final double [] relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+						for(int d=0;d<3;d++)
+						{
+							//center[d] = centerIn[d]-relShift[d];
+							minBound[d] -= relShift[d];
+							maxBound[d] -= relShift[d];
+						}
+					}
+					else
+					{
+						center = centerIn;
+					}
+					for(int d=0;d<3;d++)
+					{
+						minBound[d] = Math.min(minBound[d], center[d]);
+						maxBound[d] = Math.max(maxBound[d], center[d]);
+					}
 					if(bFirstCS)
 					{
 						for (int d=0; d<3; d++)
@@ -156,7 +190,7 @@ public class ClipCenterPanel extends JPanel
 						for (int d=0; d<3; d++)
 						{
 							final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-							allCenterEqual[d] &= boundValue[d].equals( centerRange );
+							allCenterEqual[d] &= Misc.compareBoundedValues( boundValue[d], centerRange );
 							boundValue[d] = boundValue[d].join( centerRange );
 						}
 					}
@@ -176,6 +210,8 @@ public class ClipCenterPanel extends JPanel
 					
 					double [] center = new double [3];
 					center = clipSetups.clipCenters.getCenters( sh );
+					
+					
 					if(bFirstCS)
 					{
 						for (int d=0; d<3; d++)
@@ -189,13 +225,16 @@ public class ClipCenterPanel extends JPanel
 						for (int d=0; d<3; d++)
 						{
 							final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-							allCenterEqual[d] &= boundValue[d].equals( centerRange );
+							allCenterEqual[d] &= Misc.compareBoundedValues(boundValue[d], centerRange );
 							boundValue[d] = boundValue[d].join( centerRange );
 						}
 					}
 				}
 			}
 		}
+		
+		blockUpdates = false;
+
 		//if anything is present and changed
 		if(!bFirstCS)
 		{
@@ -222,16 +261,32 @@ public class ClipCenterPanel extends JPanel
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		blockUpdates = true;
-		double currVal = clipCenterPanels[nAxis].getValue().getCurrentValue();
-		double minBound = clipCenterPanels[nAxis].getValue().getRangeMin();
-		double maxBound = clipCenterPanels[nAxis].getValue().getRangeMax();
-		minBound = Math.min( currVal, minBound );
-		maxBound = Math.max( currVal, maxBound );
+		
+		double currValAbs = clipCenterPanels[nAxis].getValue().getCurrentValue();
+		double minBoundAbs = clipCenterPanels[nAxis].getValue().getRangeMin();
+		double maxBoundAbs = clipCenterPanels[nAxis].getValue().getRangeMax();
+		minBoundAbs = Math.min( currValAbs, minBoundAbs );
+		maxBoundAbs = Math.max( currValAbs, maxBoundAbs );
+		
 		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
 			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
 			for ( final ConverterSetup cs : csList )
 			{
+				double [] relShift  = new double [3];
+			
+				if(clipSetups.bLocalCoordinates)
+				{
+				//relative coordinates
+					relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( cs ).getSpimSource() );
+				//final double [] relShift = clipSetups.getSourceMinWithScaleTranslation( cs );
+				}
+
+				//tr.apply( currValAbs, currVal );
+				double currVal = currValAbs ;//+ relShift[nAxis];
+				double minBound = minBoundAbs + relShift[nAxis];
+				double maxBound = maxBoundAbs + relShift[nAxis];
+				
 				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( cs );
 				
 				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
@@ -240,34 +295,43 @@ public class ClipCenterPanel extends JPanel
 					bounds.getMaxBound()[nAxis] = maxBound;
 					clipSetups.clipCenterBounds.setBounds( cs, bounds );
 				}
+				AffineTransform3D tr = new AffineTransform3D();
+				(( TransformedSource< ? > )clipSetups.converterSetups.getSource( cs ).getSpimSource()).getFixedTransform( tr );
 				final double [] newCenter = clipSetups.clipCenters.getCenters( cs );
-				newCenter[nAxis] = currVal;
-				
-				clipSetups.clipCenters.setCenters( cs, newCenter );
-				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs );
-			}
-		}
-		if(clipSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( sh );
-				
-				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+				if(clipSetups.bLocalCoordinates)
 				{
-					bounds.getMinBound()[nAxis] = minBound;
-					bounds.getMaxBound()[nAxis] = maxBound;
-					clipSetups.clipCenterBounds.setBounds( sh, bounds );
+					tr.inverse().apply( newCenter, newCenter );
 				}
-				final double [] newCenter = clipSetups.clipCenters.getCenters( sh );
 				newCenter[nAxis] = currVal;
-				
-				clipSetups.clipCenters.setCenters( sh, newCenter );
-				clipSetups.updateClipTransform( sh );
+				if(clipSetups.bLocalCoordinates)
+				{
+					tr.apply( newCenter, newCenter );
+				}
+				clipSetups.clipCenters.setCenters( cs, newCenter );
+				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs, null );
 			}
-			clipSetups.bvb.updateSceneRender();
 		}
+//		if(clipSetups.selectedObjects.areShapesSelected())
+//		{
+//			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
+//			for ( final BasicShape sh : shList )
+//			{
+//				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( sh );
+//				
+//				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+//				{
+//					bounds.getMinBound()[nAxis] = minBound;
+//					bounds.getMaxBound()[nAxis] = maxBound;
+//					clipSetups.clipCenterBounds.setBounds( sh, bounds );
+//				}
+//				final double [] newCenter = clipSetups.clipCenters.getCenters( sh );
+//				newCenter[nAxis] = currVal;
+//				
+//				clipSetups.clipCenters.setCenters( sh, newCenter );
+//				clipSetups.updateClipTransform( sh );
+//			}
+//			clipSetups.bvb.updateSceneRender();
+//		}
 		blockUpdates = false;
 		updateGUI();
 	}

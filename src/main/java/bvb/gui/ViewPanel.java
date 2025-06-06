@@ -57,11 +57,13 @@ public class ViewPanel extends JPanel
 {
 	
 	final BigVolumeBrowser bvb;
-//	JToggleButton butOrigin;
+
 	JToggleButton butVBox;
+	
 	JButton butProjType;
-	//public JButton butFullScreen;
+
 	JButton butSettings;
+	
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];
 	
@@ -73,13 +75,6 @@ public class ViewPanel extends JPanel
 		setLayout(new GridBagLayout());
 		bvb = bvb_;
 		//this.setBorder(new PanelTitle(" View "));
-		
-		//ORIGIN
-//		URL icon_path = this.getClass().getResource("/icons/orig.png");
-//	    ImageIcon tabIcon = new ImageIcon(icon_path);
-//	    butOrigin = new JToggleButton(tabIcon);
-//	    //butOrigin.setSelected(btdata.bShowOrigin);
-//	    butOrigin.setToolTipText("Show XYZ axes");
 	    
 	    //BOX AROUND
 		URL icon_path = this.getClass().getResource("/icons/boxvolume.png");
@@ -131,53 +126,23 @@ public class ViewPanel extends JPanel
 				bvb.bvvViewer.setProjectionType(newProj);
 			}
 	
-		});
-		
-//	    //FULL SCREEN
-//		icon_path = this.getClass().getResource("/icons/fullscreen.png");
-//	    tabIcon = new ImageIcon(icon_path);
-//	    butFullScreen = new JButton(tabIcon);
-//	    butFullScreen.setToolTipText("Full Screen");
-//	    butFullScreen.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed( ActionEvent arg0 )
-//			{
-//				bvb.makeFullScreen();								
-//			}
-//	    	
-//	    });	    
+		});  
 	    
 		//SETTINGS
 		icon_path = this.getClass().getResource("/icons/settings.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butSettings = new JButton(tabIcon);
 	    butSettings.setToolTipText("Settings");
-	    butSettings.addActionListener(new ActionListener()
-	    		{
-					@Override
-					public void actionPerformed( ActionEvent arg0 )
-					{
-						
-						dialSettings();
-					}
-	    	
-	    		});
+	    butSettings.addActionListener((e)->dialSettings());
 	    
 	    GridBagConstraints gbc = new GridBagConstraints();
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-//		this.add(butOrigin,gbc);
-//		
-//		gbc.gridx++;	    
-		this.add(butVBox,gbc);
+    	this.add(butVBox,gbc);
 		
 		gbc.gridx++;	    
 		this.add(butProjType,gbc);
-		
-//		gbc.gridx++;	    
-//		this.add(butFullScreen,gbc);
 		
 		gbc.gridx++;	    
 		this.add(butSettings,gbc);

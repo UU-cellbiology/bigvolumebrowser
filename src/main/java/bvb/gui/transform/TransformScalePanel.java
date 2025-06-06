@@ -10,7 +10,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -42,8 +41,6 @@ public class TransformScalePanel extends JPanel
 	
 	private JLabel [] voxelSize = new JLabel[3];
 	
-	final JButton butResetScale;
-	
 	/**
 	 * Panel background if color reflects a set of sources all having the same color
 	 */
@@ -64,10 +61,7 @@ public class TransformScalePanel extends JPanel
 		transformSetups = transformSetups_;
 		
 		setLayout(new GridBagLayout());
-		
-		butResetScale = new JButton ("Reset");
-		butResetScale.setToolTipText( "Reset scale" );
-		butResetScale.addActionListener( (e)->resetScale());
+
 		
 		String [] axesTitles = new String[] {"X","Y","Z"};
 		String [] voxelSizeS = new String[] {"NA","NA","NA"};
@@ -112,13 +106,6 @@ public class TransformScalePanel extends JPanel
 		spinners[0].addChangeListener( (e)-> updateScaleAxis(0) );
 		spinners[1].addChangeListener( (e)-> updateScaleAxis(1) );
 		spinners[2].addChangeListener( (e)-> updateScaleAxis(2) );
-
-
-		gbc.gridx=0;
-		gbc.gridwidth = 3;
-		gbc.anchor = GridBagConstraints.SOUTHEAST;
-		gbc.fill = GridBagConstraints.NONE;
-		this.add( butResetScale, gbc );
 		
 		transformSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
 		
@@ -130,7 +117,7 @@ public class TransformScalePanel extends JPanel
 
 	}
 	
-	void updateGUI()
+	synchronized void updateGUI()
 	{
 		
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
@@ -238,7 +225,7 @@ public class TransformScalePanel extends JPanel
 	}
 
 
-	void updateScaleAxis(int nAxis)
+	synchronized void updateScaleAxis(int nAxis)
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
@@ -259,7 +246,7 @@ public class TransformScalePanel extends JPanel
 				}
 				newScale[nAxis] = currVal;
 				transformSetups.transformScale.setScale( cs, newScale );
-				transformSetups.updateTransform( cs );
+				transformSetups.updateTransform( cs, null );
 			}
 		}
 		if(transformSetups.selectedObjects.areShapesSelected())
@@ -317,7 +304,7 @@ public class TransformScalePanel extends JPanel
 			{
 				
 				transformSetups.transformScale.setScale( cs, unitScale );
-				transformSetups.updateTransform( cs );			
+				transformSetups.updateTransform( cs, null );			
 			}
 		}
 		if(transformSetups.selectedObjects.areShapesSelected())

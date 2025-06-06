@@ -189,8 +189,9 @@ public class VolumeBBoxes extends AbstractBasicShape
 				src.getSourceTransform( nTimePoint, 0, transform );
 				final VolumeBox currBox = bvvSourceToBox.get( sac );
 				if(currBox == null)
-				{				
-					bvvSourceToBox.put( sac, new VolumeBox(interval, transform , lineThickness, lineColor, bDotted) );
+				{		
+					final VolumeBox vb = new VolumeBox(interval, transform , lineThickness, lineColor, bDotted);
+					bvvSourceToBox.put( sac, vb);
 				}
 				else
 				{
@@ -203,7 +204,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 			}
 			else
 			{
-				bvvSourceToBox.remove( sac );
+				bvvSourceToBox.remove( sac );					
 			}
 		}
 		
@@ -219,7 +220,8 @@ public class VolumeBBoxes extends AbstractBasicShape
 				final VolumeBox currBox = shapeToBox.get( sh );
 				if(currBox == null)
 				{				
-					shapeToBox.put( sh, new VolumeBox(interval, transform , lineThickness, lineColor, bDotted) );
+					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDotted); 
+					shapeToBox.put( sh, vb);
 				}
 				else
 				{
@@ -275,7 +277,8 @@ public class VolumeBBoxes extends AbstractBasicShape
 				if(currBox == null)
 				{
 					cs.getClipTransform( transform );
-					bvvSourceToBox.put( sac, new VolumeBox(interval, transform, lineThickness, lineColor, bDotted) );
+					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDotted);
+					bvvSourceToBox.put( sac, vb);
 				}
 				else
 				{
@@ -286,6 +289,10 @@ public class VolumeBBoxes extends AbstractBasicShape
 						
 					}
 				}
+			}
+			else
+			{
+				bvvSourceToBox.remove( sac );
 			}
 			
 		}
@@ -304,7 +311,8 @@ public class VolumeBBoxes extends AbstractBasicShape
 				if(currBox == null)
 				{
 					sh.getClipTransform( transform );
-					shapeToBox.put( sh, new VolumeBox(interval, transform, lineThickness, lineColor, bDotted) );
+					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDotted) ;
+					shapeToBox.put( sh, vb);
 				}
 				else
 				{

@@ -46,7 +46,7 @@ void main()
     else if (curr.xyz == next.xyz) 
     {
         //v_uv.x = linelength+w;
-        //position = screen_curr.xy + w*t0 + uv.y*w*n0;
+        // position = screen_curr.xy + w*t0 + uv.y*w*n0;
         //not rounded ends
         position = screen_curr.xy + uv.y*w*n0;
         
