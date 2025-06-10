@@ -63,7 +63,7 @@ public class Misc
 		return transformSource.estimateBounds( interval );
 	}
 	
-	public static FinalRealInterval getSourceBoundingBoxAllTP(final Source<?> source)
+	public static RealInterval getSourceBoundingBoxAllTP(final Source<?> source)
 	{
 		FinalRealInterval interval = null;
 		if ( source != null )

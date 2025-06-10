@@ -15,36 +15,27 @@ import bvb.shapes.BasicShape;
 public class TransformScale
 {
 	private final SourceToConverterSetupBimap bimap;
+
 	
-	private final Map< ConverterSetup, double[]> setupToScale = new HashMap<>();
-	private final Map< BasicShape, double[]> shapeToScale = new HashMap<>();
+	private final Map< Object, double[]> objToScale = new HashMap<>();
+
 	
 	public TransformScale( final SourceToConverterSetupBimap bimap)
 	{
 		this.bimap = bimap;
 	}
 	
-	public double[] getScale( final ConverterSetup setup )
+	public double[] getScale( final Object obj )
 	{
-		double [] out = setupToScale.get( setup );
+		double [] out = objToScale.get( obj );
 		if(out == null)
 		{
-			out = getCurrentOrDefaultScale(setup);
-			setScale( setup, out );
+			out = getCurrentOrDefaultScale(obj);
+			setScale( obj, out );
 		}		
 		return out;
 	}
 	
-	public double[] getScale( final BasicShape shape )
-	{
-		double [] out = shapeToScale.get( shape );
-		if(out == null)
-		{
-			out = getCurrentOrDefaultScale(shape);
-			setScale( shape, out );
-		}		
-		return out;
-	}
 	
 	public void updateScale(final ConverterSetup setup)
 	{
@@ -56,48 +47,37 @@ public class TransformScale
 		setScale( shape, getCurrentOrDefaultScale(shape));
 	}
 	
-	public void setScale( final ConverterSetup setup, final double[] scales)
+	public void setScale( final Object obj, final double[] scales)
 	{
-		setupToScale.put( setup, scales );
+		objToScale.put( obj, scales );
 	}
 	
-	public void setScale( final BasicShape shape, final double[] scales)
+	public double [] getCurrentOrDefaultScale(final Object obj)
 	{
-		shapeToScale.put( shape, scales );
-	}
-	
-	public double [] getCurrentOrDefaultScale(final ConverterSetup setup)
-	{
-		Source< ? > src = bimap.getSource( setup ).getSpimSource();
-		
-		AffineTransform3D srcTr = new AffineTransform3D();
-		AffineTransform3D srcInc = new AffineTransform3D();
-		(( TransformedSource< ? > )src).getFixedTransform( srcTr );
-		(( TransformedSource< ? > )src).getIncrementalTransform( srcInc );
-		
-		srcTr = srcTr.preConcatenate( srcInc );
-		
-		final double out [] = new double [3];
-		
-		for (int d = 0; d < 3; d++ )
+
+		final AffineTransform3D trScale = new AffineTransform3D();
+
+		if(obj instanceof ConverterSetup)
 		{
-			out[d] = Affine3DHelpers.extractScale( srcTr, d );
+			Source< ? > src = bimap.getSource( (ConverterSetup)obj ).getSpimSource();
+		
+			final AffineTransform3D srcInc = new AffineTransform3D();
+			(( TransformedSource< ? > )src).getFixedTransform( trScale );
+			(( TransformedSource< ? > )src).getIncrementalTransform( srcInc );
+		
+			trScale.preConcatenate( srcInc );
 		}
 		
-		return out;				
-	}
-	public double [] getCurrentOrDefaultScale(final BasicShape shape)
-	{
-		
-		AffineTransform3D shapeTr = new AffineTransform3D();
-
-		shape.getTransform( shapeTr );
+		if(obj instanceof BasicShape)
+		{
+			((BasicShape)obj).getTransform( trScale );
+		}
 		
 		final double out [] = new double [3];
 		
 		for (int d = 0; d < 3; d++ )
 		{
-			out[d] = Affine3DHelpers.extractScale( shapeTr, d );
+			out[d] = Affine3DHelpers.extractScale( trScale, d );
 		}
 		
 		return out;				

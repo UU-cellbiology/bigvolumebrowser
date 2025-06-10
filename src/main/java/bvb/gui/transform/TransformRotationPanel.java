@@ -8,9 +8,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
-import bvb.shapes.BasicShape;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -77,48 +75,23 @@ public class TransformRotationPanel extends JPanel
 			allAnglesEqual[d] = true;
 		}
 		
-		if(transformSetups.selectedObjects.areSourcesSelected())
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs: csList)
+			if(bFirstCS)
 			{
-				if(bFirstCS)
+				angles = transformSetups.transformRotation.getAngles( obj );
+				bFirstCS = false;
+			}
+			else
+			{
+				final double[] currAngles = transformSetups.transformRotation.getAngles( obj );
+
+				for (int d=0; d<3; d++)
 				{
-					angles = transformSetups.transformRotation.getAngles( cs );
-					bFirstCS = false;
-				}
-				else
-				{
-					final double[] currAngles = transformSetups.transformRotation.getAngles( cs );
-	
-					for (int d=0; d<3; d++)
-					{
-						allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
-					}
+					allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
 				}
 			}
-		}
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shList)
-			{
-				if(bFirstCS)
-				{
-					angles = transformSetups.transformRotation.getAngles( sh );
-					bFirstCS = false;
-				}
-				else
-				{
-					final double[] currAngles = transformSetups.transformRotation.getAngles( sh );
-	
-					for (int d=0; d<3; d++)
-					{
-						allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
-					}
-				}
-			}
-			
 		}
 		
 		final double [] finalAngles = angles;
@@ -144,36 +117,21 @@ public class TransformRotationPanel extends JPanel
 			return;
 		
 		blockUpdates = true;
-		if(transformSetups.selectedObjects.areSourcesSelected())
-		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs : csList )
-			{			
-				final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
-				final double [] prevAngles =  new double[3];
-				for(int d=0;d<3;d++)
-				{
-					prevAngles[d] = eAngles[d];
-				}
-				
-				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-
-				transformSetups.transformRotation.setAngles( cs, eAngles );
-				transformSetups.updateTransform( cs, prevAngles );
-	
-			}
-		}
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
+		{			
+			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
+			final double [] prevAngles =  new double[3];
+			for(int d=0;d<3;d++)
 			{
-				final double [] eAngles = transformSetups.transformRotation.getAngles( sh );
-				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-				
-				transformSetups.transformRotation.setAngles( sh, eAngles );
-				transformSetups.updateTransform( sh );
+				prevAngles[d] = eAngles[d];
 			}
+			
+			eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+
+			transformSetups.transformRotation.setAngles( obj, eAngles );
+			transformSetups.updateTransform( obj, prevAngles );
+
 		}
 		
 		blockUpdates = false;
@@ -187,32 +145,17 @@ public class TransformRotationPanel extends JPanel
 			return;
 		
 		blockUpdates = true;
-		
-		if(transformSetups.selectedObjects.areSourcesSelected())
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();	
-			for ( final ConverterSetup cs: csList)
-			{			
-				final double [] prevAngles =  new double[3];
-				final double [] eAngles = transformSetups.transformRotation.getAngles( cs );
-				for(int d=0;d<3;d++)
-				{
-					prevAngles[d] = eAngles [d];
-				}
-				transformSetups.transformRotation.setAngles( cs,  new double [3] );
-				transformSetups.updateTransform( cs, prevAngles );			
-			}
-		}
-		
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
+			final double [] prevAngles =  new double[3];
+			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
+			for(int d=0;d<3;d++)
 			{
-				final double [] eAngles = new double [3];
-				transformSetups.transformRotation.setAngles( sh, eAngles );
-				transformSetups.updateTransform( sh );	
+				prevAngles[d] = eAngles [d];
 			}
+			transformSetups.transformRotation.setAngles( obj,  new double [3] );
+			transformSetups.updateTransform( obj, prevAngles );		
 		}
 		blockUpdates = false;
 		updateGUI();

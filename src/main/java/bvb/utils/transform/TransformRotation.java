@@ -3,7 +3,7 @@ package bvb.utils.transform;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -18,106 +18,83 @@ public class TransformRotation
 {
 	private final SourceToConverterSetupBimap bimap;
 	
-	private final Map< ConverterSetup, double[]> setupToAngles = new HashMap<>();
+	private final Map< Object, double[]> objToAngles = new HashMap<>();
 	
-	private final Map< ConverterSetup, double[]> setupToQuaternion = new HashMap<>();
-	
-	private final Map< BasicShape, double[]> shapeToAngles = new HashMap<>();
-	
+	private final Map< Object, double[]> objToQuaternion = new HashMap<>();
+		
 	public TransformRotation( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
 	}
 	
-	public double[] getAngles( final ConverterSetup setup )
+	public double[] getAngles( final Object obj )
 	{
-		double [] out =  setupToAngles.get( setup );
+		double [] out =  objToAngles.get( obj );
 		if(out == null)
 		{
-			out = getCurrentEulerAngles(setup);
-			setAngles(setup, out);
+			out = getCurrentEulerAngles(obj);
+			setAngles(obj, out);
 		}
 		
 		return out;
 	}
-	public double[] getQuaternion( final ConverterSetup setup )
+	public double[] getQuaternion( final Object obj )
 	{
-		double [] out =  setupToQuaternion.get( setup );
+		double [] out =  objToQuaternion.get( obj );
 		if(out == null)
 		{
-			out = getCurrentEulerAngles(setup);
-			setAngles(setup, out);
+			out = getCurrentEulerAngles(obj);
+			setAngles(obj, out);
 		}
-		out =  setupToQuaternion.get( setup );
+		out =  objToQuaternion.get( obj );
 		return out;
 	}
 	
-	public double[] getAngles( final BasicShape shape )
+	public void setAngles( final Object obj, final double[] eAngles)
 	{
-		double [] out =  shapeToAngles.get( shape  );
-		if(out == null)
-		{
-			out = getCurrentEulerAngles(shape);
-			setAngles(shape, out);
-		}
-		
-		return out;
+		objToAngles.put( obj, eAngles );
 	}
 	
-	public void setAngles( final ConverterSetup setup, final double[] eAngles)
-	{
-		setupToAngles.put( setup, eAngles );
-	}
 
-	public void setQuaternion( final ConverterSetup setup, final double[] quat)
+	public void setQuaternion( final Object obj, final double[] quat)
 	{
-		setupToQuaternion.put( setup, quat );
+		objToQuaternion.put( obj, quat );
 	}
-	
-	public void setAngles( final BasicShape shape, final double[] eAngles)
-	{
-		shapeToAngles.put( shape, eAngles );
-	}
-	
-	public double [] getCurrentEulerAngles(final ConverterSetup setup)
+		
+	public double [] getCurrentEulerAngles(final Object obj)
 	{
 		
-		final Source< ? > src = bimap.getSource( setup ).getSpimSource();
-		
-		final AffineTransform3D srcTrFixed = new AffineTransform3D();
-		final AffineTransform3D srcTrIc = new AffineTransform3D();
-		
-		//reset both transforms just in case
-		(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
-		(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
-		
-		srcTrFixed.preConcatenate( srcTrIc );
-		final FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+		final AffineTransform3D trRotation = new AffineTransform3D();
+		RealInterval interval = null;
+		if(obj instanceof ConverterSetup)
+		{
+			final ConverterSetup setup = (ConverterSetup)obj;
+			final Source< ? > src = bimap.getSource( setup ).getSpimSource();
+			final AffineTransform3D srcTrIc = new AffineTransform3D();
+			
+			//reset both transforms just in case
+			(( TransformedSource< ? > )src).getFixedTransform( trRotation );
+			(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
+			
+			trRotation.preConcatenate( srcTrIc );
+			interval = Misc.getSourceBoundingBoxAllTP(src);
+
+		}
+		else if(obj instanceof BasicShape)
+		{
+			((BasicShape)obj).getTransform( trRotation );
+			interval = ((BasicShape)obj).boundingBox();
+		}
 		
 		final double [] center = Misc.getIntervalCenterNegative( interval );
 
-		srcTrFixed.translate( center );
-		final double[] qRotation = new double[4];
-
-		Affine3DHelpers.extractRotationAnisotropic( srcTrFixed, qRotation );
-		setupToQuaternion.put( setup, qRotation );
-		return Misc.quaternionToEulerAngles(qRotation);
-		
-	}
-	
-	public double [] getCurrentEulerAngles(final BasicShape shape)
-	{
-		
-		AffineTransform3D srcTrFixed = new AffineTransform3D();
-		shape.getTransform( srcTrFixed );
-		
-		final double [] center = Misc.getIntervalCenterNegative( shape.boundingBox());
-
-		srcTrFixed.translate( center );
+		trRotation.translate( center );
 		
 		final double[] qRotation = new double[4];
 
-		Affine3DHelpers.extractRotationAnisotropic( srcTrFixed, qRotation );
+		Affine3DHelpers.extractRotationAnisotropic( trRotation, qRotation );
+		
+		objToQuaternion.put( obj, qRotation );
 		
 		return Misc.quaternionToEulerAngles(qRotation);
 		

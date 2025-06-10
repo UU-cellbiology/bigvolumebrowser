@@ -29,6 +29,7 @@
 package bvb.utils.clip;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
@@ -109,7 +110,7 @@ public class ClipSetups
 		
 		AffineTransform3D clipTr = new AffineTransform3D();
 		
-		FinalRealInterval clipInt = cs.getClipInterval();
+		RealInterval clipInt = cs.getClipInterval();
 		
 		if (clipInt == null)
 		{
@@ -138,7 +139,7 @@ public class ClipSetups
 		
 		AffineTransform3D clipTr = new AffineTransform3D();
 		
-		FinalRealInterval clipInt = sh.getClipInterval();
+		RealInterval clipInt = sh.getClipInterval();
 		if(clipInt == null)
 		{
 			clipInt = new FinalRealInterval (sh.boundingBox());

@@ -1,6 +1,6 @@
 package bvb.utils.transform;
 
-import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
@@ -27,7 +27,7 @@ public class TransformSetups
 	
 	final public TransformCenter transformCenters;
 	
-	final public TransformCenterBounds transformTranslationBounds;
+	final public TransformCenterBounds transformCenterBounds;
 	
 	final public TransformRotation transformRotation;
 
@@ -43,44 +43,148 @@ public class TransformSetups
 		
 		transformScale = new TransformScale(converterSetups);
 		transformCenters = new TransformCenter(converterSetups);
-		transformTranslationBounds = new TransformCenterBounds(converterSetups);
+		transformCenterBounds = new TransformCenterBounds(converterSetups);
 		transformRotation = new TransformRotation(converterSetups);
 		
 	}
-
-	public void updateTransform(final BasicShape sh)
+	
+	void getRotation(final AffineTransform3D trRot, final Object obj, final double [] previousAngles)
 	{
-		final double [] eAngles = transformRotation.getAngles( sh );
+		final double [] qCurr = transformRotation.getQuaternion( obj );
+		final double [] eAngles = transformRotation.getAngles( obj );
 		
-		final AffineTransform3D trRot = Misc.getRotationTransform( eAngles );		
-		
-		AffineTransform3D srcTrFixed = new AffineTransform3D();
-		
-		//reset both transforms just in case
-		sh.setTransform( srcTrFixed );
+		//reset rotation
+		if(LinAlgHelpers.length( eAngles )<0.0001)
+		{
+			qCurr[0] = 1.0;
+			for(int d=1;d<4;d++)
+				qCurr[d] = 0.0;
+		}
+		else
+		{
+			if(previousAngles != null )
+			{
+				//add quaternion rotation
+				//calculate changes in angles
+				final double [] dChangeAngle = new double [3];
+				for (int d=0;d<3;d++)
+				{
+					dChangeAngle[d] = eAngles[d] - previousAngles[d];
+				}
+				//construct quaternion
+				final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
+				LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
+				LinAlgHelpers.normalize( qCurr );
 
-		final double [] center =  Misc.getIntervalCenterNegative( sh.boundingBox() );
-		final double [] dCurrScale = transformScale.getScale( sh );		
+			}
+		}
+		
+		final double [][] rotMatrix = new double [3][4];  
+		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
+		trRot.set( rotMatrix );	
+	}
+
+	public void updateTransform(final Object obj, final double [] previousAngles)
+	{
+		
+		//rotation
+		final AffineTransform3D trRot = new AffineTransform3D();		
+		getRotation( trRot, obj, previousAngles );
+	
+		final AffineTransform3D newTransform = new AffineTransform3D();
+		
+		RealInterval interval = null;
+		
+		final AffineTransform3D oldTr = new AffineTransform3D();
+		if(obj instanceof ConverterSetup)
+		{		
+			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
+			(( TransformedSource< ? > )src).getFixedTransform( oldTr );
+			//reset both transforms just in case
+			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
+			(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
+			
+			interval = Misc.getSourceBoundingBoxAllTP(src);
+		}
+		if(obj instanceof BasicShape)
+		{
+			//reset transform just in case
+			((BasicShape)obj).setTransform( oldTr );
+			interval = ((BasicShape)obj).boundingBox();
+		}
+		final double [] center =  Misc.getIntervalCenterNegative( interval );
+		final double [] dCurrScale = transformScale.getScale(obj );		
 
 		//move to the origin
-		srcTrFixed.translate( center );
+		newTransform.translate( center );
 
 		//scale
 		final AffineTransform3D scaleTr = new AffineTransform3D();
 		scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
-		srcTrFixed = srcTrFixed.preConcatenate( scaleTr );
-		
+		newTransform.preConcatenate( scaleTr );
 		//rotate
-		srcTrFixed = srcTrFixed.preConcatenate( trRot );		
+		newTransform.preConcatenate( trRot );
+		
 		
 		//move things to the current volume's center
-		final double [] tr = transformCenters.getCenters( sh );		
+		final double [] tr = transformCenters.getCenters( obj );		
 		final AffineTransform3D translTr = new AffineTransform3D();
 		translTr.translate( tr );
-		srcTrFixed = srcTrFixed.preConcatenate( translTr );			
-		sh.setTransform( srcTrFixed );
-
-		bvb.updateSceneRender();	
+		newTransform.preConcatenate( translTr );
+		
+		if(obj instanceof ConverterSetup)
+		{
+			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
+			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
+		}
+		if(obj instanceof BasicShape)
+		{
+			((BasicShape)obj).setTransform( newTransform );
+		}
+		
+//		if(bTransformClip)
+//		{
+//		
+//			/////   update clipping, if needed
+//			
+//			if(((GammaConverterSetup)cs).clipActive())
+//			{
+//				
+//				// get change in the transform
+//				AffineTransform3D clipBake = new AffineTransform3D ();
+//				
+//				//go to absolute coordinates
+//				clipBake.set( oldTr.inverse() );
+//				//account for the new transform
+//				clipBake.preConcatenate( newTransform );
+//				AffineTransform3D clipUpdate = new AffineTransform3D ();
+//				clipUpdate.set( clipBake );
+//		
+//				//update centers
+//				double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( cs );
+//				clipUpdate.apply( clipCent, clipCent );
+//				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( cs, clipCent );		
+//						
+//				double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs );
+//								
+//				final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs);		
+//				if(previousAngles != null)
+//				{
+//					double [] dAngUpdated  = new double [3]; 
+//					for(int d=0;d<3;d++)
+//					{
+//						dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
+//					}
+//					bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( cs, dAngUpdated );
+//				}
+//		
+//		
+//				
+//				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs, prevClipRotAngles);
+//			}
+//		}
+		bvb.updateSceneRender();		
+				
 	}
 	
 	public synchronized void updateTransform(final ConverterSetup cs, final double [] previousAngles)
@@ -131,7 +235,7 @@ public class TransformSetups
 		(( TransformedSource< ? > )src).setFixedTransform( srcTrFixed );
 		(( TransformedSource< ? > )src).setIncrementalTransform( srcTrFixed );
 		
-		FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+		RealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
 		final double [] center =  Misc.getIntervalCenterNegative( interval );
 		final double [] dCurrScale = transformScale.getScale( cs );		
 

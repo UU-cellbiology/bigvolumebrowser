@@ -31,6 +31,7 @@ package bvb.utils.clip;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.imglib2.RealInterval;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -101,7 +102,7 @@ public class ClipCenters
 	{
 		AffineTransform3D clipTr = new AffineTransform3D();
 		((GammaConverterSetup)setup).getClipTransform(clipTr);
-		FinalRealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
+		RealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
 
 		if(interval == null)
 		{
