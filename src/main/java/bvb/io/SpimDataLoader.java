@@ -190,28 +190,17 @@ public class SpimDataLoader
 			nOpenSeries = nDatasetIDs[openDatasetN.getNextChoiceIndex()];
 			
 		}
+		
 		SpimData spimData = null;
 
-		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16)
+		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8)
 		{
 			OpenerSettings settings = OpenerSettings.BioFormats()
 					.location(new File(imageFileName))
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
 					.positionConvention("TOP LEFT");
-			spimData = (SpimData)OpenersToSpimData.getSpimData(settings);
-			
-		}
-		else
-		if(seriesBitDepth[nOpenSeries] == FormatTools.UINT8 )		
-		{
-			OpenerSettings settings = OpenerSettings.BioFormats()
-					.location(new File(imageFileName))
-					.unit("MICROMETER")
-					.setSerie(nOpenSeries)
-//					.to16bits(true)
-					.positionConvention("TOP LEFT");
-			spimData = (SpimData) OpenersToSpimData.getSpimData(settings);
+			spimData = (SpimData)OpenersToSpimData.getSpimData(settings);	
 		}
 		else
 		{
