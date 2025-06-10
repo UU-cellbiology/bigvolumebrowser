@@ -58,7 +58,7 @@ public class CenterZoomBVV
 	/** returns a bounding box with all selected/visible sources, taking clipping into account.
 	 *  if there is no selected sources, returns all visible sources bbox.
 	 *  of there is no visible or no sources, returns null **/
-	public static FinalRealInterval getAllSelectedVisibleSourcesBoundindBox(final BigVolumeBrowser bvb)
+	public static RealInterval getAllSelectedVisibleSourcesBoundindBox(final BigVolumeBrowser bvb)
 	{
 		
 		final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
@@ -92,9 +92,9 @@ public class CenterZoomBVV
 		
 	}
 	
-	public static FinalRealInterval getIntervalFromSourcesList(final BigVolumeBrowser bvb, final List<SourceAndConverter< ? >> sacList)
+	public static RealInterval getIntervalFromSourcesList(final BigVolumeBrowser bvb, final List<SourceAndConverter< ? >> sacList)
 	{
-		FinalRealInterval allInt = null;
+		RealInterval allInt = null;
 		//just in case
 		if(sacList.size()>0)
 		{
@@ -104,8 +104,8 @@ public class CenterZoomBVV
 				if(sac.getSpimSource().isPresent( nTimePoint ))
 				{
 					final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
-					final FinalRealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), nTimePoint, 0 );
-					FinalRealInterval clipInt = cs.getClipInterval() ;
+					final RealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), nTimePoint, 0 );
+					RealInterval clipInt = cs.getClipInterval() ;
 					//no clipping
 					if(!cs.clipActive() || clipInt == null)
 					{
@@ -142,7 +142,7 @@ public class CenterZoomBVV
 		return allInt;
 	}
 	
-	static FinalRealInterval appendIntervals(final FinalRealInterval current, final FinalRealInterval newInt)
+	static RealInterval appendIntervals(final RealInterval current, final RealInterval newInt)
 	{
 		if(current == null)
 		{

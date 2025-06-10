@@ -47,7 +47,7 @@ import bdv.viewer.Source;
 
 public class Misc
 {
-	public static FinalRealInterval getSourceBoundingBox(final Source<?> source, int nTimePoint, int baseLevel)
+	public static RealInterval getSourceBoundingBox(final Source<?> source, int nTimePoint, int baseLevel)
 	{
 		final AffineTransform3D transformSource = new AffineTransform3D();
 		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
@@ -65,7 +65,7 @@ public class Misc
 	
 	public static RealInterval getSourceBoundingBoxAllTP(final Source<?> source)
 	{
-		FinalRealInterval interval = null;
+		RealInterval interval = null;
 		if ( source != null )
 		{
 			//get the range over all timepoints
@@ -86,7 +86,7 @@ public class Misc
 		}
 		return interval;
 	}
-	public static FinalRealInterval getSourceTranlsationRange(final Source<?> source, int nTimePoint, int baseLevel)
+	public static RealInterval getSourceTranlsationRange(final Source<?> source, int nTimePoint, int baseLevel)
 	{
 		final AffineTransform3D transformSource = new AffineTransform3D();
 		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
@@ -106,9 +106,9 @@ public class Misc
 		return transformSource.estimateBounds( interval );
 	}
 	
-	public static FinalRealInterval getSourceTranlsationRangeAllTP(final Source<?> source)
+	public static RealInterval getSourceTranlsationRangeAllTP(final Source<?> source)
 	{
-		FinalRealInterval interval = null;
+		RealInterval interval = null;
 		if ( source != null )
 		{
 			//get the range over all timepoints
@@ -222,7 +222,7 @@ public class Misc
 		return min;
 	}
 	
-	public static FinalRealInterval getSourceSize(final Source<?> source, int nTimePoint, int baseLevel)
+	public static RealInterval getSourceSize(final Source<?> source, int nTimePoint, int baseLevel)
 	{
 		final AffineTransform3D transformSource = new AffineTransform3D();
 		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);

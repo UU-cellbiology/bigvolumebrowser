@@ -51,7 +51,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerModel;
 
-import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
@@ -365,7 +365,7 @@ public class BVBActions
 		//solution for now, to not interfere with typing
 		if(!bvb.bLocked && !(c instanceof JTextField))
 		{
-			final FinalRealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
+			final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
 			if(focusInt != null)
 			{
 				CenterZoomBVV.focusAnimateOnInterval(bvb, focusInt, BVBSettings.dFocusScreenFraction);

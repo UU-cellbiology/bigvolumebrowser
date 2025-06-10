@@ -31,7 +31,7 @@ package bvb.utils.clip;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
@@ -39,88 +39,62 @@ import bdv.viewer.SourceToConverterSetupBimap;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvvpg.source.converters.Clippable3D;
 
 public class ClipCenterBounds
 {
 	private final SourceToConverterSetupBimap bimap;
 
-	private final Map< ConverterSetup, Bounds3D > setupToBounds = new HashMap<>();
-	private final Map< BasicShape, Bounds3D > shapeToBounds = new HashMap<>();
+	private final Map< Clippable3D, Bounds3D > objToBounds = new HashMap<>();
 	
 	public ClipCenterBounds( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
 	}
 	
-	public Bounds3D getBounds( final ConverterSetup setup )
+	public Bounds3D getBounds( final Clippable3D obj )
 	{
-		return setupToBounds.compute( setup, this::getExtendedBounds );
+		return objToBounds.compute( obj, this::getExtendedBounds );
 	}
 	
-	public Bounds3D getBounds( final BasicShape shape )
+	public void setBounds( final Clippable3D obj, final Bounds3D bounds )
 	{
-		return shapeToBounds.compute( shape, this::getExtendedBoundsShape );
+		objToBounds.put( obj, bounds );
 	}
 	
-	public void setBounds( final ConverterSetup setup, final Bounds3D bounds )
-	{
-		setupToBounds.put( setup, bounds );
-	}
-	
-	public void setBounds( final BasicShape shape, final Bounds3D bounds )
-	{
-		shapeToBounds.put( shape, bounds );
-	}
-
-	public Bounds3D getDefaultBounds( final BasicShape shape )
-	{
-		return new Bounds3D(shape.boundingBox());
-	}
-	
-	public Bounds3D getDefaultBounds( final ConverterSetup setup )
+	public Bounds3D getDefaultBounds( final Clippable3D obj )
 	{
 		Bounds3D bounds = null;
 
-		final SourceAndConverter< ? > sac = bimap.getSource( setup );
-		if ( sac != null )
+		if(obj instanceof ConverterSetup)
 		{
-			//get the range over all timepoints
-			bounds = new Bounds3D(Misc.getSourceBoundingBoxAllTP(sac.getSpimSource()));
+			final SourceAndConverter< ? > sac = bimap.getSource( (ConverterSetup)obj );
+			if ( sac != null )
+			{
+				//get the range over all timepoints
+				bounds = new Bounds3D(Misc.getSourceBoundingBoxAllTP(sac.getSpimSource()));
+			}
+			else
+			{
+				System.out.println("error in estimation of center bounds, no source found");
+			}
 		}
-		else
+		if(obj instanceof BasicShape)
 		{
-			System.out.println("error in estimation of center bounds, no source found");
+			bounds = new Bounds3D(((BasicShape)obj).boundingBox());
 		}
 		return bounds;
 	}
 
-	private Bounds3D getExtendedBounds( final ConverterSetup setup, Bounds3D bounds )
+	private Bounds3D getExtendedBounds( final Clippable3D obj, Bounds3D bounds )
 	{
 		if ( bounds == null )
-			bounds = getDefaultBounds( setup );
-		if(setup instanceof GammaConverterSetup)
-		{
-			GammaConverterSetup gsetup = (GammaConverterSetup)setup;
-			final FinalRealInterval clipInterval = gsetup.getClipInterval();
-			if(clipInterval == null)
-				return bounds;
-			
-			return bounds.join( new Bounds3D( clipInterval) );
-		}
-		return bounds;
-	}
-	
-	private Bounds3D getExtendedBoundsShape( final BasicShape shape, Bounds3D bounds )
-	{
-		if ( bounds == null )
-			bounds = getDefaultBounds( shape );
-
-		final FinalRealInterval clipInterval = shape.getClipInterval();
+			bounds = getDefaultBounds( obj );
+		final RealInterval clipInterval = obj.getClipInterval();
 		if(clipInterval == null)
 			return bounds;
-			
+
 		return bounds.join( new Bounds3D( clipInterval) );
 	}
-	
+		
 }

@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.imglib2.RealInterval;
-import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -41,73 +40,62 @@ import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SourceToConverterSetupBimap;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvvpg.source.converters.Clippable3D;
 
 public class ClipCenters
 {
 	private final SourceToConverterSetupBimap bimap;
 	
-	private final Map< ConverterSetup, double[]> setupToCenters = new HashMap<>();
-	
-	private final Map< BasicShape, double[]> shapeToCenters = new HashMap<>();
+	private final Map< Clippable3D, double[]> objToCenters = new HashMap<>();
 	
 	public ClipCenters( final SourceToConverterSetupBimap bimap)
 	{
 		this.bimap = bimap;
 	}
 	
-	public double[] getCenters( final ConverterSetup setup )
+	public double[] getCenters( final Clippable3D obj )
 	{
-		double [] out = setupToCenters.get( setup );
+		double [] out = objToCenters.get( obj );
 		if(out == null)
 		{
-			out = getCurrentOrDefaultCenters(setup);
-			setCenters( setup, out );
+			out = getCurrentOrDefaultCenters(obj);
+			setCenters( obj, out );
 		}		
 		return out;
 	}
+
 	
-	public double[] getCenters( final BasicShape shape )
+	public void updateCenters(final Clippable3D obj)
 	{
-		double [] out =  shapeToCenters.get( shape );
-		if(out == null)
-		{
-			out = getCurrentOrDefaultCenters(shape);
-			setCenters( shape, out );
-		}		
-		return out;
+		setCenters( obj, getCurrentOrDefaultCenters(obj));
 	}
+
 	
-	public void updateCenters(final ConverterSetup setup)
+	public void setCenters( final Clippable3D obj, final double[] centers)
 	{
-		setCenters( setup, getCurrentOrDefaultCenters(setup));
+		objToCenters.put( obj, centers );
 	}
+
 	
-	public void updateCenters(final BasicShape shape )
+	public double [] getCurrentOrDefaultCenters(final Clippable3D obj)
 	{
-		setCenters( shape, getCurrentOrDefaultCenters(shape));
-	}
-	
-	public void setCenters( final ConverterSetup setup, final double[] centers)
-	{
-		setupToCenters.put( setup, centers );
-	}
-	
-	public void setCenters( final BasicShape shape, final double[] centers)
-	{
-		shapeToCenters.put( shape, centers );
-	}
-	
-	public double [] getCurrentOrDefaultCenters(final ConverterSetup setup)
-	{
+		
 		AffineTransform3D clipTr = new AffineTransform3D();
-		((GammaConverterSetup)setup).getClipTransform(clipTr);
-		RealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
+		obj.getClipTransform(clipTr);
+		
+		RealInterval interval = obj.getClipInterval(); 
 
 		if(interval == null)
 		{
-			final SourceAndConverter< ? > source = bimap.getSource( setup );
-			interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
+			if(obj instanceof ConverterSetup)
+			{
+				final SourceAndConverter< ? > source = bimap.getSource( (ConverterSetup)obj );
+				interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
+			}
+			if(obj instanceof BasicShape)
+			{
+				interval = ((BasicShape)obj).boundingBox();
+			}
 
 		}
 		if(interval == null)
@@ -120,23 +108,5 @@ public class ClipCenters
 		return center;
 		
 	}
-	
-	public double [] getCurrentOrDefaultCenters(final BasicShape shape)
-	{
-		AffineTransform3D clipTr = new AffineTransform3D();
-		shape.getClipTransform(clipTr);
-		FinalRealInterval interval = shape.getClipInterval(); 
 
-		if(interval == null)
-		{
-			interval =  new FinalRealInterval (shape.boundingBox());
-		}
-			
-		final double [] center = Misc.getIntervalCenter(interval);
-		
-		clipTr.apply( center, center );
-
-		return center;
-		
-	}
 }
