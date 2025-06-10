@@ -223,6 +223,44 @@ public class ClipRotationPanel extends JPanel
 		updateGUI();
 	}
 	
+	void resetRotation()
+	{
+		if(!clipSetups.selectedObjects.isAnythingSelected())
+		{
+			return;
+		}
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
+		{
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(objCl.clipActive())
+			{
+				final double [] prevAngles = new double [3];
+				final double [] resetAngles = new double [3];
+//				if(clipSetups.bLocalCoordinates)
+//				{
+//					final double [] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+//					for (int d=0;d<3;d++)
+//					{
+//						resetAngles[d] = trAngles[d];
+//					}
+//				}
+				final double[] prevAnglesHM = clipSetups.clipRotation.getAngles( objCl );
+				for (int d=0;d<3;d++)
+				{
+					prevAngles[d] = prevAnglesHM[d];				
+				}
+				
+				clipSetups.clipRotation.setAngles(objCl, resetAngles);
+				clipSetups.updateClipTransform( objCl, prevAngles);
+			}
+		
+		}
+		clipSetups.bvb.updateSceneRender();
+
+		updateGUI();
+	}
+	
 	void setSliderColors(Color [] colors)
 	{
 		for(int i=0;i<3;i++)

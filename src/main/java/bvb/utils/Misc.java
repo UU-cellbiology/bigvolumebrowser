@@ -86,7 +86,7 @@ public class Misc
 		}
 		return interval;
 	}
-	public static RealInterval getSourceTranlsationRange(final Source<?> source, int nTimePoint, int baseLevel)
+	public static RealInterval getSourceTranslationRange(final Source<?> source, int nTimePoint, int baseLevel)
 	{
 		final AffineTransform3D transformSource = new AffineTransform3D();
 		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
@@ -117,11 +117,11 @@ public class Misc
 			{
 				if(interval == null)
 				{
-					interval = Misc.getSourceTranlsationRange(source,t,0);
+					interval = Misc.getSourceTranslationRange(source,t,0);
 				}
 				else
 				{
-					interval = Intervals.union( interval, Misc.getSourceTranlsationRange(source,t,0));
+					interval = Intervals.union( interval, Misc.getSourceTranslationRange(source,t,0));
 				}
 					
 				t++;

@@ -12,7 +12,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvvpg.source.converters.Clippable3D;
 import ij.Prefs;
 
 public class TransformSetups
@@ -108,8 +108,9 @@ public class TransformSetups
 		}
 		if(obj instanceof BasicShape)
 		{
+			((BasicShape)obj).getTransform( oldTr );
 			//reset transform just in case
-			((BasicShape)obj).setTransform( oldTr );
+			((BasicShape)obj).setTransform( newTransform );
 			interval = ((BasicShape)obj).boundingBox();
 		}
 		final double [] center =  Misc.getIntervalCenterNegative( interval );
@@ -142,47 +143,44 @@ public class TransformSetups
 			((BasicShape)obj).setTransform( newTransform );
 		}
 		
-//		if(bTransformClip)
-//		{
-//		
-//			/////   update clipping, if needed
-//			
-//			if(((GammaConverterSetup)cs).clipActive())
-//			{
-//				
-//				// get change in the transform
-//				AffineTransform3D clipBake = new AffineTransform3D ();
-//				
-//				//go to absolute coordinates
-//				clipBake.set( oldTr.inverse() );
-//				//account for the new transform
-//				clipBake.preConcatenate( newTransform );
-//				AffineTransform3D clipUpdate = new AffineTransform3D ();
-//				clipUpdate.set( clipBake );
-//		
-//				//update centers
-//				double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( cs );
-//				clipUpdate.apply( clipCent, clipCent );
-//				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( cs, clipCent );		
-//						
-//				double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs );
-//								
-//				final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( cs);		
-//				if(previousAngles != null)
-//				{
-//					double [] dAngUpdated  = new double [3]; 
-//					for(int d=0;d<3;d++)
-//					{
-//						dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
-//					}
-//					bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( cs, dAngUpdated );
-//				}
-//		
-//		
-//				
-//				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( (GammaConverterSetup) cs, prevClipRotAngles);
-//			}
-//		}
+		/////   update clipping, if needed
+		if(bTransformClip)
+		{
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(objCl.clipActive())
+			{				
+				// get change in the transform
+				AffineTransform3D clipBake = new AffineTransform3D ();
+				
+				//go to absolute coordinates
+				clipBake.set( oldTr.inverse() );
+				//account for the new transform
+				clipBake.preConcatenate( newTransform );
+				AffineTransform3D clipUpdate = new AffineTransform3D ();
+				clipUpdate.set( clipBake );
+		
+				//update centers
+				double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( objCl );
+				clipUpdate.apply( clipCent, clipCent );
+				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( objCl, clipCent );		
+						
+				double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( objCl );
+								
+				final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( objCl );		
+				if(previousAngles != null)
+				{
+					final double [] eAngles = transformRotation.getAngles( obj );
+					double [] dAngUpdated  = new double [3]; 
+					for(int d=0;d<3;d++)
+					{
+						dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
+					}
+					bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( objCl, dAngUpdated );
+				}					
+				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( objCl, prevClipRotAngles);
+			}
+			bvb.controlPanel.tabPanelView.clipPanel.updateGUI();
+		}
 		bvb.updateSceneRender();		
 				
 	}

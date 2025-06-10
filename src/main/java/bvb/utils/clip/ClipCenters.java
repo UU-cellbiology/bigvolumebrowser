@@ -108,5 +108,24 @@ public class ClipCenters
 		return center;
 		
 	}
+	
+	public double [] getDefaultCenters(final Clippable3D obj)
+	{
+		RealInterval interval = null;
+		if(obj instanceof ConverterSetup)
+		{
+			final SourceAndConverter< ? > source = bimap.getSource( (ConverterSetup)obj );
+			interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
+		}
+		if(obj instanceof BasicShape)
+		{
+			interval = ((BasicShape)obj).boundingBox();
+		}
+		if(interval == null)
+			return null;
+			
+		final double [] center = Misc.getIntervalCenter(interval);
+		return center;
+	}
 
 }

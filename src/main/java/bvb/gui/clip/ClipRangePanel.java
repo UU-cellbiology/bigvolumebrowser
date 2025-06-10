@@ -176,10 +176,12 @@ public class ClipRangePanel extends JPanel
 				if(clipSetups.bLocalCoordinates)
 				{
 					//convert to relative			
-					double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
-					
+					//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
+					double [] clipCenter = clipSetups.clipCenters.getCenters( objCl );
+					double [] relShift = clipSetups.getCurrentObjectCenter( obj );
 					for(int d=0;d<3;d++)
 					{
+						relShift[d]-=clipCenter[d];
 						min[d] -= relShift[d];
 						max[d] -= relShift[d];
 						
@@ -241,7 +243,8 @@ public class ClipRangePanel extends JPanel
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
 			//convert to relative
-			double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
+			//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
+			double [] relShift =  clipSetups.getCurrentObjectCenter( obj );
 			BoundedRange range = null;
 			if(clipSetups.bLocalCoordinates)
 			{

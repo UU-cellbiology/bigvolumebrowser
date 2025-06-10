@@ -37,6 +37,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
@@ -76,41 +77,11 @@ public class ClipSetups
 	public synchronized void updateClipTransform( final Clippable3D obj, final double [] previousAngles)
 	{				
 		//rotation
-		final AffineTransform3D trRot = new AffineTransform3D();		
-		final double [] qCurr = clipRotation.getQuaternion( obj );
-		final double [] eAngles = clipRotation.getAngles( obj );
-		//reset rotation
-		if(LinAlgHelpers.length( eAngles )<0.0001)
-		{
-			qCurr[0] = 1.0;
-			for(int d=1;d<4;d++)
-				qCurr[d] = 0.0;
-		}
-		else
-		{
-			if(previousAngles != null )
-			{
-
-				//add quaternion rotation
-				//calculate changes in angles
-				final double [] dChangeAngle = new double [3];
-				for (int d=0;d<3;d++)
-				{
-					dChangeAngle[d] = eAngles[d] - previousAngles[d];
-				}
-				//construct quaternion
-				final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
-				LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
-				LinAlgHelpers.normalize( qCurr );
-
-			}
-		}		
-		final double [][] rotMatrix = new double [3][4];  
-		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
-		trRot.set( rotMatrix );			
+		final AffineTransform3D trRot = new AffineTransform3D();
 		
-		AffineTransform3D clipTr = new AffineTransform3D();
+		getRotation( trRot, obj, previousAngles );				
 		
+		// find current center
 		RealInterval clipInt = obj.getClipInterval();
 		
 		if (clipInt == null)
@@ -130,14 +101,73 @@ public class ClipSetups
 		
 		final double [] centerNew = clipCenters.getCenters( obj );
 
+		final AffineTransform3D clipTr = new AffineTransform3D();
+		
 		clipTr.translate( center );
 		
-		clipTr = clipTr.preConcatenate( trRot );
+		clipTr.preConcatenate( trRot );
 
 		clipTr.translate( centerNew );	
 
 		obj.setClipTransform(clipTr);
 		
+	}
+	
+	void getRotation(final AffineTransform3D trRot, final Clippable3D obj, final double [] previousAngles)
+	{
+		
+		
+		final double [] qCurr = clipRotation.getQuaternion( obj );
+		final double [] eAngles = clipRotation.getAngles( obj );
+		
+		//reset rotation
+		if(LinAlgHelpers.length( eAngles )<0.0001)
+		{
+			qCurr[0] = 1.0;
+			for(int d=1;d<4;d++)
+				qCurr[d] = 0.0;
+		}
+		else
+		{
+			if(previousAngles != null )
+			{
+				//add quaternion rotation
+				//calculate changes in angles
+				final double [] dChangeAngle = new double [3];
+				for (int d=0;d<3;d++)
+				{
+					dChangeAngle[d] = eAngles[d] - previousAngles[d];
+				}
+				//construct quaternion
+				final double [] qAdd = Misc.getRotationQuaternion( dChangeAngle );
+				LinAlgHelpers.quaternionMultiply(qAdd,qCurr,qCurr);
+				LinAlgHelpers.normalize( qCurr );
+
+			}
+		}
+		
+		final double [][] rotMatrix = new double [3][4];  
+		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
+		trRot.set( rotMatrix );	
+	}
+	
+	public double [] getCurrentObjectCenter(final Object obj)
+	{
+		RealInterval interval = null;
+		if(obj instanceof ConverterSetup)
+		{
+			final SourceAndConverter< ? > source = converterSetups.getSource( (ConverterSetup)obj );
+			interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
+		}
+		if(obj instanceof BasicShape)
+		{
+			interval = ((BasicShape)obj).boundingBox();
+		}	
+		if(interval!= null)
+		{
+			return Misc.getIntervalCenter( interval );
+		}
+		return null;
 	}
 	
 	public double [] getSourceMinWithScale(final ConverterSetup cs)

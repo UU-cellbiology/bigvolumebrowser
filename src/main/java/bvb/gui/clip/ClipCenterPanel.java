@@ -38,11 +38,12 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
-import net.imglib2.realtransform.AffineTransform3D;
+
+import net.imglib2.RealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.BoundedValueDouble;
+import bdv.viewer.SourceAndConverter;
 import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
@@ -142,41 +143,24 @@ public class ClipCenterPanel extends JPanel
 				final double [] minBound = bounds.getMinBound();
 				final double [] maxBound = bounds.getMaxBound();
 				
-				double [] center = new double [3];
+				
 				final double [] centerIn = clipSetups.clipCenters.getCenters( objCl );
+				double [] center = new double [3];
 				
 				if(clipSetups.bLocalCoordinates)
 				{
-					//center
-					final AffineTransform3D tr = new AffineTransform3D();
-					if(obj instanceof ConverterSetup)
-					{
-						(( TransformedSource< ? > )clipSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource()).getFixedTransform( tr );
-					}
-					if(obj instanceof BasicShape)
-					{
-						((BasicShape)obj).getTransform( tr );
-					}
-					tr.inverse().apply( centerIn, center );
-					
-					//center bounds
-					double [] relShift = null;
-					if(obj instanceof ConverterSetup)
-					{
-							Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource() );
-					}
-					if(obj instanceof BasicShape)
-					{
-						relShift = ((BasicShape)obj).boundingBoxNotTransformed().minAsDoubleArray();
-					}
-					if(relShift!=null)
+					final double [] objCenter = clipSetups.getCurrentObjectCenter( obj );
+					if(objCenter != null)
 					{
 						for(int d=0;d<3;d++)
 						{
-							//center[d] = centerIn[d]-relShift[d];
-							minBound[d] -= relShift[d];
-							maxBound[d] -= relShift[d];
-						}
+							center[d] = centerIn[d]-objCenter[d];
+							minBound[d] -= objCenter[d];
+							maxBound[d] -= objCenter[d];
+
+//							minBound[d] -= centerIn[d] - objCenter[d];
+	//						maxBound[d] -= centerIn[d] - objCenter[d];
+						}						
 					}
 				}
 				else
@@ -252,19 +236,15 @@ public class ClipCenterPanel extends JPanel
 			double [] relShift  = new double[3];
 			
 			if(clipSetups.bLocalCoordinates)
-			{
-				if(obj instanceof ConverterSetup)
-				{
-					relShift = Misc.getSourceMinNoFixedTransformAllTP( clipSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource() );
-				}
+			{				
+				relShift = clipSetups.getCurrentObjectCenter( obj );
 				if(obj instanceof BasicShape)
 				{
-					relShift = ((BasicShape)obj).boundingBoxNotTransformed().minAsDoubleArray();
 					bUpdateView = true;
 				}
 			}
 
-			double currVal = currValAbs;
+			double currVal = currValAbs + relShift[nAxis];
 			double minBound = minBoundAbs + relShift[nAxis];
 			double maxBound = maxBoundAbs + relShift[nAxis];
 			
@@ -276,27 +256,11 @@ public class ClipCenterPanel extends JPanel
 				bounds.getMaxBound()[nAxis] = maxBound;
 				clipSetups.clipCenterBounds.setBounds( objCl, bounds );
 			}
-			AffineTransform3D tr = new AffineTransform3D();
-			if(obj instanceof ConverterSetup)
-			{
-				(( TransformedSource< ? > )clipSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource()).getFixedTransform( tr );			
-			}
-			if(obj instanceof BasicShape)
-			{
-				((BasicShape)obj).getTransform( tr );
-			}
-			
+		
 			final double [] newCenter = clipSetups.clipCenters.getCenters( objCl );
-			
-			if(clipSetups.bLocalCoordinates)
-			{
-				tr.inverse().apply( newCenter, newCenter );
-			}
+
 			newCenter[nAxis] = currVal;
-			if(clipSetups.bLocalCoordinates)
-			{
-				tr.apply( newCenter, newCenter );
-			}
+
 			clipSetups.clipCenters.setCenters( objCl, newCenter );
 			clipSetups.updateClipTransform( objCl, null );
 		}
@@ -340,6 +304,29 @@ public class ClipCenterPanel extends JPanel
 		}
 	}
 	
+	void resetCenters()
+	{
+		if(!clipSetups.selectedObjects.isAnythingSelected())
+		{
+			return;
+		}
+		
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
+		{
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(objCl.clipActive())
+			{				
+				clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getDefaultCenters( objCl ));
+				clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );
+				clipSetups.updateClipTransform( objCl, null);
+				objCl.setClipActive( true );
+			}
+		}
+		clipSetups.bvb.updateSceneRender();
+
+		updateGUI();
+	}
 	void setSliderColors(Color [] colors)
 	{
 		for(int i=0;i<3;i++)

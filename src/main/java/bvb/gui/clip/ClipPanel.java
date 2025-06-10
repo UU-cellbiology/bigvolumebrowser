@@ -81,6 +81,8 @@ public class ClipPanel extends JPanel implements ItemListener
 	final ImageIcon [] coordIcon = new ImageIcon[2];
 	final String[] coordToolTip = new String[2];
 	
+	final JTabbedPane tabClipPane;
+	
 	final ClipRangePanel clipRangePanel;
 	final public ClipRotationPanel clipRotationPanel;
 	final ClipCenterPanel clipCenterPanel;
@@ -112,7 +114,7 @@ public class ClipPanel extends JPanel implements ItemListener
 	    clipRotationPanel = new ClipRotationPanel( clipSetups ); 
 	    clipCenterPanel = new ClipCenterPanel( clipSetups ); 
 
-		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
+		tabClipPane = new JTabbedPane(SwingConstants.TOP);
 
 		tabClipPane.addTab( "Range", clipRangePanel );
 		tabClipPane.addTab ("Rotate", clipRotationPanel);
@@ -202,6 +204,7 @@ public class ClipPanel extends JPanel implements ItemListener
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetClipCurrent = new JButton(icon);
 		butResetClipCurrent.setToolTipText( "Reset current panel" );
+		butResetClipCurrent.addActionListener( (e)->resetPanelClip() );   
 		gbc.gridx ++;
 		this.add(butResetClipCurrent,gbc);	
 		
@@ -212,15 +215,7 @@ public class ClipPanel extends JPanel implements ItemListener
 		gbc.gridx ++;
 		this.add(butResetClipAll,gbc);	
 		
-		butResetClipAll.addActionListener( new ActionListener() 
-    		{
-				@Override
-				public void actionPerformed( ActionEvent arg0 )
-				{					
-					resetClip();
-				}
-    	
-    		});   
+		butResetClipAll.addActionListener( (e)->resetClip());   
 		
 		gbc.gridx = 0;
 	    gbc.gridy ++;
@@ -242,7 +237,7 @@ public class ClipPanel extends JPanel implements ItemListener
 	}
 	
 	
-	private synchronized void updateGUI()
+	public synchronized void updateGUI()
 	{
 		updateColors();
 		
@@ -364,6 +359,24 @@ public class ClipPanel extends JPanel implements ItemListener
 		clipRangePanel.setSliderColors( colors );
 		clipRotationPanel.setSliderColors( colors );
 		clipCenterPanel.setSliderColors( colors );		
+	}
+	
+	void resetPanelClip()
+	{
+		
+		switch(tabClipPane.getSelectedIndex())
+		{
+		case 0:
+			//clipRangePanel.resetRange();
+			break;
+		case 1:
+			clipRotationPanel.resetRotation();
+			break;
+		case 2:
+			clipCenterPanel.resetCenters();
+			break;
+		default:
+		}
 	}
 	
 	void resetClip()
