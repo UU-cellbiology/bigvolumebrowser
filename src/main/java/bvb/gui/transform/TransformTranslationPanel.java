@@ -3,7 +3,9 @@ package bvb.gui.transform;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -24,18 +26,19 @@ import bvb.utils.Misc;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
-public class TransformCenterPanel extends JPanel
+public class TransformTranslationPanel extends JPanel
 {
-	
 	final TransformSetups transformSetups;
 	
-	private BoundedValuePanelPG [] centerPanels = new BoundedValuePanelPG[3];
+	private BoundedValuePanelPG [] translationPanels = new BoundedValuePanelPG[3];
 
 	private boolean blockUpdates = false;
 	
+	private final Map< Object, double[] > objToDefCenters = new HashMap<>();
+	
 	public TransformPanel trPanel = null;
 	
-	public TransformCenterPanel(final TransformSetups transformSetups_) 
+	public TransformTranslationPanel(final TransformSetups transformSetups_) 
 	{
 		super();		
 
@@ -57,23 +60,23 @@ public class TransformCenterPanel extends JPanel
 		{
 			gbc.gridy++;
 			
-			centerPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
+			translationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
 			menus[d] = new JPopupMenu();
-			menus[d].add( runnableItem(  "set bounds ...", centerPanels[d]::setBoundsDialog ) );
-			this.add(centerPanels[d],gbc);
+			menus[d].add( runnableItem(  "set bounds ...", translationPanels[d]::setBoundsDialog ) );
+			this.add(translationPanels[d],gbc);
 		}
 
 		menus[0].add( runnableItem(  "reset bounds", () -> resetBounds(0)));
 		menus[1].add( runnableItem(  "reset bounds", () -> resetBounds(1)));
 		menus[2].add( runnableItem(  "reset bounds", () -> resetBounds(2)));
 	
-		centerPanels[0].setPopup( () -> menus[0] );
-		centerPanels[1].setPopup( () -> menus[1] );
-		centerPanels[2].setPopup( () -> menus[2] );
+		translationPanels[0].setPopup( () -> menus[0] );
+		translationPanels[1].setPopup( () -> menus[1] );
+		translationPanels[2].setPopup( () -> menus[2] );
 		
-		centerPanels[0].changeListeners().add( () -> updateTransformAxis(0));
-		centerPanels[1].changeListeners().add( () -> updateTransformAxis(1));
-		centerPanels[2].changeListeners().add( () -> updateTransformAxis(2));
+		translationPanels[0].changeListeners().add( () -> updateTranslationAxis(0));
+		translationPanels[1].changeListeners().add( () -> updateTranslationAxis(1));
+		translationPanels[2].changeListeners().add( () -> updateTranslationAxis(2));
 		
 		//add source selection listener
 		transformSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
@@ -100,17 +103,27 @@ public class TransformCenterPanel extends JPanel
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
-			final Bounds3D bounds = transformSetups.transformCenterBounds.getBounds( obj );
+			final Bounds3D bounds = transformSetups.transformTranslateBounds.getBounds( obj );
 			final double [] minBound = bounds.getMinBound();
 			final double [] maxBound = bounds.getMaxBound();
 			
 			final double [] center = transformSetups.transformCenters.getCenters( obj );
+			double [] defcenter = objToDefCenters.get(obj);
+			if(defcenter == null)
+			{
+				defcenter = getDefaultCenter(obj);
+			}
 			
+			final double [] translateValue = new double[3];
+			for(int d=0;d<3;d++)
+			{
+				translateValue[d] = center[d] - defcenter[d];
+			}
 			if(bFirstCS)
 			{
 				for (int d=0; d<3; d++)
 				{
-					boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], translateValue[d]);
 				}
 				bFirstCS = false;
 			}
@@ -118,7 +131,7 @@ public class TransformCenterPanel extends JPanel
 			{
 				for (int d=0; d<3; d++)
 				{
-					final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], translateValue[d]);
 					allTrEqual[d] &= boundValue[d].equals( translationRange );
 					boundValue[d] = boundValue[d].join( translationRange );
 				}
@@ -128,37 +141,37 @@ public class TransformCenterPanel extends JPanel
 		final BoundedValueDoubleBVB [] finalTranslation = boundValue;
 		final boolean [] isConsistent = allTrEqual;
 		SwingUtilities.invokeLater( () -> {
-			synchronized ( TransformCenterPanel.this )
+			synchronized ( TransformTranslationPanel.this )
 			{
 				blockUpdates = true;
 				for (int d=0;d<3;d++)
 				{
 
-					centerPanels[d].setConsistent( isConsistent[d] );
-					centerPanels[d].setValue( finalTranslation[d] );
+					translationPanels[d].setConsistent( isConsistent[d] );
+					translationPanels[d].setValue( finalTranslation[d] );
 				}
 				blockUpdates = false;
 			}
 		} );
 	}
 	
-	synchronized void updateTransformAxis(int nAxis)
+	synchronized void updateTranslationAxis(int nAxis)
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		blockUpdates = true;
 		
-		double currVal = centerPanels[nAxis].getValue().getCurrentValue();
-		double minBound = centerPanels[nAxis].getValue().getRangeMin();
-		double maxBound = centerPanels[nAxis].getValue().getRangeMax();
+		double currVal = translationPanels[nAxis].getValue().getCurrentValue();
+		double minBound = translationPanels[nAxis].getValue().getRangeMin();
+		double maxBound = translationPanels[nAxis].getValue().getRangeMax();
 		
 		minBound = Math.min( currVal, minBound );
 		maxBound = Math.max( currVal, maxBound );
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
-			final Bounds3D bounds = transformSetups.transformCenterBounds.getBounds( obj );
+			final Bounds3D bounds = transformSetups.transformTranslateBounds.getBounds( obj );
 			
 			if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
 			{
@@ -166,20 +179,35 @@ public class TransformCenterPanel extends JPanel
 				bounds.getMaxBound()[nAxis] = maxBound;
 				transformSetups.transformCenterBounds.setBounds( obj, bounds );
 			}
-			final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
-			final double [] newCenters = new double [3];
-			for(int d=0; d<3; d++)
+			final double [] center = transformSetups.transformCenters.getCenters( obj );
+			double [] defcenter = objToDefCenters.get(obj);
+			if(defcenter == null)
 			{
-				newCenters[d] = oldCenters[d];
+				defcenter = getDefaultCenter(obj);
 			}
-			newCenters[nAxis] = currVal;
 			
-			transformSetups.transformCenters.setCenters( obj, newCenters );
+			center[nAxis] = currVal + defcenter[nAxis];
+//			final double [] newValue = new double[3];
+//			
+//			for(int d=0;d<3;d++)
+//			{
+//				translateValue[d] = center[d] - defcenter[d];
+//			}
+//			
+//			final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
+//			final double [] newCenters = new double [3];
+//			for(int d=0; d<3; d++)
+//			{
+//				newCenters[d] = oldCenters[d];
+//			}
+//			newCenters[nAxis] = currVal;
+			
+			//transformSetups.transformCenters.setCenters( obj, newCenters );
 			transformSetups.updateTransform( obj, null );
 		}
 		blockUpdates = false;
 		updateGUI();
-		trPanel.transformTranslationPanel.updateGUI();
+		trPanel.transformCentersPanel.updateGUI();
 	}
 
 	
@@ -203,13 +231,13 @@ public class TransformCenterPanel extends JPanel
 
 		if(range3D != null)
 		{
-			double currVal = centerPanels[nAxis].getValue().getCurrentValue();
+			double currVal = translationPanels[nAxis].getValue().getCurrentValue();
 			double bmin = range3D.getMinBound()[nAxis];
 			double bmax = range3D.getMaxBound()[nAxis];
 			currVal = Math.min( bmax, currVal );
 			currVal = Math.max( bmin, currVal );
-			centerPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
-			updateTransformAxis(nAxis);
+			translationPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
+			updateTranslationAxis(nAxis);
 		}		
 		
 		blockUpdates = false;
@@ -254,7 +282,6 @@ public class TransformCenterPanel extends JPanel
 		}
 		
 		blockUpdates = false;
-		trPanel.transformTranslationPanel.updateGUI();
 		updateGUI();
 		transformSetups.updateBVV();
 	}
@@ -264,7 +291,7 @@ public class TransformCenterPanel extends JPanel
 	{
 		for(int i=0;i<3;i++)
 		{
-			centerPanels[i].setEnabled( bEnabled );
+			translationPanels[i].setEnabled( bEnabled );
 		}
 	}
 	
@@ -272,7 +299,7 @@ public class TransformCenterPanel extends JPanel
 	{
 		for(int i=0;i<3;i++)
 		{
-			centerPanels[i].setSliderForeground( colors[i] );	
+			translationPanels[i].setSliderForeground( colors[i] );	
 		}
 	}
 	
@@ -281,5 +308,28 @@ public class TransformCenterPanel extends JPanel
 		final JMenuItem item = new JMenuItem( text );
 		item.addActionListener( e -> action.run() );
 		return item;
+	}
+	
+	double [] getDefaultCenter(Object obj)
+	{
+		
+		double [] center = null;
+		if(obj instanceof ConverterSetup)
+		{
+			final Source< ? > src = transformSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource();
+			RealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+			center = Misc.getIntervalCenter( interval );
+			AffineTransform3D srcTrFixed = new AffineTransform3D();
+			(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
+			srcTrFixed.inverse().apply( center, center );
+		}
+
+		if(obj instanceof BasicShape)
+		{
+			center = Misc.getIntervalCenter( ((BasicShape)obj).boundingBoxNotTransformed() );
+		}
+		objToDefCenters.put( obj, center );
+		
+		return center;
 	}
 }

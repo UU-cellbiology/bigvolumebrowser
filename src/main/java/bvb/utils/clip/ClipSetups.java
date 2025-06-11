@@ -34,9 +34,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.ConverterSetups;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
@@ -170,46 +168,5 @@ public class ClipSetups
 		return null;
 	}
 	
-	public double [] getSourceMinWithScale(final ConverterSetup cs)
-	{
-		final double [] relShift = Misc.getSourceMinNoFixedTransformAllTP( converterSetups.getSource( cs ).getSpimSource() );
-		final double [] scales = bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( cs );
-		for(int d=0; d<3; d++)
-			relShift[d] *= scales[d];
-		return relShift;
-	}
-	
-	
-	public double [] getSourceMinWithScaleTranslation(final Object obj)
-	{
-		AffineTransform3D fixedTr = new AffineTransform3D();
-		final double [] scales = bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( obj );
-
-		double [] centerAbs = new double[3];
-		double [] relShift = new double[3];
-		if(obj instanceof ConverterSetup)
-		{
-			final Source< ? > src = converterSetups.getSource( (ConverterSetup)obj ).getSpimSource();
-			relShift = Misc.getSourceMinNoFixedTransformAllTP( src );			
-
-			//center in the absolute world
-			centerAbs = Misc.getIntervalCenter( Misc.getSourceBoundingBoxAllTP( src ));
-			(( TransformedSource< ? > ) src).getFixedTransform( fixedTr );
-		}
-		if(obj instanceof BasicShape)
-		{
-			relShift = ((BasicShape)obj).boundingBoxNotTransformed().minAsDoubleArray();
-			centerAbs = Misc.getIntervalCenter( ((BasicShape)obj).boundingBox());
-			((BasicShape)obj).getTransform( fixedTr );
-		}
-		final double [] centerRel = new double[3];
-
-		fixedTr.inverse().apply( centerAbs, centerRel );
-		for(int d=0; d<3; d++)
-			relShift[d] = (scales[d]*relShift[d])-centerRel[d]+centerAbs[d];
-		
-		return relShift;
-	}
-
 	
 }

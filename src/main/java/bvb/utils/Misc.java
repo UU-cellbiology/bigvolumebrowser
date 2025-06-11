@@ -86,165 +86,6 @@ public class Misc
 		}
 		return interval;
 	}
-	public static RealInterval getSourceTranslationRange(final Source<?> source, int nTimePoint, int baseLevel)
-	{
-		final AffineTransform3D transformSource = new AffineTransform3D();
-		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
-		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
-		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
-		//extend to include all range
-		for(int d=0; d<3; d++)
-		{
-			min[d] -= 0.5;
-			max[d] += 0.5;
-		}
-		for(int d=0; d<3; d++)
-		{
-			min[d] -= (max[d]-min[d]);
-		}
-		final FinalRealInterval interval = new FinalRealInterval(min, max);
-		return transformSource.estimateBounds( interval );
-	}
-	
-	public static RealInterval getSourceTranlsationRangeAllTP(final Source<?> source)
-	{
-		RealInterval interval = null;
-		if ( source != null )
-		{
-			//get the range over all timepoints
-			int t = 0;
-			while(source.isPresent( t ))
-			{
-				if(interval == null)
-				{
-					interval = Misc.getSourceTranslationRange(source,t,0);
-				}
-				else
-				{
-					interval = Intervals.union( interval, Misc.getSourceTranslationRange(source,t,0));
-				}
-					
-				t++;
-			}
-		}
-		return interval;
-	}
-	
-	public static double[] getSourceMin(final Source<?> source, int nTimePoint, int baseLevel)
-	{
-		final AffineTransform3D transformSource = new AffineTransform3D();
-		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
-		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
-		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
-		//extend to include all range
-		for(int d=0; d<3; d++)
-		{
-			min[d] -= 0.5;
-			max[d] += 0.5;
-		}
-		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) );
-		
-		return interval.minAsDoubleArray();
-	}
-	
-	public static double[] getSourceMinNoFixedTransform(final Source<?> source, int nTimePoint, int baseLevel)
-	{
-		final AffineTransform3D transformFullSource = new AffineTransform3D();
-		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformFullSource);
-		final AffineTransform3D transformFixed = new AffineTransform3D();
-		(( TransformedSource< ? > ) source).getFixedTransform( transformFixed );
-		
-		//remove fixed transform
-		final AffineTransform3D transformSource = new AffineTransform3D ();
-		transformSource.set( transformFullSource );
-		transformSource.preConcatenate( transformFixed.inverse() );
-		
-		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
-		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
-		//extend to include all range
-		for(int d=0; d<3; d++)
-		{
-			min[d] -= 0.5;
-			max[d] += 0.5;
-		}
-		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) );
-		
-		return interval.minAsDoubleArray();
-	}
-	
-	public static double[] getSourceMinAllTP(final Source<?> source)
-	{
-		double [] min = null;
-		if ( source != null )
-		{
-			//get the range over all timepoints
-			int t = 0;
-			while(source.isPresent( t ))
-			{
-				if(min == null)
-				{
-					min = Misc.getSourceMin(source,t,0);
-				}
-				else
-				{
-					final double [] minCurr = Misc.getSourceMin(source,t,0);
-					for(int d=0; d<3; d++)
-						min[d] = Math.min( min[d], minCurr[d] );
-				}					
-				t++;
-			}
-		}
-		return min;
-	}
-	
-	public static double[] getSourceMinNoFixedTransformAllTP(final Source<?> source)
-	{
-		double [] min = null;
-		if ( source != null )
-		{
-			//get the range over all timepoints
-			int t = 0;
-			while(source.isPresent( t ))
-			{
-				if(min == null)
-				{
-					min = Misc.getSourceMinNoFixedTransform(source,t,0);
-				}
-				else
-				{
-					final double [] minCurr = Misc.getSourceMinNoFixedTransform(source,t,0);
-					for(int d=0; d<3; d++)
-						min[d] = Math.min( min[d], minCurr[d] );
-				}					
-				t++;
-			}
-		}
-		return min;
-	}
-	
-	public static RealInterval getSourceSize(final Source<?> source, int nTimePoint, int baseLevel)
-	{
-		final AffineTransform3D transformSource = new AffineTransform3D();
-		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
-		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
-		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
-		//extend to include all range
-		for(int d=0; d<3; d++)
-		{
-			min[d] -= 0.5;
-			max[d] += 0.5;
-		}
-		final FinalRealInterval interval = transformSource.estimateBounds( new FinalRealInterval(min, max) ) ;
-		interval.realMin( min );
-		interval.realMax( max );
-		for(int d=0; d<3; d++)
-		{
-			max[d] -= min[d];
-			min[d] = 0.0;
-		}		
-		return new FinalRealInterval( min, max );
-	}
-	
 	
 	/** depending on nAxis value, extracts Euler angle (rotation around nAxis)
 	 * value (in radians) from the quaternion q.
@@ -361,16 +202,15 @@ public class Misc
 	{
 		if(interval == null)
 			return new double [3];
-		final double [] min = interval.minAsDoubleArray();
-		final double [] max = interval.maxAsDoubleArray();
 		
+		final double [] center = new double[3];
 		
 		for(int d=0;d<3;d++)
 		{
-			min[d] = -0.5*(max[d]+min[d]);
+			center[d] = -0.5*(interval.realMax( d ) + interval.realMin( d ));
 		}
 		
-		return min;
+		return center;
 		
 	}
 	
@@ -378,21 +218,22 @@ public class Misc
 	{
 		if(interval == null)
 			return new double [3];
-		final double [] min = interval.minAsDoubleArray();
-		final double [] max = interval.maxAsDoubleArray();
+
+		final double [] center = new double[3];
 		
 		for(int d=0;d<3;d++)
 		{
-			min[d] = 0.5*(max[d]+min[d]);
+			center[d] = 0.5*(interval.realMax( d ) + interval.realMin( d ));
 		}
 		
-		return min;
+		return center;
 		
 	}
 	
 	public static boolean compareAffineTransforms(AffineTransform3D af1,AffineTransform3D af2 )
 	{
 		boolean bOut = true;
+		
 		if(af1 == null && af2 == null)
 			return true;
 		if(af1 == null || af2 == null)
@@ -410,7 +251,8 @@ public class Misc
 		return bOut;
 	}
 	
-	public static double[] getScale( AffineTransform3D affineTransform3D ) {
+	public static double[] getScale( AffineTransform3D affineTransform3D ) 
+	{
 
 		double[] scales = new double[3];
 		for(int d = 0; d < 3; ++d)
