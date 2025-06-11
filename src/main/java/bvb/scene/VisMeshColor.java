@@ -317,9 +317,9 @@ public class VisMeshColor extends AbstractClipTransformVis
 		gl.glDepthFunc( GL.GL_LESS);
 
 		//add transform
-		Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
-		Matrix4f pvtm = new Matrix4f();
-		Matrix4f vtm = new Matrix4f();
+		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
+		final Matrix4f pvtm = new Matrix4f();
+		final Matrix4f vtm = new Matrix4f();
 
 		pvm.mul( trM, pvtm );
 		vm.mul( trM, vtm );

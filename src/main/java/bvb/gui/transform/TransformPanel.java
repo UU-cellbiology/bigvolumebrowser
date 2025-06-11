@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.net.URL;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -134,6 +135,7 @@ public class TransformPanel extends JPanel
 		cbTransformClip.setEnabled( true );
 		transformScalePanel.updateGUI();
 		transformCentersPanel.updateGUI();
+		transformRotationPanel.updateGUI();
 	}
 	
 	private void setPanelsEnabled(boolean bEnabled)
@@ -177,10 +179,30 @@ public class TransformPanel extends JPanel
 	
 	void resetFullTransform()
 	{
+		if(!transformSetups.selectedObjects.isAnythingSelected())
+			return;
 		
-		//for now
-		transformScalePanel.resetScale();
+		final double [] unitScale = new double [3];
+		
+		for (int d=0; d<3;d++)
+		{
+			unitScale [d] = 1.0;
+		}
+		
 		transformCentersPanel.resetCenters();
-		transformRotationPanel.resetRotation();
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
+		{
+			final double [] prevAngles =  new double[3];
+			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
+			for(int d=0;d<3;d++)
+			{
+				prevAngles[d] = eAngles [d];
+			}
+			transformSetups.transformRotation.setAngles( obj,  new double [3] );
+			transformSetups.transformScale.setScale( obj, unitScale );
+			transformSetups.updateTransform( obj, prevAngles );
+		}
+		updateGUI();
 	}
 }

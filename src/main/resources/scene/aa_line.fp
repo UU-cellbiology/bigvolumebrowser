@@ -3,6 +3,7 @@ uniform vec4 color;
 uniform float antialias;
 uniform float thickness;
 uniform float linelength;
+uniform float spacing;
 in vec2 v_uv;
 
 in vec3 posW;
@@ -54,7 +55,7 @@ void main()
 	}
 	else
 	{
-	    float spacing = 2.5;
+	    //float spacing = 2.5;
 	    float phase = 0.0;
 	    float center = v_uv.x + spacing/2.0*thickness
 	                 - mod(v_uv.x + phase + spacing/2.0*thickness, spacing*thickness);

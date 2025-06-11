@@ -44,8 +44,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import bdv.tools.brightness.ConverterSetup;
@@ -69,9 +67,9 @@ public class PanelData extends JPanel
 	public PanelData(final BigVolumeBrowser bvb_)
 	{
 		super(new GridBagLayout());	
-		bvb = bvb_;
-		//this.setBorder(new PanelTitle(" Loaded data "));
 		
+		bvb = bvb_;
+		//this.setBorder(new PanelTitle(" Loaded data "));		
 
         //create the tree by passing in the data model
         treeData = new JTree(bvb.dataTreeModel);
@@ -85,15 +83,7 @@ public class PanelData extends JPanel
         treeData.setShowsRootHandles(true);
      
         
-        treeData.addTreeSelectionListener( new TreeSelectionListener() 
-        		{
-
-					@Override
-					public void valueChanged( TreeSelectionEvent arg0 )
-					{						
-						selectObjects();						
-					}
-        		});
+        treeData.addTreeSelectionListener( (e)->selectObjects());
         
         MouseListener ml = new MouseAdapter() {
             @Override

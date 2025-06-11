@@ -83,6 +83,8 @@ public class VisPolyLineAA
 	private int nPointsN;
 	
 	int nTotVert = 0 ;
+	
+	float fDotSpacing = 2.5f;
 
 	private boolean initialized;
 
@@ -312,7 +314,7 @@ public class VisPolyLineAA
 				UV[nV*4+2] = nCumLength[nV];
 				UV[nV*4+3] = -1.0f;
 		}
-
+		//fDotSpacing = 10.0f/lineLength;
 
 		// ..:: VERTEX BUFFERS & ARRAY OBJECTS ::..
 
@@ -369,6 +371,7 @@ public class VisPolyLineAA
 		prog.getUniform4f("color").set(l_color);
 		prog.getUniform1f( "linelength" ).set( lineLength );
 		prog.getUniform1i( "dotted" ).set( bDotted ? 1:0);
+		prog.getUniform1f( "spacing" ).set( fDotSpacing );
 		prog.getUniform1f( "thickness" ).set( fLineThickness );
 		prog.getUniform1f( "antialias" ).set( 1.5f);
 		

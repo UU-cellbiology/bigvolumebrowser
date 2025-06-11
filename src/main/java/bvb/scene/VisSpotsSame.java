@@ -237,6 +237,15 @@ public class VisSpotsSame extends AbstractClipTransformVis
 			}
 		}
 		
+		//add transform
+		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
+		final Matrix4f pvtm = new Matrix4f();
+		//final Matrix4f vtm = new Matrix4f();
+
+		pvm.mul( trM, pvtm );
+		//vm.mul( trM, vtm );
+		
+		
 		JoglGpuContext context = JoglGpuContext.get( gl );
 		
 		//scale disk with viewport transform
@@ -267,7 +276,7 @@ public class VisSpotsSame extends AbstractClipTransformVis
 		ellipse_axes.x = ellipse_axes.x * ellipse_axes.x;
 		ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
 				
-		prog.getUniformMatrix4f( "pvm" ).set( pvm );
+		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform1f( "pointScale" ).set( fPointScale );
 		prog.getUniform4f( "colorin" ).set(l_color);
