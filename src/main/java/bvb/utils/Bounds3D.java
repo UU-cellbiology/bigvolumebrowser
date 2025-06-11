@@ -139,4 +139,13 @@ public class Bounds3D
 		transform.apply( minBound, minBound );
 		transform.apply( maxBound, maxBound );
 	}
+	
+	public void translate(final double [] translate)
+	{
+		for(int d=0;d<3;d++)
+		{
+			minBound[d] += translate[d];
+			maxBound[d] += translate[d];
+		}
+	}
 }

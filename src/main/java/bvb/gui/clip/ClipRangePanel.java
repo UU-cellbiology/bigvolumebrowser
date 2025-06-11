@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.util.BoundedRange;
 import bvb.gui.SelectedObjects;
@@ -173,20 +174,31 @@ public class ClipRangePanel extends JPanel
 					clipInterval.realMin( min );
 					clipInterval.realMax( max );
 				}
+//				final AffineTransform3D clipTr = new AffineTransform3D();
+//				objCl.getClipTransform( clipTr );
+//				clipTr.apply( min, min );
+//				clipTr.apply( max, max );
+//				clipTr.apply( minBound, minBound );
+//				clipTr.apply( maxBound, maxBound );
 				if(clipSetups.bLocalCoordinates)
 				{
 					//convert to relative			
 					//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
-					double [] clipCenter = clipSetups.clipCenters.getCenters( objCl );
+					//double [] clipCenter = clipSetups.clipCenters.getCenters( objCl );
 					double [] relShift = clipSetups.getCurrentObjectCenter( obj );
 					for(int d=0;d<3;d++)
 					{
-						relShift[d]-=clipCenter[d];
+						//relShift[d]-=clipCenter[d];
 						min[d] -= relShift[d];
 						max[d] -= relShift[d];
 						
 						minBound[d] -= relShift[d];
 						maxBound[d] -= relShift[d];	
+//						min[d] -= clipCenter[d];
+//						max[d] -= clipCenter[d];
+//						
+//						minBound[d] -= clipCenter[d];
+//						maxBound[d] -= clipCenter[d];	
 					}
 				}
 				if(bFirstCS)
@@ -245,6 +257,7 @@ public class ClipRangePanel extends JPanel
 			//convert to relative
 			//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
 			double [] relShift =  clipSetups.getCurrentObjectCenter( obj );
+			//double [] clipCenter = clipSetups.clipCenters.getCenters( objCl );
 			BoundedRange range = null;
 			if(clipSetups.bLocalCoordinates)
 			{

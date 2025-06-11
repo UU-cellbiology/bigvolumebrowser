@@ -1,16 +1,20 @@
 package bvb.utils.transform;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
+import bdv.util.RealRandomAccessibleIntervalSource;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
+import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
 import bvvpg.source.converters.Clippable3D;
 import ij.Prefs;
@@ -160,10 +164,29 @@ public class TransformSetups
 				clipUpdate.set( clipBake );
 		
 				//update centers
-				double [] clipCent = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( objCl );
-				clipUpdate.apply( clipCent, clipCent );
+				double [] clipCentOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( objCl );
+				double [] clipCent = new double[3];
+				clipUpdate.apply( clipCentOld, clipCent );
 				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( objCl, clipCent );		
 						
+				//update clipping interval
+				final double [] shift = new double [3];
+				final RealInterval clipInt = objCl.getClipInterval();
+				double [] min = clipInt.minAsDoubleArray();
+				double [] max = clipInt.maxAsDoubleArray();
+				for(int d=0;d<3;d++)
+				{
+					shift[d] = clipCent[d]-clipCentOld[d];
+					min[d] += shift[d];
+					max[d] += shift[d];
+				}
+				objCl.setClipInterval( FinalRealInterval.wrap( min, max));
+				final Bounds3D bounds = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipAxesBounds.getBounds( objCl );
+				
+				bounds.translate( shift );
+				
+				//update rotation
+				
 				double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( objCl );
 								
 				final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( objCl );		
