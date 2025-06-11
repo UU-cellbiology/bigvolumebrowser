@@ -45,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
 
@@ -57,10 +58,12 @@ import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
+import bvvpg.core.util.MatrixMath;
 
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
 /** example class showing different ways to render a mesh**/
@@ -237,9 +240,30 @@ public class VisMeshTexture extends AbstractClipTransformVis
 		
 		bLocked = false;
 
+		//add transform
+		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
+		final Matrix4f pvtm = new Matrix4f();
+		//final Matrix4f vtm = new Matrix4f();
+
+		pvm.mul( trM, pvtm );
+		//vm.mul( trM, vtm );
+		
 		JoglGpuContext context = JoglGpuContext.get( gl );
 
-		prog.getUniformMatrix4f( "pvm" ).set( pvm );
+		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
+		prog.getUniform1i("clipactive").set(0);
+		if(clipActive && clipInt != null)
+		{
+			prog.getUniform1i("clipactive").set(1);
+			prog.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
+			prog.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
+			final AffineTransform3D t = new AffineTransform3D();
+			t.set( transform );
+			t.preConcatenate( clipTransform.inverse() );
+			//t.set( clipTransform.inverse() );
+	
+			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
+		}
 		prog.setUniforms( context );
 		prog.use( context );
 		gl.glEnable( GL_DEPTH_TEST );

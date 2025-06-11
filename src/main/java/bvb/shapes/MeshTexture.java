@@ -34,6 +34,7 @@ import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import bvb.scene.VisMeshTexture;
 
@@ -43,7 +44,7 @@ public class MeshTexture extends AbstractClipTransformShape
 	
 	String sName = "";
 	
-	RealInterval boundingBox = null;
+	RealInterval boundBox = null;
 	
 	public MeshTexture(final Mesh nmesh, final BufferedImage imageTexture)
 	{
@@ -51,21 +52,24 @@ public class MeshTexture extends AbstractClipTransformShape
 		if(nmesh != null)
 		{
 			visRender = new VisMeshTexture( nmesh, imageTexture );
-			boundingBox = Meshes.boundingBox( nmesh );
+			boundBox = Meshes.boundingBox( nmesh );
 		}
 	}
 	
 	@Override
 	public RealInterval boundingBox()
 	{
-		return boundingBox;
+		final AffineTransform3D t = new AffineTransform3D();
+		visRender.getTransform( t );
+		
+		return t.estimateBounds( boundBox );
 	}
 	
 	@Override
 	public RealInterval boundingBoxNotTransformed()
 	{
 		
-		return new FinalRealInterval(boundingBox);
+		return new FinalRealInterval(boundBox);
 	}
 	
 	public void setName(String sName_)

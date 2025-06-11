@@ -76,7 +76,7 @@ public class VisPolyLineAA
 	
 	public boolean bIncludeClip = false;
 	
-	public boolean bDotted = false;
+	public boolean bDashed = false;
 		
 	float vertices[]; 
 	
@@ -84,7 +84,7 @@ public class VisPolyLineAA
 	
 	int nTotVert = 0 ;
 	
-	float fDotSpacing = 2.5f;
+	float fDashSpacing = 2.5f;
 
 	private boolean initialized;
 
@@ -107,7 +107,7 @@ public class VisPolyLineAA
 		this();
 		fLineThickness = fLineThickness_;		
 		l_color = new Vector4f(color_in.getComponents(null));	
-		bDotted = bDotted_;
+		bDashed = bDotted_;
 		setVertices(points);
 		
 	}
@@ -118,7 +118,7 @@ public class VisPolyLineAA
 		fLineThickness = fLineThickness_;		
 		l_color = new Vector4f(color_in.getComponents(null));		
 		setVertices(points);
-		bDotted = bDotted_;
+		bDashed = bDotted_;
 		
 	}
 
@@ -128,7 +128,7 @@ public class VisPolyLineAA
 		fLineThickness = fLineThickness_;		
 		l_color = new Vector4f(color_in.getComponents(null));		
 		setVertices(points);
-		bDotted = bDotted_;
+		bDashed = bDotted_;
 		
 	}
 	
@@ -314,7 +314,7 @@ public class VisPolyLineAA
 				UV[nV*4+2] = nCumLength[nV];
 				UV[nV*4+3] = -1.0f;
 		}
-		//fDotSpacing = 10.0f/lineLength;
+		fDashSpacing = lineLength/50.0f;
 
 		// ..:: VERTEX BUFFERS & ARRAY OBJECTS ::..
 
@@ -370,8 +370,8 @@ public class VisPolyLineAA
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );	
 		prog.getUniform4f("color").set(l_color);
 		prog.getUniform1f( "linelength" ).set( lineLength );
-		prog.getUniform1i( "dotted" ).set( bDotted ? 1:0);
-		prog.getUniform1f( "spacing" ).set( fDotSpacing );
+		prog.getUniform1i( "dashed" ).set( bDashed ? 1:0);
+		prog.getUniform1f( "spacing" ).set( fDashSpacing );
 		prog.getUniform1f( "thickness" ).set( fLineThickness );
 		prog.getUniform1f( "antialias" ).set( 1.5f);
 		

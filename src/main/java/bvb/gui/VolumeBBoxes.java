@@ -67,13 +67,13 @@ public class VolumeBBoxes extends AbstractBasicShape
 	
 	private Color lineColor = Color.WHITE;
 	
-	private boolean bDotted = false;
+	private boolean bDashed = false;
 	
 	public VolumeBBoxes(final BigVolumeBrowser bvb_, boolean bDotted_ )
 	{
 		bvb = bvb_;
 		
-		bDotted = bDotted_;
+		bDashed = bDotted_;
 		
 		bvvSourceToBox = new HashMap<>();
 		shapeToBox = new HashMap<>();
@@ -190,7 +190,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				final VolumeBox currBox = bvvSourceToBox.get( sac );
 				if(currBox == null)
 				{		
-					final VolumeBox vb = new VolumeBox(interval, transform , lineThickness, lineColor, bDotted);
+					final VolumeBox vb = new VolumeBox(interval, transform , lineThickness, lineColor, bDashed);
 					bvvSourceToBox.put( sac, vb);
 				}
 				else
@@ -220,7 +220,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				final VolumeBox currBox = shapeToBox.get( sh );
 				if(currBox == null)
 				{				
-					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDotted); 
+					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDashed); 
 					shapeToBox.put( sh, vb);
 				}
 				else
@@ -266,18 +266,18 @@ public class VolumeBBoxes extends AbstractBasicShape
 			GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
 	
 			final VolumeBox currBox = bvvSourceToBox.get( sac );
-			
-			if(cs.clipActive())
+			final Source< ? > src = sac.getSpimSource();
+			if(cs.clipActive() && src.isPresent( nTimePoint ))
 			{
 				final AffineTransform3D transform = new AffineTransform3D();
 				RealInterval interval = cs.getClipInterval();
 				if(interval == null)
-					interval = Misc.getSourceBoundingBox( sac.getSpimSource(),nTimePoint,0 );
+					interval = Misc.getSourceBoundingBox( src,nTimePoint,0 );
 				cs.getClipTransform( transform );
 				if(currBox == null)
 				{
 					cs.getClipTransform( transform );
-					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDotted);
+					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDashed);
 					bvvSourceToBox.put( sac, vb);
 				}
 				else
@@ -301,7 +301,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		{
 			final VolumeBox currBox = shapeToBox.get( sh );
 			
-			if(sh.clipActive())
+			if(sh.clipActive() && (sh.getTimePoint()<0 || sh.getTimePoint() == nTimePoint))
 			{
 				final AffineTransform3D transform = new AffineTransform3D();
 				RealInterval interval = sh.getClipInterval();
@@ -311,7 +311,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				if(currBox == null)
 				{
 					sh.getClipTransform( transform );
-					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDotted) ;
+					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDashed) ;
 					shapeToBox.put( sh, vb);
 				}
 				else

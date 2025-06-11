@@ -1,5 +1,6 @@
-uniform int dotted;
 uniform vec4 color;
+
+uniform int dashed;
 uniform float antialias;
 uniform float thickness;
 uniform float linelength;
@@ -35,7 +36,7 @@ void main()
 
     vec4 colorOut = vec4(color);
 
-	if(dotted == 0 )
+	if(dashed == 0 )
 	{
 	    // Cap at start
 	    if (v_uv.x < 0)
@@ -55,16 +56,13 @@ void main()
 	}
 	else
 	{
-	    //float spacing = 2.5;
-	    float phase = 0.0;
-	    float center = v_uv.x + spacing/2.0*thickness
-	                 - mod(v_uv.x + phase + spacing/2.0*thickness, spacing*thickness);
-	    if (linelength - center < thickness/2.0)
-	        discard;
-	    else if (center < thickness/2.0)
-	        discard;
-	    else
-	        d = length(v_uv - vec2(center,0.0)) - w;
+		float center = round(mod(v_uv.x, spacing) / spacing);
+		if(center <0.1)
+		{
+			discard;
+		}
+		d = abs(v_uv.y) - w;
+
 	}
         
     if( d < 0) 
