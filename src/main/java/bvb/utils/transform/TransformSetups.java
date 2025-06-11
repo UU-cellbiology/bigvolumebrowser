@@ -32,8 +32,6 @@ public class TransformSetups
 	final public TransformCenterBounds transformCenterBounds;
 	
 	final public TransformRotation transformRotation;
-	
-	final public TransformTranslateBounds transformTranslateBounds;
 
 	public boolean bTransformClip = Prefs.get( "BVB.bTransformClip", true );
 	
@@ -49,7 +47,6 @@ public class TransformSetups
 		transformCenters = new TransformCenter(converterSetups);
 		transformCenterBounds = new TransformCenterBounds(converterSetups);
 		transformRotation = new TransformRotation(converterSetups);
-		transformTranslateBounds = new TransformTranslateBounds(converterSetups);
 		
 	}
 	

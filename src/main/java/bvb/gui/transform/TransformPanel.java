@@ -29,8 +29,6 @@ public class TransformPanel extends JPanel
 	
 	final TransformRotationPanel transformRotationPanel;
 	
-	final TransformTranslationPanel transformTranslationPanel;
-	
 	final JCheckBox cbTransformClip;
 	
 	final JButton butResetCurrent;
@@ -55,12 +53,7 @@ public class TransformPanel extends JPanel
 		transformCentersPanel = new TransformCenterPanel(transformSetups);
 		
 		transformRotationPanel = new TransformRotationPanel(transformSetups);
-		
-		transformTranslationPanel = new TransformTranslationPanel(transformSetups);
-		
-		transformCentersPanel.trPanel = this;
-		
-		transformTranslationPanel.trPanel = this;
+
 		
 		tabTrPane = new JTabbedPane(SwingConstants.TOP);
 		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
@@ -68,7 +61,6 @@ public class TransformPanel extends JPanel
 		tabTrPane.addTab( "Scale", transformScalePanel );
 		tabTrPane.addTab( "Center", transformCentersPanel );
 		tabTrPane.addTab( "Rotate", transformRotationPanel );
-		tabTrPane.addTab( "Move", transformTranslationPanel );
 		
 		
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -145,7 +137,6 @@ public class TransformPanel extends JPanel
 		transformScalePanel.updateGUI();
 		transformCentersPanel.updateGUI();
 		transformRotationPanel.updateGUI();
-		transformTranslationPanel.updateGUI();
 	}
 	
 	private void setPanelsEnabled(boolean bEnabled)
@@ -153,7 +144,6 @@ public class TransformPanel extends JPanel
 		transformScalePanel.setEnabled( bEnabled );
 		transformCentersPanel.setEnabled( bEnabled );
 		transformRotationPanel.setEnabled( bEnabled );
-		transformTranslationPanel.setEnabled( bEnabled );
 	}
 	
 	public void setSourceListeners()
@@ -169,7 +159,6 @@ public class TransformPanel extends JPanel
 	{		
 		transformCentersPanel.setSliderColors( colors );
 		transformRotationPanel.setSliderColors( colors );
-		transformTranslationPanel.setSliderColors( colors );
 	}
 	
 	void resetPanelTransform()
@@ -184,9 +173,6 @@ public class TransformPanel extends JPanel
 			break;
 		case 2:
 			transformRotationPanel.resetRotation();
-			break;
-		case 3:
-			transformCentersPanel.resetCenters();
 			break;
 		default:
 		}

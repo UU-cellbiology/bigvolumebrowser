@@ -33,8 +33,6 @@ public class TransformCenterPanel extends JPanel
 
 	private boolean blockUpdates = false;
 	
-	public TransformPanel trPanel = null;
-	
 	public TransformCenterPanel(final TransformSetups transformSetups_) 
 	{
 		super();		
@@ -179,7 +177,6 @@ public class TransformCenterPanel extends JPanel
 		}
 		blockUpdates = false;
 		updateGUI();
-		trPanel.transformTranslationPanel.updateGUI();
 	}
 
 	
@@ -254,7 +251,6 @@ public class TransformCenterPanel extends JPanel
 		}
 		
 		blockUpdates = false;
-		trPanel.transformTranslationPanel.updateGUI();
 		updateGUI();
 		transformSetups.updateBVV();
 	}
