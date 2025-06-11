@@ -270,7 +270,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 			if(cs.clipActive())
 			{
 				final AffineTransform3D transform = new AffineTransform3D();
-				FinalRealInterval interval = cs.getClipInterval();
+				RealInterval interval = cs.getClipInterval();
 				if(interval == null)
 					interval = Misc.getSourceBoundingBox( sac.getSpimSource(),nTimePoint,0 );
 				cs.getClipTransform( transform );
@@ -304,7 +304,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 			if(sh.clipActive())
 			{
 				final AffineTransform3D transform = new AffineTransform3D();
-				FinalRealInterval interval = sh.getClipInterval();
+				RealInterval interval = sh.getClipInterval();
 				if(interval == null)
 					interval = new FinalRealInterval (sh.boundingBox());
 				sh.getClipTransform( transform );

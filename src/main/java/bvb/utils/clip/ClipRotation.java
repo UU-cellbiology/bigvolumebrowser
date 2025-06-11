@@ -31,86 +31,67 @@ package bvb.utils.clip;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
-import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Affine3DHelpers;
-import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvvpg.source.converters.Clippable3D;
 
 public class ClipRotation
-{
-	private final Map< ConverterSetup, double[]> setupToAngles = new HashMap<>();
+{	
+	private final Map< Clippable3D, double[]> objToAngles = new HashMap<>();
 	
-	private final Map< ConverterSetup, double[]> setupToQuaternion = new HashMap<>();
-	
-	private final Map< BasicShape, double[]> shapeToAngles = new HashMap<>();
-	
+	private final Map< Clippable3D, double[]> objToQuaternion = new HashMap<>();
+
 	public ClipRotation( )
 	{
 
 	}
 	
-	public double[] getAngles( final ConverterSetup setup )
+	public double[] getAngles( final Clippable3D obj )
 	{
-		double [] out =  setupToAngles.get( setup );
+		double [] out =  objToAngles.get( obj );
 		if(out == null)
 		{
-			out = getCurrentEulerAngles(setup);
-			setAngles(setup, out);
+			out = getCurrentEulerAngles(obj);
+			setAngles(obj, out);
 		}
 		
 		return out;
 	}
-	public double[] getQuaternion( final ConverterSetup setup )
+	public double[] getQuaternion( final Clippable3D obj )
 	{
-		double [] out =  setupToQuaternion.get( setup );
+		double [] out =  objToQuaternion.get( obj );
 		if(out == null)
 		{
-			out = getCurrentEulerAngles(setup);
-			setAngles(setup, out);
+			out = getCurrentEulerAngles(obj);
+			setAngles(obj, out);
 		}
-		out = setupToQuaternion.get( setup );
-		return out;
-	}
-	
-	public double[] getAngles( final BasicShape shape )
-	{
-		double [] out =  shapeToAngles.get( shape );
-		if(out == null)
-		{
-			out = getCurrentEulerAngles(shape);
-			setAngles(shape, out);
-		}
-		
+		out = objToQuaternion.get( obj );
 		return out;
 	}
 
+
 	
-	public void setAngles( final ConverterSetup setup, final double[] eAngles)
+	public void setAngles( final Clippable3D obj, final double[] eAngles)
 	{
-		setupToAngles.put( setup, eAngles );
+		objToAngles.put( obj, eAngles );
 	}
 	
-	public void setQuaternion( final ConverterSetup setup, final double[] quat)
+	public void setQuaternion( final Clippable3D obj, final double[] quat)
 	{
-		setupToQuaternion.put( setup, quat );
+		objToQuaternion.put( obj, quat );
 	}
 	
-	public void setAngles( final BasicShape shape, final double[] eAngles)
-	{
-		shapeToAngles.put( shape, eAngles );
-	}
 	
-	public double [] getCurrentEulerAngles(final ConverterSetup setup)
+	public double [] getCurrentEulerAngles(final Clippable3D obj)
 	{
 		final AffineTransform3D clipTr = new AffineTransform3D();
 		
-		((GammaConverterSetup)setup).getClipTransform(clipTr);
+		obj.getClipTransform(clipTr);
 		
-		final FinalRealInterval interval = ((GammaConverterSetup)setup).getClipInterval(); 
+		final RealInterval interval = obj.getClipInterval(); 
 		final double [] center;
 		if(interval == null)
 		{
@@ -124,30 +105,9 @@ public class ClipRotation
 		final double[] qRotation = new double[4];
 
 		Affine3DHelpers.extractRotationAnisotropic( clipTr, qRotation );
-		setupToQuaternion.put( setup, qRotation );
+		objToQuaternion.put( obj, qRotation );
 		return Misc.quaternionToEulerAngles(qRotation);
 		
 	}
 	
-	public double [] getCurrentEulerAngles(final BasicShape shape)
-	{
-		final AffineTransform3D clipTr = new AffineTransform3D();
-		shape.getClipTransform(clipTr);
-		final FinalRealInterval interval = shape.getClipInterval(); 
-		final double [] center;
-		if(interval == null)
-		{
-			center = new double[3];
-		}
-		else
-		{
-			center = Misc.getIntervalCenterNegative( interval);
-		}
-		clipTr.translate( center );
-		final double[] qRotation = new double[4];
-
-		Affine3DHelpers.extractRotationAnisotropic( clipTr, qRotation );
-		return Misc.quaternionToEulerAngles(qRotation);
-		
-	}
 }

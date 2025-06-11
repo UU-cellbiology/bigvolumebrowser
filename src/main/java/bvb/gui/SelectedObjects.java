@@ -48,6 +48,8 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 	private List< ConverterSetup > csList = new ArrayList<>();
 	private List< BasicShape > shList = new ArrayList<>();
 	
+	private final List< Object > objList = new ArrayList<>();
+
 	private ArrayList<Listener> listeners =	new ArrayList<>();
 
 	
@@ -65,27 +67,57 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 	}
 
 	@Override
-	public void selectionWindowChanged( int nWindow, List< ConverterSetup > csList_ )
+	public void selectionWindowChanged( int nWindow, final List< ConverterSetup > csList_ )
 	{
-		this.csList = csList_;
+		updateCSList(csList_);
 		for(Listener l : listeners)
 				l.selectedObjectsChanged();
 	}
 	
-	@Override
-	public void selectionCSChanged( List< ConverterSetup > csList_ )
+	void updateCSList(final List< ConverterSetup > csList_ )
 	{
+		for(final ConverterSetup cs : csList)
+		{
+			objList.remove( cs );
+		}
+		
 		this.csList = csList_;
+		
+		for(final ConverterSetup cs : csList)
+		{
+			objList.add( cs );
+		}	
+	}
+	
+	@Override
+	public void selectionCSChanged( final List< ConverterSetup > csList_ )
+	{
+		updateCSList(csList_);
 		for(Listener l : listeners)
 				l.selectedObjectsChanged();		
 	}
 	
 	@Override
-	public void selectionShapesChanged( List< BasicShape > shList_ )
+	public void selectionShapesChanged(final List< BasicShape > shList_ )
 	{
-		this.shList = shList_;
+		updateShapeList( shList_ );
 		for(Listener l : listeners)
 				l.selectedObjectsChanged();				
+	}
+	
+	void updateShapeList(final List< BasicShape > shList_ )
+	{
+		for(final BasicShape sh : shList)
+		{
+			objList.remove( sh );
+		}
+		
+		this.shList = shList_;
+		
+		for(final BasicShape sh : shList)
+		{
+			objList.add( sh );
+		}	
 	}
 	
 	public void addObjectSelectionListener(Listener l) 
@@ -113,6 +145,11 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 	public List< ConverterSetup > getSelectedSources()
 	{
 		return csList;
+	}
+	
+	public List< Object > getSelectedObjects()
+	{
+		return objList;
 	}
 	
 	public List< BasicShape > getSelectedShapes()

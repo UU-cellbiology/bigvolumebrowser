@@ -37,16 +37,14 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
 import bvb.shapes.BasicShape;
 import bvb.utils.clip.ClipSetups;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvvpg.source.converters.Clippable3D;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
 public class ClipRotationPanel extends JPanel
 {
-
 	final ClipSetups clipSetups;
 
 	private BoundedValuePanelPG [] clipRotationPanels = new BoundedValuePanelPG[3];
@@ -115,81 +113,56 @@ public class ClipRotationPanel extends JPanel
 		{
 			allAnglesEqual[d] = true;
 		}
-		if(clipSetups.selectedObjects.areSourcesSelected())
+		
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs: csList)
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(objCl.clipActive())
 			{
-				if(((GammaConverterSetup)cs).clipActive())
+				if(bFirstCS)
 				{
-					if(bFirstCS)
+					final double [] tempAngles = clipSetups.clipRotation.getAngles( objCl );
+					
+					if(clipSetups.bLocalCoordinates)
 					{
-						final double [] tempAngles = clipSetups.clipRotation.getAngles( cs );
-						
-						if(clipSetups.bLocalCoordinates)
+						final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+						for(int d=0;d<3;d++)
 						{
-							final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( cs );
-							for(int d=0;d<3;d++)
-							{
-								angles[d] = tempAngles[d] - trAngles[d];
-							}
+							angles[d] = tempAngles[d] - trAngles[d];
 						}
-						else
-						{
-							angles = tempAngles;
-						}
-						bFirstCS = false;
 					}
 					else
 					{
-						final double [] tempAngles = clipSetups.clipRotation.getAngles( cs );
-						double[] currAngles = new double [3];//clipSetups.clipRotation.getAngles( cs );
-		
-						if(clipSetups.bLocalCoordinates)
-						{
-							final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( cs );
-							for(int d=0;d<3;d++)
-							{
-								currAngles[d] = tempAngles[d] - trAngles[d];
-							}
-						}
-						else
-						{
-							currAngles = tempAngles;
-						}
-						for (int d=0; d<3; d++)
-						{
-							allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
-						}
+						angles = tempAngles;
 					}
+					bFirstCS = false;
 				}
-			}
-		}
-		
-		if(clipSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				if(sh.clipActive())
+				else
 				{
-					if(bFirstCS)
+					final double [] tempAngles = clipSetups.clipRotation.getAngles( objCl );
+					double[] currAngles = new double [3];//clipSetups.clipRotation.getAngles( cs );
+	
+					if(clipSetups.bLocalCoordinates)
 					{
-						angles = clipSetups.clipRotation.getAngles( sh );
-						bFirstCS = false;
+						final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+						for(int d=0;d<3;d++)
+						{
+							currAngles[d] = tempAngles[d] - trAngles[d];
+						}
 					}
 					else
 					{
-						final double[] currAngles = clipSetups.clipRotation.getAngles( sh );
-		
-						for (int d=0; d<3; d++)
-						{
-							allAnglesEqual[d] &= (Double.compare( angles[d], currAngles[d] )==0);
-						}
+						currAngles = tempAngles;
+					}
+					for (int d=0; d<3; d++)
+					{
+						allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
 					}
 				}
-			}
+			}		
 		}
+		
 		if(!bFirstCS)
 		{
 			final double [] finalAngles = angles;
@@ -216,45 +189,75 @@ public class ClipRotationPanel extends JPanel
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;	
 		
-		//blockUpdates = true;
-		if(clipSetups.selectedObjects.areSourcesSelected())
+		
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		boolean bUpdateView = false;
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs : csList )
-			{				
-				final double [] eAngles = clipSetups.clipRotation.getAngles( cs );
-				final double [] prevAngles =  new double[3];
-				for(int d=0;d<3;d++)
-				{
-					prevAngles[d] = eAngles[d];
-				}
-				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-				if(clipSetups.bLocalCoordinates)
-				{
-					final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( cs );
-					eAngles[nAxis] += trAngles[nAxis];
-				}
-				clipSetups.clipRotation.setAngles( cs, eAngles );
-				
-				clipSetups.updateClipTransform( ( GammaConverterSetup ) cs, prevAngles );
-	
+			final Clippable3D objCl = (Clippable3D)obj;
+			final double [] eAngles = clipSetups.clipRotation.getAngles( objCl );
+			final double [] prevAngles =  new double[3];
+			for(int d=0;d<3;d++)
+			{
+				prevAngles[d] = eAngles[d];
+			}
+			eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+			if(clipSetups.bLocalCoordinates)
+			{
+				final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+				eAngles[nAxis] += trAngles[nAxis];
+			}
+			clipSetups.clipRotation.setAngles( objCl, eAngles );
+			
+			clipSetups.updateClipTransform( objCl, prevAngles );
+			if(obj instanceof BasicShape)
+			{
+				bUpdateView = true;
 			}
 		}
-		if(clipSetups.selectedObjects.areShapesSelected())
+		if( bUpdateView )
 		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				final double [] eAngles = clipSetups.clipRotation.getAngles( sh );
-				eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-				
-				clipSetups.clipRotation.setAngles( sh, eAngles );
-				clipSetups.updateClipTransform( sh );
-			}
 			clipSetups.bvb.updateSceneRender();
 		}
-		
 		//blockUpdates = false;
+		updateGUI();
+	}
+	
+	void resetRotation()
+	{
+		if(!clipSetups.selectedObjects.isAnythingSelected())
+		{
+			return;
+		}
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
+		{
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(objCl.clipActive())
+			{
+				final double [] prevAngles = new double [3];
+				final double [] resetAngles = new double [3];
+//				if(clipSetups.bLocalCoordinates)
+//				{
+//					final double [] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+//					for (int d=0;d<3;d++)
+//					{
+//						resetAngles[d] = trAngles[d];
+//					}
+//				}
+				final double[] prevAnglesHM = clipSetups.clipRotation.getAngles( objCl );
+				for (int d=0;d<3;d++)
+				{
+					prevAngles[d] = prevAnglesHM[d];				
+				}
+				
+				clipSetups.clipRotation.setAngles(objCl, resetAngles);
+				clipSetups.updateClipTransform( objCl, prevAngles);
+			}
+		
+		}
+		clipSetups.bvb.updateSceneRender();
+
 		updateGUI();
 	}
 	

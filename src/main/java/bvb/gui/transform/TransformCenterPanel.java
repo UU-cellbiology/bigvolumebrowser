@@ -10,7 +10,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
-import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -96,67 +95,31 @@ public class TransformCenterPanel extends JPanel
 		{
 			allTrEqual[d] = true;
 		}
-		
-		if(transformSetups.selectedObjects.areSourcesSelected())
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs: csList)
+			final Bounds3D bounds = transformSetups.transformCenterBounds.getBounds( obj );
+			final double [] minBound = bounds.getMinBound();
+			final double [] maxBound = bounds.getMaxBound();
+			
+			double [] center = new double [3];
+			center = transformSetups.transformCenters.getCenters( obj );
+			
+			if(bFirstCS)
 			{
-				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( cs );
-				final double [] minBound = bounds.getMinBound();
-				final double [] maxBound = bounds.getMaxBound();
-				
-				double [] center = new double [3];
-				center = transformSetups.transformCenters.getCenters( cs );
-				
-				if(bFirstCS)
+				for (int d=0; d<3; d++)
 				{
-					for (int d=0; d<3; d++)
-					{
-						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-					}
-					bFirstCS = false;
+					boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
 				}
-				else
-				{
-					for (int d=0; d<3; d++)
-					{
-						final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-						allTrEqual[d] &= boundValue[d].equals( translationRange );
-						boundValue[d] = boundValue[d].join( translationRange );
-					}
-				}
+				bFirstCS = false;
 			}
-		}
-		
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shList)
+			else
 			{
-				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( sh );
-				final double [] minBound = bounds.getMinBound();
-				final double [] maxBound = bounds.getMaxBound();
-				
-				double [] center = new double [3];
-				center = transformSetups.transformCenters.getCenters( sh );
-				
-				if(bFirstCS)
+				for (int d=0; d<3; d++)
 				{
-					for (int d=0; d<3; d++)
-					{
-						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-					}
-					bFirstCS = false;
-				}
-				else
-				{
-					for (int d=0; d<3; d++)
-					{
-						final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-						allTrEqual[d] &= boundValue[d].equals( translationRange );
-						boundValue[d] = boundValue[d].join( translationRange );
-					}
+					final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+					allTrEqual[d] &= boundValue[d].equals( translationRange );
+					boundValue[d] = boundValue[d].join( translationRange );
 				}
 			}
 		}
@@ -191,57 +154,27 @@ public class TransformCenterPanel extends JPanel
 		
 		minBound = Math.min( currVal, minBound );
 		maxBound = Math.max( currVal, maxBound );
-		
-		if(transformSetups.selectedObjects.areSourcesSelected())
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs : csList )
+			final Bounds3D bounds = transformSetups.transformCenterBounds.getBounds( obj );
+			
+			if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
 			{
-				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( cs );
-				
-				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
-				{
-					bounds.getMinBound()[nAxis] = minBound;
-					bounds.getMaxBound()[nAxis] = maxBound;
-					transformSetups.transformTranslationBounds.setBounds( cs, bounds );
-				}
-				final double [] oldCenters = transformSetups.transformCenters.getCenters( cs );
-				final double [] newCenters = new double [3];
-				for(int d=0; d<3; d++)
-				{
-					newCenters[d] = oldCenters[d];
-				}
-				newCenters[nAxis] = currVal;
-				
-				transformSetups.transformCenters.setCenters( cs, newCenters );
-				transformSetups.updateTransform( cs, null );			
+				bounds.getMinBound()[nAxis] = minBound;
+				bounds.getMaxBound()[nAxis] = maxBound;
+				transformSetups.transformCenterBounds.setBounds( obj, bounds );
 			}
-		}
-		
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
+			final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
+			final double [] newCenters = new double [3];
+			for(int d=0; d<3; d++)
 			{
-				final Bounds3D bounds = transformSetups.transformTranslationBounds.getBounds( sh );
-				
-				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
-				{
-					bounds.getMinBound()[nAxis] = minBound;
-					bounds.getMaxBound()[nAxis] = maxBound;
-					transformSetups.transformTranslationBounds.setBounds( sh, bounds );
-				}
-				final double [] oldCenters = transformSetups.transformCenters.getCenters( sh );
-				final double [] newCenters = new double [3];
-				for(int d=0; d<3; d++)
-				{
-					newCenters[d] = oldCenters[d];
-				}
-				newCenters[nAxis] = currVal;
-				
-				transformSetups.transformCenters.setCenters( sh, newCenters );
-				transformSetups.updateTransform( sh );			
+				newCenters[d] = oldCenters[d];
 			}
+			newCenters[nAxis] = currVal;
+			
+			transformSetups.transformCenters.setCenters( obj, newCenters );
+			transformSetups.updateTransform( obj, null );
 		}
 		blockUpdates = false;
 		updateGUI();
@@ -256,28 +189,16 @@ public class TransformCenterPanel extends JPanel
 		blockUpdates = true;
 		
 		Bounds3D range3D = null;
-		if(transformSetups.selectedObjects.areSourcesSelected())
+		
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs : csList )
-			{
-				if(range3D == null)
-					range3D = transformSetups.transformTranslationBounds.getDefaultBounds( cs );
-				else
-					range3D = range3D.join( transformSetups.transformTranslationBounds.getDefaultBounds( cs ) );			
-			}
+			if(range3D == null)
+				range3D = transformSetups.transformCenterBounds.getDefaultBounds( obj );
+			else
+				range3D = range3D.join( transformSetups.transformCenterBounds.getDefaultBounds( obj ) );			
 		}
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				if(range3D == null)
-					range3D = transformSetups.transformTranslationBounds.getDefaultBounds( sh );
-				else
-					range3D = range3D.join( transformSetups.transformTranslationBounds.getDefaultBounds( sh ) );							
-			}
-		}
+
 		if(range3D != null)
 		{
 			double currVal = translationPanels[nAxis].getValue().getCurrentValue();
@@ -287,8 +208,7 @@ public class TransformCenterPanel extends JPanel
 			currVal = Math.max( bmin, currVal );
 			translationPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
 			updateTransformAxis(nAxis);
-		}
-		
+		}		
 		
 		blockUpdates = false;
 	}
@@ -298,14 +218,16 @@ public class TransformCenterPanel extends JPanel
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		blockUpdates = true;
-		
-		if(transformSetups.selectedObjects.areSourcesSelected())
+
+		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = transformSetups.selectedObjects.getSelectedSources();
 			
-			for ( final ConverterSetup cs: csList)
+			RealInterval interval = null;
+			
+			if(obj instanceof ConverterSetup)
 			{
-				final Source< ? > src = transformSetups.converterSetups.getSource( cs ).getSpimSource();
+				final Source< ? > src = transformSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource();
 				
 				final AffineTransform3D srcTrFixed = new AffineTransform3D();
 				AffineTransform3D srcTrIc = new AffineTransform3D();
@@ -313,32 +235,20 @@ public class TransformCenterPanel extends JPanel
 				//get both transforms just in case
 				(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
 				(( TransformedSource< ? > )src).getIncrementalTransform( srcTrIc );
-				FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+				interval = Misc.getSourceBoundingBoxAllTP(src);
 				
 				//remove both transforms
 				srcTrIc = srcTrIc.inverse().preConcatenate( srcTrFixed.inverse() );
 				interval = srcTrIc.estimateBounds( interval );
-
-				final double [] centers = Misc.getIntervalCenter( interval );
-				transformSetups.transformCenters.setCenters( cs, centers );
-				transformSetups.updateTransform( cs, null );
-				
 			}
-		}
-		if(transformSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = transformSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
+			if(obj instanceof BasicShape)
 			{
-				AffineTransform3D srcTrIc = new AffineTransform3D();
-				sh.getTransform( srcTrIc );
-				RealInterval interval = sh.boundingBox();
-				srcTrIc = srcTrIc.inverse();
-				interval = srcTrIc.estimateBounds( interval );
-				final double [] centers = Misc.getIntervalCenter( interval );
-				transformSetups.transformCenters.setCenters( sh, centers );
-				transformSetups.updateTransform( sh );
+				interval = ((BasicShape)obj).boundingBoxNotTransformed();
 			}
+			
+			final double [] centers = Misc.getIntervalCenter( interval );
+			transformSetups.transformCenters.setCenters( obj, centers );
+			transformSetups.updateTransform( obj, null );
 		}
 		
 		blockUpdates = false;

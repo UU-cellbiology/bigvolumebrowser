@@ -29,6 +29,7 @@
 package bvb.utils.clip;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
@@ -36,11 +37,12 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvvpg.source.converters.Clippable3D;
 import ij.Prefs;
 
 public class ClipSetups
@@ -71,12 +73,53 @@ public class ClipSetups
 		clipCenterBounds = new ClipCenterBounds(converterSetups);
 	}
 	
-	public synchronized void updateClipTransform( final GammaConverterSetup cs, final double [] previousAngles)
+	
+	public synchronized void updateClipTransform( final Clippable3D obj, final double [] previousAngles)
 	{				
 		//rotation
-		final AffineTransform3D trRot = new AffineTransform3D();		
-		final double [] qCurr = clipRotation.getQuaternion( cs );
-		final double [] eAngles = clipRotation.getAngles( cs );
+		final AffineTransform3D trRot = new AffineTransform3D();
+		
+		getRotation( trRot, obj, previousAngles );				
+		
+		// find current center
+		RealInterval clipInt = obj.getClipInterval();
+		
+		if (clipInt == null)
+		{
+			if(obj instanceof ConverterSetup)
+			{
+				clipInt = Misc.getSourceBoundingBoxAllTP(converterSetups.getSource( (ConverterSetup)obj ).getSpimSource() );
+			}
+			if(obj instanceof BasicShape)
+			{
+				clipInt = new FinalRealInterval (((BasicShape)obj).boundingBox());
+			}
+
+		}
+
+		final double [] center =  Misc.getIntervalCenterNegative( clipInt );
+		
+		final double [] centerNew = clipCenters.getCenters( obj );
+
+		final AffineTransform3D clipTr = new AffineTransform3D();
+		
+		clipTr.translate( center );
+		
+		clipTr.preConcatenate( trRot );
+
+		clipTr.translate( centerNew );	
+
+		obj.setClipTransform(clipTr);
+		
+	}
+	
+	void getRotation(final AffineTransform3D trRot, final Clippable3D obj, final double [] previousAngles)
+	{
+		
+		
+		final double [] qCurr = clipRotation.getQuaternion( obj );
+		final double [] eAngles = clipRotation.getAngles( obj );
+		
 		//reset rotation
 		if(LinAlgHelpers.length( eAngles )<0.0001)
 		{
@@ -88,7 +131,6 @@ public class ClipSetups
 		{
 			if(previousAngles != null )
 			{
-
 				//add quaternion rotation
 				//calculate changes in angles
 				final double [] dChangeAngle = new double [3];
@@ -102,60 +144,30 @@ public class ClipSetups
 				LinAlgHelpers.normalize( qCurr );
 
 			}
-		}		
+		}
+		
 		final double [][] rotMatrix = new double [3][4];  
 		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
-		trRot.set( rotMatrix );			
-		
-		AffineTransform3D clipTr = new AffineTransform3D();
-		
-		FinalRealInterval clipInt = cs.getClipInterval();
-		
-		if (clipInt == null)
-		{
-			clipInt = Misc.getSourceBoundingBoxAllTP(converterSetups.getSource( cs ).getSpimSource() );
-		}
-
-		final double [] center =  Misc.getIntervalCenterNegative( clipInt );
-		
-		final double [] centerNew = clipCenters.getCenters( cs );
-
-		clipTr.translate( center );
-		
-		clipTr = clipTr.preConcatenate( trRot );
-
-		clipTr.translate( centerNew );	
-
-		cs.setClipTransform(clipTr);
-		
+		trRot.set( rotMatrix );	
 	}
 	
-	public synchronized void updateClipTransform( final BasicShape sh)
+	public double [] getCurrentObjectCenter(final Object obj)
 	{
-		final double [] eAngles = clipRotation.getAngles( sh );
-		
-		final AffineTransform3D clipRot = Misc.getRotationTransform( eAngles );
-		
-		AffineTransform3D clipTr = new AffineTransform3D();
-		
-		FinalRealInterval clipInt = sh.getClipInterval();
-		if(clipInt == null)
+		RealInterval interval = null;
+		if(obj instanceof ConverterSetup)
 		{
-			clipInt = new FinalRealInterval (sh.boundingBox());
+			final SourceAndConverter< ? > source = converterSetups.getSource( (ConverterSetup)obj );
+			interval = Misc.getSourceBoundingBoxAllTP(source.getSpimSource());
 		}
-
-		final double [] center =  Misc.getIntervalCenterNegative( clipInt );
-		
-		final double [] centerNew = clipCenters.getCenters( sh );
-
-		clipTr.translate( center );
-		
-		clipTr = clipTr.preConcatenate( clipRot );
-
-		clipTr.translate( centerNew );	
-
-		sh.setClipTransform(clipTr);
-		
+		if(obj instanceof BasicShape)
+		{
+			interval = ((BasicShape)obj).boundingBox();
+		}	
+		if(interval!= null)
+		{
+			return Misc.getIntervalCenter( interval );
+		}
+		return null;
 	}
 	
 	public double [] getSourceMinWithScale(final ConverterSetup cs)
@@ -167,16 +179,29 @@ public class ClipSetups
 		return relShift;
 	}
 	
-	public double [] getSourceMinWithScaleTranslation(final ConverterSetup cs)
+	
+	public double [] getSourceMinWithScaleTranslation(final Object obj)
 	{
-		final Source< ? > src = converterSetups.getSource( cs ).getSpimSource();
-		final double [] relShift = Misc.getSourceMinNoFixedTransformAllTP( src );
-		final double [] scales = bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( cs );
-		
-		//center in the absolute world
-		final double [] centerAbs = Misc.getIntervalCenter( Misc.getSourceBoundingBoxAllTP( src ));
 		AffineTransform3D fixedTr = new AffineTransform3D();
-		(( TransformedSource< ? > ) src).getFixedTransform( fixedTr );
+		final double [] scales = bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformScale.getScale( obj );
+
+		double [] centerAbs = new double[3];
+		double [] relShift = new double[3];
+		if(obj instanceof ConverterSetup)
+		{
+			final Source< ? > src = converterSetups.getSource( (ConverterSetup)obj ).getSpimSource();
+			relShift = Misc.getSourceMinNoFixedTransformAllTP( src );			
+
+			//center in the absolute world
+			centerAbs = Misc.getIntervalCenter( Misc.getSourceBoundingBoxAllTP( src ));
+			(( TransformedSource< ? > ) src).getFixedTransform( fixedTr );
+		}
+		if(obj instanceof BasicShape)
+		{
+			relShift = ((BasicShape)obj).boundingBoxNotTransformed().minAsDoubleArray();
+			centerAbs = Misc.getIntervalCenter( ((BasicShape)obj).boundingBox());
+			((BasicShape)obj).getTransform( fixedTr );
+		}
 		final double [] centerRel = new double[3];
 
 		fixedTr.inverse().apply( centerAbs, centerRel );

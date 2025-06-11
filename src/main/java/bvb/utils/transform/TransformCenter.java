@@ -3,7 +3,7 @@ package bvb.utils.transform;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.Source;
@@ -17,68 +17,51 @@ public class TransformCenter
 {
 	private final SourceToConverterSetupBimap bimap;
 	
-	private final Map< ConverterSetup, double[]> setupToCenters = new HashMap<>();
-	private final Map< BasicShape, double[]> shapeToCenters = new HashMap<>();
+	private final Map< Object, double[]> objToCenters = new HashMap<>();
 
 	public TransformCenter( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
 	}
 	
-	public double[] getCenters( final ConverterSetup setup )
+	public double[] getCenters( final Object obj )
 	{
-		double [] out =  setupToCenters.get( setup );
+		double [] out =  objToCenters.get( obj );
 		if(out == null)
 		{
-			out = getDefaultCenters(setup);
-			setCenters( setup, out );
+			out = getDefaultCenters(obj);
+			setCenters( obj, out );
 		}		
 		return out;
 	}
 	
-	public double[] getCenters( final BasicShape shape )
+	public void updateCenters(final Object obj)
 	{
-		double [] out =  shapeToCenters.get( shape );
-		if(out == null)
-		{
-			out = getDefaultCenters(shape);
-			setCenters( shape, out );
-		}		
-		return out;
-	}
-	
-	public void updateCenters(final ConverterSetup setup)
-	{
-		setCenters( setup, getDefaultCenters(setup));
+		setCenters( obj, getDefaultCenters(obj));
 	}
 
-	public void updateCenters(final BasicShape shape)
+	public void setCenters( final Object obj, final double[] centers)
 	{
-		setCenters( shape, getDefaultCenters(shape));
-	}
-
-	public void setCenters( final ConverterSetup setup, final double[] centers)
-	{
-		setupToCenters.put( setup, centers );
+		objToCenters.put( obj, centers );
 	}	
 	
-	public void setCenters( final BasicShape shape, final double[] centers)
-	{
-		shapeToCenters.put( shape, centers );
-	}
 	
-	public double [] getDefaultCenters(final ConverterSetup setup)
+	public double [] getDefaultCenters(final Object obj)
 	{
-		final Source< ? > src = bimap.getSource( setup ).getSpimSource();
-				
-		FinalRealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
+		RealInterval interval = null;
+		if(obj instanceof ConverterSetup)
+		{
+			final Source< ? > src = bimap.getSource( (ConverterSetup)obj ).getSpimSource();
+			interval = Misc.getSourceBoundingBoxAllTP(src);
+		}	
+		if(obj instanceof BasicShape)
+		{
+			interval = ((BasicShape)obj).boundingBox();
+		}
 
 		return Misc.getIntervalCenter(interval);		
 		
-	}
-	public double [] getDefaultCenters(final BasicShape shape)
-	{				
-		return Misc.getIntervalCenter(shape.boundingBox());		
 		
 	}
+
 }

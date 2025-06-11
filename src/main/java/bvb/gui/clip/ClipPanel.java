@@ -57,6 +57,7 @@ import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
+import bvvpg.source.converters.Clippable3D;
 import bvvpg.source.converters.GammaConverterSetup;
 import ij.Prefs;
 
@@ -79,6 +80,8 @@ public class ClipPanel extends JPanel implements ItemListener
 
 	final ImageIcon [] coordIcon = new ImageIcon[2];
 	final String[] coordToolTip = new String[2];
+	
+	final JTabbedPane tabClipPane;
 	
 	final ClipRangePanel clipRangePanel;
 	final public ClipRotationPanel clipRotationPanel;
@@ -111,7 +114,7 @@ public class ClipPanel extends JPanel implements ItemListener
 	    clipRotationPanel = new ClipRotationPanel( clipSetups ); 
 	    clipCenterPanel = new ClipCenterPanel( clipSetups ); 
 
-		JTabbedPane tabClipPane = new JTabbedPane(SwingConstants.TOP);
+		tabClipPane = new JTabbedPane(SwingConstants.TOP);
 
 		tabClipPane.addTab( "Range", clipRangePanel );
 		tabClipPane.addTab ("Rotate", clipRotationPanel);
@@ -201,6 +204,7 @@ public class ClipPanel extends JPanel implements ItemListener
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetClipCurrent = new JButton(icon);
 		butResetClipCurrent.setToolTipText( "Reset current panel" );
+		butResetClipCurrent.addActionListener( (e)->resetPanelClip() );   
 		gbc.gridx ++;
 		this.add(butResetClipCurrent,gbc);	
 		
@@ -211,15 +215,7 @@ public class ClipPanel extends JPanel implements ItemListener
 		gbc.gridx ++;
 		this.add(butResetClipAll,gbc);	
 		
-		butResetClipAll.addActionListener( new ActionListener() 
-    		{
-				@Override
-				public void actionPerformed( ActionEvent arg0 )
-				{					
-					resetClip();
-				}
-    	
-    		});   
+		butResetClipAll.addActionListener( (e)->resetClip());   
 		
 		gbc.gridx = 0;
 	    gbc.gridy ++;
@@ -241,7 +237,7 @@ public class ClipPanel extends JPanel implements ItemListener
 	}
 	
 	
-	private synchronized void updateGUI()
+	public synchronized void updateGUI()
 	{
 		updateColors();
 		
@@ -365,55 +361,50 @@ public class ClipPanel extends JPanel implements ItemListener
 		clipCenterPanel.setSliderColors( colors );		
 	}
 	
+	void resetPanelClip()
+	{
+		
+		switch(tabClipPane.getSelectedIndex())
+		{
+		case 0:
+			//clipRangePanel.resetRange();
+			break;
+		case 1:
+			clipRotationPanel.resetRotation();
+			break;
+		case 2:
+			clipCenterPanel.resetCenters();
+			break;
+		default:
+		}
+	}
+	
 	void resetClip()
 	{
 		if(!clipSetups.selectedObjects.isAnythingSelected())
 		{
 			return;
 		}
-		
-		if(clipSetups.selectedObjects.areSourcesSelected())
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs: csList)
+			final Clippable3D objCl = (Clippable3D)obj;
+			Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( objCl );
+			
+			if(range3D != null)
 			{
-				Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( cs );
-	
-				if(range3D != null)
-				{
-					clipSetups.clipAxesBounds.setBounds( cs, range3D );
-					clipSetups.clipRotation.setAngles(cs, new double [3]);
-					((GammaConverterSetup)cs).setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
-					((GammaConverterSetup)cs).setClipTransform( new AffineTransform3D() );
-					clipSetups.clipCenters.setCenters(cs, clipSetups.clipCenters.getCurrentOrDefaultCenters( cs ));
-					clipSetups.clipCenterBounds.setBounds( cs, clipSetups.clipCenterBounds.getDefaultBounds( cs ) );
-					clipSetups.updateClipTransform( (GammaConverterSetup) cs, null);
-					((GammaConverterSetup)cs).setClipActive( true );
-				}
+				clipSetups.clipAxesBounds.setBounds( objCl, range3D );
+				clipSetups.clipRotation.setAngles(objCl, new double [3]);
+				objCl.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
+				objCl.setClipTransform( new AffineTransform3D() );
+				clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getCurrentOrDefaultCenters( objCl ));
+				clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );
+				clipSetups.updateClipTransform( objCl, null);
+				objCl.setClipActive( true );
 			}
 		}
-		
-		if(clipSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( sh );
-				
-				if(range3D != null)
-				{
-					clipSetups.clipAxesBounds.setBounds( sh, range3D );
-					clipSetups.clipRotation.setAngles(sh, new double [3]);
-					sh.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
-					sh.setClipTransform( new AffineTransform3D() );
-					clipSetups.clipCenters.setCenters(sh, clipSetups.clipCenters.getCurrentOrDefaultCenters( sh ));
-					clipSetups.clipCenterBounds.setBounds( sh, clipSetups.clipCenterBounds.getDefaultBounds( sh ) );
-					clipSetups.updateClipTransform(sh);
-					sh.setClipActive( true );
-				}
-			}
-			bvb.updateSceneRender();
-		}
+		bvb.updateSceneRender();
+
 		updateGUI();
 	}
 	

@@ -49,7 +49,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
-import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -622,7 +621,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			}
 		}
 		
-		final FinalRealInterval interval = CenterZoomBVV.getIntervalFromSourcesList(this,sacList);
+		final RealInterval interval = CenterZoomBVV.getIntervalFromSourcesList(this,sacList);
 
 		focusOnRealInterval(interval);
 	}
