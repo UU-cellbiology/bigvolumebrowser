@@ -367,7 +367,7 @@ public class ClipPanel extends JPanel implements ItemListener
 		switch(tabClipPane.getSelectedIndex())
 		{
 		case 0:
-			//clipRangePanel.resetRange();
+			clipRangePanel.resetRange();
 			break;
 		case 1:
 			clipRotationPanel.resetRotation();

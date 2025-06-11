@@ -41,7 +41,6 @@ import javax.swing.SwingUtilities;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
-import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.util.BoundedRange;
 import bvb.gui.SelectedObjects;
@@ -333,6 +332,33 @@ public class ClipRangePanel extends JPanel
 			clipAxesPanels[nAxis].setRange( newRange );
 			updateClipAxisRangeBounds(nAxis);
 		}
+	}
+	
+	void resetRange()
+	{
+		if(!clipSetups.selectedObjects.isAnythingSelected())
+		{
+			return;
+		}
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
+		{
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(objCl.clipActive())
+			{
+				Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( objCl );
+				if(range3D != null)
+				{
+					clipSetups.clipAxesBounds.setBounds( objCl, range3D );
+					objCl.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
+					clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getDefaultCenters( objCl ));
+					clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );
+					clipSetups.updateClipTransform( objCl, null);
+				}
+			}
+		}
+		clipSetups.bvb.updateSceneRender();
+		updateGUI();
 	}
 	
 	void setSliderColors(Color [] colors)

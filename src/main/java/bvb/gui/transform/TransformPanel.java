@@ -72,6 +72,7 @@ public class TransformPanel extends JPanel
 		
 		
 		cbTransformClip = new JCheckBox("Modify clip", true);
+		cbTransformClip.setSelected( transformSetups.bTransformClip );
 		cbTransformClip.addItemListener((e)->
 		{
 			transformSetups.bTransformClip = cbTransformClip.isSelected();

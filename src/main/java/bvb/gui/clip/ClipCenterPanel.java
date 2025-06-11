@@ -38,12 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
-
-import net.imglib2.RealInterval;
-
-import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BoundedValueDouble;
-import bdv.viewer.SourceAndConverter;
 import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
@@ -157,9 +152,6 @@ public class ClipCenterPanel extends JPanel
 							center[d] = centerIn[d]-objCenter[d];
 							minBound[d] -= objCenter[d];
 							maxBound[d] -= objCenter[d];
-
-//							minBound[d] -= centerIn[d] - objCenter[d];
-	//						maxBound[d] -= centerIn[d] - objCenter[d];
 						}						
 					}
 				}
@@ -320,7 +312,6 @@ public class ClipCenterPanel extends JPanel
 				clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getDefaultCenters( objCl ));
 				clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );
 				clipSetups.updateClipTransform( objCl, null);
-				objCl.setClipActive( true );
 			}
 		}
 		clipSetups.bvb.updateSceneRender();

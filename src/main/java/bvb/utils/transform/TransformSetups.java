@@ -3,12 +3,10 @@ package bvb.utils.transform;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
-import bdv.util.RealRandomAccessibleIntervalSource;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.Source;
 import bvb.core.BigVolumeBrowser;
