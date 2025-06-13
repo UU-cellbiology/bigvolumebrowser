@@ -126,7 +126,7 @@ public class ClipRotationPanel extends JPanel
 					
 					if(clipSetups.bLocalCoordinates)
 					{
-						final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+						final double[] trAngles = clipSetups.bvb.bvbCards.transformPanel.transformSetups.transformRotation.getAngles( obj );
 						for(int d=0;d<3;d++)
 						{
 							angles[d] = tempAngles[d] - trAngles[d];
@@ -145,7 +145,7 @@ public class ClipRotationPanel extends JPanel
 	
 					if(clipSetups.bLocalCoordinates)
 					{
-						final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+						final double[] trAngles = clipSetups.bvb.bvbCards.transformPanel.transformSetups.transformRotation.getAngles( obj );
 						for(int d=0;d<3;d++)
 						{
 							currAngles[d] = tempAngles[d] - trAngles[d];
@@ -204,7 +204,7 @@ public class ClipRotationPanel extends JPanel
 			eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
 			if(clipSetups.bLocalCoordinates)
 			{
-				final double[] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
+				final double[] trAngles = clipSetups.bvb.bvbCards.transformPanel.transformSetups.transformRotation.getAngles( obj );
 				eAngles[nAxis] += trAngles[nAxis];
 			}
 			clipSetups.clipRotation.setAngles( objCl, eAngles );

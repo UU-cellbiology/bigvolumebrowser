@@ -395,7 +395,7 @@ public class BVBActions
 			{
 				sh.setVisible( !sh.isVisible() );
 			}
-			bvb.controlPanel.tabPanelShapes.panelShapes.updateUI();
+			bvb.bvbCards.panelShapes.updateUI();
 			bvb.repaintBVV();
 		}
 	}

@@ -49,7 +49,6 @@ import javax.swing.tree.TreePath;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvvpg.vistools.BvvStackSource;
 
@@ -133,15 +132,7 @@ public class PanelData extends JPanel
 	/** called by parent **/
 	public void addSourceStateListener()
 	{
-    	bvb.selectedObjects.addObjectSelectionListener(  new SelectedObjects.Listener()
-		{
-			
-			@Override
-			public void selectedObjectsChanged()
-			{
-				updateObjectsSelection();
-			}
-		} );
+    	bvb.selectedObjects.addObjectSelectionListener( () -> updateObjectsSelection() );
 	}
 	
 	/** updates Sources and Shapes tables selections **/
@@ -158,7 +149,7 @@ public class PanelData extends JPanel
 		{
 			bLocked = false;
 			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
-			bvb.controlPanel.tabPanelShapes.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
+			bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 			return;
 		}
 		
@@ -201,7 +192,7 @@ public class PanelData extends JPanel
 
 		}
 		bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
-		bvb.controlPanel.tabPanelShapes.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
+		bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 		bLocked = false;
 	}
 	

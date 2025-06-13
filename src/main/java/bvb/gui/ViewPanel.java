@@ -161,7 +161,7 @@ public class ViewPanel extends JPanel
 		
 		JButton butCanvasBGColor = new JButton( new ColorIcon( BVBSettings.canvasBGColor ) );	
 		butCanvasBGColor.addActionListener( e -> {
-			Color newColor = JColorChooser.showDialog(bvb.controlPanel.cpFrame, "Choose background color", BVBSettings.canvasBGColor );
+			Color newColor = JColorChooser.showDialog(pViewSettings, "Choose background color", BVBSettings.canvasBGColor );
 			if (newColor != null)
 			{
 				selectColors.setColor(newColor, 0);

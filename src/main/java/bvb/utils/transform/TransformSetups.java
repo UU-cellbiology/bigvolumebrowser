@@ -162,10 +162,10 @@ public class TransformSetups
 				clipUpdate.set( clipBake );
 		
 				//update centers
-				double [] clipCentOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.getCenters( objCl );
+				double [] clipCentOld = bvb.bvbCards.clipPanel.clipSetups.clipCenters.getCenters( objCl );
 				double [] clipCent = new double[3];
 				clipUpdate.apply( clipCentOld, clipCent );
-				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipCenters.setCenters( objCl, clipCent );		
+				bvb.bvbCards.clipPanel.clipSetups.clipCenters.setCenters( objCl, clipCent );		
 						
 				//update clipping interval
 				final double [] shift = new double [3];
@@ -179,15 +179,15 @@ public class TransformSetups
 					max[d] += shift[d];
 				}
 				objCl.setClipInterval( FinalRealInterval.wrap( min, max));
-				final Bounds3D bounds = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipAxesBounds.getBounds( objCl );
+				final Bounds3D bounds = bvb.bvbCards.clipPanel.clipSetups.clipAxesBounds.getBounds( objCl );
 				
 				bounds.translate( shift );
 				
 				//update rotation
 				
-				double [] dAnglesOld = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( objCl );
+				double [] dAnglesOld = bvb.bvbCards.clipPanel.clipSetups.clipRotation.getAngles( objCl );
 								
-				final double[] prevClipRotAngles = bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.getAngles( objCl );		
+				final double[] prevClipRotAngles = bvb.bvbCards.clipPanel.clipSetups.clipRotation.getAngles( objCl );		
 				if(previousAngles != null)
 				{
 					final double [] eAngles = transformRotation.getAngles( obj );
@@ -196,11 +196,11 @@ public class TransformSetups
 					{
 						dAngUpdated [d] = dAnglesOld[d] - previousAngles[d] + eAngles[d]; 
 					}
-					bvb.controlPanel.tabPanelView.clipPanel.clipSetups.clipRotation.setAngles( objCl, dAngUpdated );
+					bvb.bvbCards.clipPanel.clipSetups.clipRotation.setAngles( objCl, dAngUpdated );
 				}					
-				bvb.controlPanel.tabPanelView.clipPanel.clipSetups.updateClipTransform( objCl, prevClipRotAngles);
+				bvb.bvbCards.clipPanel.clipSetups.updateClipTransform( objCl, prevClipRotAngles);
 			}
-			bvb.controlPanel.tabPanelView.clipPanel.updateGUI();
+			bvb.bvbCards.clipPanel.updateGUI();
 		}
 		bvb.updateSceneRender();		
 				

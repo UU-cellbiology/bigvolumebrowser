@@ -35,8 +35,6 @@ import com.jogamp.opengl.GL3;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -112,8 +110,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** Handle of BigVolumeViewer **/
 	public BvvHandleFrame bvvHandle;
 	
-	/** control panel **/
-	public BVBControlPanel controlPanel = null;
+	/** object holding all cards panels **/
+	public BVBCards bvbCards = null;
 	
 	/** actions and behaviors **/
 	public BVBActions bvbActions;
@@ -217,7 +215,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			
 			
 			//setup control panel
-			controlPanel = new BVBControlPanel(this);
+			bvbCards = new BVBCards(this);
 //			controlPanel.cpFrame = new JFrame("BVB");
 //			controlPanel.cpFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 //			controlPanel.cpFrame.add(controlPanel);
@@ -241,16 +239,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		    bvvFrame.getCardPanel().removeCard( BVVPGDefaultCards.DEFAULT_SOURCEGROUPS_CARD );
 		    bvvFrame.getCardPanel().setCardExpanded( BVVPGDefaultCards.DEFAULT_SOURCES_CARD, false );
 
-		    controlPanel.tabPanelShapes.panelShapes.setPreferredSize( tableViewPrefSize );
-		    controlPanel.tabPanelDataSources.panelData.setPreferredSize( tableViewPrefSize );
-		    bvvFrame.getCardPanel().addCard("Shapes", controlPanel.tabPanelShapes.panelShapes, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("All objects", controlPanel.tabPanelDataSources.panelData, true, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("Render sources", controlPanel.tabPanelView.sourcesRenderPanel, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("View", controlPanel.tabPanelView.viewPanel, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("Clipping", controlPanel.tabPanelView.clipPanel, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("Transform", controlPanel.tabPanelView.transformPanel, false, new Insets( 0, 0, 0, 0 ) );		   
-		    bvvFrame.getCardPanel().addCard("Add volumes", controlPanel.tabPanelDataSources.panelAddSources, true, new Insets( 0, 0, 0, 0 ) );		   
-		    bvvFrame.getCardPanel().addCard("Add shapes", controlPanel.tabPanelShapes.panelAddShapes, true, new Insets( 0, 0, 0, 0 ) );		   
+		    bvbCards.panelShapes.setPreferredSize( tableViewPrefSize );
+		    bvbCards.panelData.setPreferredSize( tableViewPrefSize );
+		    bvvFrame.getCardPanel().addCard("Shapes", bvbCards.panelShapes, false, new Insets( 0, 0, 0, 0 ) );
+		    bvvFrame.getCardPanel().addCard("All objects", bvbCards.panelData, true, new Insets( 0, 0, 0, 0 ) );
+		    bvvFrame.getCardPanel().addCard("Render sources", bvbCards.sourcesRenderPanel, false, new Insets( 0, 0, 0, 0 ) );
+		    bvvFrame.getCardPanel().addCard("View", bvbCards.viewPanel, false, new Insets( 0, 0, 0, 0 ) );
+		    bvvFrame.getCardPanel().addCard("Clipping", bvbCards.clipPanel, false, new Insets( 0, 0, 0, 0 ) );
+		    bvvFrame.getCardPanel().addCard("Transform", bvbCards.transformPanel, false, new Insets( 0, 0, 0, 0 ) );		   
+		    bvvFrame.getCardPanel().addCard("Add volumes", bvbCards.panelAddSources, true, new Insets( 0, 0, 0, 0 ) );		   
+		    bvvFrame.getCardPanel().addCard("Add shapes", bvbCards.panelAddShapes, true, new Insets( 0, 0, 0, 0 ) );		   
 
 //		    controlPanel.tabPanelView.viewPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 //		    controlPanel.tabPanelView.viewPanel.butFullScreen.setVisible( false );
@@ -308,37 +306,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void shutDownAll()
 	{
 		closeBVV();
-		controlPanel.cpFrame.dispose();
 	}
 	
 	void closeBVV()
 	{
 		bvvViewer.stop();
 		bvvFrame.dispose();		
-	}
-	
-	/** switches to full screen mode **/
-	public void makeFullScreen()
-	{
-		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		int width = gd.getDisplayMode().getWidth();
-		int height = gd.getDisplayMode().getHeight();
-		int nCPWidth = controlPanel.cpFrame.getWidth();
-				
-		bvvFrame.getContentPane().setPreferredSize(  new Dimension( width - nCPWidth, height ) ) ;	
-		//bvvFrame.setPreferredSize(new Dimension( width - nCPWidth, height ));
-		bvvFrame.pack();
-		bvvFrame.setLocation( 0, 0 );
-		
-		controlPanel.cpFrame.setSize( nCPWidth, height );
-		controlPanel.cpFrame.setLocation(width - nCPWidth, 0);	
-		
-		if(bvvFrame.getSplitPanel() != null)
-		{
-			//bvvFrame.getSplitPanel().setDividerLocation( -0.1 );
-			bvvFrame.getSplitPanel().setCollapsed( false );
-		}
-	
 	}
 	
 	public void repaintBVV()
@@ -522,7 +495,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public synchronized void addShape(final BasicShape shape)
 	{
 		shapes.add( shape );
-		controlPanel.tabPanelShapes.panelShapes.updateShapesTableUI();
+		bvbCards.panelShapes.updateShapesTableUI();
 		dataTreeModel.addData( shape, shape.toString(), dataTreeModel.getIconGroupShape() );
 		updateSceneRender();
 		if(BVBSettings.bFocusOnSourcesOnLoad)
@@ -601,8 +574,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void timePointChanged( int timePointIndex )
 	{
 		updateSceneRender();
-		if(controlPanel != null)
-			controlPanel.tabPanelView.transformPanel.updateGUI();
+		if(bvbCards != null)
+			bvbCards.transformPanel.updateGUI();
 	}
 	
 	public void settingsDialogBVV()
@@ -689,9 +662,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			addSpimData(spimData, spimDataToInfo.get( spimData ));
 		}
 		
-		//sync GUI		
-		controlPanel.tabPanelDataSources.updateBVVlisteners();
-		controlPanel.tabPanelView.resetClipPanel();
+		//sync GUI	
+		bvbCards.panelData.addSourceStateListener();
+		bvbCards.resetClipPanel();
 		
 		BVBSettings.bFocusOnSourcesOnLoad = focusStore;
 		
