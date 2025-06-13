@@ -187,7 +187,10 @@ public class ViewPanel extends JPanel
 		
 		JCheckBox cbShowMultiBox = new JCheckBox();
 		cbShowMultiBox.setSelected(BVBSettings.bShowMultiBox);
+
 		
+		JCheckBox cbPyramidize = new JCheckBox();
+		cbPyramidize.setSelected(BVBSettings.bPyramidize);
 		
 		gbc.gridx=0;
 		gbc.gridy=0;	
@@ -214,6 +217,12 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(new JLabel("Transform animation duration (ms): "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(nfAnimationDuration,gbc);
+
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Screen fraction on zoom/focus: "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(nfFocusScreenFraction, gbc);
 		
 		gbc.gridx=0;
 		gbc.gridy++;
@@ -223,10 +232,9 @@ public class ViewPanel extends JPanel
 
 		gbc.gridx=0;
 		gbc.gridy++;
-		pViewSettings.add(new JLabel("Screen fraction on zoom/focus: "), gbc);
+		pViewSettings.add(new JLabel("Pyramidize loaded data "), gbc);
 		gbc.gridx++;
-		pViewSettings.add(nfFocusScreenFraction, gbc);
-
+		pViewSettings.add(cbPyramidize, gbc);
 		
 		
 		
@@ -264,7 +272,9 @@ public class ViewPanel extends JPanel
 			BVBSettings.dFocusScreenFraction = Double.parseDouble(nfFocusScreenFraction.getText());
 			Prefs.set("BVB.dFocusScreenFraction",BVBSettings.dFocusScreenFraction);
 					
-
+			BVBSettings.bPyramidize = cbPyramidize.isSelected();
+			Prefs.set("BVB.bPyramidize", BVBSettings.bPyramidize);
+			
 			if(bRepaintBVV)
 			{
 				bvb.repaintBVV();

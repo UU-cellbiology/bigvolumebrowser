@@ -35,6 +35,7 @@ import java.io.IOException;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
+import bvb.core.BVBSettings;
 import ch.epfl.biop.bdv.img.OpenersToSpimData;
 import ch.epfl.biop.bdv.img.opener.OpenerSettings;
 import ij.IJ;
@@ -199,7 +200,8 @@ public class SpimDataLoader
 					.location(new File(imageFileName))
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
-					.positionConvention("TOP LEFT");
+					.positionConvention("TOP LEFT")
+					.pyramidize( BVBSettings.bPyramidize );
 			spimData = (SpimData)OpenersToSpimData.getSpimData(settings);	
 		}
 		else

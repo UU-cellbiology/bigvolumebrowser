@@ -436,7 +436,7 @@ public class BVBActions
 		});
 		
 		String shortCutInfo ="<html><center><b>Shortcuts:</b></center><br>"
-				+"&nbsp;<b>P</b> - show BVB sources panel<br><br>"
+				+"&nbsp;<b>P</b> - show BVB cards panel<br><br>"
 				+"&nbsp;<b>C</b> - center the view on selected objects<br><br>"
 				+"&nbsp;<b>V</b> - toggle visibility of selected objects<br><br>"
 				+"&nbsp;<b>O</b> - toggle render method<br><br>"
