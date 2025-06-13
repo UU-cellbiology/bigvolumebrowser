@@ -43,7 +43,6 @@ import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 
 import bdv.util.BoundedRange;
-import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
@@ -100,27 +99,10 @@ public class ClipRangePanel extends JPanel
 		clipAxesPanels[0].changeListeners().add( () -> updateClipAxisRangeBounds(0));
 		clipAxesPanels[1].changeListeners().add( () -> updateClipAxisRangeBounds(1));
 		clipAxesPanels[2].changeListeners().add( () -> updateClipAxisRangeBounds(2));
-		
-		//add listener in case number of sources, etc change
-		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
-		setBVVSourceListener();
+	
 		updateGUI();
 	}
 	
-	
-	public void setBVVSourceListener()
-	{
-		//add source selection listener
-		clipSetups.selectedObjects.addObjectSelectionListener(  new SelectedObjects.Listener()
-		{
-			
-			@Override
-			public void selectedObjectsChanged()
-			{
-				updateGUI();
-			}
-		} );
-	}
 	
 	@Override
 	public void setEnabled(boolean bEnabled)

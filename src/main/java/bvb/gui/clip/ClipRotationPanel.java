@@ -82,12 +82,6 @@ public class ClipRotationPanel extends JPanel
 		clipRotationPanels[1].changeListeners().add( () -> updateClipAxisRotation(1));
 		clipRotationPanels[2].changeListeners().add( () -> updateClipAxisRotation(2));
 		
-		//add source selection listener
-		clipSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
-		
-		//add listener in case number of sources, etc change
-		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
-		
 		updateGUI();
 	}
 	

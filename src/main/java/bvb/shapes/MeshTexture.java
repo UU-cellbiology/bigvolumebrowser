@@ -39,7 +39,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import bvb.scene.VisMeshTexture;
 
 
-public class MeshTexture extends AbstractClipTransformShape
+public class MeshTexture extends AbstractClipTransformSingleShape
 {
 	
 	String sName = "";
@@ -86,6 +86,5 @@ public class MeshTexture extends AbstractClipTransformShape
 		}
 		return sName;
 	}
-	
 
 }

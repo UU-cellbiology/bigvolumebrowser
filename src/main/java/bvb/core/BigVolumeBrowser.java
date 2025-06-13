@@ -34,10 +34,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +70,6 @@ import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
-import bvvpg.pgcards.BVVPGDefaultCards;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
@@ -83,6 +78,7 @@ import bvb.gui.CenterZoomBVV;
 import bvb.gui.SelectedObjects;
 import bvb.gui.ShapeSelectionState;
 import bvb.gui.VolumeBBoxes;
+import bvb.gui.data.BVBShapeCollectionInfo;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
 import bvb.io.ImagePlusToSpimDataBvv;
@@ -143,8 +139,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** data sources panel tree model **/
 	public DataTreeModel dataTreeModel = new DataTreeModel();
 	
-	final WindowAdapter closeWA;
-	
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
 	final private ArrayList<Listener> listeners =	new ArrayList<>();
@@ -170,16 +164,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		volumeBoxes = new VolumeBBoxes(this, false);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		clipBoxes = new VolumeBBoxes(this, true);
-		
-	    //sync BVV and Control Panel window closing
-	    closeWA = new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( WindowEvent ev )
-			{
-				shutDownAll();
-			}
-		};
 		
 	}
 	
@@ -216,52 +200,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			
 			//setup control panel
 			bvbCards = new BVBCards(this);
-//			controlPanel.cpFrame = new JFrame("BVB");
-//			controlPanel.cpFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-//			controlPanel.cpFrame.add(controlPanel);
-//			
-//	        //Display the window.
-//			controlPanel.cpFrame.setSize(BVBSettings.nDefaultWidthControlPanel, BVBSettings.nDefaultHeightControlPanel);
-//			controlPanel.cpFrame.setVisible(true);
-//		    java.awt.Point bvv_p = bvvFrame.getLocationOnScreen();
-//		    java.awt.Dimension bvv_d = bvvFrame.getSize();
-//		
-//		    controlPanel.cpFrame.setLocation(bvv_p.x + bvv_d.width, bvv_p.y);
-//			
-//			controlPanel.cpFrame.addWindowListener( closeWA );
-//			
-//
-//		    bvvFrame.addWindowListener(	closeWA );
-
-			final Dimension tableViewPrefSize = new Dimension( 340, 285 );
-			//bvvFrame.getSplitPanel().setCollapsed( false );
-		    bvvFrame.getCardPanel().removeCard( BVVPGDefaultCards.DEFAULT_VIEWERMODES_CARD );
-		    bvvFrame.getCardPanel().removeCard( BVVPGDefaultCards.DEFAULT_SOURCEGROUPS_CARD );
-		    bvvFrame.getCardPanel().setCardExpanded( BVVPGDefaultCards.DEFAULT_SOURCES_CARD, false );
-
-		    bvbCards.panelShapes.setPreferredSize( tableViewPrefSize );
-		    bvbCards.panelData.setPreferredSize( tableViewPrefSize );
-		    bvvFrame.getCardPanel().addCard("Shapes", bvbCards.panelShapes, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("All objects", bvbCards.panelData, true, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("Render sources", bvbCards.sourcesRenderPanel, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("View", bvbCards.viewPanel, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("Clipping", bvbCards.clipPanel, false, new Insets( 0, 0, 0, 0 ) );
-		    bvvFrame.getCardPanel().addCard("Transform", bvbCards.transformPanel, false, new Insets( 0, 0, 0, 0 ) );		   
-		    bvvFrame.getCardPanel().addCard("Add volumes", bvbCards.panelAddSources, true, new Insets( 0, 0, 0, 0 ) );		   
-		    bvvFrame.getCardPanel().addCard("Add shapes", bvbCards.panelAddShapes, true, new Insets( 0, 0, 0, 0 ) );		   
-
-//		    controlPanel.tabPanelView.viewPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-//		    controlPanel.tabPanelView.viewPanel.butFullScreen.setVisible( false );
-//		    controlPanel.tabPanelView.sourcesRenderPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-//		    controlPanel.tabPanelView.clipPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-//		    bvvFrame.getCardPanel().setCardExpanded( BVVPGDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false );
-//		    bvvFrame.getCardPanel().addCard( "View", controlPanel.tabPanelView.viewPanel, false);
-//		    bvvFrame.getCardPanel().addCard( "Sources render", controlPanel.tabPanelView.sourcesRenderPanel, false);
-//		    bvvFrame.getCardPanel().addCard( "Clipping", controlPanel.tabPanelView.clipPanel, true );
-		    
-		   
-		    bvvFrame.getSplitPanel().setCollapsed( false );
-		    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
+			
+			bvbCards.installCards();
+			
 			bLocked = false;
 		}
 	}
@@ -505,10 +446,28 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 	}
 	
-	public void removeShape(final BasicShape shape)
+	public synchronized void addShapes(final ArrayList<BasicShape> shapes_in, String shapeGroupName)
 	{
-		shapes.remove( shape );
+		final ArrayList<Object> objList = new ArrayList<>();
+		for(final BasicShape sh:shapes_in)
+		{
+			shapes.add( sh );
+			objList.add( sh );
+		}
+		bvbCards.panelShapes.updateShapesTableUI();
+		dataTreeModel.addData( shapes_in, shapeGroupName, dataTreeModel.getIconGroupShape() );
+		updateSceneRender();
+		if(BVBSettings.bFocusOnSourcesOnLoad)
+		{						
+			this.focusOnRealInterval( CenterZoomBVV.getIntervalFromObjectsList( this, objList ) );
+		}
+		
 	}
+	
+//	public void removeShape(final BasicShape shape)
+//	{
+//		shapes.remove( shape );
+//	}
 	
 	public void renderScene(final GL3 gl, final RenderData data)
 	{
@@ -574,7 +533,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void timePointChanged( int timePointIndex )
 	{
 		updateSceneRender();
-		if(bvbCards != null)
+		
+		//in case the scale changed (for BDV XML)
+		if(bvbCards.transformPanel.transformSetups != null)
 			bvbCards.transformPanel.updateGUI();
 	}
 	
@@ -619,7 +580,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//save window position and size on the screen
 	    final java.awt.Point bvv_p = bvvFrame.getLocation();
 	    final java.awt.Dimension bvv_d = bvvFrame.getContentPane().getSize();
-	    //final java.awt.Point bvv_pf= bvvFrame.getRootPane().getLocationOnScreen();
 		
 	    //let's save viewer transform
 		AffineTransform3D viewTransform = bvvViewer.state().getViewerTransform();
@@ -627,12 +587,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//save settings
 		updateSpimDataInfo();
 		
-		//save shapes
-		final ArrayList<BasicShape> tempShapes = new ArrayList<>();
-		for(BasicShape shape : shapes)
-		{
-			tempShapes.add( shape );
-		}
+		final ArrayList<BVBShapeCollectionInfo> shapesInfo = BVBShapeCollectionInfo.assembleCurrentShapes(this);
 		shapes.clear();
 		
 		boolean focusStore = BVBSettings.bFocusOnSourcesOnLoad;
@@ -640,16 +595,23 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		//now restart	
 		closeBVV();
+		clipBoxes.setVisible( false );
+		volumeBoxes.setVisible( false );
 
-        initBVV();
-		
-	    bvvFrame.addWindowListener(	closeWA );
-	    
 	    dataTreeModel.clearAllSources();
 	    bvvSourceToSpimData.clear();
 	    spimDataToBVVSourceList.clear();
-	    
-	    bvvHandle.getConverterSetups().listeners().add( s -> clipBoxes.updateClipBoxes() );
+
+        initBVV();
+        clipBoxes.reload();
+        volumeBoxes.reload();
+		clipBoxes.setVisible( true );
+		volumeBoxes.setVisible( true);
+		
+		bvbCards.setupListeners();
+
+		bvbCards.resetClipTransformPanels();
+	    bvbCards.installCards();
 		
 		//restore window position		
 		bvvFrame.setLocation( bvv_p );	
@@ -663,24 +625,27 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		
 		//sync GUI	
-		bvbCards.panelData.addSourceStateListener();
-		bvbCards.resetClipPanel();
+
+		
+		this.selectedObjects = new SelectedObjects(this);
 		
 		BVBSettings.bFocusOnSourcesOnLoad = focusStore;
 		
+
+		for(final BVBShapeCollectionInfo shInf: shapesInfo)
+		{
+			//reload shapes
+			for(BasicShape shape : shInf.shapes)
+			{
+				shape.reload();
+			}
+			//add back
+			this.addShapes( shInf.shapes, shInf.collectionDescription );
+			
+		}
+		
 		//put back viewer transform
 		bvvViewer.state().setViewerTransform( viewTransform );
-		
-		//reload shapes
-		for(BasicShape shape : tempShapes)
-		{
-			shape.reload();
-		}
-		//add back
-		for(BasicShape shape : tempShapes)
-		{
-			shapes.add( shape );
-		}
 		
 		//notify listener that BVB finished restarting
 		for(Listener l : listeners)

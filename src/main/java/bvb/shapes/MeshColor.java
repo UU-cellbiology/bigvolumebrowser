@@ -46,7 +46,7 @@ import org.apache.commons.io.FilenameUtils;
 import bvb.scene.VisMeshColor;
 import bvb.utils.Misc;
 
-public class MeshColor extends AbstractClipTransformShape
+public class MeshColor extends AbstractClipTransformSingleShape
 {
 	
 	String sName = "";
@@ -197,6 +197,6 @@ public class MeshColor extends AbstractClipTransformShape
 		}
 		return sName;
 	}
-
+	
 	
 }

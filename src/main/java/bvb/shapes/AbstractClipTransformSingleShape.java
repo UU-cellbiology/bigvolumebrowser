@@ -10,7 +10,7 @@ import org.joml.Matrix4fc;
 
 import bvb.scene.AbstractClipTransformVis;
 
-public abstract class AbstractClipTransformShape extends AbstractBasicShape
+public abstract class AbstractClipTransformSingleShape extends AbstractBasicShape
 {
 	
 	AbstractClipTransformVis visRender = null;

@@ -349,6 +349,7 @@ public class VisPolyLineAA
 	public void reload()
 	{
 		initShader();
+		bBuffersGenerated = false;
 		initialized = false;
 	}
 

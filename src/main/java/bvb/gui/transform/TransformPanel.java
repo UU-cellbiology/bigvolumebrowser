@@ -110,7 +110,7 @@ public class TransformPanel extends JPanel
 		
 	    this.add(tabTrPane,gbc);
 	    
-	    setSourceListeners();
+	    setupListeners();
 	    
 	    updateGUI();
 	    
@@ -146,9 +146,8 @@ public class TransformPanel extends JPanel
 		transformRotationPanel.setEnabled( bEnabled );
 	}
 	
-	public void setSourceListeners()
-	{
-		
+	public void setupListeners()
+	{		
 		transformSetups.selectedObjects.addObjectSelectionListener( () -> updateGUI());		
 	    //add listener in case number of sources, etc change
 		transformSetups.converterSetups.listeners().add( s -> updateGUI() );

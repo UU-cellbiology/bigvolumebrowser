@@ -149,10 +149,14 @@ public class DataTreeNode implements TreeNode
 	@Override
 	public int getChildCount()
 	{
-		if(isLeaf || spimData == null)
+		if(isLeaf)
 		{
 			return 0;
 		}
+//		if(this == dataModel.rootNode)
+//		{
+//			return dataModel.dataParentChildren.size();
+//		}
 		return dataModel.dataParentChildren.get( this ).size();
 			
 	}

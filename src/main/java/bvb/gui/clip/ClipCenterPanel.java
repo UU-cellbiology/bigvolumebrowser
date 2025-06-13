@@ -96,12 +96,6 @@ public class ClipCenterPanel extends JPanel
 		clipCenterPanels[1].changeListeners().add( () -> updateClipCenter(1));
 		clipCenterPanels[2].changeListeners().add( () -> updateClipCenter(2));
 		
-		//add source selection listener
-		clipSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
-		
-		//add listener in case number of sources, etc change
-		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
-		
 		updateGUI();
 	}
 	

@@ -73,12 +73,6 @@ public class TransformCenterPanel extends JPanel
 		centerPanels[1].changeListeners().add( () -> updateTransformAxis(1));
 		centerPanels[2].changeListeners().add( () -> updateTransformAxis(2));
 		
-		//add source selection listener
-		transformSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
-		
-		//add listener in case number of sources, etc change
-		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
-		
 		updateGUI();
 	}
 	

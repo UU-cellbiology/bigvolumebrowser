@@ -336,7 +336,8 @@ public class VolumeBBoxes extends AbstractBasicShape
 	@Override
 	public void reload()
 	{
-		
+		bvvSourceToBox.forEach( (src,vb) -> vb.reload() );
+		shapeToBox.forEach( (sh,vb) -> vb.reload() );
 	}
 
 	@Override

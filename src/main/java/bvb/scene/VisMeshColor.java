@@ -113,8 +113,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisSpotsSame.class, "/scene/scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisMeshColor.class, "/scene/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisMeshColor.class, "/scene/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 				
 		final Segment meshVp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh_color.vp" ).instantiate();

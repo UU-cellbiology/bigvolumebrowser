@@ -224,7 +224,7 @@ public class ClipPanel extends JPanel implements ItemListener
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    this.add(tabClipPane,gbc);
 
-	    setSourceListeners();
+	    setupListeners();
 	    
 	    Color [] colors = new Color[3];
 	    colors[0] =  new Color(198,34,0);
@@ -408,18 +408,10 @@ public class ClipPanel extends JPanel implements ItemListener
 		updateGUI();
 	}
 	
-	public void setSourceListeners()
+	public void setupListeners()
 	{
-		
-		clipSetups.selectedObjects.addObjectSelectionListener(  new SelectedObjects.Listener()
-		{			
-			@Override
-			public void selectedObjectsChanged( )
-			{
-				updateGUI();
-			}
-		} );
-		
+		//add listener on selected objects
+		clipSetups.selectedObjects.addObjectSelectionListener(  ()-> updateGUI());		
 	    //add listener in case number of sources, etc change
 		clipSetups.converterSetups.listeners().add( s -> updateGUI() );
 

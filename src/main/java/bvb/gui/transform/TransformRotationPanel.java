@@ -51,12 +51,6 @@ public class TransformRotationPanel extends JPanel
 		trRotationPanels[0].changeListeners().add( () -> updateAxisRotation(0));
 		trRotationPanels[1].changeListeners().add( () -> updateAxisRotation(1));
 		trRotationPanels[2].changeListeners().add( () -> updateAxisRotation(2));
-		
-		//add source selection listener
-		transformSetups.selectedObjects.addObjectSelectionListener(()-> updateGUI());
-		
-		//add listener in case number of sources, etc change
-		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
 
 		updateGUI();
 	}

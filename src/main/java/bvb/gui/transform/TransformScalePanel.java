@@ -106,12 +106,8 @@ public class TransformScalePanel extends JPanel
 		spinners[1].addChangeListener( (e)-> updateScaleAxis(1) );
 		spinners[2].addChangeListener( (e)-> updateScaleAxis(2) );
 		
-		transformSetups.selectedObjects.addObjectSelectionListener(()->updateGUI());
-		
 		updateColors();
-		
-		//add listener in case number of sources, etc change
-		transformSetups.converterSetups.listeners().add( s -> updateGUI() );
+
 		updateGUI();
 
 	}

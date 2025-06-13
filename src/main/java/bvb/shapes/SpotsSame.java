@@ -41,7 +41,7 @@ import bvb.scene.VisSpotsSame;
 
 /** Example class that uses points shader **/
 
-public class SpotsSame extends AbstractClipTransformShape
+public class SpotsSame extends AbstractClipTransformSingleShape
 {	
 	float pointSize;
 	Color pointColor;
@@ -151,5 +151,6 @@ public class SpotsSame extends AbstractClipTransformShape
 	{
 		bVisible = bVisible_;
 	}
+
 
 }

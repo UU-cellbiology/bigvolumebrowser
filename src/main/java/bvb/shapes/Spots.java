@@ -42,7 +42,7 @@ import bvb.scene.VisSpots;
 
 /** Spots of arbitrary color and size **/
 
-public class Spots extends AbstractClipTransformShape
+public class Spots extends AbstractClipTransformSingleShape
 {
 	
 	float pointSize;
