@@ -365,7 +365,8 @@ public class BVBActions
 		//solution for now, to not interfere with typing
 		if(!bvb.bLocked && !(c instanceof JTextField))
 		{
-			final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
+			//final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
+			final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleObjectsBoundindBox(bvb);
 			if(focusInt != null)
 			{
 				CenterZoomBVV.focusAnimateOnInterval(bvb, focusInt, BVBSettings.dFocusScreenFraction);

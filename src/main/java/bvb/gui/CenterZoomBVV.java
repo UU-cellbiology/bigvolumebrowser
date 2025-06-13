@@ -49,12 +49,161 @@ import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.geometry.Line3D;
+import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.core.util.MatrixMath;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class CenterZoomBVV
 {
+	/** returns a bounding box with all selected/visible objects, taking clipping into account.
+	 *  if there is no selected sources, returns all visible objects bbox.
+	 *  of there is no visible objects, returns null **/
+	
+	public static RealInterval getAllSelectedVisibleObjectsBoundindBox(final BigVolumeBrowser bvb)
+	{
+		final ArrayList< Object > focusSet = new ArrayList<>();
+		
+		if(bvb.selectedObjects.isAnythingSelected())
+		{
+		
+			final List< Object > objList = bvb.selectedObjects.getSelectedObjects();
+			for(final Object obj : objList)
+			{
+				if(obj instanceof BasicShape)
+				{
+					if(((BasicShape)obj).isVisible())
+						focusSet.add( obj );
+				}
+				if(obj instanceof ConverterSetup)
+				{
+					final SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( (ConverterSetup)obj );
+					if(bvb.bvvViewer.state().isSourceVisible( sac ))
+					{
+						focusSet.add( obj );	
+					}
+				}
+			}
+		}
+		//nothing is selected, let's focus on everything visible
+		if(focusSet.size() == 0)
+		{
+			final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
+			for(final SourceAndConverter< ? > sac :visibleSet)
+			{
+				focusSet.add( bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
+			}
+			for(final BasicShape sh : bvb.shapes)
+			{
+				if(sh.isVisible())
+				{
+					focusSet.add( sh );
+				}
+			}
+		}
+		
+		if(focusSet.size()==0)
+			return null;
+		
+		return getIntervalFromObjectsList(bvb, focusSet );
+		
+	}
+	
+	public static RealInterval getIntervalFromObjectsList(final BigVolumeBrowser bvb, final List<Object> objList)
+	{
+		RealInterval allInt = null;
+
+		//just in case
+		if(objList.size()>0)
+		{
+			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
+			for(final Object obj : objList)
+			{
+				if(obj instanceof ConverterSetup)
+				{
+					final SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( (ConverterSetup)obj );
+					if(sac.getSpimSource().isPresent( nTimePoint ))
+					{
+						final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
+						final RealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), nTimePoint, 0 );
+						RealInterval clipInt = cs.getClipInterval() ;
+						//no clipping
+						if(!cs.clipActive() || clipInt == null)
+						{
+							allInt = appendIntervals(allInt, sourceInt);
+						}
+						//clipping is on
+						else
+						{
+							//get clipping transform
+							final AffineTransform3D clipTr = new AffineTransform3D();
+							cs.getClipTransform( clipTr );
+							clipInt = clipTr.estimateBounds( clipInt );
+							clipInt = Intervals.intersect( clipInt, sourceInt );
+							//clipping interval could be outside of source, let's check it
+							boolean bIntersectOk = true;
+							for(int d = 0; d<3; d++)
+							{
+								if(clipInt.realMin( d )>=clipInt.realMax( d ))
+								{
+									bIntersectOk = false;
+									break;
+								}
+							}
+							if(!bIntersectOk)
+							{
+								clipInt = sourceInt;
+							}
+							allInt = appendIntervals(allInt,clipInt);
+						}
+					}
+				}
+				if(obj instanceof BasicShape)
+				{
+					final BasicShape shape = (BasicShape)obj;
+					if(shape.getTimePoint() == nTimePoint || shape.getTimePoint()<0)
+					{
+						final RealInterval shapeInt = shape.boundingBox();
+						RealInterval clipInt = shape.getClipInterval() ;
+						//no clipping
+						if(!shape.clipActive() || clipInt == null)
+						{
+							allInt = appendIntervals(allInt, shapeInt);
+						}
+						//clipping is on
+						else
+						{
+							//get clipping transform
+							final AffineTransform3D clipTr = new AffineTransform3D();
+							shape.getClipTransform( clipTr );
+							clipInt = clipTr.estimateBounds( clipInt );
+							clipInt = Intervals.intersect( clipInt, shapeInt );
+							//clipping interval could be outside of source, let's check it
+							boolean bIntersectOk = true;
+							for(int d = 0; d<3; d++)
+							{
+								if(clipInt.realMin( d )>=clipInt.realMax( d ))
+								{
+									bIntersectOk = false;
+									break;
+								}
+							}
+							if(!bIntersectOk)
+							{
+								clipInt = shapeInt;
+							}
+							allInt = appendIntervals(allInt,clipInt);
+						}
+						
+					}
+				}
+			}
+		}
+		
+		return allInt;
+	}
+	
+	
 	/** returns a bounding box with all selected/visible sources, taking clipping into account.
 	 *  if there is no selected sources, returns all visible sources bbox.
 	 *  of there is no visible or no sources, returns null **/
@@ -62,6 +211,7 @@ public class CenterZoomBVV
 	{
 		
 		final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
+		
 		//no visible sources
 		if(visibleSet.size() == 0)
 			return null;

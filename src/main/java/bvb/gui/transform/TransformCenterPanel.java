@@ -187,29 +187,16 @@ public class TransformCenterPanel extends JPanel
 			return;
 		blockUpdates = true;
 		
-		Bounds3D range3D = null;
-		
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
-			if(range3D == null)
-				range3D = transformSetups.transformCenterBounds.getDefaultBounds( obj );
-			else
-				range3D = range3D.join( transformSetups.transformCenterBounds.getDefaultBounds( obj ) );			
+			final Bounds3D range3D = transformSetups.transformCenterBounds.getDefaultBounds( obj );
+			Bounds3D currBounds = transformSetups.transformCenterBounds.getBounds( obj);
+			currBounds.getMinBound()[nAxis] = range3D.getMinBound()[nAxis];
+			currBounds.getMaxBound()[nAxis] = range3D.getMaxBound()[nAxis];
 		}
-
-		if(range3D != null)
-		{
-			double currVal = centerPanels[nAxis].getValue().getCurrentValue();
-			double bmin = range3D.getMinBound()[nAxis];
-			double bmax = range3D.getMaxBound()[nAxis];
-			currVal = Math.min( bmax, currVal );
-			currVal = Math.max( bmin, currVal );
-			centerPanels[nAxis].setValue( new BoundedValueDouble(bmin, bmax, currVal) );
-			updateTransformAxis(nAxis);
-		}		
-		
 		blockUpdates = false;
+		updateGUI();
 	}
 	
 	public void resetCenters()
