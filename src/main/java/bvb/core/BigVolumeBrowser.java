@@ -535,8 +535,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		updateSceneRender();
 		
 		//in case the scale changed (for BDV XML)
-		if(bvbCards.transformPanel.transformSetups != null)
-			bvbCards.transformPanel.updateGUI();
+		if(bvbCards != null)
+		{
+			if(bvbCards.transformPanel.transformSetups != null)
+				bvbCards.transformPanel.updateGUI();
+		}
 	}
 	
 	public void settingsDialogBVV()
