@@ -28,17 +28,26 @@
  */
 package bvb.core;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.List;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -103,6 +112,7 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
+		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
 		
@@ -398,6 +408,67 @@ public class BVBActions
 			bvb.bvbCards.panelShapes.updateUI();
 			bvb.repaintBVV();
 		}
+	}
+	
+	void showHelpWindow()
+	{
+		JPanel pHelp = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		JLabel txtBefore = new JLabel("Full documentation is available at");
+		JLabel hyperlink = new JLabel("BigVolumeBrowser wiki page");
+		hyperlink.setForeground(Color.BLUE.darker());
+		hyperlink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		hyperlink.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				try
+				{
+					Desktop.getDesktop().browse(new URI("https://github.com/UU-cellbiology/bigvolumebrowser/wiki"));
+				}
+				catch ( IOException | URISyntaxException exc )
+				{
+					exc.printStackTrace();
+				}
+
+			}
+		});
+		
+		String shortCutInfo ="<html><center><b>Shortcuts:</b></center><br>"
+				+"&nbsp;<b>P</b> - show BVB sources panel<br><br>"
+				+"&nbsp;<b>C</b> - center the view on selected objects<br><br>"
+				+"&nbsp;<b>V</b> - toggle visibility of selected objects<br><br>"
+				+"&nbsp;<b>O</b> - toggle render method<br><br>"
+				+"&nbsp;<b>S</b> - separate brightness/color dialog<br><br>"
+				+"&nbsp;<b>Shift + X/Y/Z</b> - rotate to major plane<br><br>"					
+				+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
+				+"&nbsp;<b>F10</b> - BVV (canvas) settings<br><br></html>";
+		JLabel jlInfo = new JLabel(shortCutInfo);
+		jlInfo.setVerticalAlignment(SwingConstants.TOP);
+		jlInfo.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		final int nLeftRightBorder = 40;
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(30,nLeftRightBorder,5,nLeftRightBorder);
+		
+		pHelp.add(txtBefore,gbc);
+		gbc.gridy++;
+		gbc.insets = new Insets(5,nLeftRightBorder,25,nLeftRightBorder);
+		pHelp.add(hyperlink,gbc);
+		gbc.gridy++;
+		gbc.insets = new Insets(5,nLeftRightBorder,30,nLeftRightBorder);
+		pHelp.add(jlInfo,gbc);
+		
+		JFrame frame = new JFrame("BigVolumeBrowser Help");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(pHelp);
+        
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
 	}
 	
 }

@@ -53,7 +53,6 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
-import bvb.gui.SelectedObjects;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;

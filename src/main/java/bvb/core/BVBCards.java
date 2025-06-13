@@ -90,6 +90,8 @@ public class BVBCards
 	
 	public void resetClipTransformPanels()
 	{
+		//probably it is possible just 
+		// to reset clip/transform setups, but for now we redo everything.
 		clipPanel = new ClipPanel(bvb);
 		transformPanel = new TransformPanel(bvb);
 	}
