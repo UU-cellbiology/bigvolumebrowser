@@ -58,8 +58,6 @@ public class MeshColor extends AbstractClipTransformSingleShape
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile( sFilename );
 		
-		//Mesh nmesh = createMeshWithNoise(15);
-		
 		if(nmesh != null)
 		{			
 			visRender = new VisMeshColor( nmesh );
@@ -74,7 +72,6 @@ public class MeshColor extends AbstractClipTransformSingleShape
 	
 	public MeshColor(final Mesh nmesh)
 	{
-		
 		if(nmesh != null)
 		{
 			visRender = new VisMeshColor( nmesh );
@@ -93,8 +90,7 @@ public class MeshColor extends AbstractClipTransformSingleShape
 	
 	@Override
 	public RealInterval boundingBoxNotTransformed()
-	{
-		
+	{		
 		return new FinalRealInterval(boundBox);
 	}
 	
@@ -105,8 +101,7 @@ public class MeshColor extends AbstractClipTransformSingleShape
 			((VisMeshColor)visRender).setRenderType( VisMeshColor.POINTS );
 			((VisMeshColor)visRender).setPointsSize( fPointsSize_ );
 		}
-	}
-	
+	}	
 	
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{
@@ -191,7 +186,7 @@ public class MeshColor extends AbstractClipTransformSingleShape
 		{
 			if(nTimePoint<0)
 			{
-				return "mesh"+this.hashCode();
+				return "mesh" + this.hashCode();
 			}
 			return "mesh_t" + Integer.toString( nTimePoint ) + "_" + this.hashCode();
 		}

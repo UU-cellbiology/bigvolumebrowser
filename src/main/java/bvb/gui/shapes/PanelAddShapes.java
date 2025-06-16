@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.URL;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -13,12 +14,17 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import net.imglib2.mesh.Mesh;
+
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.io.shapes.SpotsParser;
+import bvb.io.shapes.WRLParser;
+import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
 import bvb.shapes.Spots;
 import bvb.shapes.SpotsSame;
+import bvb.utils.Misc;
 import ij.IJ;
 import ij.Prefs;
 
@@ -174,7 +180,7 @@ public class PanelAddShapes extends JPanel
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
         chooser.setDialogTitle( "Open Mesh Data" );
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "Mesh files", "stl", "ply");
+                "Mesh files", "stl", "ply", "wrl", "glb", "gltf");
         chooser.setFileFilter(filter);
         
         int returnVal = chooser.showOpenDialog(null);
@@ -183,12 +189,56 @@ public class PanelAddShapes extends JPanel
         {
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            String sFilename = chooser.getSelectedFile().getPath();
+            String extension = "";
+            int i = sFilename.lastIndexOf('.');
+            if (i > 0) {
+                extension = sFilename.substring(i+1);
+            }
+            switch (extension)
+            {
+            //if it is stl or ply
+            case "stl":
+            case "ply":
+                final MeshColor loadedMesh = new MeshColor(sFilename);
+                bvb.addShape( loadedMesh );
+            	break;
+            //Imaris wrl files
+            case "wrl":
+            	loadWRLfile(sFilename);
+            	break;
+            default:
+            	IJ.log( "Unsupported mesh file format for ."+ extension + " files, aborted.");
             
-            final MeshColor loadedMesh = new MeshColor(chooser.getSelectedFile().getPath());
-            
-            bvb.addShape( loadedMesh );
-            
-            bvb.focusOnRealInterval( loadedMesh.boundingBox() );
+            }
+
         }
+	}
+	void loadWRLfile(String sFilename)
+	{
+		final WRLParser loaderWRT = new WRLParser ();
+		//loaderWRT.nMaxMeshes = 1000;
+		loaderWRT.nMaxTimePoints = 5;
+		loaderWRT.bEnableWireGrid = true;
+		final ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
+		
+		IJ.showStatus( "Uploading "+ Integer.toString( loadedMeshes.size() )+ " meshes." );
+		final ArrayList<BasicShape> finMeshesShapes = new ArrayList<>();
+		for(int i=0;i<loadedMeshes.size();i++)
+		{		
+			final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+		
+			if(loaderWRT.isTimeData())
+			{
+				meshBVB.setTimePoint( loaderWRT.timePoints.get( i ) );
+			}
+			if(loaderWRT.containsColorInfo())
+			{
+				meshBVB.setColor( loaderWRT.meshColors.get( i ) );
+			}	
+			finMeshesShapes.add( meshBVB );
+		}
+		bvb.addShapes( finMeshesShapes, Misc.getSourceStyleName( sFilename ) );
+
 	}
 }

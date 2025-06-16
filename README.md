@@ -4,7 +4,7 @@
 
 [FIJI](https://fiji.sc) plugin for 3D exploration of large datasets.
 
-Currently at the stage of active development (2025/05/21).
+Currently at the stage of active development (2025/06/18).
 
 Documentation coming soon.
 
