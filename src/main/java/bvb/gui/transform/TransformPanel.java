@@ -3,6 +3,8 @@ package bvb.gui.transform;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.List;
 
@@ -35,6 +37,12 @@ public class TransformPanel extends JPanel
 	
 	final JButton butResetAll;
 	
+	JButton butCenterTranslate;
+	
+	final ImageIcon [] translateIcon = new ImageIcon[2];
+	
+	final String[] translateToolTip = new String[2];
+	
 	final JTabbedPane tabTrPane;
 	
 	public TransformPanel(final BigVolumeBrowser bvb_)
@@ -43,8 +51,8 @@ public class TransformPanel extends JPanel
 		bvb = bvb_;
 		
 		GridBagLayout gridbag = new GridBagLayout();
+
 		setLayout(gridbag);
-		//this.setBorder(new PanelTitle(" Transform "));
 
 		transformSetups = new TransformSetups(bvb);
 		
@@ -56,20 +64,23 @@ public class TransformPanel extends JPanel
 
 		
 		tabTrPane = new JTabbedPane(SwingConstants.TOP);
-		//URL icon_path = this.getClass().getResource("/icons/rotate.png");
-	    //ImageIcon tabIcon = new ImageIcon(icon_path);
-		tabTrPane.addTab( "Scale", transformScalePanel );
+
 		tabTrPane.addTab( "Center", transformCentersPanel );
 		tabTrPane.addTab( "Rotate", transformRotationPanel );
+		tabTrPane.addTab( "Scale", transformScalePanel );
 		
+		if(!transformSetups.bCenterPanel)
+		{
+			tabTrPane.setTitleAt( 0, "Translate" );
+		}	
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
-		gbc.weightx = 0.9;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 0.3;
+		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.WEST;
 		
 		
@@ -82,9 +93,47 @@ public class TransformPanel extends JPanel
 		} );
 		this.add(cbTransformClip,gbc);
 		
+		
+		translateToolTip[0] = "Using translate panel";
+		translateToolTip[1] = "Using center panel";
+
+		URL icon_path = this.getClass().getResource("/icons/transform_translate.png");
+		translateIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource("/icons/transform_center.png");
+		translateIcon[1] = new ImageIcon(icon_path);
+		gbc.gridx ++;
+		gbc.weightx = 0.6;
+		butCenterTranslate = new JButton(translateIcon[transformSetups.bCenterPanel?1:0]);
+		butCenterTranslate.setToolTipText(translateToolTip[transformSetups.bCenterPanel?1:0]);
+
+		butCenterTranslate.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent arg0 )
+			{
+				transformSetups.bCenterPanel = !transformSetups.bCenterPanel;
+				int ind = 0;
+				
+				if(transformSetups.bCenterPanel)
+				{
+					tabTrPane.setTitleAt( 0, "Center" );
+					ind = 1;
+				}
+				else
+					tabTrPane.setTitleAt( 0, "Translate" );
+				butCenterTranslate.setIcon( translateIcon[ind]  );
+				butCenterTranslate.setToolTipText(translateToolTip[ind]);
+				Prefs.set( "BVB.bCenterPanel", transformSetups.bCenterPanel );
+				transformCentersPanel.updateGUI();
+				//updateGUI();
+			}
+	
+		});
+		this.add(butCenterTranslate,gbc);			
+		
 		gbc.weightx = 0.05;
 		gbc.fill = GridBagConstraints.NONE;
-		URL icon_path = this.getClass().getResource("/icons/red_cross.png");
+		icon_path = this.getClass().getResource("/icons/red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetCurrent = new JButton(icon);
 		butResetCurrent.setToolTipText( "Reset current panel" );
@@ -105,7 +154,7 @@ public class TransformPanel extends JPanel
 		gbc.gridx = 0;
 	    gbc.gridy ++;
 	    gbc.weightx = 1.0;
-	    gbc.gridwidth = 3;
+	    gbc.gridwidth = 4;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 		
 	    this.add(tabTrPane,gbc);
@@ -123,6 +172,7 @@ public class TransformPanel extends JPanel
 	    
 
 	}
+	
 	public synchronized void updateGUI()
 	{
 		if(!transformSetups.selectedObjects.isAnythingSelected())
@@ -205,4 +255,6 @@ public class TransformPanel extends JPanel
 		}
 		updateGUI();
 	}
+	
+	
 }
