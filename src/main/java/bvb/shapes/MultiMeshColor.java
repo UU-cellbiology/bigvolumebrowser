@@ -1,6 +1,8 @@
 package bvb.shapes;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -22,11 +24,11 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	@Override
 	public RealInterval boundingBox()
 	{
-		if(visRenders.size() ==0)
+		if(visRendersTimeMap.size() ==0)
 			return null;
 		
 		final AffineTransform3D t = new AffineTransform3D();
-		visRenders.get(0).getTransform( t );
+		((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getTransform( t );
 		
 		return t.estimateBounds( boundBox );
 	}
@@ -39,8 +41,9 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	
 	public void setPointsRender(final float fPointsSize_)
 	{
-		if(visRenders.size()>0 )
+		if(visRendersTimeMap.size()>0 )
 		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
 				((VisMeshColor)visRender).setRenderType( VisMeshColor.POINTS );
@@ -52,8 +55,9 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{
-		if(visRenders.size()>0 )
+		if(visRendersTimeMap.size()>0 )
 		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
 				((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
@@ -64,8 +68,9 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	
 	public void setSurfaceGrid(final int nSurfaceGridType)
 	{
-		if(visRenders.size()>0 )
+		if(visRendersTimeMap.size()>0 )
 		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
 				((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
@@ -75,8 +80,9 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	}
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
-		if(visRenders.size()>0 )
+		if(visRendersTimeMap.size()>0 )
 		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
 				((VisMeshColor)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
@@ -86,8 +92,9 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	
 	public void setColor(final Color colorin)
 	{
-		if(visRenders.size()>0 )
+		if(visRendersTimeMap.size()>0 )
 		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
 				((VisMeshColor)visRender).setColor( colorin );

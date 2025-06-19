@@ -3,6 +3,8 @@ package bvb.shapes;
 import com.jogamp.opengl.GL3;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -15,20 +17,20 @@ import bvb.scene.AbstractClipTransformVis;
 public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 {
 	
-	final ArrayList<AbstractClipTransformVis> visRenders = new ArrayList<>();
-	final ArrayList<Integer> timePoints = new ArrayList<>();
-
+	final ConcurrentHashMap<AbstractClipTransformVis, Integer> visRendersTimeMap = new ConcurrentHashMap<>();
+	
 	
 	@Override
 	public boolean clipActive() 
 	{	
-		if(visRenders.size() ==0 )
+		if(visRendersTimeMap.size() == 0 )
 			return false;
-		return visRenders.get( 0 ).clipActive();
+		return ((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).clipActive();
 	}
 	@Override
 	public void setClipActive(boolean bEnabled)
 	{
+		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
 			visRender.setClipActive( bEnabled ); 
@@ -38,6 +40,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	@Override
 	public void setClipInterval(final RealInterval clipInt) 
 	{
+		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
 			visRender.setClipInterval( new FinalRealInterval(clipInt) );
@@ -48,28 +51,29 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	@Override
 	public FinalRealInterval getClipInterval() 
 	{
-		if(visRenders.size()==0)
+		if(visRendersTimeMap.size() == 0)
 		{
 			return null;
 		}
-		return visRenders.get( 0 ).getClipInterval();
+		return ((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getClipInterval();
 	}
 
 	@Override
 	public void getClipTransform(final AffineTransform3D t) 
 	{	
-		if(visRenders.size()==0)
+		if(visRendersTimeMap.size() == 0)
 		{
 			t.set( new AffineTransform3D());
 			return;
 		}
-		visRenders.get(0).getClipTransform( t );
+		((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getClipTransform( t );
 
 	}
 	
 	@Override
 	public void setClipTransform(final AffineTransform3D t) 
-	{		
+	{
+		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
 			visRender.setClipTransform( t );
@@ -79,17 +83,18 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	@Override
 	public void getTransform(final AffineTransform3D t)
 	{
-		if(visRenders.size()==0)
+		if(visRendersTimeMap.size() == 0)
 		{
 			t.set( new AffineTransform3D());
 			return;
 		}
-		visRenders.get(0).getTransform( t );
+		((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getTransform( t );
 	}
 	
 	@Override
 	public void setTransform(final AffineTransform3D t)
 	{
+		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
 			visRender.setTransform( t );
@@ -99,6 +104,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	@Override
 	public void reload()
 	{
+		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
 			visRender.reload();
@@ -110,11 +116,13 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	{
 		if(bVisible)
 		{
-			for(int i=0; i<visRenders.size(); i++)
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
 			{
-				if(timePoints.get( i )<0 || timePoints.get( i ) == nTimePoint_)
+				final int nTP = visRendersTimeMap.get( visRender );
+				if(nTP<0 || nTP == nTimePoint_)
 				{
-					visRenders.get( i ).draw( gl, pvm, vm, screen_size );
+					visRender.draw( gl, pvm, vm, screen_size );
 				}
 			}
 		}
