@@ -54,8 +54,7 @@ import bvb.core.BigVolumeBrowser;
 import ij.Prefs;
 
 public class ViewPanel extends JPanel
-{
-	
+{	
 	final BigVolumeBrowser bvb;
 
 	JToggleButton butVBox;
@@ -187,10 +186,12 @@ public class ViewPanel extends JPanel
 		
 		JCheckBox cbShowMultiBox = new JCheckBox();
 		cbShowMultiBox.setSelected(BVBSettings.bShowMultiBox);
-
 		
 		JCheckBox cbPyramidize = new JCheckBox();
 		cbPyramidize.setSelected(BVBSettings.bPyramidize);
+		
+		JCheckBox cbBGShader = new JCheckBox();
+		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
 		
 		gbc.gridx=0;
 		gbc.gridy=0;	
@@ -236,6 +237,12 @@ public class ViewPanel extends JPanel
 		gbc.gridx++;
 		pViewSettings.add(cbPyramidize, gbc);
 		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Show random shader on startup"), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbBGShader, gbc);
+		
 		
 		
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
@@ -274,6 +281,9 @@ public class ViewPanel extends JPanel
 					
 			BVBSettings.bPyramidize = cbPyramidize.isSelected();
 			Prefs.set("BVB.bPyramidize", BVBSettings.bPyramidize);
+			
+			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
+			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
 			
 			if(bRepaintBVV)
 			{

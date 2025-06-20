@@ -87,6 +87,7 @@ import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
+import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
@@ -142,6 +143,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
 	final private ArrayList<Listener> listeners =	new ArrayList<>();
+	
+	boolean bShowBGShader = BVBSettings.bShowRandomShader;
+	
+	final VisQuad bgQuad = new VisQuad((int)Math.ceil(Math.random()*4.0));
 
 	public static interface Listener 
 	{
@@ -195,8 +200,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			bLocked = true;
 			
-			initBVV();
-			
+			initBVV();		
 			
 			//setup control panel
 			bvbCards = new BVBCards(this);
@@ -204,6 +208,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			bvbCards.installCards();
 			
 			bLocked = false;
+			
+			if(bShowBGShader)
+			{
+				showNoise();
+			}
 		}
 	}
 	
@@ -396,7 +405,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			bvvSourceToSpimData.put( bvvSource, spimData );
 		}
-		
+		bShowBGShader = false;
 		updateSceneRender();
 		
 		if(BVBSettings.bFocusOnSourcesOnLoad)
@@ -435,14 +444,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	public synchronized void addShape(final BasicShape shape)
 	{
-		shapes.add( shape );
-		bvbCards.panelShapes.updateShapesTableUI();
-		dataTreeModel.addData( shape, shape.toString(), dataTreeModel.getIconGroupShape() );
-		updateSceneRender();
-		if(BVBSettings.bFocusOnSourcesOnLoad)
-		{
-			this.focusOnRealInterval( shape.boundingBox());
-		}
+		final ArrayList<BasicShape> shapesadd = new ArrayList<>();
+		shapesadd.add( shape );
+		addShapes(shapesadd, shape.toString());
 		
 	}
 	
@@ -457,6 +461,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvbCards.panelShapes.updateShapesTableUI();
 		dataTreeModel.addData( shapes_in, shapeGroupName, dataTreeModel.getIconGroupShape() );
 		updateSceneRender();
+		bShowBGShader = false;
 		if(BVBSettings.bFocusOnSourcesOnLoad)
 		{						
 			this.focusOnRealInterval( CenterZoomBVV.getIntervalFromObjectsList( this, objList ) );
@@ -496,6 +501,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			shapes.get( i ).draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
 
+		//BG
+		if(bShowBGShader)
+		{
+			bgQuad.drawQuad( gl );
+		}
 		//DEBUG
 		for(VisPolyLineAA line:helpLines)
 		{
@@ -683,6 +693,25 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
         listeners.add(l);
     }
 	
+	void showNoise()
+	{
+		new Thread(() -> {
+		    while(bShowBGShader)
+		    {
+		    	try
+				{
+					Thread.sleep(25);
+				}
+				catch ( InterruptedException exc )
+				{
+					// TODO Auto-generated catch block
+					exc.printStackTrace();
+				}
+		    	repaintBVV();
+		    }
+		}).start();
+	}
+	
 	public static void main(String... args) throws Exception
 	{	
 		
@@ -695,7 +724,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//testBVB.run("");
 		
 		
-		testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_cliptest.tif" );
+		//testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_cliptest.tif" );
 		
 		//transform test
 //		ValuePair< AbstractSpimData< ? >, List< BvvStackSource< ? > > > in = testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BVB/HyperStack_test.tif" );

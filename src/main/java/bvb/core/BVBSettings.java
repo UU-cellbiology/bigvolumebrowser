@@ -59,7 +59,9 @@ public class BVBSettings
 	
 	public static double dFocusScreenFraction =  Prefs.get("BVB.dFocusScreenFraction", 0.95);
 	
-	public static boolean bPyramidize = Prefs.get( "BVB.bPyramidize", false ); 
+	public static boolean bPyramidize = Prefs.get( "BVB.bPyramidize", false );
+	
+	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", false ); 
 	
 	public static int nDefaultWidthControlPanel = 400;
 	
