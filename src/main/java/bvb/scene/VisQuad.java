@@ -104,7 +104,8 @@ public class VisQuad
 
 		//fTime = fTime/10;
 		gl.glDepthFunc( GL.GL_ALWAYS);
-
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
 		
 //		float fTime = ( float ) ( System.currentTimeMillis()%100.5453 );//-fTimeIni;
 		//fTime /= 10.5453;
@@ -118,6 +119,6 @@ public class VisQuad
 		gl.glBindVertexArray( vaoQuad );
 		gl.glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
-		gl.glDepthFunc( GL.GL_LESS);
+		//gl.glDepthFunc( GL.GL_LESS);
 	}
 }

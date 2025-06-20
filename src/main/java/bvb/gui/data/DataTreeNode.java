@@ -157,6 +157,9 @@ public class DataTreeNode implements TreeNode
 //		{
 //			return dataModel.dataParentChildren.size();
 //		}
+		if(dataModel.dataParentChildren.size() ==0)
+			return 0;
+		
 		return dataModel.dataParentChildren.get( this ).size();
 			
 	}

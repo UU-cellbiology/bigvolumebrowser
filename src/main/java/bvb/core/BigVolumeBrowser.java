@@ -57,6 +57,8 @@ import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.TimePointListener;
+import bdv.viewer.animate.TextOverlayAnimator;
+import bdv.viewer.animate.TextOverlayAnimator.TextPosition;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
@@ -238,10 +240,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		//get renderScene
 		bvvViewer.setRenderScene(this::renderScene);
-		
-		//listen to timepoint change
-		bvvViewer.addTimePointListener(this);
-		
+
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		
 		//bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -250,7 +249,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		setCanvasBGColor(BVBSettings.canvasBGColor);
 		Prefs.showMultibox( BVBSettings.bShowMultiBox);
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
-
+		bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "HELLLOOOO", 20000, TextPosition.CENTER )  );
+		//listen to timepoint change
+		bvvViewer.addTimePointListener(this);
 	}
 	
 	public void shutDownAll()
@@ -638,12 +639,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		
 		//sync GUI	
-
-		
 		this.selectedObjects = new SelectedObjects(this);
 		
-		BVBSettings.bFocusOnSourcesOnLoad = focusStore;
-		
+		BVBSettings.bFocusOnSourcesOnLoad = focusStore;		
 
 		for(final BVBShapeCollectionInfo shInf: shapesInfo)
 		{
