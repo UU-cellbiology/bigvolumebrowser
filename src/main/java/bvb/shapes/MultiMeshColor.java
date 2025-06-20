@@ -6,6 +6,8 @@ import java.util.List;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
@@ -33,6 +35,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 		return t.estimateBounds( boundBox );
 	}
 	
+		
 	@Override
 	public RealInterval boundingBoxNotTransformed()
 	{		
@@ -51,7 +54,21 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 			}
 		}
 	}
-	
+
+
+	public void addMesh(final Mesh nmesh, final int nTP, final Color colorin )
+	{		
+		if(nmesh != null)
+		{
+			final VisMeshColor meshShape = new VisMeshColor( nmesh );
+			if(colorin != null)
+			{
+				meshShape.setColor( colorin );
+			}
+			boundBox = Intervals.union( boundBox, Meshes.boundingBox( nmesh ) );
+			visRendersTimeMap.put( meshShape, nTP );
+		}
+	}
 	
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{

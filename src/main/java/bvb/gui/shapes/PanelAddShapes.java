@@ -1,5 +1,6 @@
 package bvb.gui.shapes;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -22,6 +23,7 @@ import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
+import bvb.shapes.MultiMeshColor;
 import bvb.shapes.Spots;
 import bvb.shapes.SpotsSame;
 import bvb.utils.Misc;
@@ -41,7 +43,7 @@ public class PanelAddShapes extends JPanel
 		super(new GridBagLayout());	
 		
 		bvb = bvb_;
-		//this.setBorder(new PanelTitle(" Add shapes "));
+
 	    GridBagConstraints gbc = new GridBagConstraints();
 		URL icon_path = this.getClass().getResource("/icons/spots.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
@@ -65,8 +67,6 @@ public class PanelAddShapes extends JPanel
 	    gbc.gridx++;
 	    this.add( butMesh,gbc);
 
-//	    gbc.gridx++;
-//	    this.add( butBDVXML,gbc);
 	}
 	
 	void loadSpotsDialog()
@@ -218,27 +218,47 @@ public class PanelAddShapes extends JPanel
 	{
 		final WRLParser loaderWRT = new WRLParser ();
 		//loaderWRT.nMaxMeshes = 1000;
-		loaderWRT.nMaxTimePoints = 5;
+		loaderWRT.nMaxTimePoints = 1;
 		loaderWRT.bEnableWireGrid = true;
 		final ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
 		
-		IJ.showStatus( "Uploading "+ Integer.toString( loadedMeshes.size() )+ " meshes." );
-		final ArrayList<BasicShape> finMeshesShapes = new ArrayList<>();
-		for(int i=0;i<loadedMeshes.size();i++)
-		{		
-			final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+		IJ.showStatus( "Uploading " + Integer.toString( loadedMeshes.size() ) + " meshes." );
 		
+		MultiMeshColor mmColor = new MultiMeshColor();
+		Color meshColor = null;
+		int nTP = -1;
+		for(int i=0;i<loadedMeshes.size();i++)
+		{
 			if(loaderWRT.isTimeData())
 			{
-				meshBVB.setTimePoint( loaderWRT.timePoints.get( i ) );
+				nTP = loaderWRT.timePoints.get( i );
 			}
 			if(loaderWRT.containsColorInfo())
 			{
-				meshBVB.setColor( loaderWRT.meshColors.get( i ) );
-			}	
-			finMeshesShapes.add( meshBVB );
+				meshColor = loaderWRT.meshColors.get( i );
+			}
+			mmColor.addMesh( loadedMeshes.get( i ), nTP, meshColor );
+			
 		}
-		bvb.addShapes( finMeshesShapes, Misc.getSourceStyleName( sFilename ) );
+		mmColor.setName( Misc.getSourceStyleName( sFilename )  );
+		bvb.addShape(mmColor);
+//		
+//		final ArrayList<BasicShape> finMeshesShapes = new ArrayList<>();
+//		for(int i=0;i<loadedMeshes.size();i++)
+//		{		
+//			final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+//		
+//			if(loaderWRT.isTimeData())
+//			{
+//				meshBVB.setTimePoint( loaderWRT.timePoints.get( i ) );
+//			}
+//			if(loaderWRT.containsColorInfo())
+//			{
+//				meshBVB.setColor( loaderWRT.meshColors.get( i ) );
+//			}	
+//			finMeshesShapes.add( meshBVB );
+//		}
+//		bvb.addShapes( finMeshesShapes, Misc.getSourceStyleName( sFilename ) );
 
 	}
 }
