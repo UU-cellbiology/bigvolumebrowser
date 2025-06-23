@@ -210,7 +210,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			bvbCards.installCards();
 			
 			bLocked = false;
-			
+			bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "No data loaded", 5000, TextPosition.CENTER )  );
+
 			if(bShowBGShader)
 			{
 				showNoise();
@@ -249,7 +250,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		setCanvasBGColor(BVBSettings.canvasBGColor);
 		Prefs.showMultibox( BVBSettings.bShowMultiBox);
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
-		bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "HELLLOOOO", 20000, TextPosition.CENTER )  );
 		//listen to timepoint change
 		bvvViewer.addTimePointListener(this);
 	}
@@ -517,6 +517,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			box.draw( gl, pvm, vm, screen_size, nTimePoint );
 		}
+		
+//		System.out.println(gl.glGetString( GL.GL_VENDOR ));
+//		System.out.println(gl.glGetString( GL.GL_RENDERER ));
 	}
 	
 	public void showVolumeBoxes(boolean bShow)
@@ -619,6 +622,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
         initBVV();
         clipBoxes.reload();
         volumeBoxes.reload();
+        bgQuad.reload();
 		clipBoxes.setVisible( true );
 		volumeBoxes.setVisible( true);
 		

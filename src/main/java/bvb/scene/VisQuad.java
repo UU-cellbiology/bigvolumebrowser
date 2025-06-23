@@ -19,7 +19,9 @@ import bvvpg.core.shadergen.generate.SegmentTemplate;
 
 public class VisQuad
 {
-	private final DefaultShader progQuad;
+	private DefaultShader progQuad = null;
+	
+	private int nBGShader;
 	
 	private int vaoQuad;
 	
@@ -29,10 +31,15 @@ public class VisQuad
 
 	public VisQuad(int nShaderN )
 	{
-
+		nBGShader = nShaderN;
+	
+		initShader();
+	}
+	private void initShader()
+	{
 		final Segment quadvp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg.vp" ).instantiate();
 		Segment quadfp = null;
-		switch(nShaderN)
+		switch(nBGShader)
 		{
 		case 2:
 			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg2.fp" ).instantiate();
@@ -47,7 +54,12 @@ public class VisQuad
 			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg1.fp" ).instantiate();
 		}
 		progQuad = new DefaultShader( quadvp.getCode(), quadfp.getCode() );
-
+	}
+	
+	public void reload()
+	{
+		initShader();
+		quadInitialized = false;
 	}
 	
 	private void initQuad( GL3 gl )

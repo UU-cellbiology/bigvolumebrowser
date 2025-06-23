@@ -174,8 +174,10 @@ public class BVBActions
 		SpinnerModel cacheBlockSizeM = new SpinnerNumberModel(BVVSettings.cacheBlockSize, 10, 1024, 1);		
 		JSpinner cacheBlockSize = new JSpinner(cacheBlockSizeM);
 		cacheBlockSize.setEditor(new JSpinner.NumberEditor(cacheBlockSize, "#"));
+		
 		SpinnerModel maxCacheSizeInMBM = new SpinnerNumberModel(BVVSettings.maxCacheSizeInMB, 10, Integer.MAX_VALUE, 1);		
 		JSpinner maxCacheSizeInMB = new JSpinner(maxCacheSizeInMBM);
+		maxCacheSizeInMB.setEditor(new JSpinner.NumberEditor(maxCacheSizeInMB, "#"));
 		maxCacheSizeInMB.setToolTipText( "The size of the GPU cache texture. Increase it to the max available."  );
 		
 		SpinnerModel dCamM = new SpinnerNumberModel(BVVSettings.dCam, BVVSettings.dClipNear+5, Integer.MAX_VALUE, 1);		
