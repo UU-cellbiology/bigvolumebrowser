@@ -5,14 +5,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
+
+import bvb.utils.Misc;
+import ij.IJ;
 
 public class WRLParser
 {
@@ -35,8 +38,14 @@ public class WRLParser
 	public int nMaxMeshes = Integer.MAX_VALUE;
 	public int nMaxTimePoints = Integer.MAX_VALUE;	
 	boolean bMeshOK = true;
+	
 	Map<Integer,Integer> addedInd = new ConcurrentHashMap<>();
+	
 	Color meshColor = new Color(127,127,127);
+	
+	long bytesRead = 0;
+	
+	long bytesNewLine = 0;
 
 	
 	public ArrayList<Mesh> readWRL(String sFilename)
@@ -48,14 +57,19 @@ public class WRLParser
 		bTimeData = false;
 		bMeshOK = true;
 		int nCurrVertN = -1;
-
-		
 //		boolean bSkim = true;
 		
-		try ( BufferedReader br = new BufferedReader(new FileReader(sFilename));
-				FileWriter writer = new FileWriter(new File(sFilename+"_text.txt"));
-				) 
+		
+		try ( BufferedReader br = new BufferedReader(new FileReader(sFilename)); )
+		//		FileWriter writer = new FileWriter(new File(sFilename+"_text.txt")); )
 		{
+			
+			IJ.showStatus( "Importing "+ Misc.getSourceStyleName( sFilename ) + "...");
+			//setup progress tracking variables
+			File fFileWRL = new File(sFilename);
+			final double filesize = Files.size( fFileWRL.toPath() );
+			bytesRead = 0;
+			bytesNewLine = Misc.getBytesPerNewLine(fFileWRL);
 			
 			String line = "";
 			boolean bContinue = true;
@@ -64,17 +78,17 @@ public class WRLParser
 			while(bContinue)
 			{
 				line = br.readLine();
-				nLineN ++;
 				if(line == null)
 					break;
-
+				bytesRead += line.length() + bytesNewLine;
+				nLineN ++;
 				
-				writer.write( line +"\n");
-				
+				//writer.write( line +"\n");
+				IJ.showProgress( bytesRead/filesize );
 				if(line.contains( " Transform {" ) )
 				{
 					bSkipNextMesh = true;	
-					System.out.println("skip mesh Transform");
+					//System.out.println("skip mesh Transform");
 				}
 				if(line.contains( " TimeSwitch" ) && !bSkipNextMesh)// && nMeshesN ==0 )
 				{
@@ -110,7 +124,7 @@ public class WRLParser
 						if(nCurrVertN<0)
 						{
 							bMeshOK = false;
-							System.out.println("skip mesh Vertices");
+							//System.out.println("skip mesh Vertices");
 						}
 						else
 						{
@@ -120,7 +134,7 @@ public class WRLParser
 					if(bTimeData)
 					{
 						nTimePoint++;
-						System.out.println("Timepoint "+Integer.toString( nTimePoint ));
+						//System.out.println("Timepoint "+Integer.toString( nTimePoint ));
 						if(nMaxTimePoints == nTimePoint)
 						{
 							bContinue = false;
@@ -135,9 +149,9 @@ public class WRLParser
 					{	
 						if(nCurrVertN != loadUV(br))
 						{
-							System.out.println("skip mesh UV");
+							//System.out.println("skip mesh UV");
 							bMeshOK = false;
-							System.out.println("TextureCoordinate not ok");
+							//System.out.println("TextureCoordinate not ok");
 						}
 
 					}
@@ -151,9 +165,9 @@ public class WRLParser
 						{
 							if(nCurrVertN != loadNormals(br))
 							{
-								System.out.println("skip mesh Normals N");
+								//System.out.println("skip mesh Normals N");
 								bMeshOK = false;
-								System.out.println("Normals not ok");
+								//System.out.println("Normals not ok");
 							}
 						}
 
@@ -178,7 +192,10 @@ public class WRLParser
 				if(nMeshesN>nMaxMeshes )
 					bContinue = false;
 			}
-			System.out.println("Found " +Integer.toString( nMeshesN )+ " meshes");
+			//System.out.println("Found " +Integer.toString( nMeshesN )+ " meshes");
+			//IJ.showProgress( bytesRead/filesize );
+			IJ.showProgress( 0.999 );
+			IJ.showStatus("Parsed and found "+Integer.toString( nMeshesN )+ " meshes");
 //			writer.close();
 			
 		}
@@ -201,6 +218,8 @@ public class WRLParser
 
 		vertices.clear();
 		line = br.readLine();
+		bytesRead += line.length() + bytesNewLine;
+		
 		nLineN++;
 		la = line.split("\\s+|,");		
 		int nVert = 1;
@@ -225,7 +244,7 @@ public class WRLParser
 			if(la.length>4)
 				bRead = false;
 		}
-		System.out.println("Loaded " +Integer.toString( nVert )+ " vertices");
+		//System.out.println("Loaded " +Integer.toString( nVert )+ " vertices");
 
 		return nVert;
 	}
@@ -235,6 +254,7 @@ public class WRLParser
 		String line = "";
 		String[] la;
 		line = br.readLine();
+		bytesRead += line.length() + bytesNewLine;
 		nLineN++;
 		la = line.split("\\s+|,");						
 		int nVert = 0;
@@ -245,6 +265,7 @@ public class WRLParser
 		while(bRead)
 		{
 			line = br.readLine();
+			bytesRead += line.length() + bytesNewLine;
 			nLineN++;
 			la = line.split("\\s+|,");
 			vertices.get( nVert ).setUV( la[1], la[2]);
@@ -254,7 +275,7 @@ public class WRLParser
 				bRead = false;
 
 		}
-		System.out.println("Loaded " +Integer.toString( nVert )+ " texture coordinates");
+		//System.out.println("Loaded " +Integer.toString( nVert )+ " texture coordinates");
 		return nVert;
 
 	}
@@ -264,6 +285,7 @@ public class WRLParser
 		String line = "";
 		String[] la;
 		line = br.readLine();
+		bytesRead += line.length() + bytesNewLine;
 		nLineN++;
 		la = line.split("\\s+|,");
 
@@ -276,6 +298,7 @@ public class WRLParser
 		while(bRead)
 		{
 			line = br.readLine();
+			bytesRead += line.length() + bytesNewLine;
 			nLineN++;
 			la = line.split("\\s+|,");
 			vertices.get( nVert ).setNXYZ( la[1], la[2], la[3]);
@@ -283,7 +306,7 @@ public class WRLParser
 			if(la.length>4)
 				bRead = false;
 		}
-		System.out.println("Loaded " +Integer.toString( nVert )+ " normals");
+		//System.out.println("Loaded " +Integer.toString( nVert )+ " normals");
 
 		return nVert;
 	}
@@ -297,6 +320,7 @@ public class WRLParser
 		while(bRead)
 		{
 			line = br.readLine();
+			bytesRead += line.length() + bytesNewLine;
 			nLineN++;
 			la = line.split("\\s+|,");
 			if(la[la.length-1].equals( "]" ))
@@ -305,6 +329,7 @@ public class WRLParser
 			}
 		}
 	}
+	
 	boolean loadIndices(final BufferedReader br, String linein) throws IOException
 	{
 		String line = "";
@@ -321,7 +346,8 @@ public class WRLParser
 			System.out.println("weird indices");
 			return false;
 		}
-		System.out.println("added Mesh #"+Integer.toString(nMeshesN));
+		IJ.showStatus("Parsed " + Integer.toString(nMeshesN) + " meshes.");
+		//System.out.println("added Mesh #"+Integer.toString(nMeshesN));
 		nMeshesN ++;
 		final Mesh currMesh = new NaiveFloatMesh();
 		meshes.add( currMesh );
@@ -332,42 +358,31 @@ public class WRLParser
 		if(bHasColor)
 			meshColors.add(meshColor);
 
-		la = linein.split("\\s+|,");
 		final TriangleMaker tr = new TriangleMaker(currMesh);
-		for(int i = 3; i<la.length;i++)
+		
+		line = linein;
+		boolean bRead = true;
+		while(bRead)
 		{
-			if(la[i].length()>0)
+			la = line.split("\\s+|,");
+			
+			for(int i = 1; i<la.length;i++)
 			{
 				final int [] currInd = tr.addIndex( la[i] );
 				if(currInd != null)
 				{
-					addIndices(currMesh, currInd);					
+					addIndices(currMesh, currInd);
 				}
 			}
-		}
-
-		boolean bRead = true;
-		while(bRead)
-		{
-			line = br.readLine();
-			nLineN++;
-			la = line.split("\\s+|,");
 			if(la[la.length-1].equals( "]" ))
 			{
 				bRead = false;
 			}
 			else
 			{
-				for(int i = 1; i<la.length;i++)
-					if(la[i].length()>0)
-					{
-						final int [] currInd = tr.addIndex( la[i] );
-						if(currInd != null)
-						{
-							addIndices(currMesh, currInd);
-							
-						}
-					}
+				line = br.readLine();
+				bytesRead += line.length() + bytesNewLine;
+				nLineN++;
 			}
 		}
 		
@@ -378,7 +393,7 @@ public class WRLParser
 		return true;
 	}
 	
-	public void addIndices(final Mesh currMesh, final int [] currInd)
+	void addIndices(final Mesh currMesh, final int [] currInd)
 	{
 		if(nVertPerPrim == 3)
 		{
@@ -393,7 +408,7 @@ public class WRLParser
 		}
 	}
 	
-	public void addTriangle(final Mesh currMesh, final int [] currInd)
+	void addTriangle(final Mesh currMesh, final int [] currInd)
 	{
 
 		for(int k=0;k<3; k++)

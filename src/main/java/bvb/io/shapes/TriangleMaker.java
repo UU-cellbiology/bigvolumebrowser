@@ -39,9 +39,16 @@ public class TriangleMaker
 	}
 	public int[] addIndex(String sInd)
 	{
+		int nInd = -2;
+		try
+		{
+			nInd = Integer.parseInt(sInd);
+		}
+		catch(NumberFormatException e)
+		{
+			return null;
+		}
 		
-		int nInd = Integer.parseInt(sInd);
-
 		if(nInd == -1)
 		{
 			if(nCurrent>4 && nCurrent<3)
