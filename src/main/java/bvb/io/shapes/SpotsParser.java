@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -221,5 +222,92 @@ public class SpotsParser extends SwingWorker<Void, Void>
      	}
     	IJ.showProgress( 1.0 );
     	IJ.showStatus( "Finished spots import. Loaded "+Integer.toString( vertices.size()) +" spots.");   	
+    }
+    /** filters vertices and sizes so that they are between
+     * provided percentile min and percentile max **/
+    
+    public void dataCleanup(final double dPercMin, final double dPercMax)
+    {
+    	//let's cleanup
+    	//load everything to float
+    	final int nInN = vertices.size();
+    	int nColN = 4;
+    	double dProgressTotal = (nColN-1)+3;
+    	double dProgressCurrent = 0.0;
+    	
+    	final int indMin = ( int ) Math.max( 0, Math.round( dPercMin*nInN/100. ) );
+    	final int indMax = ( int ) Math.min( nInN-1, Math.round( dPercMax*nInN/100. ) );
+    	IJ.showStatus( "Cleaning up spots data..");
+    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+    	
+    	if(parseSize)
+    	{
+    		nColN = 5;
+    	}
+
+    	final float [][] allData = new float[nInN][nColN];
+
+    	for(int i = 0; i< nInN; i++)
+    	{
+    		for(int d=0;d<3;d++)
+    		{
+    			allData[i][d] = vertices.get( i ).getFloatPosition( d );
+    		}
+    		if(parseSize)
+    		{
+    			allData[i][3] = sizes[i];
+    		}
+    	}
+    	dProgressCurrent++;
+    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+    	
+    	//now let's sort by each column and mark outliers
+    	for(int nCol = 0; nCol<nColN-1; nCol++)
+    	{
+        	dProgressCurrent++;
+        	IJ.showProgress( dProgressCurrent/dProgressTotal);
+
+    		final int nColX = nCol;
+    		Arrays.sort(allData, (a, b) -> Float.compare(a[nColX], b[nColX]));
+    		for(int i=0;i<indMin; i++)
+    		{
+    			allData[i][nColN-1] = 1.0f;
+    		}
+    		for(int i=indMax;i<nInN; i++)
+    		{
+    			allData[i][nColN-1] = 1.0f;
+    		}
+    	}
+    	
+    	vertices.clear();
+    	int nTotFiltCount = 0;
+      	dProgressCurrent++;
+    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+    	for(int i=0; i<nInN;i++)
+    	{
+    		if(allData[i][nColN-1]<0.5f)
+    		{
+    			vertices.add( new RealPoint(allData[i][0], allData[i][1],allData[i][2]) );
+    			nTotFiltCount ++;
+    		}
+    		
+    	}
+    	
+    	if(parseSize)
+    	{
+    		sizes = new float[nTotFiltCount];
+    		int nCount = 0;
+        	for(int i=0; i<nInN;i++)
+        	{
+        		if(allData[i][nColN-1]<0.5f)
+        		{
+        			sizes[nCount] = allData[i][3];
+        			nCount++;
+        		}
+        	}
+    	}
+      	dProgressCurrent++;
+    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+    	IJ.showStatus( "Cleanup done: " +Integer.toString( nTotFiltCount )+" spots left from "+Integer.toString( nInN ));
     }
 }

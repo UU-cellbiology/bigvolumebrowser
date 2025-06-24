@@ -161,6 +161,11 @@ public class PanelAddShapes extends JPanel
 				if(sptParser.getState() == StateValue.DONE)
 				{
 					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...");
+					if(sptShape.bSpotDataCleanUp)
+					{
+						sptParser.dataCleanup( sptShape.dSpotsPercMin, sptShape.dSpotsPercMax );						
+					}
+					
 					if(!sptParser.parseSize)
 					{
 						
@@ -174,10 +179,12 @@ public class PanelAddShapes extends JPanel
 						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
 						bvb.addShape( importedSpots );						
 					}
+					
 					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
 				}
 			}
 			);
+			bvb.bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "Loading spots, please wait...", 5000, TextPosition.CENTER )  );
 			
 			sptParser.execute();
 		}
@@ -188,7 +195,7 @@ public class PanelAddShapes extends JPanel
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
         chooser.setDialogTitle( "Open Mesh Data" );
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "Mesh files", "stl", "ply", "wrl", "glb");
+                "Mesh files", "stl", "ply", "wrl", "glb", "gltf");
         chooser.setFileFilter(filter);
         
         int returnVal = chooser.showOpenDialog(null);
@@ -218,6 +225,7 @@ public class PanelAddShapes extends JPanel
         		}).start();
             	break;
             //Gltf files
+            case "gltf":
             case "glb":
             	new Thread(() -> {
             	loadGLTfile( sFilename );

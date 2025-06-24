@@ -341,7 +341,6 @@ public class VisSpots extends AbstractClipTransformVis
 		else
 		{
 			gl.glDepthFunc( GL.GL_LESS);
-
 		}
 		prog.setUniforms( context );
 		
@@ -350,6 +349,8 @@ public class VisSpots extends AbstractClipTransformVis
 		gl.glDrawArrays( GL.GL_POINTS, 0, nSpotsN);
 		gl.glBindVertexArray( 0 );
 		gl.glDepthFunc( GL.GL_LESS);
+		
+
 	}
 
 }

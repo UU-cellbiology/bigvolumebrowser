@@ -21,7 +21,6 @@ import net.imglib2.mesh.impl.naive.NaiveFloatMesh;
 
 import de.javagl.jgltf.model.AccessorData;
 import de.javagl.jgltf.model.AccessorModel;
-import de.javagl.jgltf.model.BufferModel;
 import de.javagl.jgltf.model.BufferViewModel;
 import de.javagl.jgltf.model.GltfModel;
 import de.javagl.jgltf.model.ImageModel;
@@ -33,6 +32,8 @@ import de.javagl.jgltf.model.v2.MaterialModelV2;
 import bvb.shapes.BasicShape;
 import bvb.shapes.MeshTexture;
 
+/** A primitive Gltf importer based on de.javagl.jgltf library. 
+ * Written in a very inefficient way, but should work ok on small meshes. **/
 public class GltfImporter
 {
 	
@@ -58,21 +59,16 @@ public class GltfImporter
 			{
 				for(final MeshPrimitiveModel meshPrimitiveModel:mesh.getMeshPrimitiveModels())
 				{
-					//List<MeshModel> meshes = gltfModel.getMeshModels();
-					//MeshModel mesh = meshes.get( 0 );
-					//List< MeshPrimitiveModel > prmod = mesh.getMeshPrimitiveModels();
-					//MeshPrimitiveModel meshPrimitiveModel = prmod.get( 0 );
-					final Mesh currMesh = new NaiveFloatMesh();
-				
+					final Mesh currMesh = new NaiveFloatMesh();				
 					final float [][] vert = readAttributeFloatArray(meshPrimitiveModel, "POSITION");
 					final float [][] uvmap = readAttributeFloatArray(meshPrimitiveModel, "TEXCOORD_0");
-					//System.out.println( uvmap.length );
+
 					for(int i = 0; i < vert.length; i++)
 					{
 						currMesh.vertices().addf(vert[i][0], vert[i][1], vert[i][2] );
 						currMesh.vertices().setTexturef( i, uvmap[i][0], uvmap[i][1] ); 
 					}
-					//System.out.println( vert.length );
+
 					final int [] indices = readIndices(meshPrimitiveModel);
 					for(int i = 0; i < indices.length; i++)
 					{
@@ -80,9 +76,7 @@ public class GltfImporter
 						{
 							currMesh.triangles().add( indices[i-2], indices[i-1], indices[i] );
 						}
-					}
-					//System.out.println(indices.length);
-					
+					}				
 					
 					final MaterialModelV2 material = ( MaterialModelV2 ) meshPrimitiveModel.getMaterialModel();
 					final TextureModel baseColorTexture = material.getBaseColorTexture();
@@ -95,13 +89,26 @@ public class GltfImporter
 					// 3. Get the image model
 					final ImageModel imageModel = baseColorTexture.getImageModel();
 					final BufferViewModel bufferViewModel = imageModel.getBufferViewModel();
-					final BufferModel bufferModel = bufferViewModel.getBufferModel();
-					final ByteBuffer byteBuffer = bufferModel.getBufferData();
-			        final byte[] imageBytes = new byte[bufferViewModel.getByteLength()];
-		            byteBuffer.position(bufferViewModel.getByteOffset());
-		            byteBuffer.get(imageBytes);
-					BufferedImage image = null;
-		
+					ByteBuffer byteBuffer = null;
+
+					int nByteLength = 0 ;
+					if(bufferViewModel != null)
+					{
+						byteBuffer = bufferViewModel.getBufferModel().getBufferData();
+						nByteLength = bufferViewModel.getByteLength();				        
+			            byteBuffer.position(bufferViewModel.getByteOffset());
+			            
+					}
+					else
+					{
+						byteBuffer = imageModel.getImageData();
+						nByteLength = byteBuffer.remaining();
+					}
+
+					final byte[] imageBytes = new byte[nByteLength];
+					byteBuffer.get(imageBytes);
+
+					BufferedImage image = null;		
 		
 					try
 					{
@@ -113,12 +120,12 @@ public class GltfImporter
 						break;
 					}
 					out.add( new MeshTexture(currMesh, image) );
-					//MeshTexture texturedMesh = new MeshTexture(currMesh, image);
 				}
 			}
 		}
 		return out;
 	}
+	
 	public static float [][] readAttributeFloatArray(final MeshPrimitiveModel meshPrimitiveModel, String key)
 	{
 		

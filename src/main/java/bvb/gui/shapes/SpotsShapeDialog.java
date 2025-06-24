@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -27,6 +28,9 @@ public class SpotsShapeDialog
 	public Color spotColor = Color.WHITE;
 	public int nShape = VisSpots.SHAPE_ROUND;
 	public int nFill = VisSpots.RENDER_FILLED;
+	public boolean bSpotDataCleanUp;
+	public double dSpotsPercMin = 1.0;
+	public double dSpotsPercMax = 99.0;
 	
 	public ColorUserSettings selectColors = new ColorUserSettings();
 	
@@ -78,6 +82,9 @@ public class SpotsShapeDialog
 		NumberField nfSpotSize = new NumberField(5);
 		nfSpotSize.setText(df3.format( Prefs.get( "BVB.spotSize", 10.0 ) ));
 		
+		JCheckBox cbDataCleanUp = new JCheckBox();
+		cbDataCleanUp.setSelected( Prefs.get( "BVB.bSpotDataCleanUp", false ) );
+		
 		//assemble everything
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx=0;
@@ -107,6 +114,12 @@ public class SpotsShapeDialog
 		pSpotsParams.add(new JLabel("Spots filling: "), gbc);
 		gbc.gridx++;
 		pSpotsParams.add(cbFill, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pSpotsParams.add(new JLabel("Data cleanup: "), gbc);
+		gbc.gridx++;
+		pSpotsParams.add(cbDataCleanUp, gbc);
 
 		
 		int reply = JOptionPane.showConfirmDialog(null, pSpotsParams, "Spots render", 
@@ -129,12 +142,71 @@ public class SpotsShapeDialog
 				fSpotSize = Float.parseFloat( nfSpotSize.getText() );
 				Prefs.set("BVB.spotSize", fSpotSize);
 			}
+			bSpotDataCleanUp = cbDataCleanUp.isSelected();
+			Prefs.set("BVB.bSpotDataCleanUp", bSpotDataCleanUp);
+			
+			if(bSpotDataCleanUp)
+			{
+				//show percentile dialog
+				return showPercentile();
+			}
+			
 			
 			return true;
 		}
 
 		return false;
 
+	}
+	
+	boolean showPercentile()
+	{
+		JPanel pCleanup = new JPanel(new GridBagLayout());
+		
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
+		
+		
+		NumberField nfPercMin = new NumberField(5);
+		nfPercMin.setText(df3.format( Prefs.get( "BVB.dSpotsPercMin", 1.0 ) ));
+		NumberField nfPercMax = new NumberField(5);
+		nfPercMax.setText(df3.format( Prefs.get( "BVB.dSpotsPercMax", 99.0 ) ));
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx=0;
+		gbc.gridy=0;	
+		GBCHelper.alighLoose(gbc);
+		pCleanup.add(new JLabel("Percentile % min: "), gbc);
+		gbc.gridx++;
+		pCleanup.add(nfPercMin, gbc);
+
+		gbc.gridx=0;
+		gbc.gridy++;
+		pCleanup.add(new JLabel("Percentile % max: "), gbc);
+		gbc.gridx++;
+		pCleanup.add(nfPercMax, gbc);	
+		int reply = JOptionPane.showConfirmDialog(null, pCleanup, "Filter data outliers", 
+		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+		if (reply == JOptionPane.OK_OPTION) 
+		{
+			dSpotsPercMin = Double.parseDouble( nfPercMin.getText() );
+			dSpotsPercMin = Math.max( dSpotsPercMin, 0.0 );
+			Prefs.set("BVB.dSpotsPercMin", dSpotsPercMin);
+			dSpotsPercMax = Double.parseDouble( nfPercMax.getText() );
+			dSpotsPercMax = Math.min( dSpotsPercMax, 100.0 );
+			Prefs.set("BVB.dSpotsPercMax", dSpotsPercMax);
+			if(dSpotsPercMin>dSpotsPercMax)
+			{
+				final double temp = dSpotsPercMin;
+				dSpotsPercMin = dSpotsPercMax;
+				dSpotsPercMax = temp;
+			}
+			
+			return true;
+		}
+		return false;
+		
 	}
 	
 }
