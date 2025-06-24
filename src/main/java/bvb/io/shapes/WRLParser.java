@@ -118,7 +118,6 @@ public class WRLParser
 					}
 					else
 					{
-
 						nCurrVertN = loadVertices(br);
 						
 						if(nCurrVertN<0)
@@ -175,7 +174,7 @@ public class WRLParser
 
 				if(line.contains( " coordIndex" ) && bMeshOK)
 				{
-						loadIndices(br, line);
+					loadIndices(br, line);
 				}
 //				if(bSkim == true)
 //				{
@@ -343,20 +342,26 @@ public class WRLParser
 		nVertPerPrim = TriangleMaker.getVerticesNPerPrimitive(linein);
 		if(nVertPerPrim <0)
 		{
-			System.out.println("weird indices");
+			System.out.println("WRL import: weird mesh indices occured, skipping.");
 			return false;
 		}
 		IJ.showStatus("Parsed " + Integer.toString(nMeshesN) + " meshes.");
+		
 		//System.out.println("added Mesh #"+Integer.toString(nMeshesN));
 		nMeshesN ++;
+		
 		final Mesh currMesh = new NaiveFloatMesh();
+		
 		meshes.add( currMesh );
+		
 		if(bTimeData)
 		{
 			timePoints.add( nTimePoint );
 		}
 		if(bHasColor)
+		{
 			meshColors.add(meshColor);
+		}
 
 		final TriangleMaker tr = new TriangleMaker(currMesh);
 		

@@ -113,6 +113,10 @@ public class VisQuad
 
 		//float fTime =  ( System.currentTimeMillis()%200)+1;
 		float fTime =  ( System.currentTimeMillis()- fTimeIni);
+		if(nBGShader == 1 && fTime > 2000)
+		{
+			fTimeIni = System.currentTimeMillis();
+		}
 
 		//fTime = fTime/10;
 		gl.glDepthFunc( GL.GL_ALWAYS);

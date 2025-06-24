@@ -6,6 +6,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -26,7 +30,6 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
-import bvb.scene.VisMeshColor;
 import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
 import bvb.shapes.MultiMeshColor;
@@ -150,10 +153,7 @@ public class PanelAddShapes extends JPanel
 			{
 				return;
 			}
-			
-
-			
-			
+		
 			sptParser.addPropertyChangeListener( (e)->
 			{
 				if(sptParser.getState() == StateValue.DONE)
@@ -223,6 +223,7 @@ public class PanelAddShapes extends JPanel
 
         }
 	}
+	
 	void loadWRLfile(String sFilename)
 	{
 		//loading dialog
@@ -235,7 +236,7 @@ public class PanelAddShapes extends JPanel
 		gbc.gridx=0;
 		gbc.gridy=0;	
 		GBCHelper.alighLoose(gbc);
-		pWRLSettings.add(new JLabel("Load meshes as group "), gbc);
+		pWRLSettings.add(new JLabel("Group meshes together"), gbc);
 		gbc.gridx++;
 		pWRLSettings.add( cbMultiMesh, gbc );
 		boolean bGroupMesh = true;
@@ -266,25 +267,51 @@ public class PanelAddShapes extends JPanel
 		if(bGroupMesh)
 		{
 			IJ.showStatus( "Uploading " + Integer.toString( loadedMeshes.size() ) + " meshes." );
-			
-			MultiMeshColor mmColor = new MultiMeshColor();
-			Color meshColor = null;
-			int nTP = -1;
-			for(int i=0;i<loadedMeshes.size();i++)
+			if(loaderWRT.containsColorInfo())
 			{
-				if(loaderWRT.isTimeData())
+				Set<Color> uniqueColors = new HashSet<>(loaderWRT.meshColors);
+				HashMap<Color,MultiMeshColor> meshGroups = new HashMap<>();
+				for (final Color color:uniqueColors)
 				{
-					nTP = loaderWRT.timePoints.get( i );
+					meshGroups.put( color,  new MultiMeshColor() );
 				}
-				if(loaderWRT.containsColorInfo())
+				for(int i=0;i<loadedMeshes.size();i++)
 				{
-					meshColor = loaderWRT.meshColors.get( i );
+					int nTP = -1;
+
+					if(loaderWRT.isTimeData())
+					{
+						nTP = loaderWRT.timePoints.get( i );
+					}
+					Color meshColor = loaderWRT.meshColors.get( i );
+					meshGroups.get( meshColor ).addMesh( loadedMeshes.get( i ), nTP, meshColor );
 				}
-				mmColor.addMesh( loadedMeshes.get( i ), nTP, meshColor );
-				
+				int nC = 0;
+				for (Entry< Color, MultiMeshColor > pair : meshGroups.entrySet()) 
+				{
+					pair.getValue().setName( "c" +Integer.toString( nC )+"_"+Misc.getSourceStyleName( sFilename )  ); 
+					bvb.addShape( pair.getValue() ); 
+					nC++;
+				}
+					
 			}
-			mmColor.setName( Misc.getSourceStyleName( sFilename )  );
-			bvb.addShape(mmColor);
+			else
+			{
+				MultiMeshColor mmColor = new MultiMeshColor();
+				Color meshColor = null;
+				for(int i=0;i<loadedMeshes.size();i++)
+				{
+					int nTP = -1;
+
+					if(loaderWRT.isTimeData())
+					{
+						nTP = loaderWRT.timePoints.get( i );
+					}
+					mmColor.addMesh( loadedMeshes.get( i ), nTP, meshColor );					
+				}
+				mmColor.setName( Misc.getSourceStyleName( sFilename )  );
+				bvb.addShape(mmColor);
+			}
 		}
 		///load all meshes separately
 		else
