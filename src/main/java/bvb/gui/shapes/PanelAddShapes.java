@@ -92,6 +92,7 @@ public class PanelAddShapes extends JPanel
 			sptParser.fileSpots = dialSpots.fileSpots;
 			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
 			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
+			Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
 			//column indices
 			final int [] nColInd = new int[6];
 			//whether size was provided
@@ -128,6 +129,7 @@ public class PanelAddShapes extends JPanel
 			default:
 				sptParser.fScale = 1.0f;
 			}
+			Prefs.set( "BVB.nSpotsUnits", dialSpots.cbUnits.getSelectedIndex());
 			SpotsShapeDialog sptShape = new SpotsShapeDialog();
 			
 			boolean bAskForSize = true;
@@ -148,6 +150,7 @@ public class PanelAddShapes extends JPanel
 					break;
 					
 				}	
+				Prefs.set( "BVB.nSpotsSize", dialSpots.cbSize.getSelectedIndex());
 				bAskForSize = false;
 
 			}
@@ -155,28 +158,33 @@ public class PanelAddShapes extends JPanel
 			{
 				return;
 			}
+			if(sptShape.bSpotDataCleanUp)
+			{
+				sptParser.bDataCleanup = true;
+				sptParser.dPercMin = sptShape.dSpotsPercMin;
+				sptParser.dPercMax = sptShape.dSpotsPercMax;
+			}
+
 		
 			sptParser.addPropertyChangeListener( (e)->
 			{
 				if(sptParser.getState() == StateValue.DONE)
 				{
 					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...");
-					if(sptShape.bSpotDataCleanUp)
-					{
-						sptParser.dataCleanup( sptShape.dSpotsPercMin, sptShape.dSpotsPercMax );						
-					}
 					
 					if(!sptParser.parseSize)
 					{
 						
 						final SpotsSame importedSpots = new SpotsSame(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices );
+						importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
 						bvb.addShape( importedSpots );
 					}
 					else
 					{
 						final Spots importedSpots = new Spots(10.0f, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
+						importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
 						bvb.addShape( importedSpots );						
 					}
 					

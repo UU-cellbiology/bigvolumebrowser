@@ -7,6 +7,7 @@ public abstract class AbstractBasicShape implements BasicShape
 	
 	int nTimePoint = -1; 
 
+	String sName = "";
 	
 	@Override
 	public boolean isVisible()
@@ -32,5 +33,10 @@ public abstract class AbstractBasicShape implements BasicShape
 		return nTimePoint;
 	}
 	
+	@Override
+	public void setName(String sName_)
+	{
+		sName = sName_;
+	}
 
 }

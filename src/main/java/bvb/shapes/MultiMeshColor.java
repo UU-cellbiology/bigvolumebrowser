@@ -16,8 +16,6 @@ import bvb.scene.VisMeshColor;
 
 public class MultiMeshColor extends AbstractClipTransformMulti
 {
-
-	String sName = "";
 	
 	RealInterval boundBox = Intervals.createMinMaxReal( Double.POSITIVE_INFINITY,
 				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
@@ -119,10 +117,6 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 		}
 	}
 	
-	public void setName(String sName_)
-	{
-		sName = sName_;
-	}
 	
 	@Override
 	public String toString()

@@ -63,5 +63,7 @@ public interface BasicShape extends Clippable3D
 	public void getTransform(final AffineTransform3D t);
 	
 	public void setTransform(final AffineTransform3D t);	
+	
+	public void setName(String sName_);
 
 }

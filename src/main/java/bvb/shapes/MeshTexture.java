@@ -42,8 +42,6 @@ import bvb.scene.VisMeshTexture;
 public class MeshTexture extends AbstractClipTransformSingleShape
 {
 	
-	String sName = "";
-	
 	RealInterval boundBox = null;
 	
 	public MeshTexture(final Mesh nmesh, final BufferedImage imageTexture)
@@ -72,10 +70,6 @@ public class MeshTexture extends AbstractClipTransformSingleShape
 		return new FinalRealInterval(boundBox);
 	}
 	
-	public void setName(String sName_)
-	{
-		sName = sName_;
-	}
 	
 	@Override
 	public String toString()

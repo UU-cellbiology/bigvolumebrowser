@@ -142,7 +142,11 @@ public class SpotsSame extends AbstractClipTransformSingleShape
 	@Override
 	public String toString()
 	{
-		return "spots"+Integer.toString(this.hashCode());
+		if(sName.equals( "" ))
+		{
+			return "spots"+Integer.toString(this.hashCode());
+		}
+		return sName;
 
 	}
 

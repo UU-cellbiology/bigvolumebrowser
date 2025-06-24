@@ -40,6 +40,10 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	public float [] sizes = null;
 	
 	public long nTotSpots = 0;
+	
+	public boolean bDataCleanup = false;
+	public double dPercMin = 1.0;
+	public double dPercMax = 99.0;
 
 	
 	@Override
@@ -97,7 +101,14 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		{
 			sizes[i] = sizesList.get( i );
 		}
+		
 		nTotSpots = vertices.size();
+		
+		IJ.log( "Parsed  " +Long.toString( nTotSpots )+" spots.");
+		if(bDataCleanup)
+		{
+			dataCleanup();
+		}
 		return null;
 	}
 	
@@ -226,7 +237,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     /** filters vertices and sizes so that they are between
      * provided percentile min and percentile max **/
     
-    public void dataCleanup(final double dPercMin, final double dPercMax)
+    void dataCleanup()
     {
     	//let's cleanup
     	//load everything to float
@@ -308,6 +319,9 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	}
       	dProgressCurrent++;
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
-    	IJ.showStatus( "Cleanup done: " +Integer.toString( nTotFiltCount )+" spots left from "+Integer.toString( nInN ));
+    	String finOut = "Cleanup done: " +Integer.toString( nTotFiltCount )+" spots left from "+Integer.toString( nInN ); 
+    	IJ.showStatus( finOut );
+    	IJ.log( finOut  );
+    	nTotSpots = nTotFiltCount;
     }
 }

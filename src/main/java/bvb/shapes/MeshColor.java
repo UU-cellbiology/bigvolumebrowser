@@ -49,8 +49,6 @@ import bvb.utils.Misc;
 public class MeshColor extends AbstractClipTransformSingleShape
 {
 	
-	String sName = "";
-	
 	RealInterval boundBox = null;
 	
 	public MeshColor(String sFilename)
@@ -171,12 +169,6 @@ public class MeshColor extends AbstractClipTransformSingleShape
 			}
 		}
 		return nmesh;
-	}
-
-
-	public void setName(String sName_)
-	{
-		sName = sName_;
 	}
 	
 	@Override

@@ -169,7 +169,7 @@ public class SpotsLoadDialog
 		} );
 		String[] sSeparators = { ",", ";", "space", "tab" };
 		cbSeparator = new JComboBox<>(sSeparators);
-		cbSeparator.setSelectedIndex( 0 );
+		cbSeparator.setSelectedIndex( (int)Prefs.get( "BVB.nSpotsSeparator", 0 ) );
 		
 		cbSeparator.addActionListener( (e)->{
 			bParsedColumns = false;
@@ -177,12 +177,12 @@ public class SpotsLoadDialog
 			});
 		String[] sUnits = { "milli", "micro", "nano"};
 		cbUnits =  new JComboBox<>(sUnits);
-		cbUnits.setSelectedIndex( 1 );
+		cbUnits.setSelectedIndex( (int)Prefs.get( "BVB.nSpotsUnits", 1 ) );
 		
 		
 		String[] sSize = { "diameter", "radius", "SD"};
 		cbSize =  new JComboBox<>(sSize);
-		cbSize.setSelectedIndex( 0 );
+		cbSize.setSelectedIndex( (int)Prefs.get( "BVB.nSpotsSize", 0 ) );
 		
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;

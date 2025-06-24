@@ -15,10 +15,8 @@ import org.joml.Matrix4fc;
 import bvb.scene.AbstractClipTransformVis;
 
 public abstract class AbstractClipTransformMulti extends AbstractBasicShape
-{
-	
+{	
 	final ConcurrentHashMap<AbstractClipTransformVis, Integer> visRendersTimeMap = new ConcurrentHashMap<>();
-	
 	
 	@Override
 	public boolean clipActive() 
