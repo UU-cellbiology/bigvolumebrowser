@@ -451,7 +451,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 	}
 	
-	public synchronized void addShapes(final ArrayList<BasicShape> shapes_in, String shapeGroupName)
+	public synchronized void addShapes(final List<BasicShape> shapes_in, String shapeGroupName)
 	{
 		final ArrayList<Object> objList = new ArrayList<>();
 		for(final BasicShape sh:shapes_in)

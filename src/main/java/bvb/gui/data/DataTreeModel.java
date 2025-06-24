@@ -138,7 +138,7 @@ public class DataTreeModel implements TreeModel
 		addData(shList, dataName, shapeIcon);
 	}
 	
-	public void addData(final ArrayList<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
+	public void addData(final List<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
 	{
 		List<DataTreeNode> listNodes =  dataParentChildren.get( rootNode );
 		if(listNodes == null)

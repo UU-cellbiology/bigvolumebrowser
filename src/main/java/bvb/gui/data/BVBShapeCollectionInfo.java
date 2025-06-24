@@ -1,6 +1,7 @@
 package bvb.gui.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
@@ -10,9 +11,9 @@ public class BVBShapeCollectionInfo
 	
 	public final String collectionDescription;
 	
-	public final ArrayList<BasicShape> shapes;
+	public final List<BasicShape> shapes;
 	
-	public BVBShapeCollectionInfo(final ArrayList<BasicShape> shapes_, final String collectionDescription_)
+	public BVBShapeCollectionInfo(final List<BasicShape> shapes_, final String collectionDescription_)
 	{
 		shapes = shapes_;
 		collectionDescription = collectionDescription_;

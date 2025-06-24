@@ -8,12 +8,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -28,6 +29,7 @@ import bdv.viewer.animate.TextOverlayAnimator.TextPosition;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
+import bvb.io.shapes.GltfImporter;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
@@ -186,7 +188,7 @@ public class PanelAddShapes extends JPanel
         JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
         chooser.setDialogTitle( "Open Mesh Data" );
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "Mesh files", "stl", "ply", "wrl", "glb", "gltf");
+                "Mesh files", "stl", "ply", "wrl", "glb");
         chooser.setFileFilter(filter);
         
         int returnVal = chooser.showOpenDialog(null);
@@ -211,17 +213,35 @@ public class PanelAddShapes extends JPanel
             	break;
             //Imaris wrl files
             case "wrl":
-
         		new Thread(() -> {
-            	loadWRLfile(sFilename);
+            	loadWRLfile( sFilename );
         		}).start();
             	break;
+            //Gltf files
+            case "glb":
+            	new Thread(() -> {
+            	loadGLTfile( sFilename );
+            	}).start();
+            	break;
+
             default:
             	IJ.log( "Unsupported mesh file format for ."+ extension + " files, aborted.");
             
             }
 
         }
+	}
+	void loadGLTfile(String sFilename)
+	{
+		final List< BasicShape > meshes = GltfImporter.loadGLTF( sFilename );
+		
+		if (meshes != null)
+		{
+			if(meshes.size()>0)
+			{
+				bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+			}
+		}
 	}
 	
 	void loadWRLfile(String sFilename)
@@ -231,22 +251,23 @@ public class PanelAddShapes extends JPanel
 		JPanel pWRLSettings = new JPanel(new GridBagLayout());
 		
 		GridBagConstraints gbc = new GridBagConstraints();
-		JCheckBox cbMultiMesh = new JCheckBox();
-		cbMultiMesh.setSelected(Prefs.get( "BVB.bGroupMesh", true));
+		String[] sOptions = { "Group meshes by color", "Each mesh separately" };
+		JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
+		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesh", true)?0:1);
 		gbc.gridx=0;
 		gbc.gridy=0;	
 		GBCHelper.alighLoose(gbc);
-		pWRLSettings.add(new JLabel("Group meshes together"), gbc);
+		pWRLSettings.add(new JLabel("Multiple meshes:"), gbc);
 		gbc.gridx++;
 		pWRLSettings.add( cbMultiMesh, gbc );
 		boolean bGroupMesh = true;
 		
-		int reply = JOptionPane.showConfirmDialog(null, pWRLSettings, "Mesh Load options", 
+		int reply = JOptionPane.showConfirmDialog(null, pWRLSettings, "Loading WRL file options", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (reply == JOptionPane.OK_OPTION) 
 		{
-			bGroupMesh = cbMultiMesh.isSelected();
+			bGroupMesh = cbMultiMesh.getSelectedIndex()==0;
 			Prefs.set( "BVB.bGroupMesh", bGroupMesh);
 			
 		}

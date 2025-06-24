@@ -28,7 +28,6 @@
  */
 package bvb.gui.data;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -46,7 +45,7 @@ public class DataTreeNode implements TreeNode
 	public AbstractSpimData< ? > spimData = null;
 	public BvvStackSource<?> bvvSource = null;
 	
-	public ArrayList<BasicShape> shapesArr = null;
+	public List<BasicShape> shapesArr = null;
 	public BasicShape shape = null;
 	
 	final DataTreeModel dataModel;
@@ -80,7 +79,7 @@ public class DataTreeNode implements TreeNode
 	}
 	
 	//shape collection
-	public DataTreeNode(final DataTreeModel dataModel_, ArrayList<BasicShape> shapes_)
+	public DataTreeNode(final DataTreeModel dataModel_, List<BasicShape> shapes_)
 	{
 		dataModel = dataModel_;
 		shapesArr = shapes_;
