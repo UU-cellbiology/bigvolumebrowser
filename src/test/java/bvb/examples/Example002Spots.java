@@ -37,7 +37,6 @@ import net.imglib2.RealPoint;
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisSpotsSame;
 import bvb.shapes.Spots;
-import bvb.shapes.SpotsSame;
 
 import ij.ImageJ;
 
@@ -54,37 +53,38 @@ public class Example002Spots
 		testBVB.startBVB("");
 			
 		//add sphere with random values as background		
-		int nRadius = 65;
+		int nDiameter = 65;
 		
 		int maxInt = 200;
 		
-		final RandomAccessibleInterval< ? > sphereRai = RandomHyperSphere.generateRandomSphere(nRadius, maxInt);		
+		final RandomAccessibleInterval< ? > sphereRai = RandomHyperSphere.generateRandomSphere(nDiameter, maxInt);		
 		testBVB.addRAI( sphereRai );
 		
 		//define point size, color, shape and filling
-		//spots with the same radius
-		SpotsSame samePoints = new SpotsSame(nRadius*0.08f, Color.YELLOW, VisSpotsSame.SHAPE_SQUARE, VisSpotsSame.RENDER_FILLED);
-		//spots with different radiuses
-		Spots diffPoints = new Spots(nRadius*0.08f, Color.CYAN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
+		//spots with the same diameter
+		Spots samePoints = new Spots(nDiameter*0.08f, Color.YELLOW, VisSpotsSame.SHAPE_SQUARE, VisSpotsSame.RENDER_FILLED);
+		//spots with different diameters
+		Spots diffPoints = new Spots(nDiameter*0.08f, Color.CYAN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
 
 		final ArrayList<RealPoint> verticesSame = new ArrayList<>();
 		final ArrayList<RealPoint> verticesDiff = new ArrayList<>();
 		
 		int nTotNumber = 30;
 		
-		double nScale = nRadius*2.0;
+		double nScale = nDiameter*2.0;
 		
-		float [] radiuses = new float[nTotNumber];
+		float [] diameters = new float[nTotNumber];
 		
 		for(int i=0;i<nTotNumber; i++)
 		{
 			verticesSame.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
 			verticesDiff.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			radiuses[i] = ( float ) ( Math.random()*nRadius*0.5f);
+			diameters[i] = ( float ) ( Math.random()*nDiameter*0.5f);
 		}
-		
+		//do not provide radius
 		samePoints.setPoints( verticesSame );
-		diffPoints.setPoints( verticesDiff, radiuses );
+		//specify radius for each spot
+		diffPoints.setPoints( verticesDiff, diameters );
 
 		testBVB.addShape( samePoints );
 		testBVB.addShape( diffPoints );

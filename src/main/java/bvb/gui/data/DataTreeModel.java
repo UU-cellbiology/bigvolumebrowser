@@ -42,7 +42,6 @@ import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
 import bvb.shapes.MeshTexture;
 import bvb.shapes.Spots;
-import bvb.shapes.SpotsSame;
 import bvvpg.vistools.BvvStackSource;
 import mpicbg.spim.data.generic.AbstractSpimData;
 
@@ -158,7 +157,7 @@ public class DataTreeModel implements TreeModel
 			{
 				shNode.setIcon( iconMeshColor );
 			}
-			if(sh instanceof Spots || sh instanceof SpotsSame)
+			if(sh instanceof Spots )
 			{
 				shNode.setIcon( iconSpots );
 			}

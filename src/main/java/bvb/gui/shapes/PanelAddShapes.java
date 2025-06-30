@@ -36,7 +36,6 @@ import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
 import bvb.shapes.MultiMeshColor;
 import bvb.shapes.Spots;
-import bvb.shapes.SpotsSame;
 import bvb.utils.Misc;
 import ij.IJ;
 import ij.Prefs;
@@ -171,22 +170,17 @@ public class PanelAddShapes extends JPanel
 				if(sptParser.getState() == StateValue.DONE)
 				{
 					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...");
-					
+					final Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 					if(!sptParser.parseSize)
 					{
-						
-						final SpotsSame importedSpots = new SpotsSame(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices );
-						importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
-						bvb.addShape( importedSpots );
 					}
 					else
 					{
-						final Spots importedSpots = new Spots(10.0f, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
-						importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
-						bvb.addShape( importedSpots );						
 					}
+					importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
+					bvb.addShape( importedSpots );						
 					
 					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
 				}

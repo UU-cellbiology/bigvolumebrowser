@@ -46,8 +46,11 @@ public class Spots extends AbstractClipTransformSingleShape
 {
 	
 	float pointSize;
+	
 	Color pointColor;
+	
 	int renderType;
+	
 	int pointShape;
 	
 	FinalRealInterval boundBox = null;
