@@ -39,7 +39,7 @@ public class ColorUserSettings {
 	{
 		for(int i=0;i<4;i++)
 		{
-			colors[i] = null;
+			colors[i] = Color.WHITE;
 		}
 	}
 	public void setColor(Color color_in, int index)

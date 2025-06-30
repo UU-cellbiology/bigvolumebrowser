@@ -11,6 +11,7 @@ import bvb.gui.data.PanelAddSources;
 import bvb.gui.data.PanelData;
 import bvb.gui.shapes.PanelAddShapes;
 import bvb.gui.shapes.PanelShapes;
+import bvb.gui.shapes.PanelShapesProperties;
 import bvb.gui.transform.TransformPanel;
 import bvvpg.pgcards.BVVPGDefaultCards;
 
@@ -20,6 +21,8 @@ public class BVBCards
 	final BigVolumeBrowser bvb;
 	
 	final public PanelAddSources panelAddSources;
+	
+	final public PanelShapesProperties panelShapesProperties;
 	
 	final public PanelData panelData;	
 	
@@ -40,7 +43,7 @@ public class BVBCards
 		bvb = bvb_;   
 	    
 		panelAddSources = new PanelAddSources(bvb);
-
+		
 		panelData = new PanelData(bvb);
 		
 		panelAddShapes = new PanelAddShapes(bvb);
@@ -48,6 +51,8 @@ public class BVBCards
 		panelShapes = new PanelShapes(bvb);
 		
 		setupListeners();
+		
+		panelShapesProperties = new PanelShapesProperties(bvb);
 		
 	    viewPanel = new ViewPanel(bvb);
 	    
@@ -64,6 +69,7 @@ public class BVBCards
 		bvb.selectedObjects = new SelectedObjects(bvb);
 		
 		panelData.addObjectSelectionListener();
+		
 	}
 	public void installCards()
 	{
@@ -77,7 +83,8 @@ public class BVBCards
 	    bvb.bvbCards.panelData.setPreferredSize( tableViewPrefSize );
 	    bvb.bvvFrame.getCardPanel().addCard("Shapes", panelShapes, false, new Insets( 0, 0, 0, 0 ) );
 	    bvb.bvvFrame.getCardPanel().addCard("All objects", panelData, true, new Insets( 0, 0, 0, 0 ) );
-	    bvb.bvvFrame.getCardPanel().addCard("Render sources", sourcesRenderPanel, false, new Insets( 0, 0, 0, 0 ) );
+	    bvb.bvvFrame.getCardPanel().addCard("Sources render", sourcesRenderPanel, false, new Insets( 0, 0, 0, 0 ) );
+	    bvb.bvvFrame.getCardPanel().addCard("Shapes render", panelShapesProperties, false, new Insets( 0, 0, 0, 0 ) );	     
 	    bvb.bvvFrame.getCardPanel().addCard("View", viewPanel, false, new Insets( 0, 0, 0, 0 ) );
 	    bvb.bvvFrame.getCardPanel().addCard("Clipping", clipPanel, false, new Insets( 0, 0, 0, 0 ) );
 	    bvb.bvvFrame.getCardPanel().addCard("Transform", transformPanel, false, new Insets( 0, 0, 0, 0 ) );		   

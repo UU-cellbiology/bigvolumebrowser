@@ -62,7 +62,7 @@ public class TransformRotationPanel extends JPanel
 			return;
 		
 		double [] angles = new double[3];
-		boolean bFirstCS = true;
+		boolean bFirstObj = true;
 		boolean [] allAnglesEqual = new boolean [3];
 		for (int d=0;d<3;d++)
 		{
@@ -72,10 +72,10 @@ public class TransformRotationPanel extends JPanel
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
-			if(bFirstCS)
+			if(bFirstObj)
 			{
 				angles = transformSetups.transformRotation.getAngles( obj );
-				bFirstCS = false;
+				bFirstObj = false;
 			}
 			else
 			{

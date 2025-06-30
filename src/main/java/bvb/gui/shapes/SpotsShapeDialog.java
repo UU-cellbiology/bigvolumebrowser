@@ -55,14 +55,11 @@ public class SpotsShapeDialog
 		}
 		sFill[0] = "Filled";
 		sFill[1] = "Outline";
-		if(bAskForSize)
+		sFill[2] = "Gauss";			
+
+		if(!bAskForSize)
 		{
-			sFill[2] = "Gaussian";			
-		}
-		else
-		{
-			sFill[2] = "Gauss Const";			
-			sFill[3] = "Gauss Norm";			
+			sFill[3] = "Gauss norm";			
 		}
 		
 		JComboBox<String> cbFill = new JComboBox<>(sFill);

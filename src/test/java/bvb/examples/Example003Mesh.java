@@ -59,7 +59,8 @@ public class Example003Mesh
 		MeshColor meshBunny = new MeshColor(fMeshFilename);
 		
 		//render with points
-		meshBunny.setPointsRender( 0.3f );
+		meshBunny.setRenderType( VisMeshColor.POINTS);
+		meshBunny.setPointSize( 0.4f );
 		meshBunny.setColor( meshColor );
 		
 		//now let's load mesh separately

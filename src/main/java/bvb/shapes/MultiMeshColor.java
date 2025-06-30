@@ -14,7 +14,7 @@ import net.imglib2.util.Intervals;
 import bvb.scene.AbstractClipTransformVis;
 import bvb.scene.VisMeshColor;
 
-public class MultiMeshColor extends AbstractClipTransformMulti
+public class MultiMeshColor extends AbstractClipTransformMulti implements BasicMeshColor
 {
 	
 	RealInterval boundBox = Intervals.createMinMaxReal( Double.POSITIVE_INFINITY,
@@ -39,19 +39,6 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 	{		
 		return new FinalRealInterval(boundBox);
 	}
-	
-	public void setPointsRender(final float fPointsSize_)
-	{
-		if(visRendersTimeMap.size()>0 )
-		{
-			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
-			for(final AbstractClipTransformVis visRender:visRenders)
-			{
-				((VisMeshColor)visRender).setRenderType( VisMeshColor.POINTS );
-				((VisMeshColor)visRender).setPointsSize( fPointsSize_ );
-			}
-		}
-	}
 
 
 	public void addMesh(final Mesh nmesh, final int nTP, final Color colorin )
@@ -67,7 +54,27 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 			visRendersTimeMap.put( meshShape, nTP );
 		}
 	}
+
+	@Override
+	public void setRenderType(final int nRenderType_)
+	{
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{
+				((VisMeshColor)visRender).setRenderType( nRenderType_);
+			}
+		}
+	}	
 	
+	@Override
+	public int getRenderType()
+	{
+		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getRenderType();
+	}
+	
+	@Override
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{
 		if(visRendersTimeMap.size()>0 )
@@ -81,6 +88,13 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 		}
 	}
 	
+	@Override
+	public int getSurfaceRender()
+	{
+		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getSurfaceRenderType();
+	}
+	
+	@Override
 	public void setSurfaceGrid(final int nSurfaceGridType)
 	{
 		if(visRendersTimeMap.size()>0 )
@@ -93,6 +107,8 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 			}
 		}
 	}
+	
+	@Override
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
 		if(visRendersTimeMap.size()>0 )
@@ -105,6 +121,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 		}
 	}
 	
+	@Override
 	public void setColor(final Color colorin)
 	{
 		if(visRendersTimeMap.size()>0 )
@@ -117,6 +134,31 @@ public class MultiMeshColor extends AbstractClipTransformMulti
 		}
 	}
 	
+	@Override
+	public Color getColor()
+	{
+		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getColor();
+	}
+
+	@Override
+	public void setPointSize( float fPointSize )
+	{
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisMeshColor)visRender).setPointsSize( fPointSize );
+			}
+		}
+		
+	}
+	@Override
+	public float getPointSize()
+	{
+		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).fPointSize;
+	}
+
 	
 	@Override
 	public String toString()

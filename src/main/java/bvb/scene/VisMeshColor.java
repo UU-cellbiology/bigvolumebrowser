@@ -129,6 +129,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 		
 	}
 	
+	public Color getColor()
+	{
+		return new Color(l_color.x,l_color.y,l_color.z,l_color.w);
+	}
+	
 	public void setColor(final Color color_in)
 	{
 		l_color = new Vector4f(color_in.getComponents(null));
@@ -142,6 +147,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 	public void setSurfaceRenderType(final int surfaceRender_)
 	{
 		surfaceRender = surfaceRender_;		
+	}
+	
+	public int getSurfaceRenderType()
+	{
+		return surfaceRender;		
 	}
 	
 	public void setSurfaceGridType(final int gridType_)

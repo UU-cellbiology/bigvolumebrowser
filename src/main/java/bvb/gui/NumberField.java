@@ -255,7 +255,8 @@ public class NumberField extends JPanel {
 			setTextAndFire(Integer.toString(intVal));
 		}
 	}
-	public void setTFEnabled(boolean enabled)
+	@Override
+	public void setEnabled(boolean enabled)
 	{
 		textfield.setEnabled(enabled);
 	}

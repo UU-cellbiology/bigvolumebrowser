@@ -46,7 +46,7 @@ import org.apache.commons.io.FilenameUtils;
 import bvb.scene.VisMeshColor;
 import bvb.utils.Misc;
 
-public class MeshColor extends AbstractClipTransformSingleShape
+public class MeshColor extends AbstractClipTransformSingleShape implements BasicMeshColor
 {
 	
 	RealInterval boundBox = null;
@@ -74,63 +74,6 @@ public class MeshColor extends AbstractClipTransformSingleShape
 		{
 			visRender = new VisMeshColor( nmesh );
 			boundBox = Meshes.boundingBox( nmesh );
-		}
-	}
-	
-	@Override
-	public RealInterval boundingBox()
-	{
-		final AffineTransform3D t = new AffineTransform3D();
-		visRender.getTransform( t );
-		
-		return t.estimateBounds( boundBox );
-	}
-	
-	@Override
-	public RealInterval boundingBoxNotTransformed()
-	{		
-		return new FinalRealInterval(boundBox);
-	}
-	
-	public void setPointsRender(final float fPointsSize_)
-	{
-		if(visRender != null )
-		{
-			((VisMeshColor)visRender).setRenderType( VisMeshColor.POINTS );
-			((VisMeshColor)visRender).setPointsSize( fPointsSize_ );
-		}
-	}	
-	
-	public void setSurfaceRender(final int nSurfaceRenderType)
-	{
-		if(visRender != null )
-		{
-			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
-			((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );
-		}
-	}
-	
-	public void setSurfaceGrid(final int nSurfaceGridType)
-	{
-		if(visRender != null )
-		{
-			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
-			((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
-		}
-	}
-	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
-	{
-		if(visRender != null )
-		{
-			((VisMeshColor)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
-		}
-	}
-	
-	public void setColor(final Color colorin)
-	{
-		if(visRender != null )
-		{
-			((VisMeshColor)visRender).setColor( colorin );
 		}
 	}
 	
@@ -171,6 +114,102 @@ public class MeshColor extends AbstractClipTransformSingleShape
 		return nmesh;
 	}
 	
+	@Override
+	public RealInterval boundingBox()
+	{
+		final AffineTransform3D t = new AffineTransform3D();
+		visRender.getTransform( t );
+		
+		return t.estimateBounds( boundBox );
+	}
+	
+	@Override
+	public RealInterval boundingBoxNotTransformed()
+	{		
+		return new FinalRealInterval(boundBox);
+	}
+	
+	@Override
+	public void setRenderType(final int nRenderType_)
+	{
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setRenderType( nRenderType_ );
+		}	
+	}
+	
+	@Override
+	public int getRenderType()
+	{
+		
+		return ((VisMeshColor)visRender).getRenderType();
+	}	
+	
+	@Override
+	public void setSurfaceRender(final int nSurfaceRenderType)
+	{
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
+			((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );
+		}
+	}
+	
+	@Override
+	public int getSurfaceRender()
+	{
+		return ((VisMeshColor)visRender).getSurfaceRenderType();
+	}
+	
+	@Override
+	public void setSurfaceGrid(final int nSurfaceGridType)
+	{
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
+			((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
+		}
+	}
+	
+	@Override
+	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
+	{
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
+		}
+	}
+	
+	@Override
+	public void setColor(final Color colorin)
+	{
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setColor( colorin );
+		}
+	}
+	
+
+	@Override
+	public Color getColor()
+	{		
+		return ((VisMeshColor)visRender).getColor();
+	}
+	
+
+	@Override
+	public void setPointSize( float fPointSize )
+	{
+		((VisMeshColor)visRender).setPointsSize( fPointSize );
+		
+	}
+
+	@Override
+	public float getPointSize()
+	{
+		return ((VisMeshColor)visRender).fPointSize;
+	}
+
 	@Override
 	public String toString()
 	{
