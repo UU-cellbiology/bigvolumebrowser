@@ -240,6 +240,8 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		gl.glBindVertexArray( 0 );
 		
+		//make sure we can adjust the spot size
+		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		initialized = true;
 		bLocked  = false;
 

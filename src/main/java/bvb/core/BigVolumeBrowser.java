@@ -484,7 +484,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void renderSolid(final GL3 gl, final RenderData data)
 	{
 		//set canvas background color
-		gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 0.0f);
+		if(!bShowBGShader)
+		{
+			gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 0.0f);
+		}
+		else
+		{
+			gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);			
+		}
+		//clear buffer
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		//get viewport size and transform matrices 
@@ -500,8 +508,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//draw clip boxes
 		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
 
-		//to be able to change point size in shader
-		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		int shapeN = shapes.size();
 		for(int i=0; i<shapeN; i++)
 		{
@@ -516,15 +522,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			bgQuad.drawQuad( gl );
 		}
 		//DEBUG
-		for(VisPolyLineAA line:helpLines)
-		{
-			//line.draw( gl, pvm );
-		}
-		
-		for(VolumeBox box:helpBoxes)
-		{
-			//box.draw( gl, pvm, vm, screen_size, nTimePoint );
-		}
+//		for(VisPolyLineAA line:helpLines)
+//		{
+//			line.draw( gl, pvm );
+//		}
+//		
+//		for(VolumeBox box:helpBoxes)
+//		{
+//			box.draw( gl, pvm, vm, screen_size, nTimePoint );
+//		}
 		
 //		System.out.println(gl.glGetString( GL.GL_VENDOR ));
 //		System.out.println(gl.glGetString( GL.GL_RENDERER ));
@@ -540,14 +546,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
 
 		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
-		
-		//draw boxes around volume
-		//volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
-		//draw clip boxes
-		//clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
 
 		//to be able to change point size in shader
-		//gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		int shapeN = shapes.size();
 		for(int i=0; i<shapeN; i++)
 		{
