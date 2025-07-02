@@ -35,7 +35,7 @@ void main()
 	
 	vec4 colorout = colorin;
 	
-	gl_FragDepth = gl_FragCoord.z;
+	//gl_FragDepth = gl_FragCoord.z;
 	
 	if(pointShape == 0)
 	{
@@ -65,7 +65,7 @@ void main()
 			}
 			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
 			
-			gl_FragDepth = 1.0;
+			//gl_FragDepth = 1.0;
 		}
 	}
 	else
@@ -95,7 +95,7 @@ void main()
 					//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
 				}
 				colorout.a = dCol *  fade.x * fade.y * colorin.a; 
-				gl_FragDepth = 1.0;
+				//gl_FragDepth = 1.0;
 			}
 		}
 		

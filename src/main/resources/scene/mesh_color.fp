@@ -103,7 +103,7 @@ void main()
 		vec3 viewDir = normalize(-FragPos);
 		vec4 colorOut;		
 							
-		gl_FragDepth = gl_FragCoord.z;
+		//gl_FragDepth = gl_FragCoord.z;
 		
 		//plain, shaded or shiny surface
 		if(surfaceRender<3)
@@ -123,7 +123,7 @@ void main()
 			{			
 				vec3 diff = diffuse(norm,  lightDir1, lightColor1);
 				vec3 spec = specular( norm, viewDir, lightDir1, lightColor1, 16.0, 1.0 )*(surfaceRender-1);
-				fragColor = vec4((ambient + diff ) * colorin.rgb+spec, colorin.a);
+				fragColor = vec4((ambient + diff ) * colorin.rgb + spec, colorin.a);
 				fragColor = getGridColor(fragColor);
 			}	
 		}
@@ -136,8 +136,6 @@ void main()
 				//all transparent
 				fragColor = vec4(colorin.rgb, colorin.a*alphax);
 				fragColor = getGridColor(fragColor);
-				
-				gl_FragDepth = 1.0;
 			}
 			else
 			{			

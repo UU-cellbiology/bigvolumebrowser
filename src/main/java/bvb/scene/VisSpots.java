@@ -331,24 +331,24 @@ public class VisSpots extends AbstractClipTransformVis
 			t.preConcatenate( clipTransform.inverse() );
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 		}		
-		
+		gl.glDepthFunc( GL.GL_LESS);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		if(renderType == RENDER_GAUSS_UNIFORM || renderType == RENDER_GAUSS_NORMALIZED)
 		{
-			gl.glDepthFunc( GL.GL_ALWAYS);
+			gl.glDepthMask(false);
 		}
-		else
-		{
-			gl.glDepthFunc( GL.GL_LESS);
-		}
+
 		prog.setUniforms( context );
 		
 		prog.use( context );
 		gl.glBindVertexArray( vao );
 		gl.glDrawArrays( GL.GL_POINTS, 0, nSpotsN);
 		gl.glBindVertexArray( 0 );
-		gl.glDepthFunc( GL.GL_LESS);
+		if(renderType == RENDER_GAUSS_UNIFORM || renderType == RENDER_GAUSS_NORMALIZED)
+		{
+			gl.glDepthMask(true);
+		}
 		
 
 	}

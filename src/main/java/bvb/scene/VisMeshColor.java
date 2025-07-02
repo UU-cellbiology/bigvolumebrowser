@@ -366,7 +366,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progMesh.use( context );
 			if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
 			{
-				gl.glDepthFunc( GL.GL_ALWAYS);
+				gl.glDepthMask(false);
+				//gl.glDepthFunc( GL.GL_ALWAYS);
 			}
 
 			//gl.glEnable(GL.GL_BLEND);
@@ -374,6 +375,12 @@ public class VisMeshColor extends AbstractClipTransformVis
 			gl.glBindVertexArray( vao );			
 			gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 			gl.glBindVertexArray( 0 );
+			if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
+			{
+				gl.glDepthMask(true);
+				//gl.glDepthFunc( GL.GL_ALWAYS);
+			}
+
 		}
 		else
 		{
@@ -415,7 +422,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 			gl.glBindVertexArray( 0 );
 
 		}
-		gl.glDepthFunc( GL.GL_LESS);
+		
 
 	}
 	public static int[] IntBuffertoArray(IntBuffer b) {

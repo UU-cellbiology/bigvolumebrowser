@@ -28,6 +28,8 @@
  */
 package bvb.core;
 
+import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
+
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.jogamp.opengl.GL;
@@ -70,6 +72,7 @@ import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
+import bvvpg.core.VolumeViewerPanel.RenderScene;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
 import bvvpg.vistools.Bvv;
@@ -90,7 +93,9 @@ import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
+import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
+import bvb.shapes.MiscShapes;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 
@@ -240,7 +245,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvViewer = bvvHandle.getViewerPanel();
 		
 		//get renderScene
-		bvvViewer.setRenderScene(this::renderScene);
+		bvvViewer.setRenderScene(this::renderSolid);
+		bvvViewer.setRenderSceneTransparent(this::renderTransparent);
 
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		
@@ -475,11 +481,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 //		shapes.remove( shape );
 //	}
 	
-	public void renderScene(final GL3 gl, final RenderData data)
+	public void renderSolid(final GL3 gl, final RenderData data)
 	{
 		//set canvas background color
 		gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 0.0f);
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		//get viewport size and transform matrices 
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
@@ -499,7 +505,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		int shapeN = shapes.size();
 		for(int i=0; i<shapeN; i++)
 		{
-			shapes.get( i ).draw( gl, pvm, vm, screen_size, nTimePoint  );
+			final BasicShape sh = shapes.get( i );			
+			if(!MiscShapes.isShapeTransparent( sh ))
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
 
 		//BG
@@ -510,16 +518,43 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//DEBUG
 		for(VisPolyLineAA line:helpLines)
 		{
-			line.draw( gl, pvm );
+			//line.draw( gl, pvm );
 		}
 		
 		for(VolumeBox box:helpBoxes)
 		{
-			box.draw( gl, pvm, vm, screen_size, nTimePoint );
+			//box.draw( gl, pvm, vm, screen_size, nTimePoint );
 		}
 		
 //		System.out.println(gl.glGetString( GL.GL_VENDOR ));
 //		System.out.println(gl.glGetString( GL.GL_RENDERER ));
+	}
+	
+	public void renderTransparent(final GL3 gl, final RenderData data)
+	{
+		//gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		//get viewport size and transform matrices 
+		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
+		final Matrix4f pvm = new Matrix4f( data.getPv() );
+		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
+
+		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
+		
+		//draw boxes around volume
+		//volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
+		//draw clip boxes
+		//clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
+
+		//to be able to change point size in shader
+		//gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+		int shapeN = shapes.size();
+		for(int i=0; i<shapeN; i++)
+		{
+			final BasicShape sh = shapes.get( i );			
+			if(MiscShapes.isShapeTransparent( sh ))
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
+		}
 	}
 	
 	public void showVolumeBoxes(boolean bShow)
