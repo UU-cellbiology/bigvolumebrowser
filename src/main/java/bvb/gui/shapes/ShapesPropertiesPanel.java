@@ -13,16 +13,16 @@ import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
 import bvb.shapes.Spots;
 
-public class PanelShapesProperties extends JPanel 
+public class ShapesPropertiesPanel extends JPanel 
 {
 	final BigVolumeBrowser bvb;
 	
-	final PanelsSpotsProperties panelsSpotsProperties;
-	final PanelsMeshesProperties panelsMeshesProperties;
+	final SpotsPropertiesPanel panelsSpotsProperties;
+	final MeshesPropertiesPanel panelsMeshesProperties;
 
 	final JTabbedPane tabPane;
 	
-	public PanelShapesProperties(final BigVolumeBrowser bvb_)
+	public ShapesPropertiesPanel(final BigVolumeBrowser bvb_)
 	{
 		super();
 		bvb = bvb_;
@@ -30,9 +30,9 @@ public class PanelShapesProperties extends JPanel
 
 		setLayout(gridbag);
 		
-		panelsSpotsProperties = new PanelsSpotsProperties(bvb.selectedObjects);
+		panelsSpotsProperties = new SpotsPropertiesPanel(bvb);
 		
-		panelsMeshesProperties = new PanelsMeshesProperties(bvb);
+		panelsMeshesProperties = new MeshesPropertiesPanel(bvb);
 		
 		tabPane = new JTabbedPane(SwingConstants.TOP);
 		

@@ -72,7 +72,6 @@ import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
-import bvvpg.core.VolumeViewerPanel.RenderScene;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
 import bvvpg.vistools.Bvv;

@@ -110,6 +110,7 @@ public class Spots extends AbstractClipTransformSingleShape
 				if ( z + pointSize > boundingBox[ 5 ] )
 					boundingBox[ 5 ] = z + pointSize;
 			}
+			((VisSpots)visRender).setGaussSDNorm(pointSize);
 		}
 		else
 		{
@@ -133,9 +134,11 @@ public class Spots extends AbstractClipTransformSingleShape
 					boundingBox[ 5 ] = z + pSize;
 				
 			}
+			//to mark that we have sizes
+			pointSize = -1.0f;
 			Arrays.sort( sortedSize );
-			//take 99.0% quantile as max
-			int index = ( int ) Math.round( 0.01 * (sortedSize.length-1));
+			//take 97.0% quantile as max
+			int index = ( int ) Math.round( 0.03 * (sortedSize.length-1));
 			((VisSpots)visRender).setGaussSDNorm(sortedSize[index]);
 			
 		}
@@ -160,7 +163,37 @@ public class Spots extends AbstractClipTransformSingleShape
 		return new FinalRealInterval(boundBox);
 	}
 	
-	public void setPointsColor(Color pointColor_) 
+	public void setPointSize (final float pointSize_)
+	{
+		float oldSpotSize = ((VisSpots)visRender).fSpotSize;
+		if(oldSpotSize<0)
+		{
+			System.err.println("This Spots Shape object has different spots size.");
+			return;
+		}
+		
+		final double [][] bb = new double[2][3];
+		boundBox.realMin( bb[0] );
+		boundBox.realMax( bb[1] );
+		//adjust bbox dimensions
+		final double diff = oldSpotSize-pointSize;
+		for(int d=0;d<3;d++)
+		{
+			bb[0][d]+=diff;
+			bb[1][d]-=diff;
+		}
+		boundBox = FinalRealInterval.wrap( bb[0], bb[1]);
+		pointSize = pointSize_;
+		((VisSpots)visRender).fSpotSize = pointSize_;
+		
+	}
+	
+	public float getPointSize()
+	{
+		return pointSize;
+	}
+	
+	public void setColor(Color pointColor_) 
 	{
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
@@ -171,21 +204,38 @@ public class Spots extends AbstractClipTransformSingleShape
 		}
 	}
 	
+	public Color getColor()
+	{
+		return pointColor;
+
+	}
+	
 	public void setRenderType(int nRenderType)
 	{
-		pointShape = nRenderType;
-		((VisSpots)visRender).setShape( pointShape );
+		renderType = nRenderType;
+		((VisSpots)visRender).setRenderType( renderType );
 		
 		return;
 	}	
 	
+	public int getRenderType()
+	{
+		return renderType;
+	}
+	
 	public void setPointShape(int nShape)
 	{
-		renderType = nShape;
-		((VisSpots)visRender).setRenderType(renderType);
+		pointShape = nShape;
+		((VisSpots)visRender).setShape(pointShape);
 		
 		return;
 	}	
+	
+	public int getPointShape()
+	{
+		
+		return pointShape;
+	}
 	
 	@Override
 	public String toString()

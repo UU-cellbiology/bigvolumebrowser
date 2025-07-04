@@ -35,7 +35,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 
 import bvb.core.BigVolumeBrowser;
-import bvb.scene.VisSpotsSame;
+import bvb.scene.VisSpots;
 import bvb.shapes.Spots;
 
 import ij.ImageJ;
@@ -62,9 +62,9 @@ public class Example002Spots
 		
 		//define point size, color, shape and filling
 		//spots with the same diameter
-		Spots samePoints = new Spots(nDiameter*0.08f, Color.YELLOW, VisSpotsSame.SHAPE_SQUARE, VisSpotsSame.RENDER_FILLED);
+		Spots samePoints = new Spots(nDiameter*0.08f, Color.YELLOW, VisSpots.SHAPE_SQUARE, VisSpots.RENDER_FILLED);
 		//spots with different diameters
-		Spots diffPoints = new Spots(nDiameter*0.08f, Color.CYAN, VisSpotsSame.SHAPE_ROUND, VisSpotsSame.RENDER_FILLED);
+		Spots diffPoints = new Spots(nDiameter*0.08f, Color.CYAN, VisSpots.SHAPE_ROUND, VisSpots.RENDER_FILLED);
 
 		final ArrayList<RealPoint> verticesSame = new ArrayList<>();
 		final ArrayList<RealPoint> verticesDiff = new ArrayList<>();
@@ -79,7 +79,7 @@ public class Example002Spots
 		{
 			verticesSame.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
 			verticesDiff.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			diameters[i] = ( float ) ( Math.random()*nDiameter*0.5f);
+			diameters[i] = ( float ) ( 0.2*(nDiameter + Math.random()*nDiameter));
 		}
 		//do not provide radius
 		samePoints.setPoints( verticesSame );

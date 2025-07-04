@@ -69,7 +69,7 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private Vector4f l_color;
 	
-	private float fSpotSize;
+	public float fSpotSize;
 	
 	private int renderType = 0;
 	
@@ -165,10 +165,13 @@ public class VisSpots extends AbstractClipTransformVis
 	}
 	
 	public void setColor(Color pointColor) 
+	{		
+		l_color = new Vector4f(pointColor.getComponents(null));		
+	}
+	
+	public Color getColor() 
 	{
-		
-		l_color = new Vector4f(pointColor.getComponents(null));
-		
+		return new Color(l_color.x,l_color.y,l_color.z,l_color.w);
 	}
 	
 	public void setSize(float fSpotSize_)
@@ -183,10 +186,21 @@ public class VisSpots extends AbstractClipTransformVis
 		renderType = nRenderType_;
 		
 	}
+	
+	public int getRenderType()
+	{
+		return renderType;
+	}
+	
 	/** 0 - round, 1 - square **/
 	public void setShape(int nShape_)
 	{
 		spotShape = nShape_;		
+	}
+	
+	public int getShape()
+	{
+		return spotShape;
 	}
 
 	private void init( GL3 gl )

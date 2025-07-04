@@ -1,6 +1,7 @@
 package bvb.shapes;
 
 import bvb.scene.VisMeshColor;
+import bvb.scene.VisSpots;
 
 public class MiscShapes
 {
@@ -18,7 +19,8 @@ public class MiscShapes
 		}
 		if(shape instanceof Spots)
 		{
-			
+			if(((Spots)shape).getRenderType()>=VisSpots.RENDER_GAUSS_UNIFORM)
+				return true;
 		}
 		return false;
 	}

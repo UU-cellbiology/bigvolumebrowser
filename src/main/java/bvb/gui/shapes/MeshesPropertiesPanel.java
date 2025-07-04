@@ -24,7 +24,7 @@ import bvb.gui.NumberField;
 import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
 
-public class PanelsMeshesProperties extends JPanel
+public class MeshesPropertiesPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	final JPanelConsistent pColor;
@@ -32,6 +32,7 @@ public class PanelsMeshesProperties extends JPanel
 	final JPanelConsistent pPointSize;
 	final JPanelConsistent pSurface;
 	final JPanelConsistent pGrid;
+	
 	final JComboBox<String> cbRender;
 	final NumberField nfMeshPointSize;
 	final JButton butColor;
@@ -44,7 +45,7 @@ public class PanelsMeshesProperties extends JPanel
 	
 	private boolean blockUpdates = false;
 	
-	public PanelsMeshesProperties(final BigVolumeBrowser bvb_)
+	public MeshesPropertiesPanel(final BigVolumeBrowser bvb_)
 	{
 		super();	
 		
@@ -53,8 +54,7 @@ public class PanelsMeshesProperties extends JPanel
 		setLayout(new GridBagLayout());
 		
 		GridBagConstraints gbc = new GridBagConstraints();
-		
-		
+				
 		butColor = new JButton( new ColorIcon( Color.WHITE ) );	
 		butColor.addActionListener( e -> {
 			Color newColor = JColorChooser.showDialog(null, "Choose mesh color", 
@@ -121,9 +121,7 @@ public class PanelsMeshesProperties extends JPanel
 		gbc.gridy = 0;
 		pGrid.add( new JLabel("Grid: "), gbc );
 		gbc.gridx++;
-		pGrid.add( cbGrid, gbc );
-		
-
+		pGrid.add( cbGrid, gbc );		
 		
 		allComp.add( butColor );
 		allComp.add( cbSurface );
@@ -188,16 +186,18 @@ public class PanelsMeshesProperties extends JPanel
 				}
 			}
 		}
+		
+		final Color cColorFin = currColor;
+		final float fPointSizeFin = fPointSize;
 		final int nRenderFin = nRender;
 		final int nSurfaceFin = nSurface;
 		final boolean bRenderSameFin = bRenderSame;
 		final boolean bColorSameFin = bColorSame;
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bSurfaceSameFin = bSurfaceSame;
-		final Color cColorFin = currColor;
-		final float fPointSizeFin = fPointSize;
+
 		SwingUtilities.invokeLater( () -> {
-			synchronized ( PanelsMeshesProperties.this )
+			synchronized ( MeshesPropertiesPanel.this )
 			{
 				blockUpdates = true;
 				for (int d=0;d<3;d++)
@@ -293,6 +293,7 @@ public class PanelsMeshesProperties extends JPanel
 			updateGUI();
 		}
 	}
+	
 	synchronized void updateSurfaceRender()
 	{
 		if(!blockUpdates)

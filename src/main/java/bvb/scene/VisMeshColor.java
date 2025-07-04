@@ -400,8 +400,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progPoints.getUniform4f( "colorin" ).set( l_color );
 			progPoints.getUniform2f( "windowSize" ).set( window_sizef );
 			progPoints.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
-			progPoints.getUniform1i( "renderType" ).set( VisSpotsSame.RENDER_FILLED );
-			progPoints.getUniform1i( "pointShape" ).set( VisSpotsSame.SHAPE_ROUND );
+			progPoints.getUniform1i( "renderType" ).set( VisSpots.RENDER_FILLED );
+			progPoints.getUniform1i( "pointShape" ).set( VisSpots.SHAPE_ROUND );
 			progPoints.getUniform1i("clipactive").set(0);
 			
 			if(clipActive && clipInt != null)

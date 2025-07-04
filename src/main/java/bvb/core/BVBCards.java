@@ -11,7 +11,7 @@ import bvb.gui.data.PanelAddSources;
 import bvb.gui.data.PanelData;
 import bvb.gui.shapes.PanelAddShapes;
 import bvb.gui.shapes.PanelShapes;
-import bvb.gui.shapes.PanelShapesProperties;
+import bvb.gui.shapes.ShapesPropertiesPanel;
 import bvb.gui.transform.TransformPanel;
 import bvvpg.pgcards.BVVPGDefaultCards;
 
@@ -22,7 +22,7 @@ public class BVBCards
 	
 	final public PanelAddSources panelAddSources;
 	
-	final public PanelShapesProperties panelShapesProperties;
+	final public ShapesPropertiesPanel panelShapesProperties;
 	
 	final public PanelData panelData;	
 	
@@ -52,7 +52,7 @@ public class BVBCards
 		
 		setupListeners();
 		
-		panelShapesProperties = new PanelShapesProperties(bvb);
+		panelShapesProperties = new ShapesPropertiesPanel(bvb);
 		
 	    viewPanel = new ViewPanel(bvb);
 	    
