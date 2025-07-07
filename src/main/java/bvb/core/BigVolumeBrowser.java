@@ -93,7 +93,6 @@ import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
-import bvb.shapes.MiscShapes;
 import bvb.shapes.VolumeBox;
 import bvb.utils.Misc;
 

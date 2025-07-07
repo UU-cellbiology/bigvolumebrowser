@@ -38,7 +38,6 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
-import bvb.scene.VisMeshColor;
 import bvb.scene.VisSpots;
 
 /** Spots of arbitrary color and size **/
