@@ -38,6 +38,7 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
+import bvb.scene.VisMeshColor;
 import bvb.scene.VisSpots;
 
 /** Spots of arbitrary color and size **/
@@ -61,6 +62,7 @@ public class Spots extends AbstractClipTransformSingleShape
 		renderType = nRenderType_;
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		pointShape = nShape_;
+		defineTransparency();
 	}
 	
 	
@@ -163,10 +165,26 @@ public class Spots extends AbstractClipTransformSingleShape
 		return new FinalRealInterval(boundBox);
 	}
 	
+	void defineTransparency()
+	{
+		if(visRender != null)
+		{
+			bTransparent = false;
+			if(((VisSpots)visRender).getRenderType() >= VisSpots.RENDER_GAUSS_UNIFORM)
+			{
+				bTransparent = true;
+			}
+			if(((VisSpots)visRender).getColor().getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
+			{
+				bTransparent = true;
+			}
+		}
+	}
+	
 	public void setPointSize (final float pointSize_)
 	{
-		float oldSpotSize = ((VisSpots)visRender).fSpotSize;
-		if(oldSpotSize<0)
+		
+		if(pointSize < 0)
 		{
 			System.err.println("This Spots Shape object has different spots size.");
 			return;
@@ -176,7 +194,7 @@ public class Spots extends AbstractClipTransformSingleShape
 		boundBox.realMin( bb[0] );
 		boundBox.realMax( bb[1] );
 		//adjust bbox dimensions
-		final double diff = oldSpotSize-pointSize;
+		final double diff = 0.5*( pointSize - pointSize_);
 		for(int d=0;d<3;d++)
 		{
 			bb[0][d]+=diff;
@@ -197,7 +215,7 @@ public class Spots extends AbstractClipTransformSingleShape
 	{
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
-		
+		defineTransparency();
 		if(visRender != null)
 		{
 			((VisSpots)visRender).setColor(pointColor);			
@@ -214,7 +232,7 @@ public class Spots extends AbstractClipTransformSingleShape
 	{
 		renderType = nRenderType;
 		((VisSpots)visRender).setRenderType( renderType );
-		
+		defineTransparency();
 		return;
 	}	
 	
@@ -232,8 +250,7 @@ public class Spots extends AbstractClipTransformSingleShape
 	}	
 	
 	public int getPointShape()
-	{
-		
+	{		
 		return pointShape;
 	}
 	

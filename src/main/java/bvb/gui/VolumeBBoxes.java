@@ -319,8 +319,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 					if(!currBox.compareIntervalTransform( interval, transform ))
 					{
 						currBox.setTransform(transform, false);
-						currBox.setInterval( interval );
-						
+						currBox.setInterval( interval );						
 					}
 				}
 			}

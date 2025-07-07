@@ -92,7 +92,6 @@ import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataLoader;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
-import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
 import bvb.shapes.MiscShapes;
 import bvb.shapes.VolumeBox;
@@ -244,7 +243,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvViewer = bvvHandle.getViewerPanel();
 		
 		//get renderScene
-		bvvViewer.setRenderScene(this::renderSolid);
+		bvvViewer.setRenderScene(this::renderOpaque);
 		bvvViewer.setRenderSceneTransparent(this::renderTransparent);
 
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
@@ -480,7 +479,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 //		shapes.remove( shape );
 //	}
 	
-	public void renderSolid(final GL3 gl, final RenderData data)
+	public void renderOpaque(final GL3 gl, final RenderData data)
 	{
 		//set canvas background color
 		if(!bShowBGShader)
@@ -511,7 +510,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		for(int i=0; i<shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
-			if(!MiscShapes.isShapeTransparent( sh ))
+			if(!sh.isTransparent())
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
 
@@ -552,7 +551,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		for(int i=0; i<shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
-			if(MiscShapes.isShapeTransparent( sh ))
+			if(sh.isTransparent())
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
 	}

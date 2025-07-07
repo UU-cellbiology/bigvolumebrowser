@@ -39,6 +39,9 @@ import bvvpg.source.converters.Clippable3D;
 
 public interface BasicShape extends Clippable3D
 {
+	
+	public static final int TRANSPARENCY_THRESHOLD = 250;
+	
 	/** method to draw GPU primitives **/
 	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size, final int nTimePoint);
 
@@ -51,6 +54,9 @@ public interface BasicShape extends Clippable3D
 	
 	/**report visibility **/
 	public boolean isVisible();
+	
+	/** report transparency of the shape **/
+	public boolean isTransparent();
 	
 	public RealInterval boundingBox();
 	

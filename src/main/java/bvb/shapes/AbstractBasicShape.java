@@ -5,6 +5,8 @@ public abstract class AbstractBasicShape implements BasicShape
 {
 	boolean bVisible = true;
 	
+	boolean bTransparent = false;
+	
 	int nTimePoint = -1; 
 
 	String sName = "";
@@ -13,6 +15,12 @@ public abstract class AbstractBasicShape implements BasicShape
 	public boolean isVisible()
 	{
 		return bVisible;
+	}
+	
+	@Override
+	public boolean isTransparent()
+	{
+		return bTransparent;
 	}
 	
 	@Override
