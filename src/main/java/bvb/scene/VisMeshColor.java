@@ -328,7 +328,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 		JoglGpuContext context = JoglGpuContext.get( gl );
 
-		gl.glDepthFunc( GL.GL_LESS);
+		//gl.glDepthFunc( GL.GL_LESS);
 
 		//add transform
 		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
@@ -371,8 +371,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progMesh.setUniforms( context );
 			progMesh.use( context );
 
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+//			gl.glEnable(GL.GL_BLEND);
+//			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glBindVertexArray( vao );			
 			gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 			gl.glBindVertexArray( 0 );

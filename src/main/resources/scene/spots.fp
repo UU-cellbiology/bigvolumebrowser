@@ -100,7 +100,9 @@ void main()
 		}
 		
 	}
-
+	
+	//colorout.a = colorout.a*exp(-gl_FragCoord.z*0.5);
+	//colorout.xyz = colorout.xyz*colorout.a;
     fragColor = colorout; 
     
 }

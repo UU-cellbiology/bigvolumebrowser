@@ -489,8 +489,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);			
 		}
-		//clear buffer
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//clear buffer with color
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		gl.glDepthFunc( GL.GL_LESS);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
 		//get viewport size and transform matrices 
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
@@ -546,6 +549,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+		//gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE); // Additive RGB + alpha
+		//gl.glBlendEquation(GL.GL_FUNC_ADD);
+
 		int shapeN = shapes.size();
 		//disable depth writing
 		gl.glDepthMask(false);
@@ -556,6 +562,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
 		gl.glDepthMask(true);
+		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 	
 	public void showVolumeBoxes(boolean bShow)

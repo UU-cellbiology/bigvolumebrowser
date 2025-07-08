@@ -28,8 +28,6 @@
  */
 package bvb.scene;
 
-import static com.jogamp.opengl.GL.GL_LESS;
-import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_RGBA;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
@@ -266,8 +264,8 @@ public class VisMeshTexture extends AbstractClipTransformVis
 		}
 		prog.setUniforms( context );
 		prog.use( context );
-		gl.glEnable( GL_DEPTH_TEST );
-		gl.glDepthFunc( GL_LESS);
+//		gl.glEnable( GL_DEPTH_TEST );
+//		gl.glDepthFunc( GL_LESS);
 		gl.glActiveTexture( GL_TEXTURE0 );
 		gl.glBindTexture( GL_TEXTURE_2D, texId );
 		gl.glBindVertexArray( vao );
