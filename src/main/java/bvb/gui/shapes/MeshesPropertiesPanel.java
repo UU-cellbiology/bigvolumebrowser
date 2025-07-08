@@ -104,7 +104,7 @@ public class MeshesPropertiesPanel extends JPanel
 		String[] sSurface = {"Plain", "Shaded", "Shiny", "Silhouette"};
 		cbSurface = new JComboBox< >(sSurface);
 		cbSurface.addActionListener( (e)->{
-			updateSurfaceRender();				
+			updateSurface();				
 			});
 		
 		pSurface = new JPanelConsistent(new GridBagLayout());
@@ -116,6 +116,9 @@ public class MeshesPropertiesPanel extends JPanel
 		
 		String[] sGrid = {"Filled", "Wire", "Cartesian"};
 		cbGrid = new JComboBox< >(sGrid);
+		cbGrid.addActionListener( (e)->{
+			updateGrid();				
+			});
 		pGrid = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -294,7 +297,7 @@ public class MeshesPropertiesPanel extends JPanel
 		}
 	}
 	
-	synchronized void updateSurfaceRender()
+	synchronized void updateSurface()
 	{
 		if(!blockUpdates)
 		{
@@ -305,6 +308,24 @@ public class MeshesPropertiesPanel extends JPanel
 				if(sh instanceof BasicMeshColor)
 				{
 					((BasicMeshColor)sh).setSurfaceRender( nSurfaceType );
+				}
+			}
+			bvb.repaintBVV();
+			updateGUI();
+		}
+	}
+	
+	synchronized void updateGrid()
+	{
+		if(!blockUpdates)
+		{
+			final int nGridType = cbGrid.getSelectedIndex();
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicMeshColor)
+				{
+					((BasicMeshColor)sh).setSurfaceGrid( nGridType );
 				}
 			}
 			bvb.repaintBVV();

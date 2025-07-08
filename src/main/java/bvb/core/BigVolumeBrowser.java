@@ -547,12 +547,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		int shapeN = shapes.size();
+		//disable depth writing
+		gl.glDepthMask(false);
 		for(int i=0; i<shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(sh.isTransparent())
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
 		}
+		gl.glDepthMask(true);
 	}
 	
 	public void showVolumeBoxes(boolean bShow)

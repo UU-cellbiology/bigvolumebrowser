@@ -128,7 +128,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		if(visRender != null)
 		{
 			bTransparent = false;
-			if(((VisMeshColor)visRender).getRenderType() == VisMeshColor.MESH &&((VisMeshColor)visRender).getSurfaceRenderType() ==  VisMeshColor.SURFACE_SILHOUETTE)
+			if(getRenderType() == VisMeshColor.MESH && getSurfaceRender() ==  VisMeshColor.SURFACE_SILHOUETTE)
 			{
 				bTransparent = true;
 			}

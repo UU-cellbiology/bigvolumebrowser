@@ -39,6 +39,23 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	{		
 		return new FinalRealInterval(boundBox);
 	}
+	
+	/** define if the shape is transparent **/
+	void defineTransparency()
+	{
+		if(visRendersTimeMap.size()>0 )
+		{
+			bTransparent = false;
+			if(getRenderType() == VisMeshColor.MESH && getSurfaceRender() ==  VisMeshColor.SURFACE_SILHOUETTE)
+			{
+				bTransparent = true;
+			}
+			if(getColor().getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
+			{
+				bTransparent = true;
+			}
+		}
+	}
 
 
 	public void addMesh(final Mesh nmesh, final int nTP, final Color colorin )
@@ -65,6 +82,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			{
 				((VisMeshColor)visRender).setRenderType( nRenderType_);
 			}
+			defineTransparency();
 		}
 	}	
 	
@@ -85,6 +103,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 				((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
 				((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );	
 			}
+			defineTransparency();
 		}
 	}
 	
@@ -105,6 +124,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 				((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
 				((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
 			}
+			defineTransparency();
 		}
 	}
 	
@@ -131,6 +151,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			{		
 				((VisMeshColor)visRender).setColor( colorin );
 			}
+			defineTransparency();
 		}
 	}
 	

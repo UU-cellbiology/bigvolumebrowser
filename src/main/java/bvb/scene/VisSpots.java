@@ -327,6 +327,8 @@ public class VisSpots extends AbstractClipTransformVis
 		ellipse_axes.x = ellipse_axes.x * ellipse_axes.x;
 		ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
 				
+		gl.glDepthFunc( GL.GL_LESS);
+		
 		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform1f( "pointScale" ).set( fPointScale );
@@ -347,25 +349,16 @@ public class VisSpots extends AbstractClipTransformVis
 			t.preConcatenate( clipTransform.inverse() );
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 		}		
-		gl.glDepthFunc( GL.GL_LESS);
+
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		if(renderType == RENDER_GAUSS_UNIFORM || renderType == RENDER_GAUSS_NORMALIZED)
-		{
-			gl.glDepthMask(false);
-		}
 
-		prog.setUniforms( context );
-		
+		prog.setUniforms( context );		
 		prog.use( context );
+		
 		gl.glBindVertexArray( vao );
 		gl.glDrawArrays( GL.GL_POINTS, 0, nSpotsN);
-		gl.glBindVertexArray( 0 );
-		if(renderType == RENDER_GAUSS_UNIFORM || renderType == RENDER_GAUSS_NORMALIZED)
-		{
-			gl.glDepthMask(true);
-		}
-		
+		gl.glBindVertexArray( 0 );		
 
 	}
 

@@ -105,7 +105,6 @@ public class VisMeshColor extends AbstractClipTransformVis
 	
 	volatile boolean bLocked = false;
 	
-
 	public VisMeshColor()
 	{
 		initShader();
@@ -338,6 +337,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 		pvm.mul( trM, pvtm );
 		vm.mul( trM, vtm );
+		
+
 		if(renderType == MESH)
 		{
 			final Matrix4f itvm = vtm.invert( new Matrix4f() ).transpose();
@@ -369,22 +370,12 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 			progMesh.setUniforms( context );
 			progMesh.use( context );
-			if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
-			{
-				gl.glDepthMask(false);
-				//gl.glDepthFunc( GL.GL_ALWAYS);
-			}
 
-			//gl.glEnable(GL.GL_BLEND);
-			//gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glEnable(GL.GL_BLEND);
+			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glBindVertexArray( vao );			
 			gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 			gl.glBindVertexArray( 0 );
-			if(surfaceRender == SURFACE_SILHOUETTE && silhouetteRender == silhouette_TRANSPARENT)
-			{
-				gl.glDepthMask(true);
-				//gl.glDepthFunc( GL.GL_ALWAYS);
-			}
 
 		}
 		else
@@ -427,9 +418,9 @@ public class VisMeshColor extends AbstractClipTransformVis
 			gl.glBindVertexArray( 0 );
 
 		}
-		
 
 	}
+	
 	public static int[] IntBuffertoArray(IntBuffer b) {
 	    if(b.hasArray()) 
 	    {

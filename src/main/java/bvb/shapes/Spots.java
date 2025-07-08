@@ -166,17 +166,15 @@ public class Spots extends AbstractClipTransformSingleShape
 	
 	void defineTransparency()
 	{
-		if(visRender != null)
+
+		bTransparent = false;
+		if(renderType >= VisSpots.RENDER_GAUSS_UNIFORM)
 		{
-			bTransparent = false;
-			if(((VisSpots)visRender).getRenderType() >= VisSpots.RENDER_GAUSS_UNIFORM)
-			{
-				bTransparent = true;
-			}
-			if(((VisSpots)visRender).getColor().getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
-			{
-				bTransparent = true;
-			}
+			bTransparent = true;
+		}
+		if(pointColor.getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
+		{
+			bTransparent = true;
 		}
 	}
 	

@@ -115,7 +115,6 @@ public class BVBActions
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
-		actions.runnableAction(() -> bvb.bvvViewer.showDepth(), "depth", "Y" );
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
 		
 	}
