@@ -85,6 +85,7 @@ public class Example002Spots
 		samePoints.setPoints( verticesSame );
 		//specify radius for each spot
 		diffPoints.setPoints( verticesDiff, diameters );
+		diffPoints.setRenderType( VisSpots.RENDER_GAUSS_UNIFORM );
 
 		testBVB.addShape( samePoints );
 		testBVB.addShape( diffPoints );

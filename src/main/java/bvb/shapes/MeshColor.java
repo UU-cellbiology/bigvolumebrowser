@@ -29,14 +29,12 @@
 package bvb.shapes;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
-import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -80,14 +78,12 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	public static Mesh loadMeshFromFile(String sFilename)
 	{
 		String fileExt = FilenameUtils.getExtension( sFilename );
-		
-		NaiveDoubleMesh nmesh = new NaiveDoubleMesh();
 				
 		if(fileExt.equals( "stl" ))
 		{
 			try
 			{
-				STLMeshIO.read( nmesh, new File( sFilename ) );
+				return STLMeshIO.open( sFilename );
 			}
 			catch ( IOException exc )
 			{
@@ -100,10 +96,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		{
 			try
 			{
-				//not sure what is better
-				//BufferMesh bmesh = null;
-				//bmesh = PLYMeshIO.open( filename );				
-				PLYMeshIO.read( new File( sFilename ), nmesh );
+				return PLYMeshIO.open( sFilename );				
 			}
 			catch ( IOException exc )
 			{
@@ -111,7 +104,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 				return null;
 			}
 		}
-		return nmesh;
+		return null;
 	}
 	
 	@Override
@@ -152,8 +145,8 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		
 		if(visRender != null )
 		{
-			defineTransparency();
 			((VisMeshColor)visRender).setRenderType( nRenderType_ );
+			defineTransparency();
 		}	
 	}	
 
@@ -168,10 +161,9 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
-			defineTransparency();	
-			
+			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );			
 			((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );
+			defineTransparency();	
 		}
 	}
 	
@@ -185,10 +177,10 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	public void setSurfaceGrid(final int nSurfaceGridType)
 	{
 		if(visRender != null )
-		{
-			defineTransparency();
+		{			
 			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
 			((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
+			defineTransparency();
 		}
 	}
 	

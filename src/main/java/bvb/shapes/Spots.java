@@ -214,10 +214,11 @@ public class Spots extends AbstractClipTransformSingleShape
 	{
 
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
-		defineTransparency();
+		
 		if(visRender != null)
 		{
-			((VisSpots)visRender).setColor(pointColor);			
+			((VisSpots)visRender).setColor(pointColor);	
+			defineTransparency();
 		}
 	}
 	

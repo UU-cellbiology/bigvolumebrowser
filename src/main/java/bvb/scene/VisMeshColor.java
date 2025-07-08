@@ -180,6 +180,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 		
 		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
 		
+		if( mesh.vertices().size() == 0)
+		{
+			System.err.println("Error loading mesh, zero vertices!");
+			return;
+		}
 		//see if normals were setup already
 		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ),mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
 		
