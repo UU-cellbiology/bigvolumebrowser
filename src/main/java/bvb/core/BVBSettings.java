@@ -70,6 +70,8 @@ public class BVBSettings
 	
 	public static int nAddedRAINumber = 1;
 	
+	public static boolean bWeightedOIT = false;
+	
 	public static Color getInvertedColor(Color color_in)
 	{		
 		return  new Color(255-color_in.getRed(),255-color_in.getGreen(),255-color_in.getBlue(),color_in.getAlpha());

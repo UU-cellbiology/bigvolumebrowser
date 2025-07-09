@@ -28,8 +28,6 @@
  */
 package bvb.core;
 
-import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
-
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.jogamp.opengl.GL;
@@ -513,7 +511,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(!sh.isTransparent())
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint);//, false  );
 		}
 
 		//BG
@@ -559,7 +557,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(sh.isTransparent())
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint  );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint);//, BVBSettings.bWeightedOIT  );
 		}
 		gl.glDepthMask(true);
 		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);

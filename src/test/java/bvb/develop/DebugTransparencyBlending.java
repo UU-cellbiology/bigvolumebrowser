@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package bvb.examples;
+package bvb.develop;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -35,12 +35,13 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 
 import bvb.core.BigVolumeBrowser;
+import bvb.examples.RandomHyperSphere;
 import bvb.scene.VisSpots;
 import bvb.shapes.Spots;
 
 import ij.ImageJ;
 
-public class Example002Spots
+public class DebugTransparencyBlending
 {
 	public static void main( final String[] args )
 	{
@@ -62,9 +63,9 @@ public class Example002Spots
 		
 		//define point size, color, shape and filling
 		//spots with the same diameter
-		Spots samePoints = new Spots(nDiameter*0.08f, Color.YELLOW, VisSpots.SHAPE_SQUARE, VisSpots.RENDER_FILLED);
+		Spots samePoints = new Spots(nDiameter*0.8f, new Color(255,0,0,128), VisSpots.SHAPE_SQUARE, VisSpots.RENDER_FILLED);
 		//spots with different diameters
-		Spots diffPoints = new Spots(nDiameter*0.08f, Color.CYAN, VisSpots.SHAPE_ROUND, VisSpots.RENDER_FILLED);
+		Spots diffPoints = new Spots(nDiameter*0.08f, new Color(0,255,0,128), VisSpots.SHAPE_ROUND, VisSpots.RENDER_FILLED);
 
 		final ArrayList<RealPoint> verticesSame = new ArrayList<>();
 		final ArrayList<RealPoint> verticesDiff = new ArrayList<>();
