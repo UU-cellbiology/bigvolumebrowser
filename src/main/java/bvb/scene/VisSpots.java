@@ -269,7 +269,7 @@ public class VisSpots extends AbstractClipTransformVis
 	}
 
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size )
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final boolean bWeightedOIT)
 	{
 		
 		//if (fSpotSize < 0.0001)
@@ -348,7 +348,9 @@ public class VisSpots extends AbstractClipTransformVis
 			t.set( transform );
 			t.preConcatenate( clipTransform.inverse() );
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
-		}		
+		}	
+		
+		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 
 		//gl.glEnable(GL.GL_BLEND);
 		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);

@@ -298,7 +298,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 	}
 
 	@Override
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final boolean bWeightedOIT)
 	{
 		
 		while (bLocked)
@@ -367,7 +367,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 		
 				progMesh.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
-
+			progMesh.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 			progMesh.setUniforms( context );
 			progMesh.use( context );
 
@@ -410,6 +410,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 				t.preConcatenate( clipTransform.inverse() );
 				progPoints.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
+			
+			progPoints.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 			progPoints.setUniforms( context );			
 			progPoints.use( context );
 			

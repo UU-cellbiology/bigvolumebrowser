@@ -80,7 +80,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	}
 
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_)
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_, final boolean bWeightedOIT)
 	{
 		if(bVisible)
 		{
@@ -103,7 +103,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				{
 					if(vbox != null)
 					{
-						vbox.draw( gl, pvm, vm, screen_size, -1);
+						vbox.draw( gl, pvm, vm, screen_size, -1, false);
 					}
 				}
 			});
@@ -113,7 +113,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				{
 					if(vbox != null)
 					{
-						vbox.draw( gl, pvm, vm, screen_size, -1);
+						vbox.draw( gl, pvm, vm, screen_size, -1, false);
 					}
 				}
 			});

@@ -43,7 +43,7 @@ public interface BasicShape extends Clippable3D
 	public static final int TRANSPARENCY_THRESHOLD = 250;
 	
 	/** method to draw GPU primitives **/
-	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size, final int nTimePoint);
+	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final boolean bWeightedOIT);
 
 	/** method required to reload GPU shader/primitives 
 	 * during BVV restart **/
