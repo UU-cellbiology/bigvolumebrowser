@@ -10,6 +10,6 @@ public interface BasicVis
 	public void reload();
 	
 	/** draws OpenGL primitive **/
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size );
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final boolean bWeightedOIT);
 	
 }

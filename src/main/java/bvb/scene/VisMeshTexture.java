@@ -210,7 +210,7 @@ public class VisMeshTexture extends AbstractClipTransformVis
 	}
 
 	@Override
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final boolean bWeightedOIT_)
 	{
 		
 		while (bLocked)

@@ -481,11 +481,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//set canvas background color
 		if(!bShowBGShader)
 		{
-			gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 0.0f);
+			gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 1.0f);
 		}
 		else
 		{
-			gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);			
+			gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);			
 		}
 		//clear buffer with color
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -502,16 +502,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
 		
 		//draw boxes around volume
-		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
+		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 		//draw clip boxes
-		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint );
+		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 
 		int shapeN = shapes.size();
 		for(int i=0; i<shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(!sh.isTransparent())
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint);//, false  );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false  );
 		}
 
 		//BG
@@ -547,9 +547,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
-		//gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE); // Additive RGB + alpha
-		//gl.glBlendEquation(GL.GL_FUNC_ADD);
-
+		if(BVBSettings.bWeightedOIT)
+		{
+			gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE); // Additive RGB + alpha
+			gl.glBlendEquation(GL.GL_FUNC_ADD);
+		}
 		int shapeN = shapes.size();
 		//disable depth writing
 		gl.glDepthMask(false);
@@ -557,10 +559,13 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(sh.isTransparent())
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint);//, BVBSettings.bWeightedOIT  );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT  );
 		}
 		gl.glDepthMask(true);
-		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		if(BVBSettings.bWeightedOIT)
+		{
+			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		}
 	}
 	
 	public void showVolumeBoxes(boolean bShow)
@@ -747,7 +752,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				}
 				catch ( InterruptedException exc )
 				{
-					// TODO Auto-generated catch block
 					exc.printStackTrace();
 				}
 		    	repaintBVV();

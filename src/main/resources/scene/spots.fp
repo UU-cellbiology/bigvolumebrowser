@@ -11,6 +11,7 @@ uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
 uniform mat4 cliptransform;
+uniform int wOIT;
 
 void checkClipping()
 {
@@ -34,8 +35,6 @@ void main()
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
 	vec4 colorout = colorin;
-	
-	//gl_FragDepth = gl_FragCoord.z;
 	
 	if(pointShape == 0)
 	{
@@ -101,8 +100,12 @@ void main()
 		
 	}
 	
-	//colorout.a = colorout.a*exp(-gl_FragCoord.z*0.5);
-	//colorout.xyz = colorout.xyz*colorout.a;
+	if(wOIT>0)
+	{
+		colorout.a = colorout.a*exp(-gl_FragCoord.z*0.8);
+		colorout.xyz = colorout.xyz*colorout.a;
+
+	}
     fragColor = colorout; 
     
 }

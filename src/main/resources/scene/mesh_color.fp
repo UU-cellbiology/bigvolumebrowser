@@ -15,6 +15,7 @@ uniform int silType;
 uniform int gridType;
 uniform float cartesianGridStep;
 uniform float cartesianFraction;
+uniform int wOIT;
 
 //const vec3 ObjectColor = vec3(1, 1, 1);
 
@@ -97,56 +98,59 @@ void checkClipping()
 void main()
 {
 
-		checkClipping();
-		
-		vec3 norm = normalize(Normal);
-		vec3 viewDir = normalize(-FragPos);
-		vec4 colorOut;		
-							
-		//gl_FragDepth = gl_FragCoord.z;
-		
-		//plain, shaded or shiny surface
-		if(surfaceRender<3)
+	checkClipping();
+	
+	vec3 norm = normalize(Normal);
+	vec3 viewDir = normalize(-FragPos);
+	vec4 colorout = colorin;	
+	
+	//plain, shaded or shiny surface
+	if(surfaceRender<3)
+	{
+		//old code from Tobias
+		//vec3 l1 = phong( norm, viewDir, lightDir1, lightColor1, 1.0, 1.0 );
+		//vec3 l2 = phong( norm, viewDir, lightDir2, lightColor2, 32, 0.5 );
+		//fragColor = vec4((ambient + l1 + l2) * colorin.rgb, colorin.a);
+		//plain
+		if(surfaceRender==0)
 		{
-			//old code from Tobias
-			//vec3 l1 = phong( norm, viewDir, lightDir1, lightColor1, 1.0, 1.0 );
-			//vec3 l2 = phong( norm, viewDir, lightDir2, lightColor2, 32, 0.5 );
-			//fragColor = vec4((ambient + l1 + l2) * colorin.rgb, colorin.a);
-			//plain
-			if(surfaceRender==0)
-			{
-				fragColor = getGridColor(colorin);
-			}
-				
-			//shaded/shiny
-			else
-			{			
-				vec3 diff = diffuse(norm,  lightDir1, lightColor1);
-				vec3 spec = specular( norm, viewDir, lightDir1, lightColor1, 16.0, 1.0 )*(surfaceRender-1);
-				fragColor = vec4((ambient + diff ) * colorin.rgb + spec, colorin.a);
-				fragColor = getGridColor(fragColor);
-			}	
+			colorout = getGridColor(colorin);
 		}
-		//silhouette surface
+			
+		//shaded/shiny
 		else
+		{			
+			vec3 diff = diffuse(norm,  lightDir1, lightColor1);
+			vec3 spec = specular( norm, viewDir, lightDir1, lightColor1, 16.0, 1.0 )*(surfaceRender-1);
+			colorout = vec4((ambient + diff ) * colorin.rgb + spec, colorin.a);
+			colorout = getGridColor(colorout);
+		}	
+	}
+	//silhouette surface
+	else
+	{
+		float alphax = min(1.0, 1.0-pow(abs(dot(norm,viewDir)),silDecay));
+		if(silType<1)
 		{
-			float alphax = min(1.0, 1.0-pow(abs(dot(norm,viewDir)),silDecay));
-			if(silType<1)
-			{
-				//all transparent
-				fragColor = vec4(colorin.rgb, colorin.a*alphax);
-				fragColor = getGridColor(fragColor);
-			}
-			else
-			{			
-				//front culling
-				if(dot(norm,viewDir)>0)
-					discard;
-				fragColor = vec4(colorin.rgb*alphax, colorin.a);	
-				fragColor = getGridColor(fragColor);				
-			}
+			//all transparent
+			colorout = vec4(colorin.rgb, colorin.a*alphax);
+			colorout = getGridColor(colorout);
 		}
-		
+		else
+		{			
+			//front culling
+			if(dot(norm,viewDir)>0)
+				discard;
+			colorout = vec4(colorin.rgb*alphax, colorin.a);	
+			colorout = getGridColor(colorout);				
+		}
+	}
+	if(wOIT>0)
+	{
+		colorout.a = colorout.a*exp(-gl_FragCoord.z*0.8);
+		colorout.xyz = colorout.xyz*colorout.a;
+	}
+    fragColor = colorout; 
 }
 
 

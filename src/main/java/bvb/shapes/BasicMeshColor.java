@@ -25,4 +25,6 @@ public interface BasicMeshColor
 
 	public void setCartesianGrid(final float cartesianGridStep, final float cartesianFraction);
 	
+	public void setSilhouetteDecay(final float silhouetteDecay);
+	
 }

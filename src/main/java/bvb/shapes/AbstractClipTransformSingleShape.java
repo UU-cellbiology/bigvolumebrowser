@@ -77,7 +77,7 @@ public abstract class AbstractClipTransformSingleShape extends AbstractBasicShap
 	}
 	
 	@Override
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_, final boolean bWeightedOIT_)
 	{
 		if(bVisible)
 		{
@@ -85,7 +85,7 @@ public abstract class AbstractClipTransformSingleShape extends AbstractBasicShap
 			{
 				if(nTimePoint<0 || nTimePoint == nTimePoint_)
 				{
-					visRender.draw( gl, pvm, vm, screen_size );
+					visRender.draw( gl, pvm, vm, screen_size, bWeightedOIT_);
 				}
 			}
 		}
