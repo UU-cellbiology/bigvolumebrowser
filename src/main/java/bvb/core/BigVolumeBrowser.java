@@ -481,11 +481,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//set canvas background color
 		if(!bShowBGShader)
 		{
-			gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 0.0f);
+			gl.glClearColor(BVBSettings.canvasBGColor.getRed()/255.0f, BVBSettings.canvasBGColor.getGreen()/255.0f, BVBSettings.canvasBGColor.getBlue()/255.0f, 1.0f);
 		}
 		else
 		{
-			gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);			
+			gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);			
 		}
 		//clear buffer with color
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT);

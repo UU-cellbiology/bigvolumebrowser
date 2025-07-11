@@ -147,7 +147,7 @@ void main()
 	}
 	if(wOIT>0)
 	{
-		colorout.a = colorout.a*exp(-gl_FragCoord.z*0.3);
+		colorout.a = colorout.a*exp(-gl_FragCoord.z*0.8);
 		colorout.xyz = colorout.xyz*colorout.a;
 	}
     fragColor = colorout; 
