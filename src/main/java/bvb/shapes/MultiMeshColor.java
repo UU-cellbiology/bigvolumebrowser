@@ -174,6 +174,19 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 		}
 		
 	}
+	
+	@Override
+	public void setSilhouetteDecay(final float silhouetteDecay_)
+	{	
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisMeshColor)visRender).setSilhouetteDecay( silhouetteDecay_ );
+			}
+		}
+	}
 	@Override
 	public float getPointSize()
 	{

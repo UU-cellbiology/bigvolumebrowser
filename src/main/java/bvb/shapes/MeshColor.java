@@ -223,6 +223,16 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{
 		return ((VisMeshColor)visRender).fPointSize;
 	}
+	
+	@Override
+	public void setSilhouetteDecay(final float silhouetteDecay_)
+	{		
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setSilhouetteDecay( silhouetteDecay_ );
+		}
+	}
+	
 
 	@Override
 	public String toString()

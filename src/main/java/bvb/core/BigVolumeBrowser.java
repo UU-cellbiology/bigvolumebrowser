@@ -752,7 +752,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				}
 				catch ( InterruptedException exc )
 				{
-					// TODO Auto-generated catch block
 					exc.printStackTrace();
 				}
 		    	repaintBVV();

@@ -113,7 +113,6 @@ public class BVBActions
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
-		actions.runnableAction(() -> toggleOIT(), "weighted OIT", "Y" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
@@ -133,20 +132,6 @@ public class BVBActions
 	void dummy() 
 	{
 		
-	}
-	
-	void toggleOIT()
-	{
-		BVBSettings.bWeightedOIT = !BVBSettings.bWeightedOIT;
-		bvb.repaintBVV();
-		if(BVBSettings.bWeightedOIT)
-		{
-			bvb.bvvViewer.showMessage( "weighted OIT" );
-		}
-		else
-		{
-			bvb.bvvViewer.showMessage( "alpha compositing" );			
-		}
 	}
 
 	void runSettingsCommand()

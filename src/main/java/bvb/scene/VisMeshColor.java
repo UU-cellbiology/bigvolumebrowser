@@ -143,6 +143,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 		renderType = nRenderType_;		
 	}
 	
+	public int getRenderType()
+	{
+		return renderType;		
+	}
+	
 	public void setSurfaceRenderType(final int surfaceRender_)
 	{
 		surfaceRender = surfaceRender_;		
@@ -169,9 +174,9 @@ public class VisMeshColor extends AbstractClipTransformVis
 		fPointSize = fPointSize_;
 	}
 	
-	public int getRenderType()
+	public void setSilhouetteDecay(final float silhouetteDecay_)
 	{
-		return renderType;		
+		silhouetteDecay = silhouetteDecay_;
 	}
 	
 	public void setMesh(final Mesh mesh)

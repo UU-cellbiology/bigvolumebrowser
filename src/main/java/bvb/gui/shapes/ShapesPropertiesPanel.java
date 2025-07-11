@@ -17,8 +17,9 @@ public class ShapesPropertiesPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	
-	final SpotsPropertiesPanel panelsSpotsProperties;
-	final MeshesPropertiesPanel panelsMeshesProperties;
+	final SpotsPropertiesPanel panelSpotsProperties;
+	final MeshesPropertiesPanel panelMeshesProperties;
+	final GeneralPropertiesPanel panelGeneralProperties;
 
 	final JTabbedPane tabPane;
 	
@@ -30,14 +31,18 @@ public class ShapesPropertiesPanel extends JPanel
 
 		setLayout(gridbag);
 		
-		panelsSpotsProperties = new SpotsPropertiesPanel(bvb);
+		panelSpotsProperties = new SpotsPropertiesPanel(bvb);
 		
-		panelsMeshesProperties = new MeshesPropertiesPanel(bvb);
+		panelMeshesProperties = new MeshesPropertiesPanel(bvb);
+		
+		panelGeneralProperties = new GeneralPropertiesPanel(bvb);
 		
 		tabPane = new JTabbedPane(SwingConstants.TOP);
 		
-		tabPane.addTab( "Spots", panelsSpotsProperties );
-		tabPane.addTab( "Mesh", panelsMeshesProperties );
+		tabPane.addTab( "Spots", panelSpotsProperties );
+		tabPane.addTab( "Mesh", panelMeshesProperties );
+		tabPane.addTab( "General", panelGeneralProperties );
+
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
@@ -66,29 +71,29 @@ public class ShapesPropertiesPanel extends JPanel
 		{
 			if(sh instanceof Spots && bSpotsUpdate )
 			{
-				panelsSpotsProperties.setEnabled( true );
-				panelsSpotsProperties.updateGUI();
+				panelSpotsProperties.setEnabled( true );
+				panelSpotsProperties.updateGUI();
 				bSpotsUpdate = false;
 			}
 			if(sh instanceof BasicMeshColor && bMeshUpdate )
 			{
-				panelsMeshesProperties.setEnabled( true );
-				panelsMeshesProperties.updateGUI();
+				panelMeshesProperties.setEnabled( true );
+				panelMeshesProperties.updateGUI();
 				bMeshUpdate = false;
 			}
 
 		}
 		if(bSpotsUpdate)
-			panelsSpotsProperties.setEnabled( false );
+			panelSpotsProperties.setEnabled( false );
 		if(bMeshUpdate)
-			panelsMeshesProperties.setEnabled( false );
+			panelMeshesProperties.setEnabled( false );
 
 	}
 	
 	void setPanelsEnabled(boolean bEnabled)
 	{
-		panelsSpotsProperties.setEnabled( bEnabled );
-		panelsMeshesProperties.setEnabled( bEnabled );
+		panelSpotsProperties.setEnabled( bEnabled );
+		panelMeshesProperties.setEnabled( bEnabled );
 	}
 	
 	
