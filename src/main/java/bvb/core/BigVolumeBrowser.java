@@ -121,6 +121,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** boxes around volume **/	
 	final VolumeBBoxes volumeBoxes;
 	
+	/** separate framebuffer for the transparent rendering **/
+	OffScreenFrameBufferWithDepth sceneBufTransparent = null;
+	
 	/** clipping boxes **/	
 	public final VolumeBBoxes clipBoxes;
 
@@ -147,7 +150,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
-	final private ArrayList<Listener> listeners =	new ArrayList<>();
+	final private ArrayList<Listener> listeners = new ArrayList<>();
 	
 	boolean bShowBGShader = BVBSettings.bShowRandomShader;
 	
@@ -242,13 +245,14 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bvvViewer = bvvHandle.getViewerPanel();
 		
+		sceneBufTransparent = new OffScreenFrameBufferWithDepth( BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
+
 		//get renderScene
 		bvvViewer.setRenderScene(this::renderOpaque);
 		bvvViewer.setRenderSceneTransparent(this::renderTransparent);
 
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		
-		//bvvFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		bvbActions = new BVBActions(this);
 		setCanvasBGColor(BVBSettings.canvasBGColor);
@@ -540,7 +544,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void renderTransparent(final GL3 gl, final RenderData data, final OffScreenFrameBufferWithDepth sceneVolBuffer)
 	{
 		
-		OffScreenFrameBufferWithDepth sceneBufTransparent = null;
+		
 		//gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 		//get viewport size and transform matrices 
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
@@ -554,12 +558,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		if(BVBSettings.bWeightedOIT)
 		{
-			sceneBufTransparent = new OffScreenFrameBufferWithDepth( BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
 			sceneBufTransparent.bind( gl );
 			gl.glDepthMask(true);
-			sceneVolBuffer.bSetFlipY( false );
-			sceneVolBuffer.drawQuadDepth( gl );
-			sceneVolBuffer.bSetFlipY( true );
+			sceneVolBuffer.drawQuadDepth( gl, true );
 			gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE); // Additive RGB + alpha
 			gl.glBlendEquation(GL.GL_FUNC_ADD);
 		}
