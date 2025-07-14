@@ -28,6 +28,8 @@
  */
 package bvb.core;
 
+import static com.jogamp.opengl.GL.GL_RGBA8;
+
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.jogamp.opengl.GL;
@@ -70,6 +72,7 @@ import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
+import bvvpg.core.offscreen.OffScreenFrameBufferWithDepth;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
 import bvvpg.vistools.Bvv;
@@ -534,8 +537,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 //		System.out.println(gl.glGetString( GL.GL_RENDERER ));
 	}
 	
-	public void renderTransparent(final GL3 gl, final RenderData data)
+	public void renderTransparent(final GL3 gl, final RenderData data, final OffScreenFrameBufferWithDepth sceneVolBuffer)
 	{
+		
+		OffScreenFrameBufferWithDepth sceneBufTransparent = null;
 		//gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 		//get viewport size and transform matrices 
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
@@ -549,6 +554,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		if(BVBSettings.bWeightedOIT)
 		{
+			sceneBufTransparent = new OffScreenFrameBufferWithDepth( BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
+			sceneBufTransparent.bind( gl );
+			gl.glDepthMask(true);
+			sceneVolBuffer.bSetFlipY( false );
+			sceneVolBuffer.drawQuadDepth( gl );
+			sceneVolBuffer.bSetFlipY( true );
 			gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE); // Additive RGB + alpha
 			gl.glBlendEquation(GL.GL_FUNC_ADD);
 		}
@@ -564,7 +575,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		gl.glDepthMask(true);
 		if(BVBSettings.bWeightedOIT)
 		{
+			sceneBufTransparent.unbind( gl,false );
 			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			sceneBufTransparent.drawQuadAlpha( gl );
 		}
 	}
 	
