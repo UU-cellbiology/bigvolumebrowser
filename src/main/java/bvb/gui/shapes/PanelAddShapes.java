@@ -130,7 +130,7 @@ public class PanelAddShapes extends JPanel
 			}
 			Prefs.set( "BVB.nSpotsUnits", dialSpots.cbUnits.getSelectedIndex());
 			SpotsShapeDialog sptShape = new SpotsShapeDialog();
-			
+			sptShape.fileSpots = dialSpots.fileSpots;
 			boolean bAskForSize = true;
 			
 			//parse sizes
@@ -163,27 +163,37 @@ public class PanelAddShapes extends JPanel
 				sptParser.dPercMin = sptShape.dSpotsPercMin;
 				sptParser.dPercMax = sptShape.dSpotsPercMax;
 			}
+			if(sptShape.bExportCleanData)
+			{
+				sptParser.bExportCleanData = true;
+				sptParser.sExportFilename = sptShape.sExportFilename;
+			}
 
 		
 			sptParser.addPropertyChangeListener( (e)->
 			{
 				if(sptParser.getState() == StateValue.DONE)
 				{
-					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...");
-					final Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
-					if(!sptParser.parseSize)
+					if(!sptParser.bSpotsAdded )
 					{
-						importedSpots.setPoints( sptParser.vertices );
+						sptParser.bSpotsAdded = true; 
+						IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots )+" to GPU...");
+						final Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
+						if(!sptParser.parseSize)
+						{
+							importedSpots.setPoints( sptParser.vertices );
+						}
+						else
+						{
+							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
+						}
+						importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
+						bvb.addShape( importedSpots );						
+						
+						IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
 					}
-					else
-					{
-						importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
-					}
-					importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
-					bvb.addShape( importedSpots );						
-					
-					IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
 				}
+			
 			}
 			);
 			bvb.bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "Loading spots, please wait...", 5000, TextPosition.CENTER )  );

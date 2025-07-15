@@ -3,7 +3,11 @@ package bvb.io.shapes;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
@@ -42,9 +46,17 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	public long nTotSpots = 0;
 	
 	public boolean bDataCleanup = false;
+	
 	public double dPercMin = 1.0;
+	
 	public double dPercMax = 99.0;
 
+	public boolean bExportCleanData = false;
+	
+	public String sExportFilename;
+	
+	public boolean bSpotsAdded = false;
+	
 	
 	@Override
 	protected Void doInBackground() throws Exception
@@ -56,7 +68,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
 		{
 			IJ.showStatus( "Importing "+ fileSpots.getName());
-			
+			IJ.log("Importing "+ fileSpots.getName());
 			//file size in bytes
 			final double filesize = Files.size( fileSpots.toPath() );
 			long bytesRead = 0;
@@ -76,6 +88,9 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				if(line == null)
 					break;
 				bytesRead += line.getBytes().length + bytesNewLine;
+//				try {
+//					Thread.sleep(1);
+//				} catch (InterruptedException ignore) {}
 				IJ.showProgress( bytesRead/filesize );
 				la = line.split(sSeparator);
 				bCoordinateParsedOK = parseCoordinates( la );
@@ -195,7 +210,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 					System.err.println("Spots file import warning: failed to parse size column.");
 					return false;
 				}
-				sizeOut += fScale * Math.abs(finsize);
+				sizeOut += fScale * Math.abs(finsize)*fSizeScale;
 			}
 			
 		}
@@ -323,5 +338,62 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	IJ.showStatus( finOut );
     	IJ.log( finOut  );
     	nTotSpots = nTotFiltCount;
+    	final float fInverseScale = 1.0f/fScale;
+    	final float fInverseSizeScale = 1.0f/fSizeScale;
+    	String sUnits = "um";
+    	if(fInverseScale>2.0)
+    		sUnits = "nm";
+    	if(fInverseScale<0.5)
+    		sUnits = "mm";
+    	String sSize = "diameter";
+    	if(fSizeScale>5.0f)
+    	{
+    		sSize  = "SD";
+    	}
+    	if(fSizeScale<5.0f && fSizeScale>1.1f)
+    	{
+    		sSize  = "radius";
+    	}
+    	//export cleaned up data
+    	if(bExportCleanData)
+    	{
+    		IJ.log( "Exporting cleaned up data to "+ sExportFilename +".");
+    		final File file = new File(sExportFilename);
+    		IJ.showStatus( "Exporting cleaned up spots data..");
+			try (FileWriter writer = new FileWriter(file))
+			{
+				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+				symbols.setDecimalSeparator('.');
+				DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
+				//let's just write axes
+				writer.write( "X("+sUnits+"),Y("+sUnits+"),Z("+sUnits+")" );
+				
+				
+				if(nColN==5)
+				{
+					writer.write(","+sSize+"("+sUnits+")");	
+				}
+				writer.write("\n");
+		    	for(int i=0; i<nInN;i++)
+		    	{
+		    		if(allData[i][nColN-1]<0.5f)
+		    		{
+		    			for(int j=0;j<nColN-2;j++)
+		    			{
+		    				writer.write(df3.format(allData[i][j]*fInverseScale) + ",");
+		    			}
+		    			if(nColN==5)
+		    				writer.write(df3.format(allData[i][nColN-2]*fInverseScale*fInverseSizeScale) + "\n");
+		    			else
+		    				writer.write(df3.format(allData[i][nColN-2]*fInverseScale) + "\n");
+		    		}
+		    	}
+				writer.close();
+			}
+			catch ( IOException exc )
+			{
+				exc.printStackTrace();
+			}
+    	}
     }
 }

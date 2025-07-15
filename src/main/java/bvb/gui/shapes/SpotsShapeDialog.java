@@ -3,6 +3,7 @@ package bvb.gui.shapes;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
@@ -19,7 +20,9 @@ import bvb.gui.ColorUserSettings;
 import bvb.gui.GBCHelper;
 import bvb.gui.NumberField;
 import bvb.scene.VisSpots;
+import ij.IJ;
 import ij.Prefs;
+import ij.io.SaveDialog;
 
 public class SpotsShapeDialog
 {
@@ -31,6 +34,9 @@ public class SpotsShapeDialog
 	public boolean bSpotDataCleanUp;
 	public double dSpotsPercMin = 1.0;
 	public double dSpotsPercMax = 99.0;
+	public boolean bExportCleanData = false;
+	public File fileSpots = null;
+	public String sExportFilename;
 	
 	public ColorUserSettings selectColors = new ColorUserSettings();
 	
@@ -169,6 +175,10 @@ public class SpotsShapeDialog
 		nfPercMin.setText(df3.format( Prefs.get( "BVB.dSpotsPercMin", 1.0 ) ));
 		NumberField nfPercMax = new NumberField(5);
 		nfPercMax.setText(df3.format( Prefs.get( "BVB.dSpotsPercMax", 99.0 ) ));
+		
+		JCheckBox cbExportCleanData = new JCheckBox();
+		cbExportCleanData.setSelected( Prefs.get( "BVB.bExportCleanData", true ) );
+		
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx=0;
 		gbc.gridy=0;	
@@ -181,7 +191,13 @@ public class SpotsShapeDialog
 		gbc.gridy++;
 		pCleanup.add(new JLabel("Percentile % max: "), gbc);
 		gbc.gridx++;
-		pCleanup.add(nfPercMax, gbc);	
+		pCleanup.add(nfPercMax, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pCleanup.add(new JLabel("Save cleaned up data: "), gbc);
+		gbc.gridx++;
+		pCleanup.add(cbExportCleanData, gbc);
 		int reply = JOptionPane.showConfirmDialog(null, pCleanup, "Filter data outliers", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -193,6 +209,10 @@ public class SpotsShapeDialog
 			dSpotsPercMax = Double.parseDouble( nfPercMax.getText() );
 			dSpotsPercMax = Math.min( dSpotsPercMax, 100.0 );
 			Prefs.set("BVB.dSpotsPercMax", dSpotsPercMax);
+			bExportCleanData = cbExportCleanData.isSelected();
+			Prefs.set("BVB.bExportCleanData", bExportCleanData);
+			
+			
 			if(dSpotsPercMin>dSpotsPercMax)
 			{
 				final double temp = dSpotsPercMin;
@@ -200,9 +220,28 @@ public class SpotsShapeDialog
 				dSpotsPercMax = temp;
 			}
 			
-			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
+		
+		if(bExportCleanData)
+		{
+			sExportFilename = fileSpots.getAbsolutePath()+"_cleanedup";
+			SaveDialog sd = new SaveDialog("Save cleaned up data ", sExportFilename, ".csv");
+			sExportFilename = sd.getDirectory();
+			if (sExportFilename == null)
+			{
+				bExportCleanData = false;
+				IJ.log( "Exporting cleaned up data is aborted." );
+				return true;
+			}
+			sExportFilename = sExportFilename+ sd.getFileName();
+			
+			
+		}
+		return true;
 		
 	}
 	

@@ -138,8 +138,8 @@ public class Spots extends AbstractClipTransformSingleShape
 			//to mark that we have sizes
 			pointSize = -1.0f;
 			Arrays.sort( sortedSize );
-			//take 97.0% quantile as max
-			int index = ( int ) Math.round( 0.03 * (sortedSize.length-1));
+			//take 90.0% quantile as max
+			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
 			((VisSpots)visRender).setGaussSDNorm(sortedSize[index]);
 			
 		}
