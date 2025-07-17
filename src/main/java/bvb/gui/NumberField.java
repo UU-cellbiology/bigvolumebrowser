@@ -121,14 +121,14 @@ public class NumberField extends JPanel {
 	}
 
 	private void setTextAndFire(String text) {
-		System.out.println("setTextAndFire");
+		//System.out.println("setTextAndFire");
 		if(getText().equals(text))
 			return;
 		setText(text);
 		fireValueChanged(Double.parseDouble(text));
 	}
 
-	void handleKeyUp() {
+	void handleKeyDown() {
 		StringBuffer text = new StringBuffer(getText());
 		int car = textfield.getCaretPosition();
 		int originalCar = car;
@@ -174,7 +174,7 @@ public class NumberField extends JPanel {
 		}
 	}
 
-	void handleKeyDown() {
+	void handleKeyUp() {
 		StringBuffer text = new StringBuffer(getText());
 		int car = textfield.getCaretPosition();
 		int originalCar = car;
@@ -232,7 +232,7 @@ public class NumberField extends JPanel {
 					}
 					setText(s);
 					textfield.setCaretPosition(cp);
-					handleKeyUp();
+					handleKeyDown();
 					setTextAndFire("-" + getText());
 					cp++;
 					textfield.setCaretPosition(cp);

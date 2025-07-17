@@ -72,7 +72,7 @@ public class ShapesPropertiesPanel extends JPanel
 			if(sh instanceof Spots && bSpotsUpdate )
 			{
 				panelSpotsProperties.setEnabled( true );
-				panelSpotsProperties.updateGUI();
+				panelSpotsProperties.updateGUI(true);
 				bSpotsUpdate = false;
 			}
 			if(sh instanceof BasicMeshColor && bMeshUpdate )

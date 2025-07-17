@@ -111,7 +111,7 @@ public class Spots extends AbstractClipTransformSingleShape
 				if ( z + pointSize > boundingBox[ 5 ] )
 					boundingBox[ 5 ] = z + pointSize;
 			}
-			((VisSpots)visRender).setGaussSDNorm(pointSize);
+			((VisSpots)visRender).setGaussNorm(pointSize);
 		}
 		else
 		{
@@ -138,9 +138,9 @@ public class Spots extends AbstractClipTransformSingleShape
 			//to mark that we have sizes
 			pointSize = -1.0f;
 			Arrays.sort( sortedSize );
-			//take 90.0% quantile as max
+			//take 90.0% quantile as max and make it smaller
 			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
-			((VisSpots)visRender).setGaussSDNorm(sortedSize[index]);
+			((VisSpots)visRender).setGaussNorm(0.01f*sortedSize[index]);
 			
 		}
 		
@@ -250,6 +250,17 @@ public class Spots extends AbstractClipTransformSingleShape
 	public int getPointShape()
 	{		
 		return pointShape;
+	}
+	
+	
+	public void setGaussNorm(final float fNormGauss_)
+	{
+		((VisSpots)visRender).setGaussNorm( fNormGauss_ );
+	}
+	
+	public float getGaussSDNorm()
+	{
+		return ((VisSpots)visRender).getGaussNorm( );
 	}
 	
 	@Override

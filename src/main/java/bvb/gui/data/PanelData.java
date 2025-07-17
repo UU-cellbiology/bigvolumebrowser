@@ -88,6 +88,13 @@ public class PanelData extends JPanel
             @Override
 			public void mousePressed(MouseEvent e) 
             {
+            	if(SwingUtilities.isRightMouseButton(e))
+            	{
+            		treeData.clearSelection();
+            		selectObjects();
+            		return;
+            	}
+            	
                 int selRow = treeData.getRowForLocation(e.getX(), e.getY());
                
                 if(selRow != -1) 
@@ -96,11 +103,7 @@ public class PanelData extends JPanel
                 	{
                        bvb.bvbActions.actionCenterView();
                     }
-                	if(SwingUtilities.isRightMouseButton(e))
-                	{
-                		treeData.clearSelection();
-                		selectObjects();
-                	}
+
                 }
             }
         };
@@ -206,6 +209,7 @@ public class PanelData extends JPanel
 		
 		if(! bvb.selectedObjects.isAnythingSelected())
 		{
+			treeData.getSelectionModel().clearSelection();
 			bLocked = false;
 			return;
 		}

@@ -7,6 +7,7 @@ uniform int pointShape;
 in vec3 posW;
 in float sRadfp;
 uniform float normGauss;
+uniform int degreeGauss;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -60,7 +61,7 @@ void main()
 			if(renderType == 3)
 			{
 				//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
-				dCol = normGauss/(sRadfp*sRadfp*sRadfp);
+				dCol = normGauss*pow(sRadfp,-degreeGauss);
 			}
 			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
 			
@@ -90,7 +91,7 @@ void main()
 				float dCol = 1.0;
 				if(renderType == 3)
 				{
-					dCol = normGauss/(sRadfp*sRadfp*sRadfp);
+					dCol = normGauss*pow(sRadfp,-degreeGauss);
 					//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
 				}
 				colorout.a = dCol *  fade.x * fade.y * colorin.a; 

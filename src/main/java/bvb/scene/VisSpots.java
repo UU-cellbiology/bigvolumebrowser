@@ -83,6 +83,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private float fNormGauss = 1.0f;
 	
+	private int nDegreeGauss = 1;
+	
 	private boolean initialized;
 	
 	volatile boolean bLocked = false;
@@ -159,10 +161,16 @@ public class VisSpots extends AbstractClipTransformVis
 		initialized = false;
 	}
 	
-	public void setGaussSDNorm(final float fNormGauss_)
+	public void setGaussNorm(final float fNormGauss_)
 	{
-		fNormGauss = fNormGauss_*fNormGauss_*fNormGauss_;
+		fNormGauss = fNormGauss_;
 	}
+	
+	public float getGaussNorm()
+	{
+		return fNormGauss;
+	}
+
 	
 	public void setColor(Color pointColor) 
 	{		
@@ -335,7 +343,9 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform4f( "colorin" ).set( l_color );
 		prog.getUniform2f( "windowSize" ).set( window_sizef );
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
-		prog.getUniform1f( "normGauss" ).set( fNormGauss );
+		prog.getUniform1f( "normGauss" ).set( ( float ) Math.pow( fNormGauss, nDegreeGauss));
+		
+		prog.getUniform1i( "degreeGauss" ).set( nDegreeGauss );
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		prog.getUniform1i("clipactive").set(0);

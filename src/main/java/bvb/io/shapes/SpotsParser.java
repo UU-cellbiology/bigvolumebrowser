@@ -369,7 +369,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				writer.write( "X("+sUnits+"),Y("+sUnits+"),Z("+sUnits+")" );
 				
 				
-				if(nColN==5)
+				if(parseSize)
 				{
 					writer.write(","+sSize+"("+sUnits+")");	
 				}
@@ -382,7 +382,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		    			{
 		    				writer.write(df3.format(allData[i][j]*fInverseScale) + ",");
 		    			}
-		    			if(nColN==5)
+		    			if(parseSize)
 		    				writer.write(df3.format(allData[i][nColN-2]*fInverseScale*fInverseSizeScale) + "\n");
 		    			else
 		    				writer.write(df3.format(allData[i][nColN-2]*fInverseScale) + "\n");
