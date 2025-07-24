@@ -65,7 +65,7 @@ public class SpotsShapeDialog
 
 		if(!bAskForSize)
 		{
-			sFill[3] = "Gauss norm";			
+			sFill[3] = "SMLM";			
 		}
 		
 		JComboBox<String> cbFill = new JComboBox<>(sFill);

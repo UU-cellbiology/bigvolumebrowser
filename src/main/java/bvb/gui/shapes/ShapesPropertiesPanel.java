@@ -49,7 +49,8 @@ public class ShapesPropertiesPanel extends JPanel
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weighty = 1.0;
+		gbc.fill = GridBagConstraints.BOTH;
 		
 		this.add( tabPane, gbc );
 		bvb.selectedObjects.addObjectSelectionListener( () -> updateGUI());

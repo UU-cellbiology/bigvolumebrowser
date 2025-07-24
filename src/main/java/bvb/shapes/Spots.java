@@ -111,7 +111,7 @@ public class Spots extends AbstractClipTransformSingleShape
 				if ( z + pointSize > boundingBox[ 5 ] )
 					boundingBox[ 5 ] = z + pointSize;
 			}
-			((VisSpots)visRender).setGaussNorm(pointSize);
+			((VisSpots)visRender).setSMLMNorm(pointSize);
 		}
 		else
 		{
@@ -140,7 +140,7 @@ public class Spots extends AbstractClipTransformSingleShape
 			Arrays.sort( sortedSize );
 			//take 90.0% quantile as max and make it smaller
 			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
-			((VisSpots)visRender).setGaussNorm(0.01f*sortedSize[index]);
+			((VisSpots)visRender).setSMLMNorm(0.01f*sortedSize[index]);
 			
 		}
 		
@@ -168,7 +168,7 @@ public class Spots extends AbstractClipTransformSingleShape
 	{
 
 		bTransparent = false;
-		if(renderType >= VisSpots.RENDER_GAUSS_UNIFORM)
+		if(renderType >= VisSpots.RENDER_GAUSS)
 		{
 			bTransparent = true;
 		}
@@ -253,16 +253,26 @@ public class Spots extends AbstractClipTransformSingleShape
 	}
 	
 	
-	public void setGaussNorm(final float fNormGauss_)
+	public void setSMLMNorm(final float fNormGauss_)
 	{
-		((VisSpots)visRender).setGaussNorm( fNormGauss_ );
+		((VisSpots)visRender).setSMLMNorm( fNormGauss_ );
 	}
 	
-	public float getGaussSDNorm()
+	public float getSMLMNorm()
 	{
-		return ((VisSpots)visRender).getGaussNorm( );
+		return ((VisSpots)visRender).getSMLMNorm( );
 	}
 	
+	public void setSMLMGamma(final float fNormGamma_)
+	{
+		((VisSpots)visRender).setSMLMGamma( fNormGamma_ );
+	}
+	
+	public float getSMLMGamma()
+	{
+		return ((VisSpots)visRender).getSMLMGamma( );
+	}
+		
 	@Override
 	public String toString()
 	{

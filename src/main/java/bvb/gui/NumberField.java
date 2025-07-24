@@ -128,7 +128,7 @@ public class NumberField extends JPanel {
 		fireValueChanged(Double.parseDouble(text));
 	}
 
-	void handleKeyDown() {
+	void handleKeyUp() {
 		StringBuffer text = new StringBuffer(getText());
 		int car = textfield.getCaretPosition();
 		int originalCar = car;
@@ -174,7 +174,7 @@ public class NumberField extends JPanel {
 		}
 	}
 
-	void handleKeyUp() {
+	void handleKeyDown() {
 		StringBuffer text = new StringBuffer(getText());
 		int car = textfield.getCaretPosition();
 		int originalCar = car;
@@ -232,7 +232,7 @@ public class NumberField extends JPanel {
 					}
 					setText(s);
 					textfield.setCaretPosition(cp);
-					handleKeyDown();
+					handleKeyUp();
 					setTextAndFire("-" + getText());
 					cp++;
 					textfield.setCaretPosition(cp);
@@ -286,9 +286,9 @@ public class NumberField extends JPanel {
 				double d = Double.parseDouble(getText());
 				boolean neg = d < 0;
 				if((units > 0 && !neg) || (units < 0 && neg))
-					handleKeyUp();
-				else if((units < 0 && !neg) || (units > 0 && neg))
 					handleKeyDown();
+				else if((units < 0 && !neg) || (units > 0 && neg))
+					handleKeyUp();
 			}
 		});
 
@@ -296,20 +296,20 @@ public class NumberField extends JPanel {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				int kc = e.getKeyCode();
-				if(kc == KeyEvent.VK_UP) {
+				if(kc == KeyEvent.VK_DOWN) {
 					boolean neg = Double.parseDouble(getText()) < 0;
 					if(!neg)
-						handleKeyUp();
-					else
 						handleKeyDown();
+					else
+						handleKeyUp();
 					e.consume();
 				} // VK_UP
-				else if(kc == KeyEvent.VK_DOWN) {
+				else if(kc == KeyEvent.VK_UP) {
 					boolean neg = Double.parseDouble(getText()) < 0;
 					if(!neg)
-						handleKeyDown();
-					else
 						handleKeyUp();
+					else
+						handleKeyDown();
 					e.consume();
 				} // VK_DOWN
 				else if(kc == KeyEvent.VK_ENTER)

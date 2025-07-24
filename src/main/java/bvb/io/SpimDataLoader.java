@@ -138,46 +138,28 @@ public class SpimDataLoader
 		int nOpenSeries = 0;
 		if(nSeriesCount==1)
 		{
-			if(seriesZsize[0]>1)
-			{
-				nOpenSeries = 0;
-			}
-			else
-			{
-				 IJ.error("Only 3D datasets are supported.");
-				 return null;
-			}
+			nOpenSeries = 0;
 		}
 		else
 		{
-			//make a list of 3D series
-			int outCount = 0;
-			for(int nS=0;nS<nSeriesCount; nS++)
-			{
-				if(seriesZsize[nS] > 1)
-				{
-					outCount++;
-				}
-			}
-			if(outCount == 0)
-			{
-				IJ.error( "Cannot find 3D datasets in provided file\n" + imageFileName);
-				return null;
-			}
+			//make a list of all series
 			
-			String [] sDatasetNames = new String[outCount];
-			int [] nDatasetIDs = new int[outCount];
-			int [] nDatasetType = new int[outCount];
-			int nCurrDS = 0;
+			String [] sDatasetNames = new String[nSeriesCount];
+			int [] nDatasetIDs = new int[nSeriesCount];
+			int [] nDatasetType = new int[nSeriesCount];
+			
 			for(int nS=0;nS<nSeriesCount;nS++)
 			{
 				if(seriesZsize[nS] > 1)
 				{
-					sDatasetNames[nCurrDS] = seriesName[nS];
-					nDatasetIDs[nCurrDS] = nS;
-					nDatasetType[nCurrDS] = seriesBitDepth[nS];
-					nCurrDS++;
+					sDatasetNames[nS] = seriesName[nS]+" 3D";
 				}
+				else
+				{
+					sDatasetNames[nS] = seriesName[nS]+" 2D";
+				}
+				nDatasetIDs[nS] = nS;
+				nDatasetType[nS] = seriesBitDepth[nS];				
 			}
 			GenericDialog openDatasetN = new GenericDialog("Choose dataset..");
 			openDatasetN.addChoice("Name: ",sDatasetNames, sDatasetNames[0]);

@@ -47,6 +47,8 @@ import org.joml.Vector4f;
 import bvb.core.BVVSettings;
 
 import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES1;
+import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GL3;
 
 
@@ -378,8 +380,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 //			gl.glEnable(GL.GL_BLEND);
 //			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			//gl.glLineWidth( 1.0f );
+			//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
 			gl.glBindVertexArray( vao );			
 			gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
+			//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 			gl.glBindVertexArray( 0 );
 
 		}

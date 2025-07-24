@@ -334,7 +334,7 @@ public class SpotsLoadDialog
 	
 	boolean analyzeFile()
 	{
-		
+		boolean bSameColN = true;
 		boolean bOut = true;
 		int nRow = 0;
 		int nHeaderCols = -1;
@@ -399,27 +399,45 @@ public class SpotsLoadDialog
 				}
 				else
 				{
+					//number of header or first row is not the same as the second/following
 					if(nHeaderCols != la.length)
 					{
-						if(bOut)
+						if(nHeaderCols > la.length)
 						{
-							bOut = false;
-							sStatus = sStatus +" # headers column not equal to # data colums";							
-						}		
-						if(cbHasHeader.isSelected())
-						{
-							headers = new String [] {headerUnParsed};
+							if(bOut)
+							{
+								bOut = false;
+								sStatus = sStatus +" # headers column larger than # data colums";							
+							}		
+							if(cbHasHeader.isSelected())
+							{
+								headers = new String [] {headerUnParsed};
+							}
+							else
+							{	
+								headers = new String [] {"Column1"};
+							}
+							if(nRow == 2 &&  !cbHasHeader.isSelected())
+							{
+								dataParsed.clear();
+								dataParsed.add( new String[] {headerUnParsed });
+							}
+							dataParsed.add( new String[] {line} );
 						}
 						else
-						{	
-							headers = new String [] {"Column1"};
-						}
-						if(nRow == 2 &&  !cbHasHeader.isSelected())
 						{
-							dataParsed.clear();
-							dataParsed.add( new String[] {headerUnParsed });
+							if(bSameColN)
+							{
+								bSameColN = false;
+								sStatus = "Warning: # headers column smaller than # data colums";
+							}
+							String [] trunc = new String[nHeaderCols];
+							for(int i=0;i<nHeaderCols;i++)
+							{
+								trunc[i]=la[i];
+							}
+							dataParsed.add( trunc );
 						}
-						dataParsed.add( new String[] {line} );
 					}
 					else
 					{
@@ -451,10 +469,12 @@ public class SpotsLoadDialog
 				bOut = false;
 			}
 		}
-		if(bOut)
+		if(bOut && bSameColN)
 		{
 			sStatus = "Status: file columns parsed ok.";
 		}
+
+			
 		
 		return bOut;
 	}

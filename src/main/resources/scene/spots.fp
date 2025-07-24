@@ -7,6 +7,7 @@ uniform int pointShape;
 in vec3 posW;
 in float sRadfp;
 uniform float normGauss;
+uniform float gamma;
 uniform int degreeGauss;
 uniform int clipactive;
 uniform vec3 clipmin;
@@ -60,12 +61,11 @@ void main()
 			float dCol = 1.0;
 			if(renderType == 3)
 			{
-				//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
-				dCol = normGauss*pow(sRadfp,-degreeGauss);
+				//dCol = pow(clamp(normGauss*pow(sRadfp,-degreeGauss),0.0,1.0),gamma);
+				dCol = pow(normGauss*pow(sRadfp,-degreeGauss),gamma);
+				
 			}
 			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
-			
-			//gl_FragDepth = 1.0;
 		}
 	}
 	else
@@ -91,11 +91,9 @@ void main()
 				float dCol = 1.0;
 				if(renderType == 3)
 				{
-					dCol = normGauss*pow(sRadfp,-degreeGauss);
-					//dCol = clamp(normGauss/(pointSizeReal*pointSizeReal*pointSizeReal),0.1,1.0);
+					dCol = pow(normGauss*pow(sRadfp,-degreeGauss),gamma);
 				}
 				colorout.a = dCol *  fade.x * fade.y * colorin.a; 
-				//gl_FragDepth = 1.0;
 			}
 		}
 		

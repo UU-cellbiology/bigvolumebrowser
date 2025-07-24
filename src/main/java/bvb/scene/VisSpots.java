@@ -59,7 +59,7 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 public class VisSpots extends AbstractClipTransformVis
 {
-	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS_UNIFORM = 2, RENDER_GAUSS_NORMALIZED  = 3; 
+	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS = 2, RENDER_SMLM  = 3; 
 
 	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
 	
@@ -82,6 +82,8 @@ public class VisSpots extends AbstractClipTransformVis
 	private int nSpotsN;
 	
 	private float fNormGauss = 1.0f;
+	
+	private float fNormGamma = 1.0f;
 	
 	private int nDegreeGauss = 1;
 	
@@ -161,14 +163,24 @@ public class VisSpots extends AbstractClipTransformVis
 		initialized = false;
 	}
 	
-	public void setGaussNorm(final float fNormGauss_)
+	public void setSMLMNorm(final float fNormGauss_)
 	{
 		fNormGauss = fNormGauss_;
 	}
 	
-	public float getGaussNorm()
+	public float getSMLMNorm()
 	{
 		return fNormGauss;
+	}
+	
+	public void setSMLMGamma(final float fNormGamma_)
+	{
+		fNormGamma = fNormGamma_;
+	}
+	
+	public float getSMLMGamma()
+	{
+		return fNormGamma;
 	}
 
 	
@@ -344,7 +356,7 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform2f( "windowSize" ).set( window_sizef );
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
 		prog.getUniform1f( "normGauss" ).set( ( float ) Math.pow( fNormGauss, nDegreeGauss));
-		
+		prog.getUniform1f( "gamma" ).set(fNormGamma);
 		prog.getUniform1i( "degreeGauss" ).set( nDegreeGauss );
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
