@@ -185,6 +185,12 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	}
 	
 	@Override
+	public int getSurfaceGrid()
+	{
+		return ((VisMeshColor)visRender).getSurfaceGridType();
+	}
+	
+	@Override
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
 		if(visRender != null )
@@ -221,7 +227,17 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	@Override
 	public float getPointSize()
 	{
-		return ((VisMeshColor)visRender).fPointSize;
+		return ((VisMeshColor)visRender).getPointsSize();
+	}
+	
+	
+	@Override
+	public void setWireLineWidth(final float fThickness)
+	{		
+		if(visRender != null )
+		{
+			((VisMeshColor)visRender).setWireLineWidth( fThickness );
+		}
 	}
 	
 	@Override

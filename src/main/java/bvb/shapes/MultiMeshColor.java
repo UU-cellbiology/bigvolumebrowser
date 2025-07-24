@@ -129,6 +129,12 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	}
 	
 	@Override
+	public int getSurfaceGrid()
+	{
+		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getSurfaceGridType();
+	}
+	
+	@Override
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
 		if(visRendersTimeMap.size()>0 )
@@ -176,6 +182,26 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	}
 	
 	@Override
+	public float getPointSize()
+	{
+		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getPointsSize();
+	}
+	
+	@Override
+	public void setWireLineWidth(final float fThickness)
+	{		
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisMeshColor)visRender).setWireLineWidth( fThickness );
+			}
+		}
+	}
+	
+	
+	@Override
 	public void setSilhouetteDecay(final float silhouetteDecay_)
 	{	
 		if(visRendersTimeMap.size()>0 )
@@ -187,11 +213,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			}
 		}
 	}
-	@Override
-	public float getPointSize()
-	{
-		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).fPointSize;
-	}
+
 
 	
 	@Override

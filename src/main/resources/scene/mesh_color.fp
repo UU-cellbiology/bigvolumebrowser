@@ -5,7 +5,6 @@ uniform int surfaceRender;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 posW;
-in vec3 bary;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -46,20 +45,6 @@ vec3 specular(vec3 norm, vec3 viewDir, vec3 lightDir, vec3 lightColor, float shi
 
 vec4 getGridColor(vec4 colorInp)
 {
-		
-	//barycentric
-	if(gridType == 1)
-	{
-		float d = min(min(bary.x, bary.y), bary.z);
-		if(d<0.05)
-		{
-			return colorInp;
-		}
-		else
-		{
-			discard;		
-		}
-	}
 	
 	//cartesian grid
 	if(gridType == 2)

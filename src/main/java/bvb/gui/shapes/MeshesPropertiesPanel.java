@@ -161,11 +161,13 @@ public class MeshesPropertiesPanel extends JPanel
 		boolean bRenderSame = true;
 		boolean bColorSame = true;
 		boolean bPointSizeSame = true;
+		boolean bGridSame = true;
 		boolean bSurfaceSame = true;
 		float fPointSize = 0.0f;
 		Color currColor = Color.WHITE;
 		int nRender = 0;
 		int nSurface = 0;
+		int nGrid = 0;
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
 		{
@@ -178,12 +180,14 @@ public class MeshesPropertiesPanel extends JPanel
 					currColor = meshShape.getColor();
 					fPointSize = meshShape.getPointSize();
 					nSurface = meshShape.getSurfaceRender();
+					nGrid = meshShape.getSurfaceGrid();
 					bFirstMesh = false;
 				}
 				else
 				{
 					bRenderSame &= (nRender ==  meshShape.getRenderType());
 					bSurfaceSame &= (nSurface == meshShape.getSurfaceRender());
+					bGridSame &= (nGrid == meshShape.getSurfaceGrid());
 					bColorSame &= currColor.equals( meshShape.getColor() );
 					bPointSizeSame &= Math.abs( fPointSize - meshShape.getPointSize())<0.0001;
 				}
@@ -194,10 +198,12 @@ public class MeshesPropertiesPanel extends JPanel
 		final float fPointSizeFin = fPointSize;
 		final int nRenderFin = nRender;
 		final int nSurfaceFin = nSurface;
+		final int nGridFin = nGrid;
 		final boolean bRenderSameFin = bRenderSame;
 		final boolean bColorSameFin = bColorSame;
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bSurfaceSameFin = bSurfaceSame;
+		final boolean bGridSameFin = bGridSame;
 
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( MeshesPropertiesPanel.this )
@@ -210,19 +216,19 @@ public class MeshesPropertiesPanel extends JPanel
 					pColor.setConsistent( bColorSameFin );
 					pPointSize.setConsistent( bPointSizeSameFin );
 					pSurface.setConsistent( bSurfaceSameFin );
+					pGrid.setConsistent( bGridSameFin );
 					
 					if(bRenderSameFin)
 					{
 						cbRender.setSelectedIndex( nRenderFin );
 					}
+					
 					if(bColorSameFin)
 					{
 						selectColors.setColor( cColorFin, 0 );
 						butColor.setIcon(  new ColorIcon( cColorFin ) );
 					}
-					//if(bRenderSameFin && nRenderFin == VisMeshColor.POINTS)
-					//{
-						//nfMeshPointSize.setEnabled( true );
+
 					if(bPointSizeSameFin)
 					{
 						nfMeshPointSize.setText( String.format("%.2f", fPointSizeFin));
@@ -231,12 +237,11 @@ public class MeshesPropertiesPanel extends JPanel
 					{
 						cbSurface.setSelectedIndex( nSurfaceFin );
 					}
-						
-					//}
-					//else
-					//{
-					//	nfMeshPointSize.setEnabled( false );
-					//}
+					
+					if(bGridSameFin)
+					{
+						cbGrid.setSelectedIndex( nGridFin );
+					}
 				}
 				blockUpdates = false;
 			}

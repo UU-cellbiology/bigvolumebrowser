@@ -301,8 +301,6 @@ public class PanelAddShapes extends JPanel
 		final WRLParser loaderWRT = new WRLParser();
 		//loaderWRT.nMaxMeshes = 4;
 		//loaderWRT.nMaxTimePoints = 1;
-		loaderWRT.bEnableWireGrid = true;
-		//loaderWRT.bEnableWireGrid = false;
 		final ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
 		
 		if(bGroupMesh)

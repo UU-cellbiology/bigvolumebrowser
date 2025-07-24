@@ -15,16 +15,22 @@ public interface BasicMeshColor
 	
 	public void setPointSize (final float fPointSize);
 	
-	public float getPointSize ();
-	
+	public float getPointSize();
+		
+	public void setSurfaceRender(final int nSurfaceRenderType);
+
 	public int getSurfaceRender();
 	
-	public void setSurfaceRender(final int nSurfaceRenderType);
-	
 	public void setSurfaceGrid(final int nSurfaceGridType);
+	
+	public int getSurfaceGrid();
 
+	public void setWireLineWidth(final float fThickness);
+	
 	public void setCartesianGrid(final float cartesianGridStep, final float cartesianFraction);
 	
 	public void setSilhouetteDecay(final float silhouetteDecay);
+	
+	
 	
 }
