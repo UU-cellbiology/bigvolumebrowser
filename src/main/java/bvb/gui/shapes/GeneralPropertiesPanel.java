@@ -19,6 +19,7 @@ public class GeneralPropertiesPanel extends JPanel
 	final BigVolumeBrowser bvb;
 	final JComboBox<String> cbBlending;
 	final NumberField nfSilhouetteDecay;
+	final NumberField nfWireLineWidth;
 	final NumberField nfCartesianStep;
 	final NumberField nfCartesianFraction;
 	
@@ -28,34 +29,47 @@ public class GeneralPropertiesPanel extends JPanel
 		
 		bvb = bvb_;
 		
+		int nDigitsFloatTextField = 4;
+		
 		setLayout(new GridBagLayout());
 		
 		GridBagConstraints gbc = new GridBagConstraints();
+
 		
-		//GBCHelper.alighLeft(gbc);
-		
-		String[] sBlending = {"Weighted OIT", "Alpha OVER"};
+		String[] sBlending = {"Weight OIT", "Alpha OVER"};
 		cbBlending = new JComboBox< >(sBlending);
 		cbBlending.addActionListener( (e)->{
 			updateBlending();				
 			});
 
-		nfSilhouetteDecay = new NumberField(5);		
-		nfSilhouetteDecay.setText( "1.0" );
+		nfSilhouetteDecay = new NumberField(nDigitsFloatTextField);		
+		nfSilhouetteDecay.setText( "1.00" );
+		nfSilhouetteDecay.setLimits( 0.0, Double.MAX_VALUE );
 		nfSilhouetteDecay.addListener( (v)->
 		{
 			updateSilhouetteDecay(Math.abs( v ));
 		} );
 		
-		nfCartesianStep = new NumberField(5);		
+		nfWireLineWidth = new NumberField(3);
+		nfWireLineWidth.setIntegersOnly( true );
+		nfWireLineWidth.setText( "1.0" );
+		nfWireLineWidth.setLimits( 0.0, Double.MAX_VALUE );
+		nfWireLineWidth.addListener( (v)->
+		{
+			updateWireLineWidth();
+		} );
+		
+		nfCartesianStep = new NumberField(nDigitsFloatTextField);		
 		nfCartesianStep.setText( "2.0" );
+		nfCartesianStep.setLimits( 0.0, Double.MAX_VALUE );
 		nfCartesianStep.addListener( (v)->
 		{
 			updateCartesianGrid();
 		} );
 		
-		nfCartesianFraction = new NumberField(5);		
+		nfCartesianFraction = new NumberField(nDigitsFloatTextField);		
 		nfCartesianFraction.setText( "0.2" );
+		nfCartesianFraction.setLimits( 0.0, Double.MAX_VALUE );
 		nfCartesianFraction.addListener( (v)->
 		{
 			updateCartesianGrid();
@@ -72,6 +86,12 @@ public class GeneralPropertiesPanel extends JPanel
 		this.add( new JLabel("Mesh silhouette decay: "), gbc );
 		gbc.gridx++;
 		this.add( nfSilhouetteDecay, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		this.add( new JLabel("Mesh wire line width: "), gbc );
+		gbc.gridx++;
+		this.add( nfWireLineWidth, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -119,6 +139,22 @@ public class GeneralPropertiesPanel extends JPanel
 			if(sh instanceof BasicMeshColor)
 			{
 				((BasicMeshColor)sh).setSilhouetteDecay( fv );
+			}
+		}
+		bvb.repaintBVV();
+
+	}
+	
+	synchronized void updateWireLineWidth()
+	{
+		final List< BasicShape> shapeList = bvb.shapes;
+		final float valWidth = Math.abs(Float.parseFloat( nfWireLineWidth.getText()));
+		
+		for ( final BasicShape sh: shapeList)
+		{
+			if(sh instanceof BasicMeshColor)
+			{
+				((BasicMeshColor)sh).setWireLineWidth( valWidth );
 			}
 		}
 		bvb.repaintBVV();

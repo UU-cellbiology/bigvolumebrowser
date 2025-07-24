@@ -32,9 +32,7 @@ public class WRLParser
 	int nVertPerPrim;
 	long nLineN = 0;
 	int nTimePoint = -1;
-
 	
-	public boolean bEnableWireGrid = true;	
 	public int nMaxMeshes = Integer.MAX_VALUE;
 	public int nMaxTimePoints = Integer.MAX_VALUE;	
 	boolean bMeshOK = true;
@@ -428,22 +426,23 @@ public class WRLParser
 
 			}
 			else
-			{				
+			{		
+				//obsolete
 				//separate vertices per triangle,
 				//allows wireframe mesh render 
 				//but loads more data (adds extra vertices)
-				if(bEnableWireGrid)
-				{
-					addVertex(currMesh,vertices.get( currInd[k] ));
-					currInd[k] = newVindex;
-					newVindex++;
-				}
+//				if(bEnableWireGrid)
+//				{
+//					addVertex(currMesh,vertices.get( currInd[k] ));
+//					currInd[k] = newVindex;
+//					newVindex++;
+//				}
 				//shared vertices per triangle,
 				//does not always allow wireframe mesh render
-				else
-				{
-					currInd[k] = addedInd.get(currInd[k]).intValue();
-				}
+				//else
+				//{
+				currInd[k] = addedInd.get(currInd[k]).intValue();
+				//}
 			}
 		}
 		currMesh.triangles().addf( currInd[0], currInd[1], currInd[2]);

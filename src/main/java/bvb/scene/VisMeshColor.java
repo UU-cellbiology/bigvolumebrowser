@@ -31,6 +31,8 @@ package bvb.scene;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
+import static com.jogamp.opengl.GL2GL3.GL_LINE;
+import static com.jogamp.opengl.GL2GL3.GL_FILL;
 
 import java.awt.Color;
 import java.nio.FloatBuffer;
@@ -47,8 +49,6 @@ import org.joml.Vector4f;
 import bvb.core.BVVSettings;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES1;
-import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GL3;
 
 
@@ -83,9 +83,9 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 	public static final int MESH = 0, POINTS = 1;	
 	
-	public int renderType = MESH;
+	int renderType = MESH;
 	
-	public float fPointSize = 0.1f;
+	float fPointSize = 0.1f;
 	
 	public static final int SURFACE_PLAIN = 0, SURFACE_SHADE = 1, SURFACE_SHINY = 2, SURFACE_SILHOUETTE = 3; 
 	
@@ -104,6 +104,8 @@ public class VisMeshColor extends AbstractClipTransformVis
 	float cartesianGridStep = 2.0f;
 	
 	float cartesianFraction = 0.2f;
+	
+	float fWireLineWidth = 1.0f;
 	
 	volatile boolean bLocked = false;
 	
@@ -165,6 +167,16 @@ public class VisMeshColor extends AbstractClipTransformVis
 		gridType = gridType_;		
 	}
 	
+	public int getSurfaceGridType()
+	{
+		return gridType;		
+	}
+	
+	public void setWireLineWidth(final float fIn)
+	{
+		fWireLineWidth = fIn;
+	}
+	
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
 		cartesianGridStep = cartesianGridStep_;		
@@ -174,6 +186,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 	public void setPointsSize(final float fPointSize_)
 	{
 		fPointSize = fPointSize_;
+	}
+	
+	public float getPointsSize()
+	{
+		return fPointSize;
 	}
 	
 	public void setSilhouetteDecay(final float silhouetteDecay_)
@@ -221,38 +238,15 @@ public class VisMeshColor extends AbstractClipTransformVis
 	/** upload MeshData to GPU **/
 	private boolean initGPUBufferMesh( GL3 gl )
 	{
-	
-		//build baricentric coordinates for each triangle
-		final float [] barycenter = new float [mesh.vertices().size()*3];
 		
 		final IntBuffer indicesT = mesh.triangles().indices().duplicate();
 		indicesT.rewind();
 
-		final int [] trindices = IntBuffertoArray(indicesT);
-
-		for(int i=0; i<trindices.length; i+=3)
-		{			
-			for(int j=0;j<3;j++)
-			{
-				for(int d=0;d<3;d++)
-				{
-					barycenter[trindices[i+j]*3+d] = 0.0f;
-				}
-				
-			}
-			for(int j=0;j<3;j++)
-			{
-				barycenter[trindices[i+j]*3+j] = 1.0f;
-			}
-
-		}
-
-		final int[] tmp = new int[ 4 ];
-		gl.glGenBuffers( 4, tmp, 0 );
+		final int[] tmp = new int[ 3 ];
+		gl.glGenBuffers( 3, tmp, 0 );
 		final int meshPosVbo = tmp[ 0 ];
 		final int meshNormalVbo = tmp[ 1 ];
-		final int meshBaryVbo = tmp[ 2 ];
-		final int meshEbo = tmp[ 3 ];
+		final int meshEbo = tmp[ 2 ];
 		
 		if(mesh == null)
 			return false;
@@ -271,10 +265,6 @@ public class VisMeshColor extends AbstractClipTransformVis
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, normals.limit() * Float.BYTES, normals, GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
-		gl.glBufferData( GL.GL_ARRAY_BUFFER, barycenter.length * Float.BYTES, FloatBuffer.wrap( barycenter ), GL.GL_STATIC_DRAW );
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 
 		final IntBuffer indices = mesh.triangles().indices();
 		indices.rewind();
@@ -288,13 +278,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshPosVbo );
 		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 0 );
+
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
 		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
 
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshBaryVbo );
-		gl.glVertexAttribPointer( 2, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-		gl.glEnableVertexAttribArray( 2 );
 		
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
 		gl.glBindVertexArray( 0 );
@@ -380,11 +368,17 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 //			gl.glEnable(GL.GL_BLEND);
 //			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			//gl.glLineWidth( 1.0f );
-			//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+			if(gridType == GRID_WIRE)
+			{
+				gl.glLineWidth( fWireLineWidth );
+				gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL_LINE);
+			}
 			gl.glBindVertexArray( vao );			
 			gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
-			//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+			if(gridType == GRID_WIRE)
+			{
+				gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL_FILL);
+			}
 			gl.glBindVertexArray( 0 );
 
 		}
