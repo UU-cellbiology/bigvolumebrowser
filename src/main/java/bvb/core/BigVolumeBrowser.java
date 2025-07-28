@@ -253,7 +253,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		
-		
 		bvbActions = new BVBActions(this);
 		setCanvasBGColor(BVBSettings.canvasBGColor);
 		Prefs.showMultibox( BVBSettings.bShowMultiBox);

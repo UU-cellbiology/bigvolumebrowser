@@ -85,8 +85,6 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private float fNormGamma = 1.0f;
 	
-	private int nDegreeGauss = 1;
-	
 	private boolean initialized;
 	
 	volatile boolean bLocked = false;
@@ -127,8 +125,7 @@ public class VisSpots extends AbstractClipTransformVis
 		nSpotsN = points.size();
 		
 		vertices = new float [nSpotsN*3]; //assume 3D
-
-		
+	
 		for (i=0;i<nSpotsN; i++)
 		{
 			for (j=0;j<3; j++)
@@ -140,7 +137,7 @@ public class VisSpots extends AbstractClipTransformVis
 		initialized = false;
 	}
 	
-	public void setVertices( ArrayList< RealPoint > points, float [] spotSizes_)
+	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_)
 	{
 		
 		if(points.size()!= spotSizes_.length)
@@ -150,7 +147,13 @@ public class VisSpots extends AbstractClipTransformVis
 		}
 		
 		setVertices(points);
+		setSizes(spotSizes_);
 		
+		initialized = false;
+	}
+	
+	void setSizes(final float [] spotSizes_)
+	{
 		spotSizes = new float[spotSizes_.length];
 		
 		for (int i=0;i<spotSizes_.length; i++)
@@ -160,28 +163,27 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		fSpotSize = -1.0f;
 		
-		initialized = false;
 	}
 	
-	public void setSMLMNorm(final float fNormGauss_)
-	{
-		fNormGauss = fNormGauss_;
-	}
-	
-	public float getSMLMNorm()
-	{
-		return fNormGauss;
-	}
-	
-	public void setSMLMGamma(final float fNormGamma_)
-	{
-		fNormGamma = fNormGamma_;
-	}
-	
-	public float getSMLMGamma()
-	{
-		return fNormGamma;
-	}
+//	public void setSMLMNorm(final float fNormGauss_)
+//	{
+//		fNormGauss = fNormGauss_;
+//	}
+//	
+//	public float getSMLMNorm()
+//	{
+//		return fNormGauss;
+//	}
+//	
+//	public void setSMLMGamma(final float fNormGamma_)
+//	{
+//		fNormGamma = fNormGamma_;
+//	}
+//	
+//	public float getSMLMGamma()
+//	{
+//		return fNormGamma;
+//	}
 
 	
 	public void setColor(Color pointColor) 
@@ -289,7 +291,7 @@ public class VisSpots extends AbstractClipTransformVis
 	}
 
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final boolean bWeightedOIT)
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final int nTimePoint, final boolean bWeightedOIT)
 	{
 		
 		//if (fSpotSize < 0.0001)
@@ -355,9 +357,8 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform4f( "colorin" ).set( l_color );
 		prog.getUniform2f( "windowSize" ).set( window_sizef );
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
-		prog.getUniform1f( "normGauss" ).set( ( float ) Math.pow( fNormGauss, nDegreeGauss));
+		prog.getUniform1f( "normGauss" ).set(  fNormGauss);
 		prog.getUniform1f( "gamma" ).set(fNormGamma);
-		prog.getUniform1i( "degreeGauss" ).set( nDegreeGauss );
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		prog.getUniform1i("clipactive").set(0);

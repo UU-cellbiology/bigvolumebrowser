@@ -85,7 +85,7 @@ public abstract class AbstractClipTransformSingleShape extends AbstractBasicShap
 			{
 				if(nTimePoint<0 || nTimePoint == nTimePoint_)
 				{
-					visRender.draw( gl, pvm, vm, screen_size, bWeightedOIT_);
+					visRender.draw( gl, pvm, vm, screen_size, nTimePoint_, bWeightedOIT_);
 				}
 			}
 		}

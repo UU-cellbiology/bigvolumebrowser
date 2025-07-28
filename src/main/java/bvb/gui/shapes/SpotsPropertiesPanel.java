@@ -15,11 +15,9 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import bdv.tools.brightness.ColorIcon;
 import bdv.util.BoundedValueDouble;
@@ -29,7 +27,7 @@ import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
 import bvb.gui.NumberField;
 import bvb.shapes.BasicShape;
-import bvb.shapes.Spots;
+import bvb.shapes.BasicSpots;
 import bvvpg.ui.panels.BoundedRangePanelPG;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -56,8 +54,8 @@ public class SpotsPropertiesPanel extends JPanel
 	final BoundedRangePanelPG  smlmRange = new BoundedRangePanelPG();
 	final BoundedValuePanelPG  smlmGammaRange;
 	
-	final JSplitPane splitPane;
-	
+	final JTabbedPane spotsTabPane;
+		
 	final JPanel topPanel;
 	final JPanel bottomPanel;
 	
@@ -109,7 +107,7 @@ public class SpotsPropertiesPanel extends JPanel
 		pPointSize = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pPointSize.add( new JLabel("Point size: "), gbc );
+		pPointSize.add( new JLabel("Spot size: "), gbc );
 		gbc.gridx++;
 		pPointSize.add( nfSpSize, gbc );
 		
@@ -198,41 +196,16 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.weightx = 0.1;
 		bottomPanel.add( smlmGammaRange, gbc );
 
-		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, bottomPanel);
-		splitPane.setResizeWeight(0.5);
-	    splitPane.setOneTouchExpandable(true);
-	    splitPane.setContinuousLayout(true);
-	    ///collapse the bottom panel
-	    splitPane.addAncestorListener(new AncestorListener() 
-	    {
-	        @Override
-			public void ancestorAdded(AncestorEvent ev) 
-	        {
-	           // Pressing the oneTouch button shows/hides a pane while remembering the last custom dragged size
-	           BasicSplitPaneUI uicurr = (BasicSplitPaneUI) splitPane.getUI();
-	           JButton neededOneTouchBtn = (JButton) uicurr.getDivider().getComponent(1);
-	           neededOneTouchBtn.doClick();
-	         
-	         // only run once
-	          splitPane.removeAncestorListener(this);
-	        }
-
-	        @Override
-			public void ancestorRemoved(AncestorEvent ev) 
-	        {
-	        }
-
-	        @Override
-			public void ancestorMoved(AncestorEvent ev) 
-	        {
-	        }
-	      });
+		spotsTabPane = new JTabbedPane(SwingConstants.TOP);
+		
+		spotsTabPane.addTab( "Shape", topPanel);
+		spotsTabPane.addTab( "Color", bottomPanel);
 	    gbc = new GridBagConstraints();	
 	    gbc.gridx=0;
 	    gbc.gridy=0;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    gbc.weightx = 0.5;
-	    this.add( splitPane, gbc );
+	    this.add( spotsTabPane, gbc );
 	}
 	
 	synchronized void updateGUI(boolean updateText)
@@ -243,8 +216,6 @@ public class SpotsPropertiesPanel extends JPanel
 		boolean bPointSizeSame = true;
 		boolean bShapeSame = true;
 		boolean bRenderSame = true;
-		boolean bSMLMNormSame = true;
-		boolean bSMLMGammaSame = true;
 		float fPointSizeIn;
 		float fPointSize = -1.0f;
 		Color currColor = Color.WHITE;
@@ -256,9 +227,9 @@ public class SpotsPropertiesPanel extends JPanel
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
 		{
-			if(sh instanceof Spots)
+			if(sh instanceof BasicSpots)
 			{
-				final Spots spotsShape = (Spots)sh;
+				final BasicSpots spotsShape = (BasicSpots)sh;
 				if(bFirstMesh)
 				{
 					currColor = spotsShape.getColor();
@@ -269,8 +240,6 @@ public class SpotsPropertiesPanel extends JPanel
 					}
 					nShape = spotsShape.getPointShape();
 					nRender = spotsShape.getRenderType();
-					fSMLMNorm = spotsShape.getSMLMNorm();
-					fSMLMGamma = spotsShape.getSMLMGamma();
 
 					bFirstMesh = false;
 				}
@@ -280,8 +249,6 @@ public class SpotsPropertiesPanel extends JPanel
 					bShapeSame &= (nShape == spotsShape.getPointShape());
 					bColorSame &= currColor.equals( spotsShape.getColor() );
 					bPointSizeSame &= Math.abs( fPointSize - spotsShape.getPointSize())<0.0001;
-					bSMLMNormSame &= Math.abs( fSMLMNorm - spotsShape.getSMLMNorm())<0.00000001;
-					bSMLMGammaSame &= Math.abs( fSMLMGamma - spotsShape.getSMLMGamma())<0.00000001;
 
 				}
 			}
@@ -299,8 +266,6 @@ public class SpotsPropertiesPanel extends JPanel
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bShapeSameFin = bShapeSame;
 		final boolean bRenderSameFin = bRenderSame;
-		final boolean bSMLMNormSameFin = bSMLMNormSame;
-		final boolean bSMLMGammaSameFin = bSMLMGammaSame;
 
 
 		SwingUtilities.invokeLater( () -> {
@@ -317,8 +282,6 @@ public class SpotsPropertiesPanel extends JPanel
 					pPointSize.setConsistent( bPointSizeSameFin );
 					pShape.setConsistent( bShapeSameFin );
 					pRender.setConsistent( bRenderSameFin );
-					pSMLMNorm.setConsistent( bSMLMNormSameFin );
-					smlmGammaRange.setConsistent( bSMLMGammaSameFin );
 					
 					if(bColorSameFin)
 					{
@@ -379,9 +342,9 @@ public class SpotsPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof Spots)
+				if(sh instanceof BasicSpots)
 				{
-					((Spots)sh).setColor( cColor );
+					((BasicSpots)sh).setColor( cColor );
 				}
 			}
 			bvb.repaintBVV();
@@ -397,11 +360,11 @@ public class SpotsPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof Spots)
+				if(sh instanceof BasicSpots)
 				{
-					if(((Spots)sh).getPointSize()>0.0f)
+					if(((BasicSpots)sh).getPointSize()>0.0f)
 					{
-						((Spots)sh).setPointSize( fv );
+						((BasicSpots)sh).setPointSize( fv );
 					}
 				}
 			}
@@ -418,9 +381,9 @@ public class SpotsPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof Spots)
+				if(sh instanceof BasicSpots)
 				{
-					((Spots)sh).setPointShape( nShapeType );
+					((BasicSpots)sh).setPointShape( nShapeType );
 				}
 			}
 			bvb.repaintBVV();
@@ -435,9 +398,9 @@ public class SpotsPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof Spots)
+				if(sh instanceof BasicSpots)
 				{
-					((Spots)sh).setRenderType( nRenderType );
+					((BasicSpots)sh).setRenderType( nRenderType );
 				}
 			}
 			bvb.repaintBVV();
@@ -452,9 +415,9 @@ public class SpotsPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof Spots)
+				if(sh instanceof BasicSpots)
 				{
-					((Spots)sh).setSMLMNorm( (float)fGaussNorm );
+					//((Spots)sh).setSMLMNorm( (float)fGaussNorm );
 				}
 			}
 			bvb.repaintBVV();
@@ -470,9 +433,9 @@ public class SpotsPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof Spots)
+				if(sh instanceof BasicSpots)
 				{
-					((Spots)sh).setSMLMGamma( fGaussGamma ); 
+					//((Spots)sh).setSMLMGamma( fGaussGamma ); 
 				}
 			}
 			bvb.repaintBVV();

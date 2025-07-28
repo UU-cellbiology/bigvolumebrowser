@@ -30,7 +30,6 @@ package bvb.shapes;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -42,7 +41,7 @@ import bvb.scene.VisSpots;
 
 /** Spots of arbitrary color and size **/
 
-public class Spots extends AbstractClipTransformSingleShape
+public class Spots extends AbstractClipTransformSingleShape implements BasicSpots
 {
 	
 	float pointSize;
@@ -59,7 +58,7 @@ public class Spots extends AbstractClipTransformSingleShape
 	{
 		pointSize = pointSize_;		
 		renderType = nRenderType_;
-		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
+		pointColor = new Color(pointColor_.getRed(), pointColor_.getGreen(), pointColor_.getBlue(),pointColor_.getAlpha());
 		pointShape = nShape_;
 		defineTransparency();
 	}
@@ -89,6 +88,35 @@ public class Spots extends AbstractClipTransformSingleShape
 	
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{
+
+		
+//		if(spotSizes == null)
+//		{
+//
+//			//((VisSpots)visRender).setSMLMNorm(pointSize);
+//		}
+//		else
+//		{
+//			final float [] sortedSize = new float[spotSizes.length];
+//			for(int i=0;i<spotSizes.length;i++)
+//			{
+//				sortedSize[i] = spotSizes[i];
+//			}
+//			//to mark that we have sizes
+//			pointSize = -1.0f;
+//			Arrays.sort( sortedSize );
+//			//take 90.0% quantile as max and make it smaller
+//			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
+//			//((VisSpots)visRender).setSMLMNorm(0.01f*sortedSize[index]);
+//			
+//		}
+		
+		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize);
+		
+	}
+	
+	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize)
+	{
 		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
 				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
 				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
@@ -111,7 +139,7 @@ public class Spots extends AbstractClipTransformSingleShape
 				if ( z + pointSize > boundingBox[ 5 ] )
 					boundingBox[ 5 ] = z + pointSize;
 			}
-			((VisSpots)visRender).setSMLMNorm(pointSize);
+			
 		}
 		else
 		{
@@ -135,17 +163,10 @@ public class Spots extends AbstractClipTransformSingleShape
 					boundingBox[ 5 ] = z + pSize;
 				
 			}
-			//to mark that we have sizes
-			pointSize = -1.0f;
-			Arrays.sort( sortedSize );
-			//take 90.0% quantile as max and make it smaller
-			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
-			((VisSpots)visRender).setSMLMNorm(0.01f*sortedSize[index]);
-			
+
 		}
 		
-		boundBox =  Intervals.createMinMaxReal( boundingBox[ 0 ], boundingBox[ 1 ], boundingBox[ 2 ], boundingBox[ 3 ], boundingBox[ 4 ], boundingBox[ 5 ] );
-		
+		return Intervals.createMinMaxReal( boundingBox[ 0 ], boundingBox[ 1 ], boundingBox[ 2 ], boundingBox[ 3 ], boundingBox[ 4 ], boundingBox[ 5 ] );
 	}
 	
 	@Override
@@ -178,6 +199,7 @@ public class Spots extends AbstractClipTransformSingleShape
 		}
 	}
 	
+	@Override
 	public void setPointSize (final float pointSize_)
 	{
 		
@@ -203,11 +225,13 @@ public class Spots extends AbstractClipTransformSingleShape
 		
 	}
 	
+	@Override
 	public float getPointSize()
 	{
 		return pointSize;
 	}
 	
+	@Override
 	public void setColor(Color pointColor_) 
 	{
 
@@ -220,12 +244,14 @@ public class Spots extends AbstractClipTransformSingleShape
 		}
 	}
 	
+	@Override
 	public Color getColor()
 	{
 		return pointColor;
 
 	}
 	
+	@Override
 	public void setRenderType(int nRenderType)
 	{
 		renderType = nRenderType;
@@ -234,11 +260,13 @@ public class Spots extends AbstractClipTransformSingleShape
 		return;
 	}	
 	
+	@Override
 	public int getRenderType()
 	{
 		return renderType;
 	}
 	
+	@Override
 	public void setPointShape(int nShape)
 	{
 		pointShape = nShape;
@@ -247,31 +275,32 @@ public class Spots extends AbstractClipTransformSingleShape
 		return;
 	}	
 	
+	@Override
 	public int getPointShape()
 	{		
 		return pointShape;
 	}
 	
 	
-	public void setSMLMNorm(final float fNormGauss_)
-	{
-		((VisSpots)visRender).setSMLMNorm( fNormGauss_ );
-	}
-	
-	public float getSMLMNorm()
-	{
-		return ((VisSpots)visRender).getSMLMNorm( );
-	}
-	
-	public void setSMLMGamma(final float fNormGamma_)
-	{
-		((VisSpots)visRender).setSMLMGamma( fNormGamma_ );
-	}
-	
-	public float getSMLMGamma()
-	{
-		return ((VisSpots)visRender).getSMLMGamma( );
-	}
+//	public void setSMLMNorm(final float fNormGauss_)
+//	{
+//		((VisSpots)visRender).setSMLMNorm( fNormGauss_ );
+//	}
+//	
+//	public float getSMLMNorm()
+//	{
+//		return ((VisSpots)visRender).getSMLMNorm( );
+//	}
+//	
+//	public void setSMLMGamma(final float fNormGamma_)
+//	{
+//		((VisSpots)visRender).setSMLMGamma( fNormGamma_ );
+//	}
+//	
+//	public float getSMLMGamma()
+//	{
+//		return ((VisSpots)visRender).getSMLMGamma( );
+//	}
 		
 	@Override
 	public String toString()

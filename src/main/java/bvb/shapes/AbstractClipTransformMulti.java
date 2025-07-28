@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.Intervals;
 
 import org.joml.Matrix4fc;
 
@@ -17,6 +18,28 @@ import bvb.scene.AbstractClipTransformVis;
 public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 {	
 	final ConcurrentHashMap<AbstractClipTransformVis, Integer> visRendersTimeMap = new ConcurrentHashMap<>();
+	
+	RealInterval boundBox = Intervals.createMinMaxReal( Double.POSITIVE_INFINITY,
+			Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+			Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY  );
+
+	@Override
+	public RealInterval boundingBox()
+	{
+		if(visRendersTimeMap.size() ==0)
+			return null;
+		
+		final AffineTransform3D t = new AffineTransform3D();
+		((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getTransform( t );
+		
+		return t.estimateBounds( boundBox );
+	}	
+		
+	@Override
+	public RealInterval boundingBoxNotTransformed()
+	{		
+		return new FinalRealInterval(boundBox);
+	}
 	
 	@Override
 	public boolean clipActive() 
@@ -120,7 +143,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 				final int nTP = visRendersTimeMap.get( visRender );
 				if(nTP<0 || nTP == nTimePoint_)
 				{
-					visRender.draw( gl, pvm, vm, screen_size, bWeightedOIT_ );
+					visRender.draw( gl, pvm, vm, screen_size, nTimePoint_, bWeightedOIT_ );
 				}
 			}
 		}

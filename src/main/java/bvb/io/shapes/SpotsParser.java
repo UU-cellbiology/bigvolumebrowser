@@ -35,13 +35,21 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	
 	public boolean parseSize = false;
 	
+	public boolean parseTime = false;
+	
 	final float [] xyz = new float[3];
 	
 	final float[] size_f = new float[1];
+	
+	final float[] time_f = new float[1];
 
 	final public ArrayList<RealPoint> vertices = new ArrayList<>();
 	
 	public float [] sizes = null;
+	
+	public float [] times = null;
+	
+	ArrayList<Float> timesList = new ArrayList<>();
 	
 	public long nTotSpots = 0;
 	
@@ -63,6 +71,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	{		
 		vertices.clear();
 		ArrayList<Float> sizesList = new ArrayList<>();
+		
 
 		
 		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
@@ -75,7 +84,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 			final long bytesNewLine = Misc.getBytesPerNewLine(fileSpots);
 			String line = "";
 			String [] la;
-			boolean bCoordinateParsedOK;
+			boolean bAllParsedOK;
 			//header
 			if(bHeader)
 			{
@@ -93,33 +102,56 @@ public class SpotsParser extends SwingWorker<Void, Void>
 //				} catch (InterruptedException ignore) {}
 				IJ.showProgress( bytesRead/filesize );
 				la = line.split(sSeparator);
-				bCoordinateParsedOK = parseCoordinates( la );
-				if( bCoordinateParsedOK && !parseSize)
+				bAllParsedOK = parseCoordinates( la );
+				
+				if(parseSize)
 				{
-					vertices.add( new RealPoint(xyz));					
+					bAllParsedOK &= parseSizes( la );						
 				}
-				//make sure we add spot only if sizes were parsed ok
-				if(bCoordinateParsedOK && parseSize)
+				if(parseTime)
 				{
-					if( parseSizes( la ) )
+					bAllParsedOK &= parseTime( la );						
+				}
+				if( bAllParsedOK)
+				{
+					vertices.add( new RealPoint(xyz));
+					if(parseSize)
 					{
-						vertices.add( new RealPoint(xyz));	
 						sizesList.add( new Float(size_f[0] ));					
 					}
-					
+					if(parseTime)
+					{
+						timesList.add( new Float(time_f[0] ));					
+					}
 				}
 			}
 			
 		}
-		sizes = new float[sizesList.size()];
-		for(int i=0; i<sizesList.size(); i++)
+		
+		if(parseSize)
 		{
-			sizes[i] = sizesList.get( i );
+			sizes = new float[sizesList.size()];
+	
+			for(int i=0; i<sizesList.size(); i++)
+			{
+				sizes[i] = sizesList.get( i );
+			}
+		}
+		
+		if(parseTime)
+		{
+			times = new float[timesList.size()];
+			
+			for(int i=0; i<timesList.size(); i++)
+			{
+				times[i] = timesList.get( i );
+			}
+			
 		}
 		
 		nTotSpots = vertices.size();
 		
-		IJ.log( "Parsed  " +Long.toString( nTotSpots )+" spots.");
+		IJ.log( "Parsed  " + Long.toString( nTotSpots ) + " spots.");
 		if(bDataCleanup)
 		{
 			dataCleanup();
@@ -175,12 +207,40 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		return true;
 	}
 	
+	boolean parseTime(final String [] la)
+	{
+		
+		float finTime = 0.0f;
+		try
+		{
+			finTime = Float.parseFloat( la[nColIndices[3]] );
+			if(Float.isInfinite( finTime ))
+			{
+				System.err.println("Spots file import warning: found infinite time value, skipping.");
+				return false;
+			}
+			if(Float.isNaN( finTime ))
+			{
+				System.err.println("Spots file import warning: found NaN size value, skipping.");
+				return false;
+			}
+		}
+		catch(NumberFormatException e)
+		{
+			System.err.println("Spots file import warning: failed to parse size column.");
+			return false;
+		}	
+		time_f[0] = finTime;	
+		
+		return true;
+	}
+	
 	boolean parseSizes(final String [] la)
 	{
 		float sizeOut = 0.0f;
 		int nNum = 0;
 		float finsize = 0.0f;
-		for(int d=3; d<6; d++)
+		for(int d=4; d<7; d++)
 		{
 			finsize = 0.0f;
 			if(nColIndices[d] >= 0)
@@ -249,9 +309,9 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	IJ.showProgress( 1.0 );
     	IJ.showStatus( "Finished spots import. Loaded "+Integer.toString( vertices.size()) +" spots.");   	
     }
-    /** filters vertices and sizes so that they are between
-     * provided percentile min and percentile max **/
     
+    /** filters vertices and sizes so that they are between
+     * provided percentile min and percentile max **/    
     void dataCleanup()
     {
     	//let's cleanup
@@ -268,7 +328,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	
     	if(parseSize)
     	{
-    		nColN = 5;
+    		nColN ++;
     	}
 
     	final float [][] allData = new float[nInN][nColN];

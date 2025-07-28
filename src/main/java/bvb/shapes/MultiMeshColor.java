@@ -4,41 +4,16 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.imglib2.FinalRealInterval;
-import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
-import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
 import bvb.scene.AbstractClipTransformVis;
 import bvb.scene.VisMeshColor;
 
+/** a collection of meshes with different timepoints assigned to them **/
 public class MultiMeshColor extends AbstractClipTransformMulti implements BasicMeshColor
 {
-	
-	RealInterval boundBox = Intervals.createMinMaxReal( Double.POSITIVE_INFINITY,
-				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
-				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY  );
-	
-	@Override
-	public RealInterval boundingBox()
-	{
-		if(visRendersTimeMap.size() ==0)
-			return null;
-		
-		final AffineTransform3D t = new AffineTransform3D();
-		((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getTransform( t );
-		
-		return t.estimateBounds( boundBox );
-	}
-	
-		
-	@Override
-	public RealInterval boundingBoxNotTransformed()
-	{		
-		return new FinalRealInterval(boundBox);
-	}
 	
 	/** define if the shape is transparent **/
 	void defineTransparency()
@@ -73,14 +48,14 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	}
 
 	@Override
-	public void setRenderType(final int nRenderType_)
+	public void setRenderType(final int nRenderType)
 	{
 		if(visRendersTimeMap.size()>0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
-				((VisMeshColor)visRender).setRenderType( nRenderType_);
+				((VisMeshColor)visRender).setRenderType( nRenderType);
 			}
 			defineTransparency();
 		}
@@ -213,8 +188,6 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			}
 		}
 	}
-
-
 	
 	@Override
 	public String toString()

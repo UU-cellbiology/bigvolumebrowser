@@ -208,16 +208,16 @@ public class SpotsLoadDialog
 		gbc.gridx++;
 		pHeaderSeparator.add(cbSize, gbc);
 
-		///COLUMN ASSIGNMENT PANEL COORDINATES
+		///COLUMN ASSIGNMENT PANEL COORDINATES XYZT
 		JPanel pColumnsAssignCoords = new JPanel();
-		for (int i=0;i<3;i++)
+		for (int i=0;i<4;i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
 			cbColumnsAssign.get( i ).addActionListener( (e)-> updateWindow());
 		}
 		
-		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "SizeX", "SizeY", "SizeZ"};		
+		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "T", "SizeX", "SizeY", "SizeZ"};		
 
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -225,7 +225,7 @@ public class SpotsLoadDialog
 		gbc.insets = new Insets(0,5,0,5);
 		pColumnsAssignCoords.add(new JLabel("Coords:") , gbc); 
 		gbc.insets = new Insets(0,0,0,0);
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 4; i++)
 		{
 			gbc.gridx++;
 			pColumnsAssignCoords.add(new JLabel(sColSelectionLabels[i]), gbc);
@@ -235,7 +235,7 @@ public class SpotsLoadDialog
 
 		///COLUMN ASSIGNMENT PANEL SIZES
 		JPanel pColumnsAssignSize = new JPanel();
-		for (int i=3;i<6;i++)
+		for (int i=4;i<7;i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
@@ -246,7 +246,7 @@ public class SpotsLoadDialog
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.insets = new Insets(0,0,0,0);
-		for (int i = 3; i < 6; i++)
+		for (int i = 4; i < 7; i++)
 		{
 			pColumnsAssignSize.add(new JLabel(sColSelectionLabels[i]), gbc);
 			gbc.gridx++;
@@ -453,12 +453,10 @@ public class SpotsLoadDialog
 		
 		catch ( FileNotFoundException exc )
 		{
-			// TODO Auto-generated catch block
 			exc.printStackTrace();
 		}
 		catch ( IOException exc )
-		{
-			// TODO Auto-generated catch block
+		{		
 			exc.printStackTrace();
 		}
 		if(nRow == 0 || (nRow == 1 && cbHasHeader.isSelected()))

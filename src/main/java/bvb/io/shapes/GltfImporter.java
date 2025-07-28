@@ -53,6 +53,7 @@ public class GltfImporter
 			exc.printStackTrace();
 			return null;
 		}
+		
 		if(gltfModel != null)
 		{       
 			for(final MeshModel mesh: gltfModel.getMeshModels())

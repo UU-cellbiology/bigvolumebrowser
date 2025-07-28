@@ -8,7 +8,6 @@ in vec3 posW;
 in float sRadfp;
 uniform float normGauss;
 uniform float gamma;
-uniform int degreeGauss;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -61,8 +60,8 @@ void main()
 			float dCol = 1.0;
 			if(renderType == 3)
 			{
-				//dCol = pow(clamp(normGauss*pow(sRadfp,-degreeGauss),0.0,1.0),gamma);
-				dCol = pow(normGauss*pow(sRadfp,-degreeGauss),gamma);
+				
+				dCol = pow(normGauss/sRadfp,gamma);
 				
 			}
 			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
@@ -91,7 +90,7 @@ void main()
 				float dCol = 1.0;
 				if(renderType == 3)
 				{
-					dCol = pow(normGauss*pow(sRadfp,-degreeGauss),gamma);
+					dCol = pow(normGauss/sRadfp,gamma);
 				}
 				colorout.a = dCol *  fade.x * fade.y * colorin.a; 
 			}

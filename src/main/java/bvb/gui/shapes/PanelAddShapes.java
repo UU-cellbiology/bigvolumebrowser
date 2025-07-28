@@ -35,6 +35,7 @@ import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
 import bvb.shapes.MultiMeshColor;
+import bvb.shapes.MultiSpots;
 import bvb.shapes.Spots;
 import bvb.utils.Misc;
 import ij.IJ;
@@ -93,18 +94,21 @@ public class PanelAddShapes extends JPanel
 			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
 			Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
 			//column indices
-			final int [] nColInd = new int[6];
+			final int [] nColInd = new int[7];
 			//whether size was provided
 			int nSizeCols = 0;
-			for(int d=0; d<6;d++)
+			boolean bParseTime = false;
+			for(int d=0; d<7;d++)
 			{
 				if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()>0)
 				{
 					nColInd[d] = dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()-1;
-					if(d>2)
+					if(d>3)
 					{
 						nSizeCols++;
 					}
+					if(d==3)
+						bParseTime = true;
 				}
 				else
 				{
@@ -112,6 +116,7 @@ public class PanelAddShapes extends JPanel
 				}
 			}
 			sptParser.nColIndices = nColInd;
+			sptParser.parseTime = bParseTime;
 			
 			//scale factor, convert to micrometers
 			switch (dialSpots.cbUnits.getSelectedIndex())
@@ -129,6 +134,7 @@ public class PanelAddShapes extends JPanel
 				sptParser.fScale = 1.0f;
 			}
 			Prefs.set( "BVB.nSpotsUnits", dialSpots.cbUnits.getSelectedIndex());
+			
 			SpotsShapeDialog sptShape = new SpotsShapeDialog();
 			sptShape.fileSpots = dialSpots.fileSpots;
 			boolean bAskForSize = true;
@@ -178,17 +184,20 @@ public class PanelAddShapes extends JPanel
 					{
 						sptParser.bSpotsAdded = true; 
 						IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots )+" to GPU...");
-						final Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
-						if(!sptParser.parseSize)
+						BasicShape spots = null;
+						if(!sptParser.parseTime)
 						{
-							importedSpots.setPoints( sptParser.vertices );
+							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
+							importedSpots.setPoints( sptParser.vertices,sptParser.sizes);
+							spots = importedSpots;
 						}
 						else
 						{
-							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
-						}
-						importedSpots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
-						bvb.addShape( importedSpots );						
+							MultiSpots importedSpots = new MultiSpots();
+							spots = importedSpots;
+						}	
+						spots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
+						bvb.addShape( spots );						
 						
 						IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
 					}
@@ -302,7 +311,7 @@ public class PanelAddShapes extends JPanel
 		//loaderWRT.nMaxMeshes = 4;
 		//loaderWRT.nMaxTimePoints = 1;
 		final ArrayList< Mesh > loadedMeshes = loaderWRT.readWRL(sFilename);
-		
+		int nMaxTP = -1;
 		if(bGroupMesh)
 		{
 			IJ.showStatus( "Uploading " + Integer.toString( loadedMeshes.size() ) + " meshes." );
@@ -321,6 +330,7 @@ public class PanelAddShapes extends JPanel
 					if(loaderWRT.isTimeData())
 					{
 						nTP = loaderWRT.timePoints.get( i );
+						nMaxTP = Math.max( nMaxTP, nTP );
 					}
 					Color meshColor = loaderWRT.meshColors.get( i );
 					meshGroups.get( meshColor ).addMesh( loadedMeshes.get( i ), nTP, meshColor );
@@ -345,6 +355,7 @@ public class PanelAddShapes extends JPanel
 					if(loaderWRT.isTimeData())
 					{
 						nTP = loaderWRT.timePoints.get( i );
+						nMaxTP = Math.max( nMaxTP, nTP );
 					}
 					mmColor.addMesh( loadedMeshes.get( i ), nTP, meshColor );					
 				}
@@ -360,10 +371,12 @@ public class PanelAddShapes extends JPanel
 			for(int i=0;i<loadedMeshes.size();i++)
 			{		
 				final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
-			
+				int nTP = -1;
 				if(loaderWRT.isTimeData())
 				{
-					meshBVB.setTimePoint( loaderWRT.timePoints.get( i ) );
+					nTP = loaderWRT.timePoints.get( i );
+					meshBVB.setTimePoint( nTP );
+					nMaxTP = Math.max( nMaxTP, nTP );
 				}
 				if(loaderWRT.containsColorInfo())
 				{
@@ -373,6 +386,11 @@ public class PanelAddShapes extends JPanel
 				finMeshesShapes.add( meshBVB );
 			}
 			bvb.addShapes( finMeshesShapes, Misc.getSourceStyleName( sFilename ) );
+		}
+		//update time points
+		if(nMaxTP>=0)
+		{
+			bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
 		}
 	}
 }
