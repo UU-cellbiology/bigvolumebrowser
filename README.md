@@ -4,7 +4,7 @@
 
 [FIJI](https://fiji.sc) plugin for 3D exploration of large datasets.
 
-Currently at the stage of active development (2025/06/18).
+Currently at the stage of active development (2025/07/30).
 
 Documentation coming soon.
 
@@ -14,17 +14,17 @@ Hopefully the interface is self-explanatory.
 
 **For developers**: please check the code in [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).
 
-
-Powered (and made possible) by:   
+----------
+**Acknowledgements:**  
+Powered (and made possible) by a hard work of very talented people behind:   
 - [ImageJ](https://github.com/imagej) 
 - [FIJI](https://fiji.sc/) 
 - [imglib2](https://github.com/imglib/imglib2) 
 - [BioFormats](https://github.com/ome/bioformats) 
 - [BigDataViewer (BDV)](https://github.com/bigdataviewer) 
 - [BDV-loaders](https://github.com/BIOP/bigdataviewer-image-loaders) 
-- [BigVolumeViewer (playground edition)](https://github.com/UU-cellbiology/bvv-playground). 
+- [BigVolumeViewer](https://github.com/bigdataviewer/bigvolumeviewer-core) [(playground edition)](https://github.com/UU-cellbiology/bvv-playground). 
 
-Thank you all involved!
 
 ----------
 

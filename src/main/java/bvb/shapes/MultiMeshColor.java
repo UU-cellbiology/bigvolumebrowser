@@ -33,7 +33,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	}
 
 
-	public void addMesh(final Mesh nmesh, final int nTP, final Color colorin )
+	public void addMesh(final Mesh nmesh, final int nTimePoint, final Color colorin )
 	{		
 		if(nmesh != null)
 		{
@@ -43,7 +43,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 				meshShape.setColor( colorin );
 			}
 			boundBox = Intervals.union( boundBox, Meshes.boundingBox( nmesh ) );
-			visRendersTimeMap.put( meshShape, nTP );
+			visRendersTimeMap.put( meshShape, nTimePoint );
 		}
 	}
 
