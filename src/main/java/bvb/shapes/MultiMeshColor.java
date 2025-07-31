@@ -33,6 +33,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	}
 
 
+	@SuppressWarnings( "hiding" )
 	public void addMesh(final Mesh nmesh, final int nTimePoint, final Color colorin )
 	{		
 		if(nmesh != null)

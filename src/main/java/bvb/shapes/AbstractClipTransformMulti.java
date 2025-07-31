@@ -42,19 +42,19 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	}
 	
 	@Override
-	public boolean clipActive() 
+	public int getClipState() 
 	{	
 		if(visRendersTimeMap.size() == 0 )
-			return false;
-		return ((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).clipActive();
+			return 0;
+		return ((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getClipState();
 	}
 	@Override
-	public void setClipActive(boolean bEnabled)
+	public void setClipState(final int nClipType)
 	{
 		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
-			visRender.setClipActive( bEnabled ); 
+			visRender.setClipState( nClipType ); 
 		}
 	}
 	
@@ -65,7 +65,6 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 		for(final AbstractClipTransformVis visRender:visRenders)
 		{
 			visRender.setClipInterval( new FinalRealInterval(clipInt) );
-			visRender.setClipActive( true );
 		}
 	}
 	

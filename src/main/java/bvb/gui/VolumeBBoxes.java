@@ -267,7 +267,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	
 			final VolumeBox currBox = bvvSourceToBox.get( sac );
 			final Source< ? > src = sac.getSpimSource();
-			if(cs.clipActive() && src.isPresent( nTimePoint ))
+			if(cs.getClipState() > 0 && src.isPresent( nTimePoint ))
 			{
 				final AffineTransform3D transform = new AffineTransform3D();
 				RealInterval interval = cs.getClipInterval();
@@ -301,7 +301,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		{
 			final VolumeBox currBox = shapeToBox.get( sh );
 			
-			if(sh.clipActive() && (sh.getTimePoint()<0 || sh.getTimePoint() == nTimePoint))
+			if(sh.getClipState()>0 && (sh.getTimePoint()<0 || sh.getTimePoint() == nTimePoint))
 			{
 				final AffineTransform3D transform = new AffineTransform3D();
 				RealInterval interval = sh.getClipInterval();
@@ -346,10 +346,10 @@ public class VolumeBBoxes extends AbstractBasicShape
 	}
 
 	@Override
-	public boolean clipActive()
+	public int getClipState()
 	{
 
-		return false;
+		return 0;
 	}
 
 	@Override
@@ -359,7 +359,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	}
 
 	@Override
-	public void setClipActive( boolean bEnabled )
+	public void setClipState( final int nClipType)
 	{
 		
 	}

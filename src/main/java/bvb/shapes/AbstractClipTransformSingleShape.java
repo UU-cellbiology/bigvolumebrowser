@@ -16,17 +16,17 @@ public abstract class AbstractClipTransformSingleShape extends AbstractBasicShap
 	AbstractClipTransformVis visRender = null;
 	
 	@Override
-	public boolean clipActive() 
+	public int getClipState() 
 	{		
-		return visRender.clipActive();
+		return visRender.getClipState();
 	}
 	
 	@Override
-	public void setClipActive(boolean bEnabled)
+	public void setClipState(final int nClipType)
 	{
-		if(visRender.clipActive() != bEnabled )
+		if(visRender.getClipState() != nClipType )
 		{
-			visRender.setClipActive( bEnabled ); 
+			visRender.setClipState( nClipType ); 
 		}
 	}
 	
@@ -34,7 +34,6 @@ public abstract class AbstractClipTransformSingleShape extends AbstractBasicShap
 	public void setClipInterval(final RealInterval clipInt) 
 	{
 		visRender.setClipInterval( new FinalRealInterval(clipInt) );
-		visRender.setClipActive( true );
 	}
 	
 	@Override

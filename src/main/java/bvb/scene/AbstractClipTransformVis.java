@@ -6,7 +6,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 public abstract class AbstractClipTransformVis implements BasicVis
 {
-	boolean clipActive = false;
+	int clipState = 0;
 	
 	FinalRealInterval clipInt = null;
 	
@@ -14,23 +14,22 @@ public abstract class AbstractClipTransformVis implements BasicVis
 	
 	AffineTransform3D transform = new AffineTransform3D();
 	
-	public boolean clipActive() 
+	public int getClipState() 
 	{		
-		return clipActive;
+		return clipState;
 	}
 	
-	public void setClipActive(boolean bEnabled)
+	public void setClipState(final int nClipType)
 	{
-		if(clipActive != bEnabled )
+		if(clipState != nClipType )
 		{
-			clipActive = bEnabled;
+			clipState = nClipType;
 		}
 	}
 	
 	public void setClipInterval(final RealInterval clipInt) 
 	{
 		this.clipInt = new FinalRealInterval(clipInt);
-		clipActive = true;
 	}
 	
 	public FinalRealInterval getClipInterval() 

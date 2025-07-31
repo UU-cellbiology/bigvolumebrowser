@@ -447,9 +447,9 @@ public class VolumeBox extends AbstractBasicShape
 	}
 
 	@Override
-	public boolean clipActive()
+	public int getClipState()
 	{
-		return false;
+		return 0;
 	}
 
 	@Override
@@ -459,7 +459,7 @@ public class VolumeBox extends AbstractBasicShape
 	}
 
 	@Override
-	public void setClipActive( boolean bEnabled )
+	public void setClipState( final int nClipType)
 	{
 		
 	}

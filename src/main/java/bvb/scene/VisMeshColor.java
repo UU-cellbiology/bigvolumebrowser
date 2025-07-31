@@ -350,9 +350,9 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progMesh.getUniform1i("silType").set(silhouetteRender);
 			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
 			progMesh.getUniform1i("clipactive").set(0);
-			if(clipActive && clipInt != null)
+			if(clipState !=0 && clipInt != null)
 			{
-				progMesh.getUniform1i("clipactive").set(1);
+				progMesh.getUniform1i("clipactive").set(clipState);
 				progMesh.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 				progMesh.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 				final AffineTransform3D t = new AffineTransform3D();
@@ -404,9 +404,9 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progPoints.getUniform1i( "pointShape" ).set( VisSpots.SHAPE_ROUND );
 			progPoints.getUniform1i("clipactive").set(0);
 			
-			if(clipActive && clipInt != null)
+			if(clipState != 0 && clipInt != null)
 			{
-				progPoints.getUniform1i("clipactive").set(1);
+				progPoints.getUniform1i("clipactive").set(clipState);
 				progPoints.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 				progPoints.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 				AffineTransform3D t = new AffineTransform3D();

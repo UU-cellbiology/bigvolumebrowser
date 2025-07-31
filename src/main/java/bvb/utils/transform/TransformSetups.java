@@ -151,7 +151,7 @@ public class TransformSetups
 		if(bTransformClip)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState() != 0)
 			{				
 				// get change in the transform
 				AffineTransform3D clipBake = new AffineTransform3D ();

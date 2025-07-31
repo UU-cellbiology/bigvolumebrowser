@@ -112,7 +112,7 @@ public class ClipRotationPanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState() != 0)
 			{
 				if(bFirstCS)
 				{
@@ -227,7 +227,7 @@ public class ClipRotationPanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState() != 0)
 			{
 				final double [] prevAngles = new double [3];
 				final double [] resetAngles = new double [3];
