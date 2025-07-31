@@ -41,6 +41,8 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
@@ -49,25 +51,24 @@ import javax.swing.UIManager;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
-import bdv.tools.brightness.ConverterSetup;
 import bdv.ui.UIUtils;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
-import bvb.shapes.BasicShape;
+import bvb.gui.JPanelConsistent;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.Clippable3D;
-import bvvpg.source.converters.GammaConverterSetup;
 import ij.Prefs;
 
-public class ClipPanel extends JPanel implements ItemListener
+public class ClipPanel extends JPanel
 {
 	
 	final BigVolumeBrowser bvb;
 	
 	final public ClipSetups clipSetups;
 	
-	JCheckBox cbClipEnabled;
+	final JComboBox<String> cbClipState;
+	final JPanelConsistent pClipState;
 	
 	JButton butCoordSystem;
 	
@@ -130,11 +131,24 @@ public class ClipPanel extends JPanel implements ItemListener
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.WEST;
 		
-		cbClipEnabled = new JCheckBox("Clipping", false);
-		this.add(cbClipEnabled,gbc);
+		String[] sClipType= {"Off", "Out", "In"};
+		cbClipState = new JComboBox< >(sClipType);
+		cbClipState.setSelectedIndex( 0 );
 		
-		cbClipEnabled.addItemListener( this );	
+		cbClipState.addActionListener( (e)->{
+			updateClipState();				
+			});
 		
+		pClipState = new JPanelConsistent(new GridBagLayout());
+		GridBagConstraints gbcp = new GridBagConstraints();
+		gbcp.gridx = 0;
+		gbcp.gridy = 0;
+		pClipState.add( new JLabel("Clipping"), gbcp );
+		gbcp.gridx++;
+		pClipState.add( cbClipState, gbcp );
+
+		this.add(pClipState,gbc);
+				
 		gbc.gridx++;
 		
 		//CLIP COORDINATE SYSTEM
@@ -249,48 +263,34 @@ public class ClipPanel extends JPanel implements ItemListener
 		
 		//consistent clipping
 		boolean bClipConsistent = true;
-		int bClipEnabled = -1;
-		if(clipSetups.selectedObjects.areSourcesSelected())
+		int nClipState = -1;
+		
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs: csList)
-			{		 
-				if(bClipEnabled < 0)
-				{
-					bClipEnabled = ((GammaConverterSetup)cs).clipActive()?1:0;	
-				}
-				else
-				{
-					bClipConsistent &= (bClipEnabled==(((GammaConverterSetup)cs).clipActive()?1:0));
-				}			
-			}
-		}
-		if(clipSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
+			final Clippable3D objCl = (Clippable3D)obj;
+			if(nClipState < 0)
 			{
-				if(bClipEnabled < 0)
-				{
-					bClipEnabled = sh.clipActive()?1:0;	
-				}
-				else
-				{
-					bClipConsistent &= (bClipEnabled==(sh.clipActive()?1:0));
-				}	
+				nClipState = objCl.getClipState();	
+			}
+			else
+			{
+				bClipConsistent &= (nClipState==(objCl.getClipState()));
 			}
 		}
 		
+		
 		if(bClipConsistent)
 		{
-			cbClipEnabled.setBackground( consistentBg );
-			cbClipEnabled.setSelected( bClipEnabled != 0 );
-			setPanelsEnabled(bClipEnabled != 0);
+			pClipState.setBackground( consistentBg );
+			cbClipState.setSelectedIndex( nClipState );
+			setPanelsEnabled(nClipState != 0);
 		}
 		else
 		{
-			setPanelsEnabled(cbClipEnabled.isSelected());
-			cbClipEnabled.setBackground( inConsistentBg );
+			pClipState.setBackground( inConsistentBg );
+			setPanelsEnabled(true);
+
 		}
 		clipRangePanel.updateGUI();
 		clipRotationPanel.updateGUI();
@@ -312,46 +312,28 @@ public class ClipPanel extends JPanel implements ItemListener
 		inConsistentBg = UIUtils.mix( consistentBg, Color.red, 0.9 );
 	}
 	
-	private void updateClipEnabled()
+	private void updateClipState()
 	{
-		boolean bEnabled = cbClipEnabled.isSelected();
+		int nClipState = cbClipState.getSelectedIndex();
 		
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected())
 		{
-			cbClipEnabled.setSelected( false );
+			cbClipState.setSelectedIndex( 0 );
 			return;
 		}
-		if(clipSetups.selectedObjects.areSourcesSelected())
+		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+		for ( final Object obj: objList)
 		{
-			final List< ConverterSetup > csList = clipSetups.selectedObjects.getSelectedSources();
-			for ( final ConverterSetup cs: csList)
-			{
-				  ((GammaConverterSetup)cs).setClipActive( bEnabled );
-			}
+			final Clippable3D objCl = (Clippable3D)obj;
+			objCl.setClipState( nClipState );
 		}
-		if(clipSetups.selectedObjects.areShapesSelected())
-		{
-			final List< BasicShape > shList = clipSetups.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh : shList )
-			{
-				sh.setClipActive( bEnabled );
-			}
-			bvb.updateSceneRender();
-		}
-		if(bEnabled)
-		{
-			bvb.clipBoxes.updateClipBoxes();
-		}
-	}
-	
-	@Override
-	public void itemStateChanged( ItemEvent arg0 )
-	{
-		if(arg0.getSource() == cbClipEnabled)
-			updateClipEnabled();
+
+		bvb.updateSceneRender();
+
 		updateGUI();
 	}
+	
 	
 	void setSliderColors(Color [] colors)
 	{		
@@ -399,7 +381,7 @@ public class ClipPanel extends JPanel implements ItemListener
 				clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getCurrentOrDefaultCenters( objCl ));
 				clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );
 				clipSetups.updateClipTransform( objCl, null);
-				objCl.setClipActive( true );
+				//objCl.setClipActive( true );
 			}
 		}
 		bvb.updateSceneRender();

@@ -127,8 +127,8 @@ public class CenterZoomBVV
 						final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
 						final RealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), nTimePoint, 0 );
 						RealInterval clipInt = cs.getClipInterval() ;
-						//no clipping
-						if(!cs.clipActive() || clipInt == null)
+						//no clipping or internal clipping
+						if(cs.getClipState() != 1 || clipInt == null)
 						{
 							allInt = appendIntervals(allInt, sourceInt);
 						}
@@ -166,7 +166,7 @@ public class CenterZoomBVV
 						final RealInterval shapeInt = shape.boundingBox();
 						RealInterval clipInt = shape.getClipInterval() ;
 						//no clipping
-						if(!shape.clipActive() || clipInt == null)
+						if(shape.getClipState() != 1  || clipInt == null)
 						{
 							allInt = appendIntervals(allInt, shapeInt);
 						}
@@ -256,8 +256,8 @@ public class CenterZoomBVV
 					final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
 					final RealInterval sourceInt = Misc.getSourceBoundingBox( sac.getSpimSource(), nTimePoint, 0 );
 					RealInterval clipInt = cs.getClipInterval() ;
-					//no clipping
-					if(!cs.clipActive() || clipInt == null)
+					//no clipping or inside clipping
+					if(cs.getClipState() != 1 || clipInt == null)
 					{
 						allInt = appendIntervals(allInt, sourceInt);
 					}

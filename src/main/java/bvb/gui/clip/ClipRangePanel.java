@@ -135,7 +135,7 @@ public class ClipRangePanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState()!=0)
 			{
 				final Bounds3D bounds = new Bounds3D(clipSetups.clipAxesBounds.getBounds( objCl ));
 				final double [] minBound = bounds.getMinBound();
@@ -326,7 +326,7 @@ public class ClipRangePanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState() != 0)
 			{
 				Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( objCl );
 				if(range3D != null)

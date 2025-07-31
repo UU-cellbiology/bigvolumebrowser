@@ -249,9 +249,9 @@ public class VisMeshTexture extends AbstractClipTransformVis
 
 		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
 		prog.getUniform1i("clipactive").set(0);
-		if(clipActive && clipInt != null)
+		if(clipState !=0 && clipInt != null)
 		{
-			prog.getUniform1i("clipactive").set(1);
+			prog.getUniform1i("clipactive").set(clipState);
 			prog.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 			prog.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 			final AffineTransform3D t = new AffineTransform3D();

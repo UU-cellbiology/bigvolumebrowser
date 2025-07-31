@@ -126,7 +126,7 @@ public class ClipCenterPanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState() != 0)
 			{
 				final Bounds3D bounds = new Bounds3D(clipSetups.clipCenterBounds.getBounds( objCl ));
 				final double [] minBound = bounds.getMinBound();
@@ -301,7 +301,7 @@ public class ClipCenterPanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.clipActive())
+			if(objCl.getClipState() != 0 )
 			{				
 				clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getDefaultCenters( objCl ));
 				clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );

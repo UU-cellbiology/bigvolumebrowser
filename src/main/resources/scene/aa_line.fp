@@ -19,7 +19,7 @@ void main()
 	if(clipactive>0)
 	{
 		vec3 s = step(clipmin, posW) - step(clipmax, posW);
-		if(s.x * s.y * s.z == 0.0)
+		if(s.x * s.y * s.z == clipactive - 1)
 		{
 			discard;
 		}
