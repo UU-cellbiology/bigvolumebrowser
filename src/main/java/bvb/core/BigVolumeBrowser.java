@@ -28,6 +28,7 @@
  */
 package bvb.core;
 
+import static com.jogamp.opengl.GL.GL_LESS;
 import static com.jogamp.opengl.GL.GL_RGBA8;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
@@ -36,6 +37,11 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +49,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import net.imglib2.RandomAccessibleInterval;
@@ -55,6 +64,7 @@ import net.imglib2.util.ValuePair;
 
 import org.joml.Matrix4f;
 
+import bdv.util.BoundedValueDouble;
 import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -75,6 +85,7 @@ import bvvpg.core.VolumeViewerPanel;
 import bvvpg.core.offscreen.OffScreenFrameBufferWithDepth;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
+import bvvpg.ui.panels.BoundedValuePanelPG;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
@@ -222,6 +233,91 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			{
 				showNoise();
 			}
+			JFrame frame = new JFrame("Depth of Field");
+			frame.setAlwaysOnTop( true );
+			frame.getContentPane().setPreferredSize( new Dimension(450,140) );
+			final JCheckBox cbEnable = new JCheckBox("Enable DoF");
+			cbEnable.addItemListener( new ItemListener() 
+			{
+				@Override
+				public void itemStateChanged( ItemEvent e )
+				{
+					bvvViewer.enableDOF( cbEnable.isSelected());	
+				}
+			});
+			BoundedValueDouble modelDepth = new BoundedValueDouble( 0.0, 1.0, 0.5 );
+			BoundedValuePanelPG depthPanel = new BoundedValuePanelPG(modelDepth);
+			depthPanel.setConsistent( true );
+			
+			depthPanel.changeListeners().add(new BoundedValuePanelPG.ChangeListener()
+			{
+
+				@Override
+				public void boundedValueChanged(  )
+				{
+					//System.out.print( slSlider.getValue());
+					//anglePanel.getValue();
+					float fDepth = ( float ) depthPanel.getValue().getCurrentValue();
+					bvvViewer.setFocalDepth( fDepth );
+					//panelBVV.requestRepaint();
+				}});
+			
+			BoundedValueDouble modelRange = new BoundedValueDouble( 0.0, 1.0, 0.5 );
+			BoundedValuePanelPG rangePanel = new BoundedValuePanelPG(modelRange);
+			rangePanel.setConsistent( true );
+			
+			rangePanel.changeListeners().add(new BoundedValuePanelPG.ChangeListener()
+			{
+
+				@Override
+				public void boundedValueChanged(  )
+				{
+					//System.out.print( slSlider.getValue());
+					//anglePanel.getValue();
+					float fRange = ( float ) rangePanel.getValue().getCurrentValue();
+					bvvViewer.setFocalRange( fRange );
+					//panelBVV.requestRepaint();
+				}});
+			BoundedValueDouble modelRadius = new BoundedValueDouble( 1.0, 100.0, 20. );
+			BoundedValuePanelPG radiusPanel = new BoundedValuePanelPG(modelRadius);
+			radiusPanel.setConsistent( true );
+			
+			radiusPanel.changeListeners().add(new BoundedValuePanelPG.ChangeListener()
+			{
+
+				@Override
+				public void boundedValueChanged(  )
+				{
+					//System.out.print( slSlider.getValue());
+					//anglePanel.getValue();
+					float fRadius = ( float ) radiusPanel.getValue().getCurrentValue();
+					bvvViewer.setBlurRadius( fRadius );
+					//panelBVV.requestRepaint();
+				}});
+			
+
+			JPanel allPanels = new JPanel();
+			GridBagLayout gridbag = new GridBagLayout();
+			allPanels.setLayout(gridbag);		
+			
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			gbc.weightx = 0.1;
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			
+			allPanels.add( cbEnable,gbc);
+			gbc.gridy++;
+			allPanels.add( depthPanel,gbc);
+			
+			gbc.gridy++;
+			allPanels.add( rangePanel,gbc);
+			gbc.gridy++;
+			allPanels.add( radiusPanel,gbc);		
+			
+			frame.getContentPane().add(allPanels);
+			frame.pack();
+			frame.setVisible(true);
 		}
 	}
 	
@@ -552,7 +648,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
 
 		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
-
+		
 		//to be able to change point size in shader
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		if(BVBSettings.bWeightedOIT)
@@ -578,6 +674,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			sceneBufTransparent.unbind( gl,false );
 			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			sceneBufTransparent.drawQuadAlpha( gl );
+			gl.glDepthFunc( GL.GL_ALWAYS );
+			sceneBufTransparent.drawQuadDepth( gl, false );
 		}
 	}
 	
