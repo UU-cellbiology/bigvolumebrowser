@@ -275,7 +275,7 @@ public class ClipPanel extends JPanel
 			}
 			else
 			{
-				bClipConsistent &= (nClipState==(objCl.getClipState()));
+				bClipConsistent &= (nClipState== objCl.getClipState());
 			}
 		}
 		
