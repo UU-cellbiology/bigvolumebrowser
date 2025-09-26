@@ -11,7 +11,7 @@ import javax.swing.SwingConstants;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
-import bvb.shapes.Spots;
+import bvb.shapes.BasicSpots;
 
 public class ShapesPropertiesPanel extends JPanel 
 {
@@ -70,7 +70,7 @@ public class ShapesPropertiesPanel extends JPanel
 		final List< BasicShape > shapes = bvb.selectedObjects.getSelectedShapes();
 		for(final BasicShape sh:shapes)
 		{
-			if(sh instanceof Spots && bSpotsUpdate )
+			if(sh instanceof BasicSpots && bSpotsUpdate )
 			{
 				panelSpotsProperties.setEnabled( true );
 				panelSpotsProperties.updateGUI(true);

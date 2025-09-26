@@ -188,13 +188,19 @@ public class PanelAddShapes extends JPanel
 						if(!sptParser.parseTime)
 						{
 							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
-							importedSpots.setPoints( sptParser.vertices,sptParser.sizes);
+							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
 							spots = importedSpots;
 						}
 						else
 						{
 							MultiSpots importedSpots = new MultiSpots();
+							int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
 							spots = importedSpots;
+							//update time points
+							if(nMaxTP>=0)
+							{
+								bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
+							}
 						}	
 						spots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
 						bvb.addShape( spots );						
@@ -283,8 +289,8 @@ public class PanelAddShapes extends JPanel
 		String[] sOptions = { "Group meshes by color", "Each mesh separately" };
 		JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
 		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesh", true)?0:1);
-		gbc.gridx=0;
-		gbc.gridy=0;	
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
 		pWRLSettings.add(new JLabel("Multiple meshes:"), gbc);
 		gbc.gridx++;
@@ -296,7 +302,7 @@ public class PanelAddShapes extends JPanel
 
 		if (reply == JOptionPane.OK_OPTION) 
 		{
-			bGroupMesh = cbMultiMesh.getSelectedIndex()==0;
+			bGroupMesh = cbMultiMesh.getSelectedIndex() == 0;
 			Prefs.set( "BVB.bGroupMesh", bGroupMesh);
 			
 		}
@@ -323,7 +329,7 @@ public class PanelAddShapes extends JPanel
 				{
 					meshGroups.put( color,  new MultiMeshColor() );
 				}
-				for(int i=0;i<loadedMeshes.size();i++)
+				for(int i = 0; i < loadedMeshes.size(); i++)
 				{
 					int nTP = -1;
 

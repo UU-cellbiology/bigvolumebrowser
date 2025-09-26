@@ -2,9 +2,12 @@ package bvb.shapes;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.imglib2.FinalRealInterval;
+import net.imglib2.RealPoint;
+import net.imglib2.util.Intervals;
 
 import bvb.gui.shapes.SpotsShapeDialog;
 import bvb.io.shapes.SpotsParser;
@@ -142,17 +145,91 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		return pointShape;
 	}
 
-	void initFromSpotParser(final SpotsParser parser, final SpotsShapeDialog sptShape)
+	/** returns maximum timepoint value (integer) **/
+	public int initFromSpotParser(final SpotsParser sptParser, final SpotsShapeDialog sptShape)
 	{
 		pointShape = sptShape.nShape;
 		setColor(sptShape.spotColor);
 		renderType = sptShape.nFill;
 		pointSize = -1.0f;
-		if(!parser.parseSize)
+		if(!sptParser.parseSize)
 		{
 			pointSize = sptShape.fSpotSize;
 		}
+		defineTransparency();
 		
+		final int nTotSpotsN = sptParser.times.length;
+
+		float [][] patTimesIndices = new float[nTotSpotsN][2];
+		for (int i = 0; i< nTotSpotsN; i++)
+		{
+			patTimesIndices[i][0] = sptParser.times[i];
+			patTimesIndices[i][1] = i;
+		}
+		Arrays.sort(patTimesIndices, (a, b) -> Float.compare(a[0], b[0]));
+		float nCurrTimepoint = patTimesIndices[0][0];
+		
+		int nLoadTimePoint = 0;
+		final ArrayList<RealPoint> verticesTP = new ArrayList<>();
+		final ArrayList<Float> sizesTP = new ArrayList<>();
+		for(int i = 0; i < nTotSpotsN; i++)
+		{
+			if(Math.abs(patTimesIndices[i][0] - nCurrTimepoint)<0.00001)
+			{
+				final int index = ( int ) patTimesIndices[i][1] ;
+				verticesTP.add( sptParser.vertices.get( index ) );
+				if(sptParser.parseSize)
+				{
+					sizesTP.add( sptParser.sizes[index] );
+				}			
+			}
+			else
+			{
+				//add a new spots object
+				addSpots(verticesTP, sizesTP, nLoadTimePoint);
+				nCurrTimepoint = patTimesIndices[i][0];
+				nLoadTimePoint++;
+				verticesTP.clear();
+				sizesTP.clear();
+			}
+		}
+		if(verticesTP.size() != 0)
+		{
+			addSpots(verticesTP, sizesTP, nLoadTimePoint);	
+		}
+		return nLoadTimePoint;
+	}
+	void addSpots(final ArrayList<RealPoint> verticesTP, final ArrayList<Float> sizesTP, final int nLoadTimePoint)
+	{
+		//add a new spots object
+		VisSpots spotsTP = new VisSpots(pointSize, pointColor, pointShape, renderType);
+		if(sizesTP.size() == 0)
+		{
+			spotsTP.setVertices( verticesTP );
+			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, null, pointSize) );
+		}
+		else
+		{
+			final float [] sizesF = new float[sizesTP.size()];
+			for (int j = 0; j < sizesTP.size(); j++)
+			{
+				sizesF[j] = sizesTP.get( j );
+			}
+			spotsTP.setVertices( verticesTP, sizesF );
+			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, sizesF, pointSize) );
+
+		}
+		visRendersTimeMap.put( spotsTP, nLoadTimePoint );
 	}
 	
+	@Override
+	public String toString()
+	{
+		if(sName.equals( "" ))
+		{
+			return "spots" + this.hashCode();
+		}
+		
+		return sName;
+	}
 }

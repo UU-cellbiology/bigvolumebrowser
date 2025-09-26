@@ -75,7 +75,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		{
 			visRender = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		}
-		if(spotSizes==null || spotSizes.length != vertices.size())
+		if(spotSizes == null || spotSizes.length != vertices.size())
 		{	
 			((VisSpots)visRender).setVertices(vertices);	
 		}

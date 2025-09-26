@@ -48,6 +48,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 			return 0;
 		return ((AbstractClipTransformVis)visRendersTimeMap.keySet().toArray()[0]).getClipState();
 	}
+	
 	@Override
 	public void setClipState(final int nClipType)
 	{
