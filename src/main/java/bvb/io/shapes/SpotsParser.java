@@ -21,6 +21,7 @@ import ij.IJ;
 
 public class SpotsParser extends SwingWorker<Void, Void> 
 {
+	
 	public File fileSpots = null;
 	
 	public boolean bHeader = false;
@@ -142,7 +143,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		{
 			times = new float[timesList.size()];
 			
-			for(int i=0; i<timesList.size(); i++)
+			for(int i=0; i < timesList.size(); i++)
 			{
 				times[i] = timesList.get( i );
 			}
@@ -317,17 +318,26 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	//let's cleanup
     	//load everything to float
     	final int nInN = vertices.size();
+    	// 3D coordinates + filtermark
     	int nColN = 4;
     	double dProgressTotal = (nColN-1)+3;
     	double dProgressCurrent = 0.0;
+    	int nColSize = 0;
+    	int nColTime = 0;
     	
     	final int indMin = ( int ) Math.max( 0, Math.round( dPercMin*nInN/100. ) );
     	final int indMax = ( int ) Math.min( nInN-1, Math.round( dPercMax*nInN/100. ) );
     	IJ.showStatus( "Cleaning up spots data..");
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
-    	
+    	// 3D coordinates + size + filtermark (always last)
     	if(parseSize)
     	{
+    		nColSize = nColN - 1;
+    		nColN ++;
+    	}
+    	if(parseTime)
+    	{
+    		nColTime = nColN - 1;
     		nColN ++;
     	}
 
@@ -341,25 +351,35 @@ public class SpotsParser extends SwingWorker<Void, Void>
     		}
     		if(parseSize)
     		{
-    			allData[i][3] = sizes[i];
+    			allData[i][nColSize] = sizes[i];
+    		}
+    		if(parseTime)
+    		{
+    			allData[i][nColTime] = times[i];
     		}
     	}
     	dProgressCurrent++;
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
     	
     	//now let's sort by each column and mark outliers
-    	for(int nCol = 0; nCol<nColN-1; nCol++)
+    	//filter only by XYZ and size
+    	int nColLast = 3;
+    	if(parseSize)
+    	{
+    		nColLast = 4;
+    	}
+    	for(int nCol = 0; nCol < nColLast; nCol++)
     	{
         	dProgressCurrent++;
         	IJ.showProgress( dProgressCurrent/dProgressTotal);
 
     		final int nColX = nCol;
     		Arrays.sort(allData, (a, b) -> Float.compare(a[nColX], b[nColX]));
-    		for(int i=0;i<indMin; i++)
+    		for(int i = 0; i < indMin; i++)
     		{
     			allData[i][nColN-1] = 1.0f;
     		}
-    		for(int i=indMax;i<nInN; i++)
+    		for(int i = indMax; i < nInN; i++)
     		{
     			allData[i][nColN-1] = 1.0f;
     		}
@@ -369,7 +389,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	int nTotFiltCount = 0;
       	dProgressCurrent++;
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
-    	for(int i=0; i<nInN;i++)
+    	for(int i=0; i < nInN; i++)
     	{
     		if(allData[i][nColN-1]<0.5f)
     		{
@@ -383,15 +403,30 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	{
     		sizes = new float[nTotFiltCount];
     		int nCount = 0;
-        	for(int i=0; i<nInN;i++)
+        	for(int i = 0; i < nInN; i++)
         	{
         		if(allData[i][nColN-1]<0.5f)
         		{
-        			sizes[nCount] = allData[i][3];
+        			sizes[nCount] = allData[i][nColSize];
         			nCount++;
         		}
         	}
     	}
+    	if(parseTime)
+    	{
+    		times = new float[nTotFiltCount];
+    		int nCount = 0;
+        	for(int i = 0; i < nInN; i++)
+        	{
+        		if(allData[i][nColN-1]<0.5f)
+        		{
+        			times[nCount] = allData[i][nColTime];
+        			nCount++;
+        		}
+        	}
+    	}
+    	
+    	
       	dProgressCurrent++;
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
     	String finOut = "Cleanup done: " +Integer.toString( nTotFiltCount )+" spots left from "+Integer.toString( nInN ); 
@@ -433,19 +468,33 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				{
 					writer.write(","+sSize+"("+sUnits+")");	
 				}
+				if(parseTime)
+				{
+					writer.write(", T");	
+				}
 				writer.write("\n");
-		    	for(int i=0; i<nInN;i++)
+		    	for(int i = 0; i < nInN;i++)
 		    	{
 		    		if(allData[i][nColN-1]<0.5f)
 		    		{
-		    			for(int j=0;j<nColN-2;j++)
+		    			//coordinates
+		    			for(int j=0;j<3;j++)
 		    			{
 		    				writer.write(df3.format(allData[i][j]*fInverseScale) + ",");
 		    			}
 		    			if(parseSize)
-		    				writer.write(df3.format(allData[i][nColN-2]*fInverseScale*fInverseSizeScale) + "\n");
-		    			else
-		    				writer.write(df3.format(allData[i][nColN-2]*fInverseScale) + "\n");
+		    			{
+		    				writer.write(df3.format(allData[i][nColSize]*fInverseScale*fInverseSizeScale));
+		    			}
+		    			if(parseSize && parseTime)
+		    			{
+		    				writer.write(",");
+		    			}
+		    			if(parseTime)
+		    			{
+		    				writer.write(df3.format(allData[i][nColTime]));
+		    			}
+		    			writer.write("\n");
 		    		}
 		    	}
 				writer.close();

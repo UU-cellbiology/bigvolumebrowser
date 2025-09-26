@@ -58,8 +58,10 @@ public interface BasicShape extends Clippable3D
 	/** report transparency of the shape **/
 	public boolean isTransparent();
 	
+	/** returns bounding box with applied transform **/
 	public RealInterval boundingBox();
 	
+	/** returns bounding box without applied transform **/
 	public RealInterval boundingBoxNotTransformed();
 	
 	public void setTimePoint(final int nTP);

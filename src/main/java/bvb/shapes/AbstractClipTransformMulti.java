@@ -26,7 +26,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	@Override
 	public RealInterval boundingBox()
 	{
-		if(visRendersTimeMap.size() ==0)
+		if(visRendersTimeMap.size() == 0)
 			return null;
 		
 		final AffineTransform3D t = new AffineTransform3D();

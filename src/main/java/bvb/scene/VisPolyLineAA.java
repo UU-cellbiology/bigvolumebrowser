@@ -290,9 +290,9 @@ public class VisPolyLineAA
 		}
 		for(int i = 0; i<nTotLength; i++)
 		{
-			vertCurr[i] =vertAll[i+6];
-			vertPrev[i] =vertAll[i];
-			vertNext[i] =vertAll[i+12];
+			vertCurr[i] = vertAll[i+6];
+			vertPrev[i] = vertAll[i];
+			vertNext[i] = vertAll[i+12];
 		}
 		
 		//cumulative length

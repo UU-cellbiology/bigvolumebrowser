@@ -25,10 +25,12 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	{
 
 		bTransparent = false;
+		
 		if(renderType >= VisSpots.RENDER_GAUSS)
 		{
 			bTransparent = true;
 		}
+		
 		if(pointColor.getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
 		{
 			bTransparent = true;
