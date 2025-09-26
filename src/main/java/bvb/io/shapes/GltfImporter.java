@@ -30,6 +30,7 @@ import de.javagl.jgltf.model.ImageModel;
 import de.javagl.jgltf.model.MeshModel;
 import de.javagl.jgltf.model.MeshPrimitiveModel;
 import de.javagl.jgltf.model.NodeModel;
+import de.javagl.jgltf.model.SceneModel;
 import de.javagl.jgltf.model.TextureModel;
 import de.javagl.jgltf.model.io.GltfModelReader;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
@@ -61,6 +62,16 @@ public class GltfImporter
 		
 		if(gltfModel != null)
 		{       
+			
+			// Entry point:
+			for (SceneModel scene : gltfModel.getSceneModels()) 
+			{
+			    System.out.println("Scene: " + scene.getName());
+			    for (NodeModel root : scene.getNodeModels()) 
+			    {
+			        traverseNode(root, 0);
+			    }
+			}  
 			String meshName = "";
 			for (NodeModel nodeModel : gltfModel.getNodeModels())
 			{
@@ -211,6 +222,31 @@ public class GltfImporter
 			}
 		}
 		return out;
+	}
+	
+	public static void traverseNode(NodeModel node, int depth) 
+	{
+	    String indent = "";
+	    for(int i=0;i<depth;i++)
+	    {
+	    	indent = indent + "  ";
+	    }
+		for(final MeshModel mesh: node.getMeshModels())
+		{
+		    if (mesh != null) {
+		        System.out.printf("%sNode '%s' → Mesh '%s'%n",
+		                          indent,
+		                          node.getName(),
+		                          mesh.getName());
+		    } else {
+		        System.out.printf("%sNode '%s' → no mesh%n",
+		                          indent,
+		                          node.getName());
+		    }
+		}
+	    for (NodeModel child : node.getChildren()) {
+	        traverseNode(child, depth + 1);
+	    }
 	}
 	
 	public static float [][] readAttributeFloatArray(final MeshPrimitiveModel meshPrimitiveModel, String key)
