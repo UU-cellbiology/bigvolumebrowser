@@ -34,6 +34,7 @@ import de.javagl.jgltf.model.SceneModel;
 import de.javagl.jgltf.model.TextureModel;
 import de.javagl.jgltf.model.io.GltfModelReader;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
+import ij.IJ;
 import bvb.shapes.BasicShape;
 import bvb.shapes.MeshColor;
 import bvb.shapes.MeshTexture;
@@ -42,12 +43,16 @@ import bvb.shapes.MeshTexture;
  * Written in a very inefficient way, but should work ok on small meshes. **/
 public class GltfImporter
 {
+	final ArrayList<BasicShape> shapesOut = new ArrayList<>();
+	int nTotNodes = 0;
+	int nCurrNodeN = 0;
 	
-	public static List<BasicShape> loadGLTF(String sFilename)
-	{
+	public List<BasicShape> loadGLTF(String sFilename)
+	{	
+		shapesOut.clear();
 		
-		final ArrayList<BasicShape> out = new ArrayList<>();
 		final GltfModelReader gltfModelReader = new GltfModelReader();
+		
 		GltfModel gltfModel = null;
 		
 		try
@@ -62,7 +67,7 @@ public class GltfImporter
 		
 		if(gltfModel != null)
 		{       
-			
+			nTotNodes = gltfModel.getNodeModels().size();
 			// Entry point:
 			for (SceneModel scene : gltfModel.getSceneModels()) 
 			{
@@ -72,178 +77,186 @@ public class GltfImporter
 			        traverseNode(root, 0);
 			    }
 			}  
-			String meshName = "";
-			for (NodeModel nodeModel : gltfModel.getNodeModels())
+		}
+		IJ.log( "Loaded " + Integer.toString( shapesOut.size() ) + " shapes from " + sFilename );
+		return shapesOut;
+	}
+	
+	public void loadNodeMeshes(final NodeModel nodeModel)
+	{
+		String meshName = "";
+		final AffineTransform3D nodeTransform = new AffineTransform3D();
+		
+		final float[] matTransform = nodeModel.getMatrix();
+		
+		if(matTransform == null)
+		{
+			final float[] scalef = nodeModel.getScale();
+			if(scalef != null)
 			{
-				final AffineTransform3D nodeTransform = new AffineTransform3D();
-				
-				final float[] matTransform = nodeModel.getMatrix();
-				
-				if(matTransform == null)
+				nodeTransform.scale( scalef[0], scalef[1], scalef[2] );
+			}
+			
+			final float[] rotationQ = nodeModel.getRotation();
+			if(rotationQ != null)
+			{
+				final double [] q = new double[4];
+				for(int d=0;d<3;d++)
 				{
-					final float[] scalef = nodeModel.getScale();
-					if(scalef != null)
+					q[d+1] = rotationQ[d];
+				}
+				q[0] = rotationQ[3];
+				final double [][] rotMatrix = new double [3][4];
+				LinAlgHelpers.quaternionToR( q, rotMatrix );
+				final AffineTransform3D rotationAf = new AffineTransform3D();
+				rotationAf.set( rotMatrix );
+				nodeTransform.preConcatenate( rotationAf );
+			}
+			
+			final float[] translatef = nodeModel.getTranslation();
+			if(translatef != null)
+			{
+				final double [] translated = new double [3];
+				for(int d = 0; d < 3; d++)
+				{
+					translated[d] = translatef[d];
+				}
+				nodeTransform.translate( translated );
+			}
+		}
+		else
+		{
+			final double [][] trMatrix = new double [3][4];
+			for(int j = 0; j < 4; j++)
+			{	
+				for(int d = 0; d < 3; d++)
+				{
+					trMatrix[d][j] = matTransform[j*4 + d];
+				}
+			}
+			nodeTransform.set( trMatrix );
+		}
+		
+		for(final MeshModel meshModel: nodeModel.getMeshModels())
+		{					
+			//System.out.println(meshModel.getName());
+			//int nMeshCount = 0;
+			for(final MeshPrimitiveModel meshPrimitiveModel:meshModel.getMeshPrimitiveModels())
+			{
+				//nMeshCount ++;
+				meshName = nodeModel.getName() +"("+ meshModel.getName() +")";
+				
+				final Mesh currMesh = new NaiveFloatMesh();				
+				final float [][] vert = readAttributeFloatArray(meshPrimitiveModel, "POSITION");
+				final float [][] uvmap = readAttributeFloatArray(meshPrimitiveModel, "TEXCOORD_0");
+
+				for(int i = 0; i < vert.length; i++)
+				{
+					currMesh.vertices().addf(vert[i][0], vert[i][1], vert[i][2] );
+					if(uvmap != null)
 					{
-						nodeTransform.scale( scalef[0], scalef[1], scalef[2] );
-					}
-					
-					final float[] rotationQ = nodeModel.getRotation();
-					if(rotationQ != null)
-					{
-						final double [] q = new double[4];
-						for(int d=0;d<3;d++)
-						{
-							q[d+1] = rotationQ[d];
-						}
-						q[0] = rotationQ[3];
-						final double [][] rotMatrix = new double [3][4];
-						LinAlgHelpers.quaternionToR( q, rotMatrix );
-						final AffineTransform3D rotationAf = new AffineTransform3D();
-						rotationAf.set( rotMatrix );
-						nodeTransform.preConcatenate( rotationAf );
-					}
-					
-					final float[] translatef = nodeModel.getTranslation();
-					if(translatef != null)
-					{
-						final double [] translated = new double [3];
-						for(int d = 0; d < 3; d++)
-						{
-							translated[d] = translatef[d];
-						}
-						nodeTransform.translate( translated );
+						currMesh.vertices().setTexturef( i, uvmap[i][0], uvmap[i][1] ); 
 					}
 				}
+
+				final int [] indices = readIndices(meshPrimitiveModel);
+				for(int i = 0; i < indices.length; i++)
+				{
+					if((i+1)%3 == 0)
+					{
+						currMesh.triangles().add( indices[i-2], indices[i-1], indices[i] );
+					}
+				}	
+				
+				final MaterialModelV2 material = ( MaterialModelV2 ) meshPrimitiveModel.getMaterialModel();
+
+				final TextureModel baseColorTexture = material.getBaseColorTexture();
+				//see if there is a texture
+				if(baseColorTexture != null && uvmap != null)
+				{
+					// 3. Get the image model
+					final ImageModel imageModel = baseColorTexture.getImageModel();
+					final BufferViewModel bufferViewModel = imageModel.getBufferViewModel();
+					ByteBuffer byteBuffer = null;
+
+					int nByteLength = 0 ;
+					if(bufferViewModel != null)
+					{
+						byteBuffer = bufferViewModel.getBufferModel().getBufferData();
+						nByteLength = bufferViewModel.getByteLength();				        
+						byteBuffer.position(bufferViewModel.getByteOffset());
+
+					}
+					else
+					{
+						byteBuffer = imageModel.getImageData();
+						nByteLength = byteBuffer.remaining();
+					}
+
+					final byte[] imageBytes = new byte[nByteLength];
+					byteBuffer.get(imageBytes);
+
+					BufferedImage image = null;		
+
+					try
+					{
+						image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+					}
+					catch ( IOException exc )
+					{
+						exc.printStackTrace();
+						break;
+					}
+					final MeshTexture meshTexture = new MeshTexture(currMesh, image);
+					meshTexture.setTransform( nodeTransform );
+					shapesOut.add( new MeshTexture(currMesh, image) );
+				}
+				//no texture, only color
 				else
 				{
-					final double [][] trMatrix = new double [3][4];
-					for(int j = 0; j < 4; j++)
-					{	
-						for(int d = 0; d < 3; d++)
-						{
-							trMatrix[d][j] = matTransform[j*4 + d];
-						}
-					}
-					nodeTransform.set( trMatrix );
-				}
-				
-				for(final MeshModel meshModel: nodeModel.getMeshModels())
-				{
-					//System.out.println(meshModel.getName());
-					int nMeshCount = 0;
-					for(final MeshPrimitiveModel meshPrimitiveModel:meshModel.getMeshPrimitiveModels())
+					final float[] rgba = material.getBaseColorFactor();
+					final float[] rgbaEM = material.getEmissiveFactor();
+					//for now, we are going to add them
+					for(int d=0; d<3; d++)
 					{
-						nMeshCount ++;
-						meshName = nodeModel.getName() +"("+ meshModel.getName()+Integer.toString( nMeshCount ) +")";
-						
-						final Mesh currMesh = new NaiveFloatMesh();				
-						final float [][] vert = readAttributeFloatArray(meshPrimitiveModel, "POSITION");
-						final float [][] uvmap = readAttributeFloatArray(meshPrimitiveModel, "TEXCOORD_0");
-						boolean bTexture = uvmap == null ? false : true;
-
-						final MaterialModelV2 material = ( MaterialModelV2 ) meshPrimitiveModel.getMaterialModel();
-
-						final TextureModel baseColorTexture = material.getBaseColorTexture();
-						if (baseColorTexture == null) 
-						{
-							bTexture = false;
-							//System.out.println("Gltf loader: no base color texture found, skipping mesh.");
-							// break;
-						}
-						for(int i = 0; i < vert.length; i++)
-						{
-							currMesh.vertices().addf(vert[i][0], vert[i][1], vert[i][2] );
-							if(bTexture)
-							{
-								currMesh.vertices().setTexturef( i, uvmap[i][0], uvmap[i][1] ); 
-							}
-						}
-
-						final int [] indices = readIndices(meshPrimitiveModel);
-						for(int i = 0; i < indices.length; i++)
-						{
-							if((i+1)%3 == 0)
-							{
-								currMesh.triangles().add( indices[i-2], indices[i-1], indices[i] );
-							}
-						}				
-						if(bTexture)
-						{
-							// 3. Get the image model
-							final ImageModel imageModel = baseColorTexture.getImageModel();
-							final BufferViewModel bufferViewModel = imageModel.getBufferViewModel();
-							ByteBuffer byteBuffer = null;
-
-							int nByteLength = 0 ;
-							if(bufferViewModel != null)
-							{
-								byteBuffer = bufferViewModel.getBufferModel().getBufferData();
-								nByteLength = bufferViewModel.getByteLength();				        
-								byteBuffer.position(bufferViewModel.getByteOffset());
-
-							}
-							else
-							{
-								byteBuffer = imageModel.getImageData();
-								nByteLength = byteBuffer.remaining();
-							}
-
-							final byte[] imageBytes = new byte[nByteLength];
-							byteBuffer.get(imageBytes);
-
-							BufferedImage image = null;		
-
-							try
-							{
-								image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-							}
-							catch ( IOException exc )
-							{
-								exc.printStackTrace();
-								break;
-							}
-							final MeshTexture meshTexture = new MeshTexture(currMesh, image);
-							meshTexture.setTransform( nodeTransform );
-							out.add( new MeshTexture(currMesh, image) );
-						}
-						//no texture, only color
-						else
-						{
-							final float[] rgba = material.getBaseColorFactor();
-							final Color colorMesh = new Color(rgba[0], rgba[1], rgba[2], rgba[3]);
-							final MeshColor meshShape = new MeshColor(currMesh);
-							meshShape.setColor( colorMesh );
-							meshShape.setName( meshName );
-							meshShape.setTransform(nodeTransform);
-							out.add(meshShape );
-						}
+						rgba[d] += rgbaEM[d];
+						rgba[d] = ( float ) Math.min(rgba[d], 1.0);
 					}
+					final Color colorMesh = new Color(rgba[0], rgba[1], rgba[2], rgba[3]);
+					final MeshColor meshShape = new MeshColor(currMesh);
+					meshShape.setColor( colorMesh );
+					meshShape.setName( meshName );
+					meshShape.setTransform(nodeTransform);
+					shapesOut.add(meshShape );
 				}
 			}
 		}
-		return out;
 	}
 	
-	public static void traverseNode(NodeModel node, int depth) 
+	public void traverseNode(final NodeModel node, int depth) 
 	{
 	    String indent = "";
 	    for(int i=0;i<depth;i++)
 	    {
 	    	indent = indent + "  ";
 	    }
-		for(final MeshModel mesh: node.getMeshModels())
-		{
-		    if (mesh != null) {
-		        System.out.printf("%sNode '%s' → Mesh '%s'%n",
-		                          indent,
-		                          node.getName(),
-		                          mesh.getName());
-		    } else {
-		        System.out.printf("%sNode '%s' → no mesh%n",
-		                          indent,
-		                          node.getName());
-		    }
-		}
+	    
+	    loadNodeMeshes(node);
+	    nCurrNodeN++;
+	    IJ.showProgress( nCurrNodeN, nTotNodes  );
+//		for(final MeshModel mesh: node.getMeshModels())
+//		{
+//		    if (mesh != null) {
+//		        System.out.printf("%sNode '%s' → Mesh '%s'%n",
+//		                          indent,
+//		                          node.getName(),
+//		                          mesh.getName());
+//		    } else {
+//		        System.out.printf("%sNode '%s' → no mesh%n",
+//		                          indent,
+//		                          node.getName());
+//		    }
+//		}
 	    for (NodeModel child : node.getChildren()) {
 	        traverseNode(child, depth + 1);
 	    }

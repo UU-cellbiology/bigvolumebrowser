@@ -266,9 +266,12 @@ public class PanelAddShapes extends JPanel
 
         }
 	}
+	
 	void loadGLTfile(String sFilename)
 	{
-		final List< BasicShape > meshes = GltfImporter.loadGLTF( sFilename );
+		bvb.bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "Loading meshes from glTF, please wait...", 3000, TextPosition.CENTER )  );
+		GltfImporter gltfImporter = new GltfImporter();
+		final List< BasicShape > meshes = gltfImporter.loadGLTF( sFilename );
 		
 		if (meshes != null)
 		{
