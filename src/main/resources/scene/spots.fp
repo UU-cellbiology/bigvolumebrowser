@@ -13,9 +13,14 @@ uniform vec3 clipmin;
 uniform vec3 clipmax;
 uniform mat4 cliptransform;
 uniform int wOIT;
-uniform int nMapLUTMode;
 
 uniform sampler2D lutTexture;
+uniform int nMapLUTMode;
+uniform int sizeLUT;
+uniform float mapMin;
+uniform float mapRange;
+
+
 
 void checkClipping()
 {
@@ -31,6 +36,25 @@ void checkClipping()
 	}
 }
 
+vec4 getInputColor()
+{
+
+	if(nMapLUTMode == 1)
+	{
+		vec2 q = vec2(0);
+		//2D texture with fixed width of 256
+		float val = 0.5 + (sizeLUT-1)*((posW.z-mapMin)/mapRange);
+		q.y = floor(val/256.0);
+		q.x = (val/256.0)- q.y;
+		q.y = (q.y+0.5)/ceil(sizeLUT/256.0);
+		return texture(lutTexture, q);
+	}
+	else
+	{
+	 	return colorin;
+	}
+}
+
 void main()
 {
 	checkClipping();
@@ -38,15 +62,8 @@ void main()
     //transform coordinates to NDC
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
-	vec4 colorout;
-	if(nMapLUTMode == 1)
-	{
-		colorout = texture(lutTexture, coord);
-	}
-	else
-	{
-	 	colorout =  colorin;
-	}
+	vec4 colorout = getInputColor();
+
 	
 	if(pointShape == 0)
 	{

@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 
 import bdv.viewer.animate.TextOverlayAnimator;
@@ -192,6 +193,8 @@ public class PanelAddShapes extends JPanel
 							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
 							importedSpots.setLUT( "Fire" );
 							importedSpots.setMapLUTMode( 1 );
+							RealInterval testInt = importedSpots.boundingBox();
+							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
 							spots = importedSpots;
 						}
 						else

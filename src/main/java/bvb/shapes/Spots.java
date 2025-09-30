@@ -277,6 +277,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		return;
 	}	
 	
+	public void setMapRange(final float fMin, final float fMax)
+	{
+		((VisSpots)visRender).setMapRange( fMin, fMax );
+	}
+	
 	@Override
 	public int getRenderType()
 	{

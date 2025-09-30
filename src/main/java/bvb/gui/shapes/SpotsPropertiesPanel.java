@@ -234,7 +234,7 @@ public class SpotsPropertiesPanel extends JPanel
 				{
 					currColor = spotsShape.getColor();
 					fPointSizeIn = spotsShape.getPointSize();
-					if(fPointSizeIn>0.0)
+					if(fPointSizeIn > 0.0)
 					{
 						fPointSize = spotsShape.getPointSize();
 					}
@@ -345,6 +345,7 @@ public class SpotsPropertiesPanel extends JPanel
 				if(sh instanceof BasicSpots)
 				{
 					((BasicSpots)sh).setColor( cColor );
+					((BasicSpots)sh).setMapLUTMode( 0 );
 				}
 			}
 			bvb.repaintBVV();

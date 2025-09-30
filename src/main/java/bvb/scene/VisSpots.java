@@ -96,6 +96,8 @@ public class VisSpots extends AbstractClipTransformVis
 	 
 	private int nMapLUTMode = 0;
 	
+	final float [] fMapMinRange = new float[2];
+	
 	public VisSpots()
 	{
 		initShader();
@@ -195,6 +197,12 @@ public class VisSpots extends AbstractClipTransformVis
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
+	}
+	
+	public void setMapRange(final float fMin, final float fMax)
+	{
+		fMapMinRange[0] = fMin;
+		fMapMinRange[1] = fMax - fMin;
 	}
 	
 	public int getMapLUTMode()
@@ -417,7 +425,12 @@ public class VisSpots extends AbstractClipTransformVis
 		{
 			gl.glActiveTexture( GL_TEXTURE0 );
 			if(lutGPU.getTextureID()>0)
+			{
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
+				prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
+				prog.getUniform1f("mapMin").set(fMapMinRange[0]);
+				prog.getUniform1f("mapRange").set(fMapMinRange[1]);
+			}
 		}
 		
 		gl.glBindVertexArray( vao );
