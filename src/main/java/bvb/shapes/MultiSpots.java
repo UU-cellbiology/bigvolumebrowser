@@ -1,6 +1,7 @@
 package bvb.shapes;
 
 import java.awt.Color;
+import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +13,7 @@ import net.imglib2.util.Intervals;
 import bvb.gui.shapes.SpotsShapeDialog;
 import bvb.io.shapes.SpotsParser;
 import bvb.scene.AbstractClipTransformVis;
+import bvb.scene.LUTUploaderGPU;
 import bvb.scene.VisSpots;
 
 public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
@@ -23,6 +25,10 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	int renderType;
 	
 	int pointShape;
+	
+	int nMapLUTMode = 0;
+	
+	String sLUTName = "";
 	
 	void defineTransparency()
 	{
@@ -99,6 +105,66 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public Color getColor()
 	{
 		return pointColor;
+	}
+	
+	@Override
+	public void setMapLUTMode(int nMapLUTMode_)
+	{
+		nMapLUTMode = nMapLUTMode_;
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapLUTMode( nMapLUTMode );
+			}
+			
+		}
+	}
+	
+	@Override
+	public int getMapLUTMode()
+	{
+		return nMapLUTMode;
+	}
+	
+	@Override
+	public void setLUT(final IndexColorModel icm_, String sLUTName) 
+	{		
+		this.sLUTName = sLUTName;
+		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU.setLUT( icm_, sLUTName );
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+			}
+			
+		}
+	}
+	
+	@Override
+	public void setLUT( String sLUTName ) 
+	{	
+		this.sLUTName = sLUTName;
+		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU.setLUT( sLUTName );
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+			}			
+		}
+	}
+	
+	@Override
+	public String getLUTName()
+	{
+		return sLUTName;
 	}
 
 	@Override

@@ -13,7 +13,7 @@ uniform vec3 clipmin;
 uniform vec3 clipmax;
 uniform mat4 cliptransform;
 uniform int wOIT;
-uniform int bUseLUT;
+uniform int nMapLUTMode;
 
 uniform sampler2D lutTexture;
 
@@ -39,13 +39,13 @@ void main()
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
 	vec4 colorout;
-	if(bUseLUT == 1)
+	if(nMapLUTMode == 1)
 	{
 		colorout = texture(lutTexture, coord);
 	}
 	else
 	{
-	 colorout =  colorin;
+	 	colorout =  colorin;
 	}
 	
 	if(pointShape == 0)

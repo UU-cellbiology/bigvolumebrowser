@@ -49,19 +49,19 @@ public class SpotsLoadDialog
 	
 	final JTextField jlFileName = new JTextField("No file selected");
 	
-	JLabel jStatus = new JLabel ("Status:");
+	final JLabel jStatus = new JLabel ("Status:");
 	
 	int panelWidth = 800;
 	
 	int panelHeight = 400;
 	
-	public JCheckBox cbHasHeader = null;
+	final public JCheckBox cbHasHeader;
 	
-	public JComboBox<String> cbSeparator = null;
+	final public JComboBox<String> cbSeparator;
 	
-	public JComboBox<String> cbUnits = null;
+	final public JComboBox<String> cbUnits;
 	
-	public JComboBox<String> cbSize = null;
+	final public JComboBox<String> cbSize;
 	
 	final public ArrayList<JComboBox<String>> cbColumnsAssign = new ArrayList<>();
 	

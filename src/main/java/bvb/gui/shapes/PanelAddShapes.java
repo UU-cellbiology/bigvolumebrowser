@@ -91,6 +91,7 @@ public class PanelAddShapes extends JPanel
 			SpotsParser sptParser = new SpotsParser();
 			sptParser.fileSpots = dialSpots.fileSpots;
 			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
+			Prefs.set( "BVB.bSpotsImportHasHeader", sptParser.bHeader);
 			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
 			Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
 			//column indices
@@ -189,16 +190,19 @@ public class PanelAddShapes extends JPanel
 						{
 							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
-							importedSpots.setLUT( "Spectrum" );
+							importedSpots.setLUT( "Fire" );
+							importedSpots.setMapLUTMode( 1 );
 							spots = importedSpots;
 						}
 						else
 						{
 							MultiSpots importedSpots = new MultiSpots();
 							int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
+							importedSpots.setLUT( "Fire" );
+							importedSpots.setMapLUTMode( 1 );
 							spots = importedSpots;
 							//update time points
-							if(nMaxTP>=0)
+							if(nMaxTP >= 0)
 							{
 								bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
 							}

@@ -29,6 +29,7 @@
 package bvb.shapes;
 
 import java.awt.Color;
+import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 
 import net.imglib2.FinalRealInterval;
@@ -37,6 +38,7 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
+import bvb.scene.LUTUploaderGPU;
 import bvb.scene.VisSpots;
 
 /** Spots of arbitrary color and size **/
@@ -53,6 +55,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	int pointShape;
 	
 	FinalRealInterval boundBox = null;
+	
+	String sLUTName = "";
 	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -227,9 +231,41 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 
 	}
 	
+	@Override
 	public void setLUT(String sLUTName)
 	{
-		((VisSpots)visRender).setLUT( sLUTName );
+		this.sLUTName = sLUTName;
+		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU.setLUT( sLUTName );
+		((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+	}
+	
+	@Override
+	public void setLUT(final IndexColorModel icm_, String sLUTName) 
+	{		
+		this.sLUTName = sLUTName;
+		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU.setLUT( icm_, sLUTName );
+		((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+
+	}
+
+	@Override
+	public String getLUTName()
+	{
+		return sLUTName;
+	}
+	
+	@Override
+	public void setMapLUTMode(int nMapLUTMode_)
+	{
+		((VisSpots)visRender).setMapLUTMode( nMapLUTMode_ ); 
+	}
+	
+	@Override
+	public int getMapLUTMode()
+	{
+		return ((VisSpots)visRender).getMapLUTMode();
 	}
 	
 	@Override
