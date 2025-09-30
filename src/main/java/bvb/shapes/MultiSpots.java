@@ -53,7 +53,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		boundBox.realMax( bb[1] );
 		//adjust bbox dimensions
 		final double diff = 0.5*( pointSize - pointSize_);
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			bb[0][d]+=diff;
 			bb[1][d]-=diff;

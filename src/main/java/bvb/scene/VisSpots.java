@@ -38,6 +38,7 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import java.awt.Color;
+import java.awt.image.IndexColorModel;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
@@ -52,8 +53,17 @@ import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
 import bvvpg.core.util.MatrixMath;
+import ij.IJ;
+import ij.plugin.LutLoader;
 
+import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
 
 /** example class that draws point of specific shape and filling type **/
 
@@ -88,6 +98,16 @@ public class VisSpots extends AbstractClipTransformVis
 	private boolean initialized;
 	
 	volatile boolean bLocked = false;
+	
+	private IndexColorModel icm = null;
+	
+	private String sLUTName = null;
+	
+	private boolean bUseLUT = false;
+	
+	private int texColorBuffer = -1;
+	
+	private boolean bTextureInit = true;
 	
 	public VisSpots()
 	{
@@ -224,7 +244,56 @@ public class VisSpots extends AbstractClipTransformVis
 	{
 		return spotShape;
 	}
+	
+	public void setLUT(String sLUTName)
+	{
+		final IndexColorModel icm_lut = LutLoader.getLut(sLUTName);
+		if(icm_lut == null)
+		{
+			System.err.println("Cannot load ImageJ LUT with the name \""+sLUTName+ "\". Wrong name/not installed?");
+			return;
+		}
+		setLUT(icm_lut, sLUTName);
+	}
+	
+	public void setLUT(final IndexColorModel icm_, String sLUTName) 
+	{		
+		this.sLUTName = sLUTName;
+		icm = icm_;
+		bUseLUT = true;
+		//sizeLUT = icm.getMapSize();
+		bTextureInit = false;
 
+	}
+
+	private void initTexture( GL3 gl )
+	{		
+		int size_ = icm.getMapSize();
+		if (size_ < 65536)
+		{
+			int nHeight = (int)Math.ceil(size_/256.0);
+			final int[] tmp = new int[ 1 ];
+			gl.glGenTextures( 1, tmp, 0 );
+			texColorBuffer = tmp[ 0 ];
+			gl.glBindTexture( GL_TEXTURE_2D, texColorBuffer );
+			//gl.glTexStorage2D( GL_TEXTURE_2D, 1, GL.GL_RGBA8, 256, 256 );
+			
+			gl.glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR );
+			gl.glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR );
+			gl.glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			gl.glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			gl.glTexImage2D(GL_TEXTURE_2D, 0, GL.GL_RGBA, 256, nHeight, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, Misc.ICMToByteBuffer( icm ) );
+			gl.glGenerateMipmap( GL_TEXTURE_2D );
+			gl.glBindTexture( GL_TEXTURE_2D, 0 );
+		}
+		else
+		{
+			System.out.println("LUTs larger than 65535 elements are not supported, aborting. ");
+			bTextureInit = true;
+			bUseLUT = false;
+		}
+		bTextureInit = true;
+	}
 	private void init( GL3 gl )
 	{
 		
@@ -310,6 +379,11 @@ public class VisSpots extends AbstractClipTransformVis
 				exc.printStackTrace();
 			}
 		}
+		if(bUseLUT && !bTextureInit)
+		{
+			initTexture(gl);
+			
+		}
 		
 		//add transform
 		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
@@ -374,6 +448,7 @@ public class VisSpots extends AbstractClipTransformVis
 		}	
 		
 		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
+		prog.getUniform1i("bUseLUT").set(bUseLUT?1:0);
 
 		//gl.glEnable(GL.GL_BLEND);
 		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -381,10 +456,19 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.setUniforms( context );		
 		prog.use( context );
 		
+		if(bUseLUT)
+		{
+			gl.glActiveTexture( GL_TEXTURE0 );
+			gl.glBindTexture( GL_TEXTURE_2D, texColorBuffer );
+		}
+		
 		gl.glBindVertexArray( vao );
 		gl.glDrawArrays( GL.GL_POINTS, 0, nSpotsN);
 		gl.glBindVertexArray( 0 );		
-
+		if(bUseLUT)
+		{
+			gl.glBindTexture( GL_TEXTURE_2D, 0 );
+		}
 	}
 
 }

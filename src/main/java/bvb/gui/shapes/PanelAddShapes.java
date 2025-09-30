@@ -189,6 +189,7 @@ public class PanelAddShapes extends JPanel
 						{
 							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
+							importedSpots.setLUT( "Spectrum" );
 							spots = importedSpots;
 						}
 						else

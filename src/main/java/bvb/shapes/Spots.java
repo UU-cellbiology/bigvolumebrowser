@@ -87,32 +87,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	}
 	
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
-	{
-
-		
-//		if(spotSizes == null)
-//		{
-//
-//			//((VisSpots)visRender).setSMLMNorm(pointSize);
-//		}
-//		else
-//		{
-//			final float [] sortedSize = new float[spotSizes.length];
-//			for(int i=0;i<spotSizes.length;i++)
-//			{
-//				sortedSize[i] = spotSizes[i];
-//			}
-//			//to mark that we have sizes
-//			pointSize = -1.0f;
-//			Arrays.sort( sortedSize );
-//			//take 90.0% quantile as max and make it smaller
-//			int index = ( int ) Math.round( 0.1 * (sortedSize.length-1));
-//			//((VisSpots)visRender).setSMLMNorm(0.01f*sortedSize[index]);
-//			
-//		}
-		
-		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize);
-		
+	{		
+		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize);		
 	}
 	
 	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize)
@@ -249,6 +225,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	{
 		return pointColor;
 
+	}
+	
+	public void setLUT(String sLUTName)
+	{
+		((VisSpots)visRender).setLUT( sLUTName );
 	}
 	
 	@Override
