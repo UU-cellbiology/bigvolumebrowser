@@ -71,10 +71,11 @@ public class GltfImporter
 			// Entry point:
 			for (SceneModel scene : gltfModel.getSceneModels()) 
 			{
-			    System.out.println("Scene: " + scene.getName());
+			    //System.out.println("Scene: " + scene.getName());
 			    for (NodeModel root : scene.getNodeModels()) 
 			    {
-			        traverseNode(root, 0);
+			    	final AffineTransform3D nodeTransformZero = new AffineTransform3D ();
+			        traverseNode(root, 0, nodeTransformZero);
 			    }
 			}  
 		}
@@ -82,60 +83,13 @@ public class GltfImporter
 		return shapesOut;
 	}
 	
-	public void loadNodeMeshes(final NodeModel nodeModel)
+	/** returns pre-concatenated transform: first applied local and then provided  nodeTransformUpstream **/
+	public AffineTransform3D loadNodeMeshes(final NodeModel nodeModel, final AffineTransform3D nodeTransformUpstream)
 	{
 		String meshName = "";
-		final AffineTransform3D nodeTransform = new AffineTransform3D();
 		
-		final float[] matTransform = nodeModel.getMatrix();
-		
-		if(matTransform == null)
-		{
-			final float[] scalef = nodeModel.getScale();
-			if(scalef != null)
-			{
-				nodeTransform.scale( scalef[0], scalef[1], scalef[2] );
-			}
-			
-			final float[] rotationQ = nodeModel.getRotation();
-			if(rotationQ != null)
-			{
-				final double [] q = new double[4];
-				for(int d=0;d<3;d++)
-				{
-					q[d+1] = rotationQ[d];
-				}
-				q[0] = rotationQ[3];
-				final double [][] rotMatrix = new double [3][4];
-				LinAlgHelpers.quaternionToR( q, rotMatrix );
-				final AffineTransform3D rotationAf = new AffineTransform3D();
-				rotationAf.set( rotMatrix );
-				nodeTransform.preConcatenate( rotationAf );
-			}
-			
-			final float[] translatef = nodeModel.getTranslation();
-			if(translatef != null)
-			{
-				final double [] translated = new double [3];
-				for(int d = 0; d < 3; d++)
-				{
-					translated[d] = translatef[d];
-				}
-				nodeTransform.translate( translated );
-			}
-		}
-		else
-		{
-			final double [][] trMatrix = new double [3][4];
-			for(int j = 0; j < 4; j++)
-			{	
-				for(int d = 0; d < 3; d++)
-				{
-					trMatrix[d][j] = matTransform[j*4 + d];
-				}
-			}
-			nodeTransform.set( trMatrix );
-		}
+		final AffineTransform3D nodeTransform = getNodeTransform(nodeModel);
+		nodeTransform.preConcatenate( nodeTransformUpstream );
 		
 		for(final MeshModel meshModel: nodeModel.getMeshModels())
 		{					
@@ -144,7 +98,7 @@ public class GltfImporter
 			for(final MeshPrimitiveModel meshPrimitiveModel:meshModel.getMeshPrimitiveModels())
 			{
 				//nMeshCount ++;
-				meshName = nodeModel.getName() +"("+ meshModel.getName() +")";
+				meshName = nodeModel.getName() +"["+meshModel.getName()+"]("+ meshModel.getName() +")";
 				
 				final Mesh currMesh = new NaiveFloatMesh();				
 				final float [][] vert = readAttributeFloatArray(meshPrimitiveModel, "POSITION");
@@ -209,7 +163,8 @@ public class GltfImporter
 					}
 					final MeshTexture meshTexture = new MeshTexture(currMesh, image);
 					meshTexture.setTransform( nodeTransform );
-					shapesOut.add( new MeshTexture(currMesh, image) );
+					meshTexture.setName( meshName );
+					shapesOut.add( meshTexture );
 				}
 				//no texture, only color
 				else
@@ -231,19 +186,88 @@ public class GltfImporter
 				}
 			}
 		}
+		return nodeTransform;
 	}
 	
-	public void traverseNode(final NodeModel node, int depth) 
+	AffineTransform3D getNodeTransform(final NodeModel nodeModel)
 	{
-	    String indent = "";
-	    for(int i=0;i<depth;i++)
+		final AffineTransform3D nodeTransform = new AffineTransform3D();
+		
+		final float[] matTransform = nodeModel.getMatrix();
+		
+		if(matTransform == null)
+		{
+			final float[] scalef = nodeModel.getScale();
+			
+			if(scalef != null)
+			{
+				nodeTransform.scale( scalef[0], scalef[1], scalef[2] );
+			}
+			
+			final float[] rotationQ = nodeModel.getRotation();
+			if(rotationQ != null)
+			{
+				final double [] q = new double[4];
+				//x,y,z,w to w,x,y,z
+				for(int d = 0; d < 3; d++)
+				{
+					q[d+1] = rotationQ[d];
+				}
+				q[0] = rotationQ[3];
+				
+				final double [][] rotMatrix = new double [3][4];
+				LinAlgHelpers.quaternionToR( q, rotMatrix );
+				final AffineTransform3D rotationAf = new AffineTransform3D();
+				rotationAf.set( rotMatrix );
+				nodeTransform.preConcatenate( rotationAf );
+			}
+			
+			final float[] translatef = nodeModel.getTranslation();
+			if(translatef != null)
+			{
+				final double [] translated = new double [3];
+				for(int d = 0; d < 3; d++)
+				{
+					translated[d] = translatef[d];
+				}
+				nodeTransform.translate( translated );
+			}
+		}
+		else
+		{
+			final double [][] trMatrix = new double [3][4];
+			for(int j = 0; j < 4; j++)
+			{	
+				for(int d = 0; d < 3; d++)
+				{
+					trMatrix[d][j] = matTransform[j*4 + d];
+				}
+			}
+			nodeTransform.set( trMatrix );
+		}
+		return nodeTransform;
+	}
+	
+	public void traverseNode(final NodeModel node, int depth, final AffineTransform3D nodeTransformParent) 
+	{
+	    
+	    final AffineTransform3D nodeTransformCurrent = loadNodeMeshes(node, nodeTransformParent);
+	    
+	    nCurrNodeN++;
+	    
+	    IJ.showProgress( nCurrNodeN, nTotNodes  );
+	    
+	    for (NodeModel child : node.getChildren()) 
 	    {
-	    	indent = indent + "  ";
+	        traverseNode(child, depth + 1, nodeTransformCurrent);
 	    }
 	    
-	    loadNodeMeshes(node);
-	    nCurrNodeN++;
-	    IJ.showProgress( nCurrNodeN, nTotNodes  );
+//		//printout scene tree 	    
+//	    String indent = "";
+//	    for(int i=0;i<depth;i++)
+//	    {
+//	    	indent = indent + "  ";
+//	    }
 //		for(final MeshModel mesh: node.getMeshModels())
 //		{
 //		    if (mesh != null) {
@@ -257,9 +281,6 @@ public class GltfImporter
 //		                          node.getName());
 //		    }
 //		}
-	    for (NodeModel child : node.getChildren()) {
-	        traverseNode(child, depth + 1);
-	    }
 	}
 	
 	public static float [][] readAttributeFloatArray(final MeshPrimitiveModel meshPrimitiveModel, String key)
