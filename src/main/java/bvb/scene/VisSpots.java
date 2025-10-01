@@ -62,7 +62,7 @@ import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 
 public class VisSpots extends AbstractClipTransformVis
 {
-	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS = 2, RENDER_SMLM  = 3; 
+	public static final int RENDER_FILLED = 0, RENDER_OUTLINE = 1, RENDER_GAUSS = 2; 
 
 	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
 	
@@ -417,7 +417,12 @@ public class VisSpots extends AbstractClipTransformVis
 
 		//gl.glEnable(GL.GL_BLEND);
 		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-
+		if(nMapLUTMode > 0 && lutGPU != null)
+		{
+			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
+			prog.getUniform1f("mapMin").set(fMapMinRange[0]);
+			prog.getUniform1f("mapRange").set(fMapMinRange[1]);	
+		}
 		prog.setUniforms( context );		
 		prog.use( context );
 		
@@ -427,9 +432,6 @@ public class VisSpots extends AbstractClipTransformVis
 			if(lutGPU.getTextureID()>0)
 			{
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
-				prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
-				prog.getUniform1f("mapMin").set(fMapMinRange[0]);
-				prog.getUniform1f("mapRange").set(fMapMinRange[1]);
 			}
 		}
 		

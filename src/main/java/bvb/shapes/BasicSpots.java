@@ -14,8 +14,9 @@ public interface BasicSpots
 	public void setLUT(String sLUTName);
 	public void setLUT(final IndexColorModel icm_, String sLUTName); 
 	public String getLUTName();
-	public void setMapLUTMode(int nMapLUTMode);
+	public void setMapLUTMode(final int nMapLUTMode);
 	public int getMapLUTMode();
+	public void setMapRange(final float fMin, final float fMax);
 	
 	public void setRenderType(int nRenderType);
 	public int getRenderType();

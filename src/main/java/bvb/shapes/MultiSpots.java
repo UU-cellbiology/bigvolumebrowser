@@ -30,6 +30,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	String sLUTName = "";
 	
+	final float [] fMapMinMax = new float[2];
+	
 	void defineTransparency()
 	{
 
@@ -111,6 +113,12 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
+		//no sizes, cannot map LUT
+		if(nMapLUTMode == 4 && pointSize > 0.0f)
+		{
+			nMapLUTMode = 0;
+			System.out.println("No size data available for " + this.toString());
+		}
 		if(visRendersTimeMap.size()>0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
@@ -126,6 +134,23 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public int getMapLUTMode()
 	{
 		return nMapLUTMode;
+	}
+	
+	@Override
+	public void setMapRange(final float fMin, final float fMax)
+	{
+		fMapMinMax[0] = fMin;
+		fMapMinMax[1] = fMax;
+
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapRange( fMapMinMax[0], fMapMinMax[1] );
+			}
+			
+		}
 	}
 	
 	@Override

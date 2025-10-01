@@ -39,15 +39,22 @@ void checkClipping()
 vec4 getInputColor()
 {
 
-	if(nMapLUTMode == 1)
+	if(nMapLUTMode > 0)
 	{
-		vec2 q = vec2(0);
-		//2D texture with fixed width of 256
-		float val = 0.5 + (sizeLUT-1)*((posW.z-mapMin)/mapRange);
-		q.y = floor(val/256.0);
-		q.x = (val/256.0)- q.y;
-		q.y = (q.y+0.5)/ceil(sizeLUT/256.0);
-		return texture(lutTexture, q);
+		if(nMapLUTMode<4)
+		{
+			vec3 axis = vec3(0);
+			axis[nMapLUTMode-1] = 1;
+			float val = dot(axis, posW);
+		 	val = 0.5 + (sizeLUT-1)*((val-mapMin)/mapRange);
+
+			//2D texture with fixed width of 256
+			vec2 q = vec2(0);
+			q.y = floor(val/256.0);
+			q.x = (val/256.0)- q.y;
+			q.y = (q.y+0.5)/ceil(sizeLUT/256.0);
+			return texture(lutTexture, q);
+		}
 	}
 	else
 	{

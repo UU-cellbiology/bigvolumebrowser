@@ -203,6 +203,9 @@ public class PanelAddShapes extends JPanel
 							int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
 							importedSpots.setLUT( "Fire" );
 							importedSpots.setMapLUTMode( 1 );
+							RealInterval testInt = importedSpots.boundingBox();
+							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
+
 							spots = importedSpots;
 							//update time points
 							if(nMaxTP >= 0)

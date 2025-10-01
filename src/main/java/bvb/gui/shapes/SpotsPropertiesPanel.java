@@ -20,7 +20,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ColorIcon;
-import bdv.util.BoundedValueDouble;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorUserSettings;
 import bvb.gui.GBCHelper;
@@ -28,8 +27,6 @@ import bvb.gui.JPanelConsistent;
 import bvb.gui.NumberField;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
-import bvvpg.ui.panels.BoundedRangePanelPG;
-import bvvpg.ui.panels.BoundedValuePanelPG;
 
 public class SpotsPropertiesPanel extends JPanel
 {
@@ -39,20 +36,14 @@ public class SpotsPropertiesPanel extends JPanel
 	final JPanelConsistent pRender;
 	final JPanelConsistent pPointSize;
 	final JPanelConsistent pShape;
-	
-	final JPanelConsistent pSMLMNorm;
+	final JPanelConsistent pMapLUT;
 
 	
 	final NumberField nfSpSize;
 	final JButton butColor;
 	final JComboBox<String> cbShape;
 	final JComboBox<String> cbRender;
-
-	
-	final NumberField nfSMLMNorm;
-
-	final BoundedRangePanelPG  smlmRange = new BoundedRangePanelPG();
-	final BoundedValuePanelPG  smlmGammaRange;
+	final JComboBox<String> cbMapLUT;
 	
 	final JTabbedPane spotsTabPane;
 		
@@ -123,7 +114,7 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridx++;
 		pShape.add( cbShape, gbc );
 
-		String[] sRender = {"Filled", "Outline", "Gauss", "SMLM"};
+		String[] sRender = {"Filled", "Outline", "Gauss"};
 		cbRender = new JComboBox< >(sRender);
 		cbRender.addActionListener( (e)->{
 			updateRender();				
@@ -135,33 +126,26 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridx++;
 		pRender.add( cbRender, gbc );
 		
+		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Param LUT"};
 		
-		nfSMLMNorm = new NumberField(5);
-		nfSMLMNorm.setLimits( 0.0, Double.MAX_VALUE );
-		nfSMLMNorm.addListener( (v)->
-		{
-			updateSMLMNorm(Math.abs( v ));
-			//String.format("%.2f", in);
-		} );
-		pSMLMNorm = new JPanelConsistent(new GridBagLayout());
+		cbMapLUT = new JComboBox< >(sMapLUT);
+		cbMapLUT.addActionListener( (e)->{
+			updateLUTMapping();				
+			});
+
+		pMapLUT = new JPanelConsistent(new GridBagLayout());
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pSMLMNorm.add( new JLabel("SMLM norm: "), gbc );
+		pMapLUT.add( new JLabel("Color Mapping: "), gbc );
 		gbc.gridx++;
-		pSMLMNorm.add( nfSMLMNorm, gbc );
-		
-		
-		smlmGammaRange =  new BoundedValuePanelPG(new BoundedValueDouble( 0.01, 5.0, 1.0 ) ) ;
-		smlmGammaRange.changeListeners().add( () -> updateSMLMGamma());
-		
+		pMapLUT.add( cbMapLUT, gbc );	
 		
 		allComp.add( butColor );
 		allComp.add( nfSpSize );
 		allComp.add( cbShape );
 		allComp.add( cbRender );
-		allComp.add( nfSMLMNorm );
-		allComp.add( smlmGammaRange );
+		allComp.add( cbMapLUT );
 		
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -190,11 +174,11 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 
-		bottomPanel.add( pSMLMNorm, gbc );
+		bottomPanel.add( pMapLUT, gbc );
 		gbc.gridy++;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.weightx = 0.1;
-		bottomPanel.add( smlmGammaRange, gbc );
+		//bottomPanel.add( smlmGammaRange, gbc );
 
 		spotsTabPane = new JTabbedPane(SwingConstants.TOP);
 		
@@ -208,7 +192,7 @@ public class SpotsPropertiesPanel extends JPanel
 	    this.add( spotsTabPane, gbc );
 	}
 	
-	synchronized void updateGUI(boolean updateText)
+	synchronized void updateGUI()
 	{
 		boolean bFirstMesh = true;
 		
@@ -216,13 +200,13 @@ public class SpotsPropertiesPanel extends JPanel
 		boolean bPointSizeSame = true;
 		boolean bShapeSame = true;
 		boolean bRenderSame = true;
+		boolean bMapLUTSame = true;
 		float fPointSizeIn;
 		float fPointSize = -1.0f;
 		Color currColor = Color.WHITE;
 		int nRender = 0;
 		int nShape = 0;
-		float fSMLMNorm = -1.0f;
-		float fSMLMGamma = -1.0f;
+		int nMapLUT = 0;
 		
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
@@ -240,7 +224,7 @@ public class SpotsPropertiesPanel extends JPanel
 					}
 					nShape = spotsShape.getPointShape();
 					nRender = spotsShape.getRenderType();
-
+					nMapLUT = spotsShape.getMapLUTMode();
 					bFirstMesh = false;
 				}
 				else
@@ -248,6 +232,7 @@ public class SpotsPropertiesPanel extends JPanel
 					bRenderSame &= (nRender ==  spotsShape.getRenderType());
 					bShapeSame &= (nShape == spotsShape.getPointShape());
 					bColorSame &= currColor.equals( spotsShape.getColor() );
+					bMapLUTSame &= (nMapLUT == spotsShape.getMapLUTMode());
 					bPointSizeSame &= Math.abs( fPointSize - spotsShape.getPointSize())<0.0001;
 
 				}
@@ -257,15 +242,14 @@ public class SpotsPropertiesPanel extends JPanel
 		final Color cColorFin = currColor;
 		final float fPointSizeFin = fPointSize;		
 		final int nShapeFin = nShape;
-		final int nRenderFin = nRender;		
-		final float fSMLMNormFin = fSMLMNorm;		
-		final float fSMLMGammaFin = fSMLMGamma;		
-
+		final int nRenderFin = nRender;			
+		final int nMapLUTFin = nMapLUT;
 		
 		final boolean bColorSameFin = bColorSame;
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bShapeSameFin = bShapeSame;
 		final boolean bRenderSameFin = bRenderSame;
+		final boolean bMapLUTSameFin = bMapLUTSame;
 
 
 		SwingUtilities.invokeLater( () -> {
@@ -282,6 +266,7 @@ public class SpotsPropertiesPanel extends JPanel
 					pPointSize.setConsistent( bPointSizeSameFin );
 					pShape.setConsistent( bShapeSameFin );
 					pRender.setConsistent( bRenderSameFin );
+					pMapLUT.setConsistent( bMapLUTSameFin );
 					
 					if(bColorSameFin)
 					{
@@ -303,11 +288,7 @@ public class SpotsPropertiesPanel extends JPanel
 						}
 
 					}
-					if(updateText)
-					{
-						nfSMLMNorm.setText( df3.format( fSMLMNormFin) );
-						smlmGammaRange.getValue().setCurrentValue( fSMLMGammaFin );
-					}
+
 					if(bRenderSameFin)
 					{
 						cbRender.setSelectedIndex( nRenderFin );
@@ -316,6 +297,10 @@ public class SpotsPropertiesPanel extends JPanel
 					if(bShapeSameFin)
 					{
 						cbShape.setSelectedIndex( nShapeFin );
+					}
+					if(bMapLUTSameFin)
+					{
+						cbMapLUT.setSelectedIndex(nMapLUTFin);
 					}
 						
 				}
@@ -349,7 +334,7 @@ public class SpotsPropertiesPanel extends JPanel
 				}
 			}
 			bvb.repaintBVV();
-			updateGUI(false);
+			updateGUI();
 		}
 	}
 	
@@ -370,7 +355,7 @@ public class SpotsPropertiesPanel extends JPanel
 				}
 			}
 			bvb.updateSceneRender();
-			updateGUI(false);
+			updateGUI();
 		}
 	}
 	
@@ -388,9 +373,10 @@ public class SpotsPropertiesPanel extends JPanel
 				}
 			}
 			bvb.repaintBVV();
-			updateGUI(false);
+			updateGUI();
 		}
 	}
+	
 	synchronized void updateRender()
 	{
 		if(!blockUpdates)
@@ -405,42 +391,27 @@ public class SpotsPropertiesPanel extends JPanel
 				}
 			}
 			bvb.repaintBVV();
-			updateGUI(false);
+			updateGUI();
 		}
 	}
 	
-	synchronized void updateSMLMNorm (double fGaussNorm)
+	synchronized void updateLUTMapping()
 	{
 		if(!blockUpdates)
 		{
+			final int nMapLUT = cbMapLUT.getSelectedIndex();
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
 				if(sh instanceof BasicSpots)
 				{
-					//((Spots)sh).setSMLMNorm( (float)fGaussNorm );
+					((BasicSpots)sh).setMapLUTMode( nMapLUT );
 				}
 			}
 			bvb.repaintBVV();
-			updateGUI(false);
+			updateGUI();
 		}
 	}
 	
-	synchronized void updateSMLMGamma ()
-	{
-		if(!blockUpdates)
-		{
-			float fGaussGamma = (float)smlmGammaRange.getValue().getCurrentValue();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
-			{
-				if(sh instanceof BasicSpots)
-				{
-					//((Spots)sh).setSMLMGamma( fGaussGamma ); 
-				}
-			}
-			bvb.repaintBVV();
-			updateGUI(false);
-		}
-	}
+
 }

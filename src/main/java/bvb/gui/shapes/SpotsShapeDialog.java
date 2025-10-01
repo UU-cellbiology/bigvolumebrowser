@@ -50,23 +50,11 @@ public class SpotsShapeDialog
 		String[] sShape = { "Round", "Square"};
 		JComboBox<String> cbShape = new JComboBox<>(sShape);
 
-		String[] sFill = null;
-		if(bAskForSize)
-		{
-			sFill = new String[3];					
-		}
-		else
-		{
-			sFill = new String[4];
-		}
+		String[] sFill = new String[3];
+
 		sFill[0] = "Filled";
 		sFill[1] = "Outline";
 		sFill[2] = "Gauss";			
-
-		if(!bAskForSize)
-		{
-			sFill[3] = "SMLM";			
-		}
 		
 		JComboBox<String> cbFill = new JComboBox<>(sFill);
 		
@@ -114,7 +102,7 @@ public class SpotsShapeDialog
 
 		gbc.gridx=0;
 		gbc.gridy++;
-		pSpotsParams.add(new JLabel("Spots filling: "), gbc);
+		pSpotsParams.add(new JLabel("Spots render: "), gbc);
 		gbc.gridx++;
 		pSpotsParams.add(cbFill, gbc);
 		

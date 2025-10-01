@@ -85,7 +85,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		}
 		else
 		{
-			((VisSpots)visRender).setVertices(vertices, spotSizes);				
+			((VisSpots)visRender).setVertices(vertices, spotSizes);		
+			pointSize = -1.0f;
 		}
 		setBoundingBox(vertices, spotSizes);
 	}
@@ -259,7 +260,14 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	@Override
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
-		((VisSpots)visRender).setMapLUTMode( nMapLUTMode_ ); 
+		int nMapMode = nMapLUTMode_;
+		//no sizes, cannot map LUT
+		if(nMapMode == 4 && pointSize > 0.0f)
+		{
+			nMapMode = 0;
+			System.out.println("No size data available for " + this.toString());
+		}
+		((VisSpots)visRender).setMapLUTMode( nMapMode ); 
 	}
 	
 	@Override
@@ -277,6 +285,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		return;
 	}	
 	
+	@Override
 	public void setMapRange(final float fMin, final float fMax)
 	{
 		((VisSpots)visRender).setMapRange( fMin, fMax );
