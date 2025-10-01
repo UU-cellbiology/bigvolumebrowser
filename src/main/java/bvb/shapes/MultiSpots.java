@@ -33,6 +33,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	LUTUploaderGPU lutGPU = null;
 	
+	float [] sizeMinMax = null;
+	
 	final float [] fMapMinMax = new float[2];
 	
 	void defineTransparency()
@@ -297,6 +299,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		}
 		return nLoadTimePoint;
 	}
+	
 	void addSpots(final ArrayList<RealPoint> verticesTP, final ArrayList<Float> sizesTP, final int nLoadTimePoint)
 	{
 		//add a new spots object
@@ -315,6 +318,15 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 			}
 			spotsTP.setVertices( verticesTP, sizesF );
 			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, sizesF, pointSize) );
+			float [] sizeMinMaxCurr = Spots.getSizeMinMax( sizesF );
+			if(sizeMinMax == null)
+			{
+				sizeMinMax = new float[2];
+				sizeMinMax[0] = Float.POSITIVE_INFINITY;
+				sizeMinMax[1] = Float.NEGATIVE_INFINITY;
+			}
+			sizeMinMax[0] = Math.min( sizeMinMax[0], sizeMinMaxCurr[0] );
+			sizeMinMax[1] = Math.max( sizeMinMax[1], sizeMinMaxCurr[1] );
 
 		}
 		visRendersTimeMap.put( spotsTP, nLoadTimePoint );
@@ -329,5 +341,16 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		}
 		
 		return sName;
+	}
+
+	@Override
+	public float[] getSizeRange()
+	{
+		final float [] sizeMinMaxOut = new float[2];
+		for(int i=0;i<2;i++)
+		{
+			sizeMinMaxOut[i] = sizeMinMax[i];
+		}
+		return sizeMinMaxOut;
 	}
 }

@@ -1,12 +1,12 @@
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in float sRad;
+layout (location = 1) in float sDiam;
 
 uniform float pointSizeReal;
 uniform float pointScale;
 uniform mat4 pvm;
 uniform vec2 windowSize;
 out vec3 posW;
-out float sRadfp;
+out float sDiamfp;
 
 void main()
 {
@@ -42,12 +42,12 @@ void main()
 	if(pointSizeReal>0.0)
 	{
  		shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
- 		sRadfp = pointSizeReal;
+ 		sDiamfp = pointSizeReal;
  	}
  	else
  	{
- 		shift.xyz = shift.xyz * 0.5 * sRad / length(shift.xyz);
- 		sRadfp = sRad;
+ 		shift.xyz = shift.xyz * 0.5 * sDiam / length(shift.xyz);
+ 		sDiamfp = sDiam;
  	}	
  	
  	shift.xyz = aPos + shift.xyz ;

@@ -58,7 +58,10 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	FinalRealInterval boundBox = null;
 	
 	String sLUTName = "";
+	
 	LUTUploaderGPU lutGPU  = null;
+	
+	float [] sizeMinMax = null;
 	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -96,8 +99,25 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{		
 		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize);		
+		sizeMinMax = getSizeMinMax(spotSizes);
 	}
 	
+	public static float [] getSizeMinMax(final float[] spotSizes)
+	{
+		if(spotSizes == null)
+			return null;
+		final float [] sizeMinMax = new float [2];
+		sizeMinMax[0] = Float.POSITIVE_INFINITY;
+		sizeMinMax[1] = Float.NEGATIVE_INFINITY;
+		for(int v = 0; v < spotSizes.length; v++)
+		{
+			if(spotSizes[v] < sizeMinMax[0])
+				sizeMinMax[0] = spotSizes[v];
+			if(spotSizes[v] > sizeMinMax[1])
+				sizeMinMax[1] = spotSizes[v];
+		}
+		return sizeMinMax;
+	}
 	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize)
 	{
 		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
@@ -126,12 +146,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		}
 		else
 		{
-			final float [] sortedSize = new float[spotSizes.length];
-			for ( int v=0; v < vertices.size(); v++ )
+			
+			for ( int v = 0; v < vertices.size(); v++ )
 			{
 				final double x = vertices.get( v ).getDoublePosition(0), y = vertices.get( v ).getDoublePosition(1), z = vertices.get( v ).getDoublePosition(2);
 				final double pSize = spotSizes[v];
-				sortedSize[v] = spotSizes[v];
 				if ( x - pSize < boundingBox[ 0 ] )
 					boundingBox[ 0 ] = x - pSize;
 				if ( y - pSize < boundingBox[ 1 ] )
@@ -318,26 +337,6 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		return pointShape;
 	}
 	
-	
-//	public void setSMLMNorm(final float fNormGauss_)
-//	{
-//		((VisSpots)visRender).setSMLMNorm( fNormGauss_ );
-//	}
-//	
-//	public float getSMLMNorm()
-//	{
-//		return ((VisSpots)visRender).getSMLMNorm( );
-//	}
-//	
-//	public void setSMLMGamma(final float fNormGamma_)
-//	{
-//		((VisSpots)visRender).setSMLMGamma( fNormGamma_ );
-//	}
-//	
-//	public float getSMLMGamma()
-//	{
-//		return ((VisSpots)visRender).getSMLMGamma( );
-//	}
 		
 	@Override
 	public String toString()
@@ -347,6 +346,18 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 			return "spots"+Integer.toString(this.hashCode());
 		}
 		return sName;
+	}
+
+
+	@Override
+	public float[] getSizeRange()
+	{
+		final float [] sizeMinMaxOut = new float[2];
+		for(int i=0;i<2;i++)
+		{
+			sizeMinMaxOut[i] = sizeMinMax[i];
+		}
+		return sizeMinMaxOut;
 	}
 
 

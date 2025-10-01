@@ -195,6 +195,11 @@ public class PanelAddShapes extends JPanel
 							//importedSpots.setMapLUTMode( 1 );
 							RealInterval testInt = importedSpots.boundingBox();
 							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
+							if(sptParser.parseSize)
+							{
+								float[] range = importedSpots.getSizeRange();
+								importedSpots.setMapRange(range[0], range[1]);
+							}
 							spots = importedSpots;
 						}
 						else
@@ -205,7 +210,11 @@ public class PanelAddShapes extends JPanel
 							//importedSpots.setMapLUTMode( 1 );
 							RealInterval testInt = importedSpots.boundingBox();
 							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
-
+							if(sptParser.parseSize)
+							{
+								float[] range = importedSpots.getSizeRange();
+								importedSpots.setMapRange(range[0], range[1]);
+							}
 							spots = importedSpots;
 							//update time points
 							if(nMaxTP >= 0)

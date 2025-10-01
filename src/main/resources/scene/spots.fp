@@ -5,7 +5,7 @@ uniform vec2 ellipseAxes;
 uniform int renderType;
 uniform int pointShape;
 in vec3 posW;
-in float sRadfp;
+in float sDiamfp;
 uniform float normGauss;
 uniform float gamma;
 uniform int clipactive;
@@ -41,20 +41,28 @@ vec4 getInputColor()
 
 	if(nMapLUTMode > 0)
 	{
+		float val = 0.0;
 		if(nMapLUTMode<4)
 		{
 			vec3 axis = vec3(0);
 			axis[nMapLUTMode-1] = 1;
-			float val = dot(axis, posW);
-		 	val = 0.5 + (sizeLUT-1)*((val-mapMin)/mapRange);
-
-			//2D texture with fixed width of 256
-			vec2 q = vec2(0);
-			q.y = floor(val/256.0);
-			q.x = (val/256.0)- q.y;
-			q.y = (q.y+0.5)/ceil(sizeLUT/256.0);
-			return texture(lutTexture, q);
+			val = dot(axis, posW);
+			val = 0.5 + (sizeLUT-1)*((val-mapMin)/mapRange);
 		}
+		if(nMapLUTMode == 4)
+		{
+			val = sDiamfp;
+			val = 0.5 + (sizeLUT-1)*(1.0-((val-mapMin)/mapRange));
+			
+		}
+
+		//2D texture with fixed width of 256
+		vec2 q = vec2(0);
+		q.y = floor(val/256.0);
+		q.x = (val/256.0)- q.y;
+		q.y = (q.y+0.5)/ceil(sizeLUT/256.0);
+		return texture(lutTexture, q);
+		
 	}
 	else
 	{
@@ -89,17 +97,8 @@ void main()
 				discard;
 		}
 		else if(renderType >= 2)
-		{
-			
-			float sd = -9.0/2.0; //i.e.  (-1)/(2.0*0.333*0.333);  
-			float dCol = 1.0;
-			if(renderType == 3)
-			{
-				
-				dCol = pow(normGauss/sRadfp,gamma);
-				
-			}
-			colorout.a = dCol *  exp(sd*norm) * colorin.a; 
+		{		
+			colorout.a = exp(-4.5 * norm) * colorin.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
 		}
 	}
 	else
@@ -121,13 +120,8 @@ void main()
 		{
 			if(renderType >= 2)
 			{
-				vec2 fade = abs((1/sqrt(ellipseAxes))-abs(coord));
-				float dCol = 1.0;
-				if(renderType == 3)
-				{
-					dCol = pow(normGauss/sRadfp,gamma);
-				}
-				colorout.a = dCol *  fade.x * fade.y * colorin.a; 
+				vec2 fade = abs(( 1 /sqrt(ellipseAxes)) - abs(coord));
+				colorout.a = fade.x * fade.y * colorin.a; 
 			}
 		}
 		
@@ -135,8 +129,8 @@ void main()
 	
 	if(wOIT>0)
 	{
-		colorout.a = colorout.a*exp(-gl_FragCoord.z*0.8);
-		colorout.xyz = colorout.xyz*colorout.a;
+		colorout.a = colorout.a * exp( - gl_FragCoord.z * 0.8);
+		colorout.xyz = colorout.xyz * colorout.a;
 
 	}
     fragColor = colorout; 

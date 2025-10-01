@@ -33,5 +33,7 @@ public interface BasicSpots
 	public void setPointShape(int nShape);
 	public int getPointShape();
 	
+	public float [] getSizeRange();
+	
 	
 }
