@@ -191,8 +191,8 @@ public class PanelAddShapes extends JPanel
 						{
 							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
 							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
-							importedSpots.setLUT( "Fire" );
-							importedSpots.setMapLUTMode( 1 );
+							//importedSpots.setLUT( "Fire" );
+							//importedSpots.setMapLUTMode( 1 );
 							RealInterval testInt = importedSpots.boundingBox();
 							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
 							spots = importedSpots;
@@ -201,8 +201,8 @@ public class PanelAddShapes extends JPanel
 						{
 							MultiSpots importedSpots = new MultiSpots();
 							int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
-							importedSpots.setLUT( "Fire" );
-							importedSpots.setMapLUTMode( 1 );
+							//importedSpots.setLUT( "Fire" );
+							//importedSpots.setMapLUTMode( 1 );
 							RealInterval testInt = importedSpots.boundingBox();
 							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
 

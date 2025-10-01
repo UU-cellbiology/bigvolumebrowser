@@ -6,6 +6,7 @@ import java.awt.image.IndexColorModel;
 public interface BasicSpots
 {
 	public void setPointSize (final float pointSize_);
+	/** if points have provided size, returns a negative number **/
 	public float getPointSize();
 	
 	public void setColor(Color pointColor_);
@@ -14,8 +15,16 @@ public interface BasicSpots
 	public void setLUT(String sLUTName);
 	public void setLUT(final IndexColorModel icm_, String sLUTName); 
 	public String getLUTName();
+	/** LUT Mapping: 0 - no mapping, use color,
+	 * 1 - map LUT to X coord
+	 * 2 - map LUT to Y coord
+	 * 3 - map LUT to Z coord
+	 * 4 - map LUT to spot size
+	 * 5 - map LUT to parameter **/
 	public void setMapLUTMode(final int nMapLUTMode);
+	
 	public int getMapLUTMode();
+	
 	public void setMapRange(final float fMin, final float fMax);
 	
 	public void setRenderType(int nRenderType);

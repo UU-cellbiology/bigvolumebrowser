@@ -15,6 +15,7 @@ import bvb.io.shapes.SpotsParser;
 import bvb.scene.AbstractClipTransformVis;
 import bvb.scene.LUTUploaderGPU;
 import bvb.scene.VisSpots;
+import ij.IJ;
 
 public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 {
@@ -29,6 +30,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	int nMapLUTMode = 0;
 	
 	String sLUTName = "";
+	
+	LUTUploaderGPU lutGPU = null;
 	
 	final float [] fMapMinMax = new float[2];
 	
@@ -117,7 +120,11 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		if(nMapLUTMode == 4 && pointSize > 0.0f)
 		{
 			nMapLUTMode = 0;
-			System.out.println("No size data available for " + this.toString());
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		if(nMapLUTMode > 0 && lutGPU == null)
+		{
+			this.setLUT( IJ.getLuts()[0] );
 		}
 		if(visRendersTimeMap.size()>0 )
 		{
@@ -157,7 +164,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public void setLUT(final IndexColorModel icm_, String sLUTName) 
 	{		
 		this.sLUTName = sLUTName;
-		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU = new LUTUploaderGPU();
 		lutGPU.setLUT( icm_, sLUTName );
 		if(visRendersTimeMap.size()>0 )
 		{
@@ -174,7 +181,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public void setLUT( String sLUTName ) 
 	{	
 		this.sLUTName = sLUTName;
-		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU = new LUTUploaderGPU();
 		lutGPU.setLUT( sLUTName );
 		if(visRendersTimeMap.size()>0 )
 		{

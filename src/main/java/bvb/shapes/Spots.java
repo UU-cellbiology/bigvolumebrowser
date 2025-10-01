@@ -40,6 +40,7 @@ import net.imglib2.util.Intervals;
 
 import bvb.scene.LUTUploaderGPU;
 import bvb.scene.VisSpots;
+import ij.IJ;
 
 /** Spots of arbitrary color and size **/
 
@@ -57,6 +58,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	FinalRealInterval boundBox = null;
 	
 	String sLUTName = "";
+	LUTUploaderGPU lutGPU  = null;
 	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -236,7 +238,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setLUT(String sLUTName)
 	{
 		this.sLUTName = sLUTName;
-		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU = new LUTUploaderGPU();
 		lutGPU.setLUT( sLUTName );
 		((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
 	}
@@ -245,7 +247,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setLUT(final IndexColorModel icm_, String sLUTName) 
 	{		
 		this.sLUTName = sLUTName;
-		final LUTUploaderGPU lutGPU = new LUTUploaderGPU();
+		lutGPU = new LUTUploaderGPU();
 		lutGPU.setLUT( icm_, sLUTName );
 		((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
 
@@ -265,7 +267,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		if(nMapMode == 4 && pointSize > 0.0f)
 		{
 			nMapMode = 0;
-			System.out.println("No size data available for " + this.toString());
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		if(nMapMode > 0 && lutGPU == null)
+		{
+			this.setLUT( IJ.getLuts()[0] );
 		}
 		((VisSpots)visRender).setMapLUTMode( nMapMode ); 
 	}
