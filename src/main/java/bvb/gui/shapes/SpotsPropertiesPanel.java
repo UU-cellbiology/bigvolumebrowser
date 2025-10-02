@@ -38,22 +38,17 @@ public class SpotsPropertiesPanel extends JPanel
 	final JPanelConsistent pShape;
 	final JPanelConsistent pSizeScale;
 	
-	final JPanelConsistent pMapLUT;
-	final LUTSelectionPanel panelLUT;
-
-	
 	final JButton butColor;
 	final NumberField nfSpSize;
 	final NumberField nfSpSizeScale;
 
 	final JComboBox<String> cbShape;
 	final JComboBox<String> cbRender;
-	final JComboBox<String> cbMapLUT;
 	
 	final JTabbedPane spotsTabPane;
 		
-	final JPanel topPanel;
-	final JPanel bottomPanel;
+	final JPanel shapePanel;
+	final SpotsColorCodePanel colorCodePanel;
 	
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
@@ -67,8 +62,9 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		bvb = bvb_;
 		
-		setLayout(new GridBagLayout());
-	
+		colorCodePanel = new SpotsColorCodePanel(bvb);
+		
+		setLayout(new GridBagLayout());	
 		
 		GridBagConstraints gbc = new GridBagConstraints();		
 
@@ -144,74 +140,48 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridy = 0;
 		pRender.add( new JLabel("Render: "), gbc );
 		gbc.gridx++;
-		pRender.add( cbRender, gbc );
-		
-		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Param LUT"};
-		
-		cbMapLUT = new JComboBox< >(sMapLUT);
-		cbMapLUT.addActionListener( (e) -> updateLUTMapping());
-
-		pMapLUT = new JPanelConsistent(new GridBagLayout());
-		
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		pMapLUT.add( new JLabel("Color Mapping: "), gbc );
-		gbc.gridx++;
-		pMapLUT.add( cbMapLUT, gbc );	
-		
-		panelLUT = new LUTSelectionPanel();
-		panelLUT.setConsistent( true );
-
-		panelLUT.changeListeners().add( ()-> updateLUT());
+		pRender.add( cbRender, gbc );	
 		
 		allComp.add( butColor );
 		allComp.add( nfSpSize );
 		allComp.add( nfSpSizeScale );
 		allComp.add( cbShape );
 		allComp.add( cbRender );
-		allComp.add( cbMapLUT );
-		allComp.add( panelLUT.lutButton );
+		allComp.add( colorCodePanel );
 		
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		//GBCHelper.alighLoose(gbc);
 		gbc.insets = new Insets(0,0,0,0);
+					
+		//Shape Panel
+		shapePanel = new JPanel(new GridBagLayout());
 		
-		//split panels		
-		topPanel = new JPanel(new GridBagLayout());
-		bottomPanel = new JPanel(new GridBagLayout());
-		//Top Panel
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
-		topPanel.add(pColor, gbc );
+		shapePanel.add(pColor, gbc );
 		
 		gbc.gridy ++;	
-		topPanel.add(pPointSize, gbc );
+		shapePanel.add(pPointSize, gbc );
 		
 		gbc.gridy ++;	
-		topPanel.add(pSizeScale, gbc );
+		shapePanel.add(pSizeScale, gbc );
 		
 		gbc.gridy ++;		
-		topPanel.add(pShape, gbc );
+		shapePanel.add(pShape, gbc );
 		
 		gbc.gridy ++;
-		topPanel.add(pRender, gbc );
+		shapePanel.add(pRender, gbc );
 		
 		//Bottom Panel
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 
-		bottomPanel.add( pMapLUT, gbc );
-		gbc.gridy++;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weightx = 0.1;
-		bottomPanel.add( panelLUT, gbc );
-
 		spotsTabPane = new JTabbedPane(SwingConstants.TOP);
 		
-		spotsTabPane.addTab( "Shape", topPanel);
-		spotsTabPane.addTab( "Colorcode", bottomPanel);
+		spotsTabPane.addTab( "Shape", shapePanel);
+		spotsTabPane.addTab( "Colorcode", colorCodePanel);
 	    gbc = new GridBagConstraints();	
 	    gbc.gridx=0;
 	    gbc.gridy=0;
@@ -229,8 +199,6 @@ public class SpotsPropertiesPanel extends JPanel
 		boolean bSizeScaleSame = true;
 		boolean bShapeSame = true;
 		boolean bRenderSame = true;
-		boolean bMapLUTSame = true;
-		boolean bLUTSame = true;
 		float fPointSizeIn;
 		float fSizeScaleIn;
 		float fPointSize = -1.0f;
@@ -239,8 +207,6 @@ public class SpotsPropertiesPanel extends JPanel
 		Color currColor = Color.WHITE;
 		int nRender = 0;
 		int nShape = 0;
-		int nMapLUT = 0;
-		String sLUT = "";
 		
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
@@ -262,12 +228,6 @@ public class SpotsPropertiesPanel extends JPanel
 					}
 					nShape = spotsShape.getPointShape();
 					nRender = spotsShape.getRenderType();
-					nMapLUT = spotsShape.getMapLUTMode();
-					sLUT = spotsShape.getLUTName();
-					if(sLUT == "" || spotsShape.getMapLUTMode() == 0)
-					{
-						bLUTSame = false;
-					}
 					bFirstMesh = false;
 				}
 				else
@@ -301,20 +261,6 @@ public class SpotsPropertiesPanel extends JPanel
 					bRenderSame &= (nRender ==  spotsShape.getRenderType());
 					bShapeSame &= (nShape == spotsShape.getPointShape());
 					bColorSame &= currColor.equals( spotsShape.getColor() );
-					bMapLUTSame &= (nMapLUT == spotsShape.getMapLUTMode());
-					
-					
-					if(bLUTSame)
-					{
-						if(spotsShape.getLUTName() == "" || spotsShape.getMapLUTMode() == 0)
-						{
-							bLUTSame = false;
-						}
-						else
-						{
-							bLUTSame &= sLUT.equals( spotsShape.getLUTName());
-						}
-					}
 				}
 			}
 		}
@@ -324,16 +270,12 @@ public class SpotsPropertiesPanel extends JPanel
 		final float fSizeScaleFin = fSizeScale;	
 		final int nShapeFin = nShape;
 		final int nRenderFin = nRender;			
-		final int nMapLUTFin = nMapLUT;
-		final String sLUTFin = sLUT;
 		
 		final boolean bColorSameFin = bColorSame;
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bSizeScaleSameFin = bSizeScaleSame;
 		final boolean bShapeSameFin = bShapeSame;
 		final boolean bRenderSameFin = bRenderSame;
-		final boolean bMapLUTSameFin = bMapLUTSame;
-		final boolean bLUTSameFin = bLUTSame;
 
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( SpotsPropertiesPanel.this )
@@ -343,79 +285,58 @@ public class SpotsPropertiesPanel extends JPanel
 				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 				symbols.setDecimalSeparator('.');
 				DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
-				for (int d = 0; d < 3; d++)
-				{					
-					pColor.setConsistent( bColorSameFin );
-					pPointSize.setConsistent( bPointSizeSameFin );
-					pSizeScale.setConsistent( bSizeScaleSameFin );
-					pShape.setConsistent( bShapeSameFin );
-					pRender.setConsistent( bRenderSameFin );
-					pMapLUT.setConsistent( bMapLUTSameFin );
-					panelLUT.setConsistent( bLUTSameFin );
 					
-					if(bColorSameFin)
-					{
-						selectColors.setColor( cColorFin, 0 );
-						butColor.setIcon(  new ColorIcon( cColorFin ) );
-					}
-		
-					if(fSizeScaleFin > 0)
-					{
-						nfSpSizeScale.setEnabled( true );
-						nfSpSizeScale.setText( df3.format( fSizeScaleFin) );
-					}
-					else
-					{
-						nfSpSizeScale.setEnabled( false );
-						nfSpSizeScale.setText( "none" );
-					}
-					
+				pColor.setConsistent( bColorSameFin );
+				pPointSize.setConsistent( bPointSizeSameFin );
+				pSizeScale.setConsistent( bSizeScaleSameFin );
+				pShape.setConsistent( bShapeSameFin );
+				pRender.setConsistent( bRenderSameFin );
 
-					//all various sizes
-					if(fPointSizeFin < 0.0)
-					{
-						nfSpSize.setText( "various");
-						nfSpSize.setEnabled( false );
-					}
-					//all fixed sizes
-					else
-					{
-						nfSpSize.setEnabled( true );
-						nfSpSize.setText( df3.format( fPointSizeFin));
-					}
-
-					
-
-					if(bRenderSameFin)
-					{
-						cbRender.setSelectedIndex( nRenderFin );
-					}
-
-					if(bShapeSameFin)
-					{
-						cbShape.setSelectedIndex( nShapeFin );
-					}
-					panelLUT.setEnabled( true );
-					if(bMapLUTSameFin)
-					{
-						cbMapLUT.setSelectedIndex(nMapLUTFin);
-						if(nMapLUTFin == 0)
-						{
-							panelLUT.setColor( null );
-							panelLUT.setEnabled( false );
-							panelLUT.setConsistent( true );
-						}
-					}
-					if(bLUTSameFin)
-					{
-						panelLUT.setICMbyName( sLUTFin );
-					}
-						
+				if(bColorSameFin)
+				{
+					selectColors.setColor( cColorFin, 0 );
+					butColor.setIcon(  new ColorIcon( cColorFin ) );
 				}
+
+				if(fSizeScaleFin > 0)
+				{
+					nfSpSizeScale.setEnabled( true );
+					nfSpSizeScale.setText( df3.format( fSizeScaleFin) );
+				}
+				else
+				{
+					nfSpSizeScale.setEnabled( false );
+					nfSpSizeScale.setText( "none" );
+				}				
+
+				//all various sizes
+				if(fPointSizeFin < 0.0)
+				{
+					nfSpSize.setText( "various");
+					nfSpSize.setEnabled( false );
+				}
+				//all fixed sizes
+				else
+				{
+					nfSpSize.setEnabled( true );
+					nfSpSize.setText( df3.format( fPointSizeFin));
+				}				
+
+				if(bRenderSameFin)
+				{
+					cbRender.setSelectedIndex( nRenderFin );
+				}
+
+				if(bShapeSameFin)
+				{
+					cbShape.setSelectedIndex( nShapeFin );
+				}
+
+				
 				blockUpdates = false;
 			}
 		} );
-		
+		colorCodePanel.updateGUI();
 	}
 	
 	@Override
@@ -517,46 +438,6 @@ public class SpotsPropertiesPanel extends JPanel
 				if(sh instanceof BasicSpots)
 				{
 					((BasicSpots)sh).setRenderType( nRenderType );
-				}
-			}
-			bvb.repaintBVV();
-			updateGUI();
-		}
-	}
-	
-	synchronized void updateLUTMapping()
-	{
-		if(!blockUpdates)
-		{
-			final int nMapLUT = cbMapLUT.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
-			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setMapLUTMode( nMapLUT );
-				}
-			}
-			bvb.repaintBVV();
-			updateGUI();
-		}
-	}
-	
-	synchronized void updateLUT()
-	{
-		if(!blockUpdates)
-		{
-			final String sLUT = panelLUT.getICMName();
-			if(sLUT == null)
-				return;
-			if(sLUT == "")
-				return;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
-			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setLUT( sLUT );
 				}
 			}
 			bvb.repaintBVV();

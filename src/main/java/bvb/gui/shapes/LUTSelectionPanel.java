@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.IndexColorModel;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -31,6 +32,8 @@ public class LUTSelectionPanel extends JPanel
 	public final JButton lutButton;
 
 	private final ARGBType color = new ARGBType();
+	
+	public final JCheckBox cbInverted = new JCheckBox("Inv");
 	
 	private IndexColorModel icm = null;
 	
@@ -65,20 +68,31 @@ public class LUTSelectionPanel extends JPanel
 		GridBagConstraints gbc = new GridBagConstraints();	
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		gbc.weightx = 0.1;
+		gbc.anchor = GridBagConstraints.WEST;
 		this.add( new JLabel("Lookup table:"), gbc );
+		gbc.anchor = GridBagConstraints.CENTER;
 		gbc.gridx++;
 		lutButton = new JButton();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weightx = 0.1;
+		gbc.weightx = 0.5;
 		this.add( lutButton, gbc );
+		gbc.gridx++;
+		gbc.weightx = 0.1;
+		gbc.fill = GridBagConstraints.NONE;
+		//gbc.weightx = 0.0;
+
+		this.add( cbInverted, gbc );
+
+		cbInverted.addItemListener( (e) -> updateButton() );
 
 		//colorButton.addActionListener( e -> chooseColor() );
 
 		lutButton.setBorderPainted( false );
 		lutButton.setFocusPainted( false );
 		lutButton.setContentAreaFilled( false );
-		lutButton.setMinimumSize( new Dimension( 30, 30 ) );
-		lutButton.setPreferredSize( new Dimension( 30, 30 ) );
+		lutButton.setMinimumSize( new Dimension( 105, 30 ) );
+		lutButton.setPreferredSize( new Dimension( 105, 30 ) );
 		
 		lutButton.addMouseListener( new MouseAdapter()
 		{ 
@@ -160,14 +174,32 @@ public class LUTSelectionPanel extends JPanel
 			this.color.set( color );
 		icm = null;
 		icmName = null;
-		lutButton.setIcon( new ColorIconPG( new Color( this.color.get() ), null, 100, 28, 10, 10, true ) );
+		updateButton();
 	}
+
 
 	public void setICM(final IndexColorModel icm_, String icmName_)
 	{
+		
 		this.icm = icm_;
 		this.icmName = icmName_;
-		lutButton.setIcon( new ColorIconPG( null, icm, 100, 28, 10, 10, true ) );
+		updateButton();
+
+	}
+	
+	public void updateButton()
+	{
+		if(this.icm == null)
+		{
+			lutButton.setIcon( new ColorIconPG( new Color( this.color.get() ), null, 100, 28, 10, 10, true ) );
+		}
+		else
+		{
+			final ColorIconPG lutIcon = new ColorIconPG( null, icm, 100, 28, 10, 10, true );
+			if(cbInverted.isSelected())
+				lutIcon.bInvertedICM = true;
+			lutButton.setIcon( lutIcon );
+		}
 	}
 	
 	public synchronized void setICMbyName(String icmName)
