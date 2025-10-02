@@ -36,12 +36,16 @@ public class SpotsPropertiesPanel extends JPanel
 	final JPanelConsistent pRender;
 	final JPanelConsistent pPointSize;
 	final JPanelConsistent pShape;
+	final JPanelConsistent pSizeScale;
+	
 	final JPanelConsistent pMapLUT;
 	final LUTSelectionPanel panelLUT;
 
 	
-	final NumberField nfSpSize;
 	final JButton butColor;
+	final NumberField nfSpSize;
+	final NumberField nfSpSizeScale;
+
 	final JComboBox<String> cbShape;
 	final JComboBox<String> cbRender;
 	final JComboBox<String> cbMapLUT;
@@ -103,6 +107,21 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridx++;
 		pPointSize.add( nfSpSize, gbc );
 		
+		nfSpSizeScale = new NumberField(5);
+		nfSpSizeScale.setLimits( 0.0, Double.MAX_VALUE );
+		nfSpSizeScale.addListener( (v)->
+		{
+			double in = Math.max( Math.abs(v), 0.0001 );
+			updateSizeScale(Math.abs( in ));
+			//String.format("%.2f", in);
+		} );
+		pSizeScale = new JPanelConsistent(new GridBagLayout());
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pSizeScale.add( new JLabel("Size scale: "), gbc );
+		gbc.gridx++;
+		pSizeScale.add( nfSpSizeScale, gbc );
+		
 		String[] sShapes = {"Round", "Square"};
 		cbShape = new JComboBox< >(sShapes);
 		cbShape.addActionListener( (e)->{
@@ -147,6 +166,7 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		allComp.add( butColor );
 		allComp.add( nfSpSize );
+		allComp.add( nfSpSizeScale );
 		allComp.add( cbShape );
 		allComp.add( cbRender );
 		allComp.add( cbMapLUT );
@@ -168,6 +188,9 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		gbc.gridy ++;	
 		topPanel.add(pPointSize, gbc );
+		
+		gbc.gridy ++;	
+		topPanel.add(pSizeScale, gbc );
 		
 		gbc.gridy ++;		
 		topPanel.add(pShape, gbc );
@@ -203,12 +226,16 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		boolean bColorSame = true;
 		boolean bPointSizeSame = true;
+		boolean bSizeScaleSame = true;
 		boolean bShapeSame = true;
 		boolean bRenderSame = true;
 		boolean bMapLUTSame = true;
 		boolean bLUTSame = true;
 		float fPointSizeIn;
+		float fSizeScaleIn;
 		float fPointSize = -1.0f;
+		float fSizeScale = -1.0f;
+
 		Color currColor = Color.WHITE;
 		int nRender = 0;
 		int nShape = 0;
@@ -225,9 +252,13 @@ public class SpotsPropertiesPanel extends JPanel
 				{
 					currColor = spotsShape.getColor();
 					fPointSizeIn = spotsShape.getPointSize();
-					if(fPointSizeIn > 0.0)
+					if(fPointSizeIn >= 0.0)
 					{
-						fPointSize = spotsShape.getPointSize();
+						fPointSize = fPointSizeIn;
+					}
+					else
+					{
+						fSizeScale = spotsShape.getSizeScale();
 					}
 					nShape = spotsShape.getPointShape();
 					nRender = spotsShape.getRenderType();
@@ -241,11 +272,38 @@ public class SpotsPropertiesPanel extends JPanel
 				}
 				else
 				{
+					fPointSizeIn = spotsShape.getPointSize();
+					fSizeScaleIn = spotsShape.getSizeScale();
+					//we encoutered fixed size spots, let's update
+					if(fPointSizeIn>=0.0)
+					{
+						if(fPointSize < 0.0)
+						{	
+							fPointSize = fPointSizeIn;
+						}						
+						else
+						{
+							bPointSizeSame &= Math.abs( fPointSize - fPointSizeIn)<0.0001;
+						}
+					}
+					else
+					{
+						if(fSizeScale < 0.0)
+						{	
+							fSizeScale = fSizeScaleIn;
+						}	
+						else
+						{
+							bSizeScaleSame &= Math.abs( fSizeScale - fSizeScaleIn)<0.0001;
+						}
+					}
+
 					bRenderSame &= (nRender ==  spotsShape.getRenderType());
 					bShapeSame &= (nShape == spotsShape.getPointShape());
 					bColorSame &= currColor.equals( spotsShape.getColor() );
 					bMapLUTSame &= (nMapLUT == spotsShape.getMapLUTMode());
-					bPointSizeSame &= Math.abs( fPointSize - spotsShape.getPointSize())<0.0001;
+					
+					
 					if(bLUTSame)
 					{
 						if(spotsShape.getLUTName() == "" || spotsShape.getMapLUTMode() == 0)
@@ -262,7 +320,8 @@ public class SpotsPropertiesPanel extends JPanel
 		}
 		
 		final Color cColorFin = currColor;
-		final float fPointSizeFin = fPointSize;		
+		final float fPointSizeFin = fPointSize;	
+		final float fSizeScaleFin = fSizeScale;	
 		final int nShapeFin = nShape;
 		final int nRenderFin = nRender;			
 		final int nMapLUTFin = nMapLUT;
@@ -270,6 +329,7 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		final boolean bColorSameFin = bColorSame;
 		final boolean bPointSizeSameFin = bPointSizeSame;
+		final boolean bSizeScaleSameFin = bSizeScaleSame;
 		final boolean bShapeSameFin = bShapeSame;
 		final boolean bRenderSameFin = bRenderSame;
 		final boolean bMapLUTSameFin = bMapLUTSame;
@@ -283,10 +343,11 @@ public class SpotsPropertiesPanel extends JPanel
 				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 				symbols.setDecimalSeparator('.');
 				DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{					
 					pColor.setConsistent( bColorSameFin );
 					pPointSize.setConsistent( bPointSizeSameFin );
+					pSizeScale.setConsistent( bSizeScaleSameFin );
 					pShape.setConsistent( bShapeSameFin );
 					pRender.setConsistent( bRenderSameFin );
 					pMapLUT.setConsistent( bMapLUTSameFin );
@@ -297,21 +358,33 @@ public class SpotsPropertiesPanel extends JPanel
 						selectColors.setColor( cColorFin, 0 );
 						butColor.setIcon(  new ColorIcon( cColorFin ) );
 					}
-					
-					if(bPointSizeSameFin)
+		
+					if(fSizeScaleFin > 0)
 					{
-						if(bPointSizeSameFin && fPointSizeFin < 0.0)
-						{
-							nfSpSize.setText( "various");
-							nfSpSize.setEnabled( false );
-						}
-						else
-						{
-							nfSpSize.setEnabled( true );
-							nfSpSize.setText( df3.format( fPointSizeFin));
-						}
-
+						nfSpSizeScale.setEnabled( true );
+						nfSpSizeScale.setText( df3.format( fSizeScaleFin) );
 					}
+					else
+					{
+						nfSpSizeScale.setEnabled( false );
+						nfSpSizeScale.setText( "none" );
+					}
+					
+
+					//all various sizes
+					if(fPointSizeFin < 0.0)
+					{
+						nfSpSize.setText( "various");
+						nfSpSize.setEnabled( false );
+					}
+					//all fixed sizes
+					else
+					{
+						nfSpSize.setEnabled( true );
+						nfSpSize.setText( df3.format( fPointSizeFin));
+					}
+
+					
 
 					if(bRenderSameFin)
 					{
@@ -383,9 +456,30 @@ public class SpotsPropertiesPanel extends JPanel
 			{
 				if(sh instanceof BasicSpots)
 				{
-					if(((BasicSpots)sh).getPointSize()>0.0f)
+					if(((BasicSpots)sh).getPointSize() >= 0.0f)
 					{
 						((BasicSpots)sh).setPointSize( fv );
+					}
+				}
+			}
+			bvb.updateSceneRender();
+			updateGUI();
+		}
+	}
+	
+	synchronized void updateSizeScale(final double v)
+	{
+		if(!blockUpdates)
+		{
+			final float fv = (float)v;
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicSpots)
+				{
+					if(((BasicSpots)sh).getPointSize() < 0.0f)
+					{
+						((BasicSpots)sh).setSizeScale( fv );
 					}
 				}
 			}

@@ -3,6 +3,7 @@ layout (location = 1) in float sDiam;
 
 uniform float pointSizeReal;
 uniform float pointScale;
+uniform float fSizeScale;
 uniform mat4 pvm;
 uniform vec2 windowSize;
 out vec3 posW;
@@ -39,16 +40,15 @@ void main()
  	//in the absolute units
  	shift.xyz = shift.xyz - aPos;
 
-	if(pointSizeReal>0.0)
+	if(pointSizeReal >= 0.0)
 	{
- 		shift.xyz = shift.xyz * 0.5 * pointSizeReal / length(shift.xyz);
  		sDiamfp = pointSizeReal;
  	}
  	else
  	{
- 		shift.xyz = shift.xyz * 0.5 * sDiam / length(shift.xyz);
- 		sDiamfp = sDiam;
+ 		sDiamfp = sDiam;		
  	}	
+ 	shift.xyz = shift.xyz * 0.5 * sDiamfp * fSizeScale / length(shift.xyz);
  	
  	shift.xyz = aPos + shift.xyz ;
  	

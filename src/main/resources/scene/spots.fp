@@ -6,8 +6,6 @@ uniform int renderType;
 uniform int pointShape;
 in vec3 posW;
 in float sDiamfp;
-uniform float normGauss;
-uniform float gamma;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -19,7 +17,6 @@ uniform int nMapLUTMode;
 uniform int sizeLUT;
 uniform float mapMin;
 uniform float mapRange;
-
 
 
 void checkClipping()
@@ -78,7 +75,6 @@ void main()
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
 	vec4 colorout = getInputColor();
-
 	
 	if(pointShape == 0)
 	{

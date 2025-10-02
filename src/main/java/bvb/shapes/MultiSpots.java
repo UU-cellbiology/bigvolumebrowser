@@ -37,6 +37,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	final float [] fMapMinMax = new float[2];
 	
+	float fSizeScale = 1.0f;
+	
 	void defineTransparency()
 	{
 
@@ -352,5 +354,28 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 			sizeMinMaxOut[i] = sizeMinMax[i];
 		}
 		return sizeMinMaxOut;
+	}
+
+	@Override
+	public float getSizeScale()
+	{
+		return fSizeScale;
+	}
+
+	@Override
+	public void setSizeScale( float fSizeScale_ )
+	{
+		fSizeScale = fSizeScale_;
+		
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{
+				((VisSpots)visRender).setSizeScale( fSizeScale);
+			}
+			defineTransparency();
+		}
+		
 	}
 }

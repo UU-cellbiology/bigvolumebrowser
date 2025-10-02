@@ -361,4 +361,19 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	}
 
 
+	@Override
+	public float getSizeScale()
+	{
+		return ((VisSpots)visRender).getSizeScale();
+	}
+
+
+	@Override
+	public void setSizeScale( float fSizeScale )
+	{
+		((VisSpots)visRender).setSizeScale( fSizeScale );
+		
+	}
+
+
 }

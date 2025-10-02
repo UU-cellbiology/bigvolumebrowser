@@ -34,6 +34,13 @@ public interface BasicSpots
 	public int getPointShape();
 	
 	public float [] getSizeRange();
+	/** returns scale factor for various size spots **/
+	public float getSizeScale();
+	
+	/** sets extra scale factor for various size spots **/
+	public void setSizeScale(final float fSizeScale);
+	
+	
 	
 	
 }

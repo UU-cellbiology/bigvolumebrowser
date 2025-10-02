@@ -74,6 +74,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	public float fSpotSize;
 	
+	public float fSizeScale = 1.0f;
+	
 	private int renderType = 0;
 	
 	private int spotShape = 0;
@@ -83,10 +85,6 @@ public class VisSpots extends AbstractClipTransformVis
 	float spotSizes[]; 
 	
 	private int nSpotsN;
-	
-	private float fNormGauss = 1.0f;
-	
-	private float fNormGamma = 1.0f;
 	
 	private boolean initialized;
 	
@@ -135,9 +133,9 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		vertices = new float [nSpotsN*3]; //assume 3D
 	
-		for (i=0;i<nSpotsN; i++)
+		for (i = 0; i < nSpotsN; i++)
 		{
-			for (j=0;j<3; j++)
+			for (j = 0; j < 3; j++)
 			{
 				vertices[i*3+j] = points.get(i).getFloatPosition(j);
 			}			
@@ -174,26 +172,6 @@ public class VisSpots extends AbstractClipTransformVis
 		
 	}
 	
-//	public void setSMLMNorm(final float fNormGauss_)
-//	{
-//		fNormGauss = fNormGauss_;
-//	}
-//	
-//	public float getSMLMNorm()
-//	{
-//		return fNormGauss;
-//	}
-//	
-//	public void setSMLMGamma(final float fNormGamma_)
-//	{
-//		fNormGamma = fNormGamma_;
-//	}
-//	
-//	public float getSMLMGamma()
-//	{
-//		return fNormGamma;
-//	}
-	
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
@@ -203,6 +181,16 @@ public class VisSpots extends AbstractClipTransformVis
 	{
 		fMapMinRange[0] = fMin;
 		fMapMinRange[1] = fMax - fMin;
+	}
+	
+	public void setSizeScale(final float fSizeScale_)
+	{
+		fSizeScale = fSizeScale_;
+	}
+	
+	public float getSizeScale()
+	{
+		return fSizeScale;
 	}
 	
 	public int getMapLUTMode()
@@ -393,15 +381,23 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform1f( "pointScale" ).set( fPointScale );
+		if(fSpotSize <0.0)
+		{
+			prog.getUniform1f( "fSizeScale" ).set( fSizeScale );			
+		}
+		else
+		{
+			prog.getUniform1f( "fSizeScale" ).set( 1.0f);			
+		}
+
 		prog.getUniform4f( "colorin" ).set( l_color );
 		prog.getUniform2f( "windowSize" ).set( window_sizef );
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
-		prog.getUniform1f( "normGauss" ).set(  fNormGauss);
-		prog.getUniform1f( "gamma" ).set(fNormGamma);
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		prog.getUniform1i("clipactive").set(0);
-		if(clipState !=0 && clipInt != null)
+		
+		if(clipState != 0 && clipInt != null)
 		{
 			prog.getUniform1i("clipactive").set(clipState);
 			prog.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
@@ -415,8 +411,6 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
 
-		//gl.glEnable(GL.GL_BLEND);
-		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
 			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
