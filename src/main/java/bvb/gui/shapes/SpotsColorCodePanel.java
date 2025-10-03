@@ -201,7 +201,6 @@ public class SpotsColorCodePanel extends JPanel
 		} );
 		
 	}
-
 	
 	synchronized void updateLUTMapping()
 	{

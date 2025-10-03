@@ -304,14 +304,14 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		return nLoadTimePoint;
 	}
 	
-	void addSpots(final ArrayList<RealPoint> verticesTP, final ArrayList<Float> sizesTP, final int nLoadTimePoint)
+	public void addSpots(final ArrayList<RealPoint> verticesTP, final ArrayList<Float> sizesTP, final int nLoadTimePoint)
 	{
 		//add a new spots object
 		VisSpots spotsTP = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		if(sizesTP.size() == 0)
 		{
 			spotsTP.setVertices( verticesTP );
-			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, null, pointSize) );
+			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, null, pointSize, 1.0f) );
 		}
 		else
 		{
@@ -321,7 +321,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 				sizesF[j] = sizesTP.get( j );
 			}
 			spotsTP.setVertices( verticesTP, sizesF );
-			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, sizesF, pointSize) );
+			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, sizesF, pointSize, fSizeScale) );
 			float [] sizeMinMaxCurr = Spots.getSizeMinMax( sizesF );
 			if(sizeMinMax == null)
 			{
@@ -351,7 +351,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public float[] getSizeRange()
 	{
 		final float [] sizeMinMaxOut = new float[2];
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{
 			sizeMinMaxOut[i] = sizeMinMax[i];
 		}

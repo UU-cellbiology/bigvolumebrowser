@@ -98,7 +98,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{		
-		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize);		
+		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize, 1.0f);		
 		sizeMinMax = getSizeMinMax(spotSizes);
 	}
 	
@@ -118,29 +118,30 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		}
 		return sizeMinMax;
 	}
-	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize)
+	
+	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize_, final float sizeScale)
 	{
 		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
 				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
 				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
-		
+		double pointRadius = 0.5 * pointSize_;
 		if(spotSizes == null)
 		{
 			for ( final RealPoint v : vertices )
 			{
 				final double x = v.getDoublePosition(0), y = v.getDoublePosition(1), z = v.getDoublePosition(2);
-				if ( x - pointSize < boundingBox[ 0 ] )
-					boundingBox[ 0 ] = x - pointSize;
-				if ( y - pointSize < boundingBox[ 1 ] )
-					boundingBox[ 1 ] = y - pointSize;
-				if ( z - pointSize < boundingBox[ 2 ] )
-					boundingBox[ 2 ] = z - pointSize;
-				if ( x + pointSize > boundingBox[ 3 ] )
-					boundingBox[ 3 ] = x + pointSize;
-				if ( y + pointSize > boundingBox[ 4 ] )
-					boundingBox[ 4 ] = y + pointSize;
-				if ( z + pointSize > boundingBox[ 5 ] )
-					boundingBox[ 5 ] = z + pointSize;
+				if ( x - pointRadius < boundingBox[ 0 ] )
+					boundingBox[ 0 ] = x - pointRadius;
+				if ( y - pointRadius < boundingBox[ 1 ] )
+					boundingBox[ 1 ] = y - pointRadius;
+				if ( z - pointRadius < boundingBox[ 2 ] )
+					boundingBox[ 2 ] = z - pointRadius;
+				if ( x + pointRadius > boundingBox[ 3 ] )
+					boundingBox[ 3 ] = x + pointRadius;
+				if ( y + pointRadius > boundingBox[ 4 ] )
+					boundingBox[ 4 ] = y + pointRadius;
+				if ( z + pointRadius > boundingBox[ 5 ] )
+					boundingBox[ 5 ] = z + pointRadius;
 			}
 			
 		}
@@ -150,19 +151,19 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 			for ( int v = 0; v < vertices.size(); v++ )
 			{
 				final double x = vertices.get( v ).getDoublePosition(0), y = vertices.get( v ).getDoublePosition(1), z = vertices.get( v ).getDoublePosition(2);
-				final double pSize = spotSizes[v];
-				if ( x - pSize < boundingBox[ 0 ] )
-					boundingBox[ 0 ] = x - pSize;
-				if ( y - pSize < boundingBox[ 1 ] )
-					boundingBox[ 1 ] = y - pSize;
-				if ( z - pSize < boundingBox[ 2 ] )
-					boundingBox[ 2 ] = z - pSize;
-				if ( x + pSize > boundingBox[ 3 ] )
-					boundingBox[ 3 ] = x + pSize;
-				if ( y + pSize > boundingBox[ 4 ] )
-					boundingBox[ 4 ] = y + pSize;
-				if ( z + pSize > boundingBox[ 5 ] )
-					boundingBox[ 5 ] = z + pSize;
+				final double pRad = 0.5 * spotSizes[v]*sizeScale;
+				if ( x - pRad < boundingBox[ 0 ] )
+					boundingBox[ 0 ] = x - pRad;
+				if ( y - pRad < boundingBox[ 1 ] )
+					boundingBox[ 1 ] = y - pRad;
+				if ( z - pRad < boundingBox[ 2 ] )
+					boundingBox[ 2 ] = z - pRad;
+				if ( x + pRad > boundingBox[ 3 ] )
+					boundingBox[ 3 ] = x + pRad;
+				if ( y + pRad > boundingBox[ 4 ] )
+					boundingBox[ 4 ] = y + pRad;
+				if ( z + pRad > boundingBox[ 5 ] )
+					boundingBox[ 5 ] = z + pRad;
 				
 			}
 
@@ -372,6 +373,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setSizeScale( float fSizeScale )
 	{
 		((VisSpots)visRender).setSizeScale( fSizeScale );
+		//adjust bounding box
+		
 		
 	}
 
