@@ -91,6 +91,8 @@ public class VisSpots extends AbstractClipTransformVis
 	volatile boolean bLocked = false;
 	
 	LUTUploaderGPU lutGPU = null;
+	
+	boolean bInvertLUT = false;
 	 
 	private int nMapLUTMode = 0;
 	
@@ -163,7 +165,7 @@ public class VisSpots extends AbstractClipTransformVis
 	{
 		spotSizes = new float[spotSizes_.length];
 		
-		for (int i=0;i<spotSizes_.length; i++)
+		for (int i = 0; i < spotSizes_.length; i++)
 		{
 			spotSizes[i] = spotSizes_[i];
 		}
@@ -175,6 +177,15 @@ public class VisSpots extends AbstractClipTransformVis
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
+	}
+	
+	public void setInvertedLUT(boolean bInv)
+	{
+		bInvertLUT = bInv;
+	}
+	public boolean isInvertedLUT()
+	{
+		return bInvertLUT;
 	}
 	
 	public void setMapRange(final float fMin, final float fMax)
@@ -410,6 +421,7 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
+		prog.getUniform1i("bInvLUT").set( bInvertLUT?1:0 );
 
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{

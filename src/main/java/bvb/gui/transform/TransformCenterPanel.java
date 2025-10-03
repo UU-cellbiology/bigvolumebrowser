@@ -35,6 +35,8 @@ public class TransformCenterPanel extends JPanel
 
 	private boolean blockUpdates = false;
 	
+	/** a map to store object's center coordinates,
+	 *  to reduce calculations **/
 	private final Map< Object, double[] > objToDefCenters = new HashMap<>();
 	
 	public TransformCenterPanel(final TransformSetups transformSetups_) 

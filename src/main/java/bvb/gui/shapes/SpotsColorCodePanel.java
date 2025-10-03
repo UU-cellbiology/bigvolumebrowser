@@ -14,17 +14,21 @@ import javax.swing.SwingUtilities;
 
 import net.imglib2.type.numeric.ARGBType;
 
+import bdv.util.BoundedValueDouble;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
+import bvvpg.ui.panels.BoundedRangePanelPG;
+import bvvpg.ui.panels.BoundedValuePanelPG;
 
 public class SpotsColorCodePanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	
 	final JPanelConsistent pMapLUT;
+	
 	final LUTSelectionPanel panelLUT;
 	
 	final JComboBox<String> cbMapLUT;
@@ -32,6 +36,9 @@ public class SpotsColorCodePanel extends JPanel
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
 	private boolean blockUpdates = false;
+	
+	private final BoundedRangePanelPG lutRangePanel;
+	private final BoundedValuePanelPG lutGammaPanel;
 	
 	public SpotsColorCodePanel(final BigVolumeBrowser bvb_)
 	{
@@ -43,12 +50,15 @@ public class SpotsColorCodePanel extends JPanel
 	
 		GridBagConstraints gbc = new GridBagConstraints();	
 		GBCHelper.alighLeft(gbc);
-		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Param LUT"};
-		
+		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Param LUT"};		
+ 
 		cbMapLUT = new JComboBox< >(sMapLUT);
 		cbMapLUT.addActionListener( (e) -> updateLUTMapping());
-
 		pMapLUT = new JPanelConsistent(new GridBagLayout());
+		
+		lutRangePanel = new BoundedRangePanelPG();
+		
+		lutGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -60,6 +70,7 @@ public class SpotsColorCodePanel extends JPanel
 		panelLUT.setConsistent( true );
 		
 		panelLUT.changeListeners().add( ()-> updateLUT());
+		panelLUT.cbInverted.addItemListener( (e)-> updateLUTInversion());
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -70,8 +81,22 @@ public class SpotsColorCodePanel extends JPanel
 		gbc.weightx = 0.1;
 		this.add( panelLUT, gbc );
 		
+		gbc.gridy++;
+		this.add( lutRangePanel, gbc);
+		gbc.gridy++;
+		this.add( lutGammaPanel, gbc);
+
+		//filler
+		gbc.gridy++;
+		gbc.fill = GridBagConstraints.VERTICAL;
+		gbc.weighty = 0.1;
+		this.add( new JLabel(), gbc );
+		
 		allComp.add( cbMapLUT );
 		allComp.add( panelLUT.lutButton );
+		allComp.add( panelLUT.cbInverted );
+		allComp.add( lutRangePanel );
+		allComp.add( lutGammaPanel );
 	}
 	
 	
@@ -82,8 +107,10 @@ public class SpotsColorCodePanel extends JPanel
 		boolean bColorSame = true;
 		boolean bMapLUTSame = true;
 		boolean bLUTSame = true;
+		boolean bLUTInvertedSame = true;
 		
 		Color currColor = Color.WHITE;
+		boolean bLUTInverted = false;
 		int nMapLUT = 0;
 		String sLUT = "";
 		
@@ -102,6 +129,7 @@ public class SpotsColorCodePanel extends JPanel
 					{
 						bLUTSame = false;
 					}
+					bLUTInverted = spotsShape.isInvertedLUT();
 					bFirstMesh = false;
 				}
 				else
@@ -119,6 +147,7 @@ public class SpotsColorCodePanel extends JPanel
 							bLUTSame &= sLUT.equals( spotsShape.getLUTName());
 						}
 					}
+					bLUTInvertedSame &= (bLUTInverted == spotsShape.isInvertedLUT()); 
 				}
 			}
 		}
@@ -128,7 +157,7 @@ public class SpotsColorCodePanel extends JPanel
 		final Color cColorFin = currColor;
 		final boolean bColorSameFin = bColorSame;
 		final boolean bMapLUTSameFin = bMapLUTSame;
-		final boolean bLUTSameFin = bLUTSame;
+		final boolean bLUTSameFin = (bLUTSame && bLUTInvertedSame);
 
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( SpotsColorCodePanel.this )
@@ -138,6 +167,9 @@ public class SpotsColorCodePanel extends JPanel
 				pMapLUT.setConsistent( bMapLUTSameFin );
 				panelLUT.setConsistent( bLUTSameFin );
 				panelLUT.setEnabled( true );
+				
+				lutRangePanel.setEnabled( true );
+				lutGammaPanel.setEnabled( true );
 				if(bMapLUTSameFin)
 				{
 					cbMapLUT.setSelectedIndex(nMapLUTFin);
@@ -153,6 +185,10 @@ public class SpotsColorCodePanel extends JPanel
 						}
 						panelLUT.setEnabled( false );
 						panelLUT.setConsistent( true );
+						lutRangePanel.setEnabled( false );
+						lutGammaPanel.setEnabled( false );
+						lutRangePanel.setConsistent( true );
+						lutGammaPanel.setConsistent( true );
 					}
 				}
 				if(bLUTSameFin)
@@ -209,6 +245,24 @@ public class SpotsColorCodePanel extends JPanel
 				if(sh instanceof BasicSpots)
 				{
 					((BasicSpots)sh).setLUT( sLUT );
+				}
+			}
+			bvb.repaintBVV();
+			updateGUI();
+		}
+	}
+	
+	synchronized void updateLUTInversion()
+	{
+		if(!blockUpdates)
+		{
+			final boolean bInvLUT = panelLUT.cbInverted.isSelected();
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicSpots)
+				{
+					((BasicSpots)sh).setInvertedLUT( bInvLUT );
 				}
 			}
 			bvb.repaintBVV();

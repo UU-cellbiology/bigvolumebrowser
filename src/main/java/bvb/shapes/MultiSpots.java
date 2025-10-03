@@ -33,6 +33,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	LUTUploaderGPU lutGPU = null;
 	
+	boolean bInvertedLUT = false;
+	
 	float [] sizeMinMax = null;
 	
 	final float [] fMapMinMax = new float[2];
@@ -367,15 +369,34 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	{
 		fSizeScale = fSizeScale_;
 		
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
 				((VisSpots)visRender).setSizeScale( fSizeScale);
 			}
-			defineTransparency();
 		}
 		
+	}
+	@Override
+	public void setInvertedLUT(boolean bInv)
+	{
+		bInvertedLUT = bInv;
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{
+				((VisSpots)visRender).setInvertedLUT( bInvertedLUT );
+			}
+		}
+		
+	}
+	
+	@Override
+	public boolean isInvertedLUT()
+	{
+		return bInvertedLUT;
 	}
 }

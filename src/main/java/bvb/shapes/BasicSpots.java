@@ -25,6 +25,10 @@ public interface BasicSpots
 	
 	public int getMapLUTMode();
 	
+	public void setInvertedLUT(boolean bInv);
+	
+	public boolean isInvertedLUT();
+	
 	public void setMapRange(final float fMin, final float fMax);
 	
 	public void setRenderType(int nRenderType);

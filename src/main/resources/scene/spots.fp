@@ -15,6 +15,7 @@ uniform int wOIT;
 uniform sampler2D lutTexture;
 uniform int nMapLUTMode;
 uniform int sizeLUT;
+uniform int bInvLUT;
 uniform float mapMin;
 uniform float mapRange;
 
@@ -44,15 +45,22 @@ vec4 getInputColor()
 			vec3 axis = vec3(0);
 			axis[nMapLUTMode-1] = 1;
 			val = dot(axis, posW);
-			val = 0.5 + (sizeLUT-1)*((val-mapMin)/mapRange);
-		}
-		if(nMapLUTMode == 4)
-		{
-			val = sDiamfp;
-			val = 0.5 + (sizeLUT-1)*(1.0-((val-mapMin)/mapRange));
-			
 		}
 
+		if(nMapLUTMode == 4)
+		{
+			val = sDiamfp;			
+		}
+
+		val = (val-mapMin)/mapRange;
+		
+		if(bInvLUT != 0)
+		{
+			val = 1.0 - val;
+		}
+		
+		val = 0.5 + (sizeLUT-1)*val;
+		
 		//2D texture with fixed width of 256
 		vec2 q = vec2(0);
 		q.y = floor(val/256.0);
