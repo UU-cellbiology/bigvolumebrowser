@@ -44,7 +44,6 @@ public interface BasicSpots
 	/** sets extra scale factor for various size spots **/
 	public void setSizeScale(final float fSizeScale);
 	
-	
-	
+	public boolean hasProperty();
 	
 }

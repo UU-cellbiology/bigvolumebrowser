@@ -189,7 +189,7 @@ public class ClipCenterPanel extends JPanel
 				synchronized ( ClipCenterPanel.this )
 				{
 					blockUpdates = true;
-					for (int d=0;d<3;d++)
+					for (int d = 0; d < 3; d++)
 					{
 						clipCenterPanels[d].setConsistent( isConsistent[d] );
 						clipCenterPanels[d].setValue( finalCenter[d] );

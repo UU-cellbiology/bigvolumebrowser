@@ -390,4 +390,12 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	{
 		return ((VisSpots)visRender).isInvertedLUT();
 	}
+
+
+	@Override
+	public boolean hasProperty()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -32,6 +32,8 @@ public class SpotsColorCodePanel extends JPanel
 	final LUTSelectionPanel panelLUT;
 	
 	final JComboBox<String> cbMapLUT;
+	
+	final SpotsLUTMapSetups spotsLUTSetup = new SpotsLUTMapSetups();
 		
 	final ArrayList<Component> allComp = new ArrayList<>();
 	

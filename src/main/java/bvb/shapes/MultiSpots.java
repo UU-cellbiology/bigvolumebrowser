@@ -399,4 +399,11 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	{
 		return bInvertedLUT;
 	}
+
+	@Override
+	public boolean hasProperty()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
