@@ -4,22 +4,30 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import net.imglib2.type.numeric.ARGBType;
 
+import bdv.util.BoundedRange;
 import bdv.util.BoundedValueDouble;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
+import bvb.utils.BoundedValueDoubleBVB;
+import bvb.utils.Misc;
 import bvvpg.ui.panels.BoundedRangePanelPG;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -34,6 +42,8 @@ public class SpotsColorCodePanel extends JPanel
 	final JComboBox<String> cbMapLUT;
 	
 	final SpotsLUTMapSetups spotsLUTSetup = new SpotsLUTMapSetups();
+	
+	final JButton butResetToDefault;
 		
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
@@ -59,9 +69,15 @@ public class SpotsColorCodePanel extends JPanel
 		pMapLUT = new JPanelConsistent(new GridBagLayout());
 		
 		lutRangePanel = new BoundedRangePanelPG();
+		lutRangePanel.changeListeners().add( () -> updateLUTMapRangeBounds());
+		final JPopupMenu menuLutRange = new JPopupMenu();
+		menuLutRange.add( runnableItem(  "set bounds ...", lutRangePanel::setBoundsDialog ) );
+		menuLutRange.add( runnableItem(  "shrink bounds to selection", lutRangePanel::shrinkBoundsToRange ) );
+		lutRangePanel.setPopup( () -> menuLutRange );	
+		
 		
 		lutGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
-		
+		lutGammaPanel.changeListeners().add(  () -> updateLUTMapGamma() );
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		pMapLUT.add( new JLabel("Color Mapping: "), gbc );
@@ -74,9 +90,16 @@ public class SpotsColorCodePanel extends JPanel
 		panelLUT.changeListeners().add( ()-> updateLUT());
 		panelLUT.cbInverted.addItemListener( (e)-> updateLUTInversion());
 		
+		
+		URL icon_path = this.getClass().getResource("/icons/red_cross.png");
+		ImageIcon icon = new ImageIcon(icon_path);
+		butResetToDefault = new JButton(icon);
+		butResetToDefault.setToolTipText( "Reset to default" );
+		butResetToDefault.addActionListener( (e)->resetLUTMapRangeBounds() );   
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 
+		gbc.gridwidth = 2;
 		this.add( pMapLUT, gbc );
 		gbc.gridy++;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -86,10 +109,19 @@ public class SpotsColorCodePanel extends JPanel
 		gbc.gridy++;
 		this.add( lutRangePanel, gbc);
 		gbc.gridy++;
+		gbc.gridwidth = 1;
+		gbc.weightx = 0.2;
 		this.add( lutGammaPanel, gbc);
-
+		
+		gbc.gridx++;
+		gbc.weightx = 0.0;
+		gbc.fill = GridBagConstraints.NONE;
+		//gbc.anchor = GridBagConstraints.EAST;
+		this.add( butResetToDefault, gbc);
+		gbc.gridwidth = 2;
 		//filler
 		gbc.gridy++;
+		gbc.gridx = 0;
 		gbc.fill = GridBagConstraints.VERTICAL;
 		gbc.weighty = 0.1;
 		this.add( new JLabel(), gbc );
@@ -99,9 +131,9 @@ public class SpotsColorCodePanel extends JPanel
 		allComp.add( panelLUT.cbInverted );
 		allComp.add( lutRangePanel );
 		allComp.add( lutGammaPanel );
+		allComp.add( butResetToDefault );
 	}
-	
-	
+
 	synchronized void updateGUI()
 	{
 		boolean bFirstMesh = true;
@@ -109,7 +141,11 @@ public class SpotsColorCodePanel extends JPanel
 		boolean bColorSame = true;
 		boolean bMapLUTSame = true;
 		boolean bLUTSame = true;
-		boolean bLUTInvertedSame = true;
+		boolean bLUTInvertedSame = true;	
+		BoundedRange range = null;
+		BoundedValueDoubleBVB gamma = null;
+		boolean allRangesEqual = true;
+		boolean gammaEqual = true;
 		
 		Color currColor = Color.WHITE;
 		boolean bLUTInverted = false;
@@ -131,16 +167,24 @@ public class SpotsColorCodePanel extends JPanel
 					{
 						bLUTSame = false;
 					}
+					else
+					{
+						range = spotsLUTSetup.getLUTMapRange( spotsShape, nMapLUT - 1 );
+						gamma = spotsLUTSetup.getLUTMapGamma( spotsShape, nMapLUT - 1 );
+					}
 					bLUTInverted = spotsShape.isInvertedLUT();
+			
+					
 					bFirstMesh = false;
 				}
 				else
 				{
-					bMapLUTSame &= (nMapLUT == spotsShape.getMapLUTMode());
+					int nCurrMapLUTMode = spotsShape.getMapLUTMode();
+					bMapLUTSame &= (nMapLUT == nCurrMapLUTMode);
 					bColorSame &= currColor.equals( spotsShape.getColor() );		
 					if(bLUTSame)
 					{
-						if(spotsShape.getLUTName() == "" || spotsShape.getMapLUTMode() == 0)
+						if(spotsShape.getLUTName() == "" || nCurrMapLUTMode == 0)
 						{
 							bLUTSame = false;
 						}
@@ -148,6 +192,21 @@ public class SpotsColorCodePanel extends JPanel
 						{
 							bLUTSame &= sLUT.equals( spotsShape.getLUTName());
 						}
+					}
+					if(nCurrMapLUTMode != 0)
+					{
+						if(range == null )
+						{
+							range = spotsLUTSetup.getLUTMapRange( spotsShape, nMapLUT - 1 );							
+						}
+						
+						allRangesEqual &= Misc.compareBoundedRanges(range, spotsLUTSetup.getLUTMapRange( spotsShape, nMapLUT - 1) );
+						if(gamma == null )
+						{
+							gamma = spotsLUTSetup.getLUTMapGamma( spotsShape, nMapLUT -1 );							
+						}
+						gammaEqual &= Misc.compareBoundedValues( gamma, spotsLUTSetup.getLUTMapGamma( spotsShape, nMapLUT - 1 ) );
+						
 					}
 					bLUTInvertedSame &= (bLUTInverted == spotsShape.isInvertedLUT()); 
 				}
@@ -160,6 +219,11 @@ public class SpotsColorCodePanel extends JPanel
 		final boolean bColorSameFin = bColorSame;
 		final boolean bMapLUTSameFin = bMapLUTSame;
 		final boolean bLUTSameFin = (bLUTSame && bLUTInvertedSame);
+		
+		final BoundedRange finalRange = range;
+		final BoundedValueDoubleBVB finalGamma = gamma;
+		final boolean allRangesEqualFin = allRangesEqual;
+		final boolean gammaEqualFin = gammaEqual;
 
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( SpotsColorCodePanel.this )
@@ -171,7 +235,20 @@ public class SpotsColorCodePanel extends JPanel
 				panelLUT.setEnabled( true );
 				
 				lutRangePanel.setEnabled( true );
+				lutRangePanel.setConsistent( allRangesEqualFin );
+
 				lutGammaPanel.setEnabled( true );
+				lutGammaPanel.setConsistent( gammaEqualFin );
+
+				if(finalRange != null)
+				{
+					lutRangePanel.setRange( finalRange );
+				}
+				if(finalGamma != null)
+				{
+					lutGammaPanel.setValue( finalGamma );
+				}
+
 				if(bMapLUTSameFin)
 				{
 					cbMapLUT.setSelectedIndex(nMapLUTFin);
@@ -191,6 +268,8 @@ public class SpotsColorCodePanel extends JPanel
 						lutGammaPanel.setEnabled( false );
 						lutRangePanel.setConsistent( true );
 						lutGammaPanel.setConsistent( true );
+						lutRangePanel.setRange( new BoundedRange(0,1,0,1) );
+
 					}
 				}
 				if(bLUTSameFin)
@@ -208,13 +287,18 @@ public class SpotsColorCodePanel extends JPanel
 	{
 		if(!blockUpdates)
 		{
-			final int nMapLUT = cbMapLUT.getSelectedIndex();
+			final int nMapLUTMode = cbMapLUT.getSelectedIndex();
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
 				if(sh instanceof BasicSpots)
 				{
-					((BasicSpots)sh).setMapLUTMode( nMapLUT );
+					((BasicSpots)sh).setMapLUTMode( nMapLUTMode );
+					if(nMapLUTMode != 0)
+					{
+						final float [] range = spotsLUTSetup.getLUTMapRangeFloat( ((BasicSpots)sh), nMapLUTMode - 1 );
+						((BasicSpots)sh).setMapRange( range[0], range[1] );
+					}
 				}
 			}
 			bvb.repaintBVV();
@@ -269,5 +353,106 @@ public class SpotsColorCodePanel extends JPanel
 			bvb.repaintBVV();
 			updateGUI();
 		}
+	}
+	
+	public synchronized void updateLUTMapRangeBounds()
+	{
+		if(!blockUpdates)
+		{
+			blockUpdates = true;
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		
+			final BoundedRange rangeUI = lutRangePanel.getRange();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicSpots)
+				{
+					final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
+					if(nMapMode != 0)
+					{
+						((BasicSpots)sh).setMapRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
+					
+						float [] rangeStored = spotsLUTSetup.getLUTMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+						rangeStored[0] = (float)rangeUI.getMin();
+						rangeStored[1] = (float)rangeUI.getMax();
+						rangeStored[2] = (float)rangeUI.getMinBound();
+						rangeStored[3] = (float)rangeUI.getMaxBound();
+					}
+				}
+			}
+	
+			bvb.repaintBVV();
+			blockUpdates = false;
+			updateGUI();
+		}
+	}
+	
+	public synchronized void updateLUTMapGamma()
+	{
+		if(!blockUpdates)
+		{
+			blockUpdates = true;
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			BoundedValueDouble gammaCurr = lutGammaPanel.getValue();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicSpots)
+				{
+					final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
+					if(nMapMode != 0)
+					{
+						((BasicSpots)sh).setMapGamma( (float) gammaCurr.getCurrentValue() );   
+						float [] rangeStored = spotsLUTSetup.getLUTMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+						rangeStored[4] = (float) gammaCurr.getCurrentValue();
+						rangeStored[5] = (float) gammaCurr.getRangeMin();
+						rangeStored[6] = (float) gammaCurr.getRangeMax();
+					}
+				}
+			}
+	
+			bvb.repaintBVV();
+			blockUpdates = false;
+			updateGUI();
+		}
+	}
+	
+	
+	void resetLUTMapRangeBounds()
+	{
+		if(!blockUpdates)
+		{
+			blockUpdates = true;
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicSpots)
+				{
+					final int nMapMode = ((BasicSpots)sh).getMapLUTMode() - 1;
+					if(nMapMode >= 0)
+					{
+						final float [][] rangeDef = spotsLUTSetup.getDefaultRanges( (BasicSpots)sh );
+						final float [] currRange = spotsLUTSetup.getLUTMapRangeFloat( (BasicSpots)sh , nMapMode );
+						for(int i = 0; i < 7; i++)
+						{
+							currRange[i] = rangeDef[nMapMode][i];
+						}
+						((BasicSpots)sh).setMapGamma( currRange[4] );
+						((BasicSpots)sh).setMapRange( currRange[0], currRange[1] );
+					}
+				}
+			}
+	
+			bvb.repaintBVV();
+			blockUpdates = false;
+			updateGUI();
+		}
+		
+	}
+	
+	private JMenuItem runnableItem( final String text, final Runnable action )
+	{
+		final JMenuItem item = new JMenuItem( text );
+		item.addActionListener( e -> action.run() );
+		return item;
 	}
 }

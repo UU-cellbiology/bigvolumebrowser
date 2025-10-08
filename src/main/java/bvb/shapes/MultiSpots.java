@@ -132,7 +132,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		{
 			this.setLUT( IJ.getLuts()[0] );
 		}
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -155,7 +155,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		fMapMinMax[0] = fMin;
 		fMapMinMax[1] = fMax;
 
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -164,6 +164,20 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 			}
 			
 		}
+	}
+	
+	@Override
+	public void setMapGamma(final float fGamma)
+	{
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapGamma( fGamma );	
+			}
+			
+		}	
 	}
 	
 	@Override

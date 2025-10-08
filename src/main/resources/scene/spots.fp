@@ -18,6 +18,7 @@ uniform int sizeLUT;
 uniform int bInvLUT;
 uniform float mapMin;
 uniform float mapRange;
+uniform float mapGamma;
 
 
 void checkClipping()
@@ -52,7 +53,7 @@ vec4 getInputColor()
 			val = sDiamfp;			
 		}
 
-		val = (val-mapMin)/mapRange;
+		val = pow(clamp((val-mapMin)/mapRange,0.0,1.0), mapGamma);
 		
 		if(bInvLUT != 0)
 		{

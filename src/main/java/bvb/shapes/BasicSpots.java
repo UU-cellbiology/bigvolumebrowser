@@ -31,6 +31,8 @@ public interface BasicSpots
 	
 	public void setMapRange(final float fMin, final float fMax);
 	
+	public void setMapGamma(final float fGamma);
+	
 	public void setRenderType(int nRenderType);
 	public int getRenderType();
 	

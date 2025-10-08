@@ -318,6 +318,12 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	}
 	
 	@Override
+	public void setMapGamma(final float fGamma)
+	{
+		((VisSpots)visRender).setMapGamma( fGamma );		
+	}
+	
+	@Override
 	public int getRenderType()
 	{
 		return renderType;

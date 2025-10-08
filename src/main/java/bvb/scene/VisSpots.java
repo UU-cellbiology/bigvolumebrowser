@@ -96,7 +96,9 @@ public class VisSpots extends AbstractClipTransformVis
 	 
 	private int nMapLUTMode = 0;
 	
-	final float [] fMapMinRange = new float[2];
+	final float [] fLUTMapMinRange = new float[2];
+	
+	float fLUTMapGamma = 1.0f;
 	
 	public VisSpots()
 	{
@@ -190,8 +192,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	public void setMapRange(final float fMin, final float fMax)
 	{
-		fMapMinRange[0] = fMin;
-		fMapMinRange[1] = fMax - fMin;
+		fLUTMapMinRange[0] = fMin;
+		fLUTMapMinRange[1] = fMax - fMin;
 	}
 	
 	public void setSizeScale(final float fSizeScale_)
@@ -207,6 +209,11 @@ public class VisSpots extends AbstractClipTransformVis
 	public int getMapLUTMode()
 	{
 		return nMapLUTMode;
+	}
+	
+	public void setMapGamma(final float fGamma)
+	{
+		fLUTMapGamma = fGamma;
 	}
 	
 	public void setLUTUploaderGPU (final LUTUploaderGPU lutGPU)
@@ -421,13 +428,14 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
+		prog.getUniform1f("mapGamma").set(fLUTMapGamma);
 		prog.getUniform1i("bInvLUT").set( bInvertLUT?1:0 );
 
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
 			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
-			prog.getUniform1f("mapMin").set(fMapMinRange[0]);
-			prog.getUniform1f("mapRange").set(fMapMinRange[1]);	
+			prog.getUniform1f("mapMin").set(fLUTMapMinRange[0]);
+			prog.getUniform1f("mapRange").set(fLUTMapMinRange[1]);	
 		}
 		prog.setUniforms( context );		
 		prog.use( context );
@@ -435,7 +443,7 @@ public class VisSpots extends AbstractClipTransformVis
 		if(nMapLUTMode > 0)
 		{
 			gl.glActiveTexture( GL_TEXTURE0 );
-			if(lutGPU.getTextureID()>0)
+			if(lutGPU.getTextureID() > 0)
 			{
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
 			}
