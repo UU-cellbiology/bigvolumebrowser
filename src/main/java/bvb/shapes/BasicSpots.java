@@ -12,6 +12,7 @@ public interface BasicSpots
 	public void setColor(Color pointColor_);
 	public Color getColor();
 	
+	
 	public void setLUT(String sLUTName);
 	public void setLUT(final IndexColorModel icm_, String sLUTName); 
 	public String getLUTName();
@@ -29,9 +30,16 @@ public interface BasicSpots
 	
 	public boolean isInvertedLUT();
 	
-	public void setMapRange(final float fMin, final float fMax);
+	public void setMapLUTRange(final float fMin, final float fMax);
+	public void setMapLUTGamma(final float fGamma);
 	
-	public void setMapGamma(final float fGamma);
+	public void setMapAlphaMode(final int nMapLUTMode);
+	public int getMapAlphaMode();
+	public void setMapAlphaRange(final float fMin, final float fMax);
+	public void setMapAlphaGamma(final float fGamma);
+	
+	public void setInvertedAlpha(boolean bInv);
+	public boolean isInvertedAlpha();
 	
 	public void setRenderType(int nRenderType);
 	public int getRenderType();

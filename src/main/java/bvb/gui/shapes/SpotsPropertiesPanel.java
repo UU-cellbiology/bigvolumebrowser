@@ -49,6 +49,7 @@ public class SpotsPropertiesPanel extends JPanel
 		
 	final JPanel shapePanel;
 	final SpotsColorCodePanel colorCodePanel;
+	final SpotsOpacityPanel opacityPanel;
 	
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
@@ -63,6 +64,7 @@ public class SpotsPropertiesPanel extends JPanel
 		bvb = bvb_;
 		
 		colorCodePanel = new SpotsColorCodePanel(bvb);
+		opacityPanel = new SpotsOpacityPanel(bvb);
 		
 		setLayout(new GridBagLayout());	
 		
@@ -148,6 +150,7 @@ public class SpotsPropertiesPanel extends JPanel
 		allComp.add( cbShape );
 		allComp.add( cbRender );
 		allComp.add( colorCodePanel );
+		allComp.add( opacityPanel );
 		
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -182,9 +185,11 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		spotsTabPane.addTab( "Shape", shapePanel);
 		spotsTabPane.addTab( "Colorcode", colorCodePanel);
+		spotsTabPane.addTab( "Opacity", opacityPanel);
+		
 	    gbc = new GridBagConstraints();	
-	    gbc.gridx=0;
-	    gbc.gridy=0;
+	    gbc.gridx = 0;
+	    gbc.gridy = 0;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    gbc.weightx = 0.5;
 	    this.add( spotsTabPane, gbc );
@@ -301,7 +306,12 @@ public class SpotsPropertiesPanel extends JPanel
 				if(fSizeScaleFin > 0)
 				{
 					nfSpSizeScale.setEnabled( true );
-					nfSpSizeScale.setText( df3.format( fSizeScaleFin) );
+					nfSpSizeScale.setText( df3.format( fSizeScaleFin ) );
+					//all panel is disabled
+					if(!cbShape.isEnabled())
+					{
+						nfSpSizeScale.setEnabled( false );
+					}
 				}
 				else
 				{
@@ -319,7 +329,13 @@ public class SpotsPropertiesPanel extends JPanel
 				else
 				{
 					nfSpSize.setEnabled( true );
-					nfSpSize.setText( df3.format( fPointSizeFin));
+					nfSpSize.setText( df3.format( fPointSizeFin ));
+					//all panel is disabled
+					if(!cbShape.isEnabled())
+					{
+						nfSpSize.setEnabled( false );
+					}
+
 				}				
 
 				if(bRenderSameFin)
@@ -337,6 +353,7 @@ public class SpotsPropertiesPanel extends JPanel
 			}
 		} );
 		colorCodePanel.updateGUI();
+		opacityPanel.updateGUI();
 	}
 	
 	@Override

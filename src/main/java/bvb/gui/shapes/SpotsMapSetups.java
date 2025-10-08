@@ -10,11 +10,11 @@ import bvb.shapes.BasicSpots;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.shapes.BasicShape;
 
-public class SpotsLUTMapSetups
+public class SpotsMapSetups
 {
 	private final Map< BasicSpots, float[][]> spotsToMaps = new HashMap<>();
 	
-	public float[][] getLUTMapAllFloat( final BasicSpots obj )
+	public float[][] getMapAllFloat( final BasicSpots obj )
 	{
 		float [][] out = spotsToMaps.get( obj );
 		if(out == null)
@@ -24,7 +24,7 @@ public class SpotsLUTMapSetups
 		}		
 		return out;
 	}
-	public float [] getLUTMapRangeFloat( final BasicSpots obj, final int nPropertyInd )
+	public float [] getMapRangeFloat( final BasicSpots obj, final int nPropertyInd )
 	{
 		//int nPropertyInd = nPropertyInd_ - 1;
 		float [][] out = spotsToMaps.get( obj );
@@ -40,10 +40,10 @@ public class SpotsLUTMapSetups
 	}
 
 	
-	public BoundedValueDoubleBVB getLUTMapGamma( final BasicSpots obj, final int nPropertyInd )
+	public BoundedValueDoubleBVB getMapGamma( final BasicSpots obj, final int nPropertyInd )
 	{
 		//int nPropertyInd = nPropertyInd_ - 1;
-		float [] out = getLUTMapRangeFloat(obj, nPropertyInd );
+		float [] out = getMapRangeFloat(obj, nPropertyInd );
 		if(out != null)
 		{
 			return new BoundedValueDoubleBVB(out[5], out[6], out[4]);
@@ -53,10 +53,10 @@ public class SpotsLUTMapSetups
 		
 	}
 	
-	public BoundedRange getLUTMapRange( final BasicSpots obj, final int nPropertyInd )
+	public BoundedRange getMapRange( final BasicSpots obj, final int nPropertyInd )
 	{
 		//int nPropertyInd = nPropertyInd_ - 1;
-		float [] out = getLUTMapRangeFloat(obj, nPropertyInd );
+		float [] out = getMapRangeFloat(obj, nPropertyInd );
 		if(out != null)
 		{
 			return new BoundedRange(out[2],out[3],out[0],out[1]);

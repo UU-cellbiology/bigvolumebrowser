@@ -27,6 +27,10 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	int pointShape;
 	
+	float [] sizeMinMax = null;
+	
+	float fSizeScale = 1.0f;
+	
 	int nMapLUTMode = 0;
 	
 	String sLUTName = "";
@@ -35,11 +39,13 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	boolean bInvertedLUT = false;
 	
-	float [] sizeMinMax = null;
+	final float [] fMapLUTMinMax = new float[2];
 	
-	final float [] fMapMinMax = new float[2];
+	int nMapAlphaMode = 0;
 	
-	float fSizeScale = 1.0f;
+	boolean bInvertedAlpha = false;
+	
+	final float [] fMapAlphaMinMax = new float[2];
 	
 	void defineTransparency()
 	{
@@ -54,6 +60,10 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		if(pointColor.getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
 		{
 			bTransparent = true;
+		}
+		if(nMapAlphaMode != 0)
+		{
+			bTransparent = true;			
 		}
 	}
 	
@@ -116,68 +126,6 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public Color getColor()
 	{
 		return pointColor;
-	}
-	
-	@Override
-	public void setMapLUTMode(int nMapLUTMode_)
-	{
-		nMapLUTMode = nMapLUTMode_;
-		//no sizes, cannot map LUT
-		if(nMapLUTMode == 4 && pointSize > 0.0f)
-		{
-			nMapLUTMode = 0;
-			System.out.println("No spot size data available for " + this.toString());
-		}
-		if(nMapLUTMode > 0 && lutGPU == null)
-		{
-			this.setLUT( IJ.getLuts()[0] );
-		}
-		if( visRendersTimeMap.size() > 0 )
-		{
-			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
-			for(final AbstractClipTransformVis visRender:visRenders)
-			{		
-				((VisSpots)visRender).setMapLUTMode( nMapLUTMode );
-			}
-			
-		}
-	}
-	
-	@Override
-	public int getMapLUTMode()
-	{
-		return nMapLUTMode;
-	}
-	
-	@Override
-	public void setMapRange(final float fMin, final float fMax)
-	{
-		fMapMinMax[0] = fMin;
-		fMapMinMax[1] = fMax;
-
-		if( visRendersTimeMap.size() > 0 )
-		{
-			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
-			for(final AbstractClipTransformVis visRender:visRenders)
-			{		
-				((VisSpots)visRender).setMapRange( fMapMinMax[0], fMapMinMax[1] );
-			}
-			
-		}
-	}
-	
-	@Override
-	public void setMapGamma(final float fGamma)
-	{
-		if( visRendersTimeMap.size() > 0 )
-		{
-			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
-			for(final AbstractClipTransformVis visRender:visRenders)
-			{		
-				((VisSpots)visRender).setMapGamma( fGamma );	
-			}
-			
-		}	
 	}
 	
 	@Override
@@ -393,6 +341,68 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		}
 		
 	}
+	
+	@Override
+	public void setMapLUTMode(int nMapLUTMode_)
+	{
+		nMapLUTMode = nMapLUTMode_;
+		//no sizes, cannot map LUT
+		if(nMapLUTMode == 4 && pointSize > 0.0f)
+		{
+			nMapLUTMode = 0;
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		if(nMapLUTMode > 0 && lutGPU == null)
+		{
+			this.setLUT( IJ.getLuts()[0] );
+		}
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapLUTMode( nMapLUTMode );
+			}
+			
+		}
+	}
+	
+	@Override
+	public int getMapLUTMode()
+	{
+		return nMapLUTMode;
+	}
+	
+	@Override
+	public void setMapLUTRange(final float fMin, final float fMax)
+	{
+		fMapLUTMinMax[0] = fMin;
+		fMapLUTMinMax[1] = fMax;
+
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapLUTRange( fMapLUTMinMax[0], fMapLUTMinMax[1] );
+			}
+			
+		}
+	}
+	
+	@Override
+	public void setMapLUTGamma(final float fGamma)
+	{
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapLUTGamma( fGamma );	
+			}		
+		}	
+	}
+	
 	@Override
 	public void setInvertedLUT(boolean bInv)
 	{
@@ -419,5 +429,87 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	{
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void setMapAlphaMode( int nMapAlphaMode_ )
+	{
+		nMapAlphaMode = nMapAlphaMode_;
+		//no sizes, cannot map LUT
+		if(nMapAlphaMode == 4 && pointSize > 0.0f)
+		{
+			nMapAlphaMode = 0;
+			System.out.println("No spot size data available for " + this.toString());
+		}
+
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapAlphaMode( nMapAlphaMode );
+			}
+			
+		}
+		
+	}
+	
+	@Override
+	public int getMapAlphaMode()
+	{
+		return nMapAlphaMode;
+	}
+
+	@Override
+	public void setMapAlphaRange( float fMin, float fMax )
+	{
+		fMapAlphaMinMax[0] = fMin;
+		fMapAlphaMinMax[1] = fMax;
+
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapAlphaRange( fMapAlphaMinMax[0], fMapAlphaMinMax[1] );
+			}
+			
+		}
+		
+	}
+
+	@Override
+	public void setMapAlphaGamma( float fGamma )
+	{
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{		
+				((VisSpots)visRender).setMapAlphaGamma( fGamma );	
+			}		
+		}	
+		
+	}
+
+	@Override
+	public void setInvertedAlpha( boolean bInv )
+	{
+		bInvertedAlpha = bInv;
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{
+				((VisSpots)visRender).setInvertedAlpha( bInvertedAlpha );
+			}
+		}
+		
+	}
+
+	@Override
+	public boolean isInvertedAlpha()
+	{
+		return bInvertedAlpha;
 	}
 }

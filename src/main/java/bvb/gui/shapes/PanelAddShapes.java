@@ -194,11 +194,11 @@ public class PanelAddShapes extends JPanel
 							//importedSpots.setLUT( "Fire" );
 							//importedSpots.setMapLUTMode( 1 );
 							RealInterval testInt = importedSpots.boundingBox();
-							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
+							importedSpots.setMapLUTRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
 							if(sptParser.parseSize)
 							{
 								float[] range = importedSpots.getSizeRange();
-								importedSpots.setMapRange(range[0], range[1]);
+								importedSpots.setMapLUTRange(range[0], range[1]);
 							}
 							spots = importedSpots;
 						}
@@ -209,11 +209,11 @@ public class PanelAddShapes extends JPanel
 							//importedSpots.setLUT( "Fire" );
 							//importedSpots.setMapLUTMode( 1 );
 							RealInterval testInt = importedSpots.boundingBox();
-							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
+							importedSpots.setMapLUTRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
 							if(sptParser.parseSize)
 							{
 								float[] range = importedSpots.getSizeRange();
-								importedSpots.setMapRange(range[0], range[1]);
+								importedSpots.setMapLUTRange(range[0], range[1]);
 							}
 							spots = importedSpots;
 							//update time points

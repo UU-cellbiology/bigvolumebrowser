@@ -96,9 +96,17 @@ public class VisSpots extends AbstractClipTransformVis
 	 
 	private int nMapLUTMode = 0;
 	
-	final float [] fLUTMapMinRange = new float[2];
+	final float [] fMapLUTMinRange = new float[2];
 	
-	float fLUTMapGamma = 1.0f;
+	float fMapLUTGamma = 1.0f;
+	
+	boolean bInvertAlpha = false;
+	 
+	private int nMapAlphaMode = 0;
+	
+	final float [] fMapAlphaMinRange = new float[2];
+	
+	float fMapAlphaGamma = 1.0f;
 	
 	public VisSpots()
 	{
@@ -176,6 +184,17 @@ public class VisSpots extends AbstractClipTransformVis
 		
 	}
 	
+	public void setMapAlphaMode(int nMapAlphaMode_)
+	{
+		nMapAlphaMode = nMapAlphaMode_;
+	}
+	
+	public int getMapAlphaMode()
+	{
+		return nMapAlphaMode;
+	}
+
+	
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
@@ -190,12 +209,25 @@ public class VisSpots extends AbstractClipTransformVis
 		return bInvertLUT;
 	}
 	
-	public void setMapRange(final float fMin, final float fMax)
+	public void setMapLUTRange(final float fMin, final float fMax)
 	{
-		fLUTMapMinRange[0] = fMin;
-		fLUTMapMinRange[1] = fMax - fMin;
+		fMapLUTMinRange[0] = fMin;
+		fMapLUTMinRange[1] = fMax - fMin;
+	}
+	public void setInvertedAlpha(boolean bInv)
+	{
+		bInvertAlpha = bInv;
+	}
+	public boolean isInvertedAlpha()
+	{
+		return bInvertAlpha;
 	}
 	
+	public void setMapAlphaRange(final float fMin, final float fMax)
+	{
+		fMapAlphaMinRange[0] = fMin;
+		fMapAlphaMinRange[1] = fMax - fMin;
+	}
 	public void setSizeScale(final float fSizeScale_)
 	{
 		fSizeScale = fSizeScale_;
@@ -211,9 +243,14 @@ public class VisSpots extends AbstractClipTransformVis
 		return nMapLUTMode;
 	}
 	
-	public void setMapGamma(final float fGamma)
+	public void setMapLUTGamma(final float fGamma)
 	{
-		fLUTMapGamma = fGamma;
+		fMapLUTGamma = fGamma;
+	}
+	
+	public void setMapAlphaGamma(final float fGamma)
+	{
+		fMapAlphaGamma = fGamma;
 	}
 	
 	public void setLUTUploaderGPU (final LUTUploaderGPU lutGPU)
@@ -428,14 +465,24 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
-		prog.getUniform1f("mapGamma").set(fLUTMapGamma);
+		prog.getUniform1f("mapGamma").set(fMapLUTGamma);
 		prog.getUniform1i("bInvLUT").set( bInvertLUT?1:0 );
+		
+		prog.getUniform1i("nMapAlphaMode").set(nMapAlphaMode);
+		prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
+		prog.getUniform1i("bInvAlpha").set( bInvertAlpha?1:0 );
+		
 
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
 			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
-			prog.getUniform1f("mapMin").set(fLUTMapMinRange[0]);
-			prog.getUniform1f("mapRange").set(fLUTMapMinRange[1]);	
+			prog.getUniform1f("mapMin").set(fMapLUTMinRange[0]);
+			prog.getUniform1f("mapRange").set(fMapLUTMinRange[1]);	
+		}
+		if(nMapAlphaMode > 0 )
+		{
+			prog.getUniform1f("alphaMin").set(fMapAlphaMinRange[0]);
+			prog.getUniform1f("alphaRange").set(fMapAlphaMinRange[1]);		
 		}
 		prog.setUniforms( context );		
 		prog.use( context );

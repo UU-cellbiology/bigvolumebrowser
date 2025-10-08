@@ -41,7 +41,7 @@ public class SpotsColorCodePanel extends JPanel
 	
 	final JComboBox<String> cbMapLUT;
 	
-	final SpotsLUTMapSetups spotsLUTSetup = new SpotsLUTMapSetups();
+	final SpotsMapSetups spotsLUTSetup = new SpotsMapSetups();
 	
 	final JButton butResetToDefault;
 		
@@ -62,7 +62,7 @@ public class SpotsColorCodePanel extends JPanel
 	
 		GridBagConstraints gbc = new GridBagConstraints();	
 		GBCHelper.alighLeft(gbc);
-		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Param LUT"};		
+		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Property"};		
  
 		cbMapLUT = new JComboBox< >(sMapLUT);
 		cbMapLUT.addActionListener( (e) -> updateLUTMapping());
@@ -169,8 +169,8 @@ public class SpotsColorCodePanel extends JPanel
 					}
 					else
 					{
-						range = spotsLUTSetup.getLUTMapRange( spotsShape, nMapLUT - 1 );
-						gamma = spotsLUTSetup.getLUTMapGamma( spotsShape, nMapLUT - 1 );
+						range = spotsLUTSetup.getMapRange( spotsShape, nMapLUT - 1 );
+						gamma = spotsLUTSetup.getMapGamma( spotsShape, nMapLUT - 1 );
 					}
 					bLUTInverted = spotsShape.isInvertedLUT();
 			
@@ -197,15 +197,15 @@ public class SpotsColorCodePanel extends JPanel
 					{
 						if(range == null )
 						{
-							range = spotsLUTSetup.getLUTMapRange( spotsShape, nMapLUT - 1 );							
+							range = spotsLUTSetup.getMapRange( spotsShape, nMapLUT - 1 );							
 						}
 						
-						allRangesEqual &= Misc.compareBoundedRanges(range, spotsLUTSetup.getLUTMapRange( spotsShape, nMapLUT - 1) );
+						allRangesEqual &= Misc.compareBoundedRanges(range, spotsLUTSetup.getMapRange( spotsShape, nMapLUT - 1) );
 						if(gamma == null )
 						{
-							gamma = spotsLUTSetup.getLUTMapGamma( spotsShape, nMapLUT -1 );							
+							gamma = spotsLUTSetup.getMapGamma( spotsShape, nMapLUT -1 );							
 						}
-						gammaEqual &= Misc.compareBoundedValues( gamma, spotsLUTSetup.getLUTMapGamma( spotsShape, nMapLUT - 1 ) );
+						gammaEqual &= Misc.compareBoundedValues( gamma, spotsLUTSetup.getMapGamma( spotsShape, nMapLUT - 1 ) );
 						
 					}
 					bLUTInvertedSame &= (bLUTInverted == spotsShape.isInvertedLUT()); 
@@ -296,8 +296,8 @@ public class SpotsColorCodePanel extends JPanel
 					((BasicSpots)sh).setMapLUTMode( nMapLUTMode );
 					if(nMapLUTMode != 0)
 					{
-						final float [] range = spotsLUTSetup.getLUTMapRangeFloat( ((BasicSpots)sh), nMapLUTMode - 1 );
-						((BasicSpots)sh).setMapRange( range[0], range[1] );
+						final float [] range = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapLUTMode - 1 );
+						((BasicSpots)sh).setMapLUTRange( range[0], range[1] );
 					}
 				}
 			}
@@ -370,9 +370,9 @@ public class SpotsColorCodePanel extends JPanel
 					final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
 					if(nMapMode != 0)
 					{
-						((BasicSpots)sh).setMapRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
+						((BasicSpots)sh).setMapLUTRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
 					
-						float [] rangeStored = spotsLUTSetup.getLUTMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+						float [] rangeStored = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
 						rangeStored[0] = (float)rangeUI.getMin();
 						rangeStored[1] = (float)rangeUI.getMax();
 						rangeStored[2] = (float)rangeUI.getMinBound();
@@ -401,8 +401,8 @@ public class SpotsColorCodePanel extends JPanel
 					final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
 					if(nMapMode != 0)
 					{
-						((BasicSpots)sh).setMapGamma( (float) gammaCurr.getCurrentValue() );   
-						float [] rangeStored = spotsLUTSetup.getLUTMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+						((BasicSpots)sh).setMapLUTGamma( (float) gammaCurr.getCurrentValue() );   
+						float [] rangeStored = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
 						rangeStored[4] = (float) gammaCurr.getCurrentValue();
 						rangeStored[5] = (float) gammaCurr.getRangeMin();
 						rangeStored[6] = (float) gammaCurr.getRangeMax();
@@ -431,13 +431,13 @@ public class SpotsColorCodePanel extends JPanel
 					if(nMapMode >= 0)
 					{
 						final float [][] rangeDef = spotsLUTSetup.getDefaultRanges( (BasicSpots)sh );
-						final float [] currRange = spotsLUTSetup.getLUTMapRangeFloat( (BasicSpots)sh , nMapMode );
+						final float [] currRange = spotsLUTSetup.getMapRangeFloat( (BasicSpots)sh , nMapMode );
 						for(int i = 0; i < 7; i++)
 						{
 							currRange[i] = rangeDef[nMapMode][i];
 						}
-						((BasicSpots)sh).setMapGamma( currRange[4] );
-						((BasicSpots)sh).setMapRange( currRange[0], currRange[1] );
+						((BasicSpots)sh).setMapLUTGamma( currRange[4] );
+						((BasicSpots)sh).setMapLUTRange( currRange[0], currRange[1] );
 					}
 				}
 			}

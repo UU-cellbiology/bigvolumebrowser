@@ -63,6 +63,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	float [] sizeMinMax = null;
 	
+	int nMapAlphaMode = 0;
+	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
@@ -200,6 +202,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		{
 			bTransparent = true;
 		}
+		if(nMapAlphaMode != 0)
+		{
+			bTransparent = true;			
+		}
+
 	}
 	
 	@Override
@@ -279,28 +286,6 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		return sLUTName;
 	}
 	
-	@Override
-	public void setMapLUTMode(int nMapLUTMode_)
-	{
-		int nMapMode = nMapLUTMode_;
-		//no sizes, cannot map LUT
-		if(nMapMode == 4 && pointSize > 0.0f)
-		{
-			nMapMode = 0;
-			System.out.println("No spot size data available for " + this.toString());
-		}
-		if(nMapMode > 0 && lutGPU == null)
-		{
-			this.setLUT( IJ.getLuts()[0] );
-		}
-		((VisSpots)visRender).setMapLUTMode( nMapMode ); 
-	}
-	
-	@Override
-	public int getMapLUTMode()
-	{
-		return ((VisSpots)visRender).getMapLUTMode();
-	}
 	
 	@Override
 	public void setRenderType(int nRenderType)
@@ -310,18 +295,6 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		defineTransparency();
 		return;
 	}	
-	
-	@Override
-	public void setMapRange(final float fMin, final float fMax)
-	{
-		((VisSpots)visRender).setMapRange( fMin, fMax );
-	}
-	
-	@Override
-	public void setMapGamma(final float fGamma)
-	{
-		((VisSpots)visRender).setMapGamma( fGamma );		
-	}
 	
 	@Override
 	public int getRenderType()
@@ -379,11 +352,43 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setSizeScale( float fSizeScale )
 	{
 		((VisSpots)visRender).setSizeScale( fSizeScale );
-		//adjust bounding box
-		
-		
+		//adjust bounding box?? too complicated for now	
 	}
-
+	@Override
+	public void setMapLUTMode(int nMapLUTMode_)
+	{
+		int nMapMode = nMapLUTMode_;
+		//no sizes, cannot map LUT
+		if(nMapMode == 4 && pointSize > 0.0f)
+		{
+			nMapMode = 0;
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		if(nMapMode > 0 && lutGPU == null)
+		{
+			this.setLUT( IJ.getLuts()[0] );
+		}
+		((VisSpots)visRender).setMapLUTMode( nMapMode ); 
+	}
+	
+	@Override
+	public int getMapLUTMode()
+	{
+		return ((VisSpots)visRender).getMapLUTMode();
+	}
+	
+	@Override
+	public void setMapLUTRange(final float fMin, final float fMax)
+	{
+		((VisSpots)visRender).setMapLUTRange( fMin, fMax );
+	}
+	
+	@Override
+	public void setMapLUTGamma(final float fGamma)
+	{
+		((VisSpots)visRender).setMapLUTGamma( fGamma );		
+	}
+	
 	@Override
 	public void setInvertedLUT(boolean bInv)
 	{
@@ -403,5 +408,51 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	{
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+
+	@Override
+	public void setMapAlphaMode( int nMapAlphaMode_ )
+	{
+		nMapAlphaMode = nMapAlphaMode_;
+		//no sizes, cannot map LUT
+		if(nMapAlphaMode == 4 && pointSize > 0.0f)
+		{
+			nMapAlphaMode = 0;
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		((VisSpots)visRender).setMapAlphaMode( nMapAlphaMode );
+		defineTransparency();
+		
+	}
+	
+	@Override
+	public int getMapAlphaMode()
+	{
+		return nMapAlphaMode;
+	}
+
+	@Override
+	public void setMapAlphaRange( float fMin, float fMax )
+	{
+		((VisSpots)visRender).setMapAlphaRange( fMin, fMax );	
+	}
+
+	@Override
+	public void setMapAlphaGamma( float fGamma )
+	{
+		((VisSpots)visRender).setMapAlphaGamma( fGamma );		
+	}
+
+	@Override
+	public void setInvertedAlpha( boolean bInv )
+	{
+		((VisSpots)visRender).setInvertedAlpha( bInv );		
+	}
+
+	@Override
+	public boolean isInvertedAlpha()
+	{
+		return ((VisSpots)visRender).isInvertedAlpha();
 	}
 }

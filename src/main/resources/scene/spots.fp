@@ -20,6 +20,12 @@ uniform float mapMin;
 uniform float mapRange;
 uniform float mapGamma;
 
+uniform int nMapAlphaMode;
+uniform int bInvAlpha;
+uniform float alphaMin;
+uniform float alphaRange;
+uniform float alphaGamma;
+
 
 void checkClipping()
 {
@@ -76,6 +82,40 @@ vec4 getInputColor()
 	}
 }
 
+float getInputAlpha()
+{
+
+	if(nMapAlphaMode > 0)
+	{
+		float val = 0.0;
+		if(nMapAlphaMode < 4)
+		{
+			vec3 axis = vec3(0);
+			axis[nMapAlphaMode - 1] = 1;
+			val = dot(axis, posW);
+		}
+
+		if(nMapAlphaMode == 4)
+		{
+			val = sDiamfp;			
+		}
+
+		val = pow(clamp((val-alphaMin)/alphaRange,0.0,1.0), alphaGamma);
+		
+		if(bInvAlpha != 0)
+		{
+			val = 1.0 - val;
+		}
+		
+		return val * colorin.a;
+		
+	}
+	else
+	{
+	 	return colorin.a;
+	}
+}
+
 void main()
 {
 	checkClipping();
@@ -84,6 +124,7 @@ void main()
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
 	vec4 colorout = getInputColor();
+	colorout.a = getInputAlpha();
 	
 	if(pointShape == 0)
 	{
@@ -103,7 +144,7 @@ void main()
 		}
 		else if(renderType >= 2)
 		{		
-			colorout.a = exp(-4.5 * norm) * colorin.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
+			colorout.a = exp(-4.5 * norm) * colorout.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
 		}
 	}
 	else
@@ -126,7 +167,7 @@ void main()
 			if(renderType >= 2)
 			{
 				vec2 fade = abs(( 1 /sqrt(ellipseAxes)) - abs(coord));
-				colorout.a = fade.x * fade.y * colorin.a; 
+				colorout.a = fade.x * fade.y * colorout.a; 
 			}
 		}
 		
