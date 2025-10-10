@@ -26,6 +26,7 @@ uniform int bInvAlpha;
 uniform float alphaMin;
 uniform float alphaRange;
 uniform float alphaGamma;
+uniform float extraAlpha;
 
 
 void checkClipping()
@@ -134,7 +135,7 @@ void main()
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
 	vec4 colorout = getInputColor();
-	colorout.a = getInputAlpha();
+	colorout.a = extraAlpha * getInputAlpha();
 	
 	if(pointShape == 0)
 	{

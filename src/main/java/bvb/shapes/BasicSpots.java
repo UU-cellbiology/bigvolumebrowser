@@ -60,4 +60,7 @@ public interface BasicSpots
 	/** returns null if spots do not have set property**/	
 	public float [] getPropertyRange();
 	
+	public void setExtraAlphaCoefficient(float dCoeff);
+	public float getExtraAlphaCoefficient();
+	
 }

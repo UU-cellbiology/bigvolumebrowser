@@ -69,6 +69,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	boolean bHasProperty = false;
 	
+	float fExtraAlpha = 1.0f;
+	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
@@ -210,6 +212,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		if(nMapAlphaMode != 0)
 		{
 			bTransparent = true;			
+		}
+		
+		if(fExtraAlpha < BasicShape.TRANSPARENCY_THRESHOLD * 255)
+		{
+			bTransparent = true;		
 		}
 
 	}
@@ -480,5 +487,19 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public boolean isInvertedAlpha()
 	{
 		return ((VisSpots)visRender).isInvertedAlpha();
+	}
+
+	@Override
+	public void setExtraAlphaCoefficient( float dCoeff )
+	{
+		fExtraAlpha = dCoeff;
+		((VisSpots)visRender).setExtraAlphaCoefficient( fExtraAlpha );
+		defineTransparency();
+	}
+	
+	@Override
+	public float getExtraAlphaCoefficient( )
+	{
+		return ((VisSpots)visRender).getExtraAlphaCoefficient( );
 	}
 }

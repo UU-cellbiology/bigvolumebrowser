@@ -3,6 +3,7 @@ package bvb.gui.shapes;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.util.BoundedRange;
 import bdv.util.BoundedValueDouble;
+import bdv.util.Bounds;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
@@ -37,11 +39,13 @@ public class SpotsOpacityPanel extends JPanel
 	
 	final JPanelConsistent pMapInverted;
 	
-	public final JCheckBox cbInverted = new JCheckBox("Inverted");
+	public final JCheckBox cbInverted = new JCheckBox("Inv");
 	
 	final JComboBox<String> cbMapAlpha;
 	
 	final SpotsMapSetups spotsAlphaSetup = new SpotsMapSetups();
+	
+	final SpotsExtraAlphaBounds extraAlphaBounds = new SpotsExtraAlphaBounds();
 	
 	final JButton butResetToDefault;
 		
@@ -50,7 +54,8 @@ public class SpotsOpacityPanel extends JPanel
 	private boolean blockUpdates = false;
 	
 	private final BoundedRangePanelPG alphaRangePanel;
-	private final BoundedValuePanelPG alphaGammaPanel;
+	private final BoundedValuePanelPG alphaGammaPanel;	
+	private final BoundedValuePanelPG extraAlphaPanel;
 	
 	public SpotsOpacityPanel(final BigVolumeBrowser bvb_)
 	{
@@ -75,16 +80,22 @@ public class SpotsOpacityPanel extends JPanel
 		menuLutRange.add( runnableItem(  "shrink bounds to selection", alphaRangePanel::shrinkBoundsToRange ) );
 		alphaRangePanel.setPopup( () -> menuLutRange );	
 		
-		
 		alphaGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
 		alphaGammaPanel.changeListeners().add(  () -> updateAlphaMapGamma() );
+		
+		extraAlphaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.0,1.0,1.0) );
+		extraAlphaPanel.changeListeners().add( () -> updateExtraAlpha() );
+		final JPopupMenu menuExtraAlpha = new JPopupMenu();
+		menuExtraAlpha.add( runnableItem(  "set bounds ...", extraAlphaPanel::setBoundsDialog ) );
+		extraAlphaPanel.setPopup( () -> menuExtraAlpha );	
+		
+		gbc.weighty = 0.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		pMapAlpha.add( new JLabel("α mapping: "), gbc );
 		gbc.gridx++;
 		pMapAlpha.add( cbMapAlpha, gbc );	
-		
-		
+			
 		pMapInverted = new JPanelConsistent(new GridBagLayout());
 		pMapInverted.setConsistent( true );
 		gbc.gridx = 0;
@@ -100,13 +111,18 @@ public class SpotsOpacityPanel extends JPanel
 		butResetToDefault.addActionListener( (e)->resetAlphaMapRangeBounds() );   
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-
 		gbc.gridwidth = 2;
-		this.add( pMapAlpha, gbc );
+		this.add(extraAlphaPanel, gbc);
 		gbc.gridy++;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weightx = 0.1;
-		this.add( pMapInverted, gbc );
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0,3,0,0);
+		this.add( pMapAlpha, gbc );
+		gbc.gridx++;
+		gbc.insets = new Insets(0,0,0,0);
+		this.add( pMapInverted, gbc );		
+			
+		gbc.gridx = 0;
+		gbc.gridwidth = 2;
 		
 		gbc.gridy++;
 		this.add( alphaRangePanel, gbc);
@@ -120,8 +136,9 @@ public class SpotsOpacityPanel extends JPanel
 		gbc.fill = GridBagConstraints.NONE;
 		//gbc.anchor = GridBagConstraints.EAST;
 		this.add( butResetToDefault, gbc);
-		gbc.gridwidth = 2;
+		
 		//filler
+		gbc.gridwidth = 2;		
 		gbc.gridy++;
 		gbc.gridx = 0;
 		gbc.fill = GridBagConstraints.VERTICAL;
@@ -143,8 +160,10 @@ public class SpotsOpacityPanel extends JPanel
 		boolean bAlphaInvertedSame = true;	
 		BoundedRange range = null;
 		BoundedValueDoubleBVB gamma = null;
+		BoundedValueDoubleBVB extraAlpha = null;
 		boolean allRangesEqual = true;
-		boolean gammaEqual = true;
+		boolean gammaEqual = true;		
+		boolean extraAlphaEqual = true;
 		
 		boolean bAlphaInverted = false;
 		int nMapAlpha = 0;
@@ -155,6 +174,10 @@ public class SpotsOpacityPanel extends JPanel
 			if(sh instanceof BasicSpots)
 			{
 				final BasicSpots spotsShape = (BasicSpots)sh;
+				
+				final Bounds boundExtraAlpha = extraAlphaBounds.getBounds( spotsShape );
+				double currExtraAlpha = spotsShape.getExtraAlphaCoefficient();
+				
 				if(bFirstMesh)
 				{
 					nMapAlpha = spotsShape.getMapAlphaMode();
@@ -166,6 +189,7 @@ public class SpotsOpacityPanel extends JPanel
 					}
 					bAlphaInverted = spotsShape.isInvertedAlpha();							
 					bFirstMesh = false;
+					extraAlpha = new BoundedValueDoubleBVB( boundExtraAlpha.getMinBound(), boundExtraAlpha.getMaxBound(), currExtraAlpha);
 				}
 				else
 				{
@@ -188,6 +212,7 @@ public class SpotsOpacityPanel extends JPanel
 						
 					}
 					bAlphaInvertedSame &= (bAlphaInverted == spotsShape.isInvertedAlpha()); 
+					extraAlphaEqual &= Misc.compareBoundedValues(extraAlpha, new BoundedValueDoubleBVB( boundExtraAlpha.getMinBound(), boundExtraAlpha.getMaxBound(), currExtraAlpha));					
 				}
 			}
 		}
@@ -198,14 +223,18 @@ public class SpotsOpacityPanel extends JPanel
 		
 		final BoundedRange finalRange = range;
 		final BoundedValueDoubleBVB finalGamma = gamma;
+		final BoundedValueDoubleBVB finalExtraAlpha = extraAlpha;
 		final boolean allRangesEqualFin = allRangesEqual;
 		final boolean gammaEqualFin = gammaEqual;
+		final boolean extraAlphaEqualFin = extraAlphaEqual;
 
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( SpotsOpacityPanel.this )
 			{
 				blockUpdates = true;
 
+				extraAlphaPanel.setConsistent( extraAlphaEqualFin );
+				extraAlphaPanel.setValue( finalExtraAlpha );
 				pMapAlpha.setConsistent( bMapAlphaSameFin );
 				pMapInverted.setConsistent( bAlphaInvertedSameFin );
 				
@@ -215,7 +244,7 @@ public class SpotsOpacityPanel extends JPanel
 
 				alphaGammaPanel.setEnabled( true );
 				alphaGammaPanel.setConsistent( gammaEqualFin );
-
+				
 				if(finalRange != null)
 				{
 					alphaRangePanel.setRange( finalRange );
@@ -349,6 +378,31 @@ public class SpotsOpacityPanel extends JPanel
 						rangeStored[5] = (float) gammaCurr.getRangeMin();
 						rangeStored[6] = (float) gammaCurr.getRangeMax();
 					}
+				}
+			}
+	
+			bvb.repaintBVV();
+			blockUpdates = false;
+			updateGUI();
+		}
+	}
+	
+	public void updateExtraAlpha()
+	{
+		if(!blockUpdates)
+		{
+			blockUpdates = true;
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			final float extraAlpha = (float) extraAlphaPanel.getValue().getCurrentValue();
+			final double minB = Math.min(extraAlpha, extraAlphaPanel.getValue().getRangeMin());
+			final double maxB = Math.max(extraAlpha, extraAlphaPanel.getValue().getRangeMax());
+
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicSpots)
+				{
+					((BasicSpots)sh).setExtraAlphaCoefficient( extraAlpha );
+					extraAlphaBounds.setBounds( (BasicSpots)sh, new Bounds(minB, maxB));
 				}
 			}
 	

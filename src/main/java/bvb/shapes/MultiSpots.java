@@ -51,6 +51,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	boolean bHasProperty = false;
 	
+	float fExtraAlpha = 1.0f;
+	
 	void defineTransparency()
 	{
 
@@ -65,9 +67,15 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		{
 			bTransparent = true;
 		}
+		
 		if(nMapAlphaMode != 0)
 		{
 			bTransparent = true;			
+		}
+		
+		if(fExtraAlpha < BasicShape.TRANSPARENCY_THRESHOLD * 255)
+		{
+			bTransparent = true;		
 		}
 	}
 	
@@ -571,5 +579,25 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public boolean isInvertedAlpha()
 	{
 		return bInvertedAlpha;
+	}
+
+	@Override
+	public void setExtraAlphaCoefficient( float dCoeff )
+	{
+		fExtraAlpha = dCoeff;
+		if( visRendersTimeMap.size() > 0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{
+				((VisSpots)visRender).setExtraAlphaCoefficient( fExtraAlpha );
+			}
+		}	
+		defineTransparency();
+	}
+	@Override
+	public float getExtraAlphaCoefficient()
+	{
+		return fExtraAlpha;
 	}
 }

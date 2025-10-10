@@ -110,6 +110,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	float fMapAlphaGamma = 1.0f;
 	
+	float fExtraAlpha = 1.0f;
+	
 	public VisSpots()
 	{
 		initShader();
@@ -274,6 +276,16 @@ public class VisSpots extends AbstractClipTransformVis
 	{
 		fMapAlphaMinRange[0] = fMin;
 		fMapAlphaMinRange[1] = fMax - fMin;
+	}
+	
+	public void setExtraAlphaCoefficient(float dCoeff)
+	{
+		fExtraAlpha = dCoeff;
+	}
+	
+	public float getExtraAlphaCoefficient()
+	{
+		return fExtraAlpha;
 	}
 	public void setSizeScale(final float fSizeScale_)
 	{
@@ -535,6 +547,9 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform1i("nMapAlphaMode").set(nMapAlphaMode);
 		prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
 		prog.getUniform1i("bInvAlpha").set( bInvertAlpha?1:0 );
+		prog.getUniform1f("extraAlpha").set(fExtraAlpha);
+
+		
 		
 
 		if(nMapLUTMode > 0 && lutGPU != null)

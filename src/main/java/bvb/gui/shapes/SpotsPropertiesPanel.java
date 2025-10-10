@@ -2,6 +2,7 @@ package bvb.gui.shapes;
 
 import java.awt.Color;
 import java.awt.Component;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -81,11 +82,12 @@ public class SpotsPropertiesPanel extends JPanel
 			}
 			
 		});
-		
-		GBCHelper.alighLeft(gbc);
-		pColor = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
-		gbc.gridy = 0;
+		gbc.gridy = 0;	
+		GBCHelper.alighLeft(gbc);
+	
+		pColor = new JPanelConsistent(new GridBagLayout());
+
 		pColor.add( new JLabel("Color: "), gbc );
 		gbc.gridx++;
 		pColor.add( butColor, gbc );
@@ -137,6 +139,7 @@ public class SpotsPropertiesPanel extends JPanel
 		cbRender.addActionListener( (e)->{
 			updateRender();				
 			});
+		
 		pRender = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -156,6 +159,7 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		//GBCHelper.alighLoose(gbc);
+		//GBCHelper.alighLeft(gbc);
 		gbc.insets = new Insets(0,0,0,0);
 					
 		//Shape Panel
@@ -174,24 +178,24 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridy ++;		
 		shapePanel.add(pShape, gbc );
 		
-		gbc.gridy ++;
+		gbc.gridy++;
 		shapePanel.add(pRender, gbc );
 		
-		//Bottom Panel
-		gbc.gridx = 0;
-		gbc.gridy = 0;
 
-		spotsTabPane = new JTabbedPane(SwingConstants.TOP);
-		
+
+		spotsTabPane = new JTabbedPane(SwingConstants.TOP);		
 		spotsTabPane.addTab( "Shape", shapePanel);
 		spotsTabPane.addTab( "Colorcode", colorCodePanel);
-		spotsTabPane.addTab( "Opacity", opacityPanel);
-		
+		spotsTabPane.addTab( "Opacity", opacityPanel);	
+		spotsTabPane.setTabLayoutPolicy( JTabbedPane.SCROLL_TAB_LAYOUT );
+
 	    gbc = new GridBagConstraints();	
+	    gbc.insets = new Insets(0,0,0,0);
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
 	    gbc.fill = GridBagConstraints.HORIZONTAL;
 	    gbc.weightx = 0.5;
+	    //gbc.anchor = GridBagConstraints.NORTH;
 	    this.add( spotsTabPane, gbc );
 	}
 	

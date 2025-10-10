@@ -78,8 +78,11 @@ public class SpotsColorCodePanel extends JPanel
 		
 		lutGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
 		lutGammaPanel.changeListeners().add(  () -> updateLUTMapGamma() );
+		
+		gbc.weighty = 0.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+
 		pMapLUT.add( new JLabel("Color Mapping: "), gbc );
 		gbc.gridx++;
 		pMapLUT.add( cbMapLUT, gbc );	
@@ -98,7 +101,6 @@ public class SpotsColorCodePanel extends JPanel
 		butResetToDefault.addActionListener( (e)->resetLUTMapRangeBounds() );   
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-
 		gbc.gridwidth = 2;
 		this.add( pMapLUT, gbc );
 		gbc.gridy++;
@@ -118,8 +120,9 @@ public class SpotsColorCodePanel extends JPanel
 		gbc.fill = GridBagConstraints.NONE;
 		//gbc.anchor = GridBagConstraints.EAST;
 		this.add( butResetToDefault, gbc);
-		gbc.gridwidth = 2;
+		
 		//filler
+		gbc.gridwidth = 2;
 		gbc.gridy++;
 		gbc.gridx = 0;
 		gbc.fill = GridBagConstraints.VERTICAL;

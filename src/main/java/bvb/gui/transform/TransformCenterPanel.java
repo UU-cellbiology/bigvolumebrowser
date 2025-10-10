@@ -91,7 +91,7 @@ public class TransformCenterPanel extends JPanel
 		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
 		boolean bFirstCS = true;
 		boolean [] allTrEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			allTrEqual[d] = true;
 		}
