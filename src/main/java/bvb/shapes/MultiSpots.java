@@ -73,7 +73,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 			bTransparent = true;			
 		}
 		
-		if(fExtraAlpha < BasicShape.TRANSPARENCY_THRESHOLD * 255)
+		if(fExtraAlpha < BasicShape.TRANSPARENCY_THRESHOLD / 255.0f)
 		{
 			bTransparent = true;		
 		}
