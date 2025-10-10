@@ -5,7 +5,8 @@ uniform vec2 ellipseAxes;
 uniform int renderType;
 uniform int pointShape;
 in vec3 posW;
-in float sDiamfp;
+in float fDiamfp;
+in float fPropertyfp;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -56,7 +57,11 @@ vec4 getInputColor()
 
 		if(nMapLUTMode == 4)
 		{
-			val = sDiamfp;			
+			val = fDiamfp;			
+		}
+		if(nMapLUTMode == 5)
+		{
+			val = fPropertyfp;			
 		}
 
 		val = pow(clamp((val-mapMin)/mapRange,0.0,1.0), mapGamma);
@@ -97,9 +102,14 @@ float getInputAlpha()
 
 		if(nMapAlphaMode == 4)
 		{
-			val = sDiamfp;			
+			val = fDiamfp;			
 		}
-
+		
+		if(nMapLUTMode == 5)
+		{
+			val = fPropertyfp;			
+		}
+		
 		val = pow(clamp((val-alphaMin)/alphaRange,0.0,1.0), alphaGamma);
 		
 		if(bInvAlpha != 0)

@@ -365,10 +365,12 @@ public class VisSpots extends AbstractClipTransformVis
 
 		// ..:: VERTEX BUFFER ::..
 
-		final int[] tmp = new int[ 2 ];
-		gl.glGenBuffers( 2, tmp, 0 );
+		final int[] tmp = new int[ 3 ];
+		gl.glGenBuffers( 3, tmp, 0 );
 		final int posVbo = tmp[ 0 ];
 		final int sizeVbo = tmp[ 1 ];
+		final int propertyVbo = tmp[ 2 ];
+
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
@@ -381,6 +383,17 @@ public class VisSpots extends AbstractClipTransformVis
 			gl.glBufferData( GL.GL_ARRAY_BUFFER, spotSizes.length * Float.BYTES, FloatBuffer.wrap( spotSizes ), GL.GL_STATIC_DRAW );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 		}
+		
+		// ..:: PROPERTY BUFFER ::..
+
+		if( property != null )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, property.length * Float.BYTES, FloatBuffer.wrap( property ), GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+		}
+		
+		
 		// ..:: VERTEX ARRAY OBJECT ::..
 
 		gl.glGenVertexArrays( 1, tmp, 0 );
@@ -394,6 +407,10 @@ public class VisSpots extends AbstractClipTransformVis
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
 		gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
+		gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 2 );
 		
 		gl.glBindVertexArray( 0 );
 		
