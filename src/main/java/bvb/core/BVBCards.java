@@ -92,7 +92,6 @@ public class BVBCards
 	    bvb.bvvFrame.getCardPanel().addCard("Add shapes", panelAddShapes, true, new Insets( 0, 0, 0, 0 ) );		   		    
 	   
 	    bvb.bvvFrame.getSplitPanel().setCollapsed( false );
-	    bvb.bvvFrame.getSplitPanel().set
 	    bvb.bvvHandle.getConverterSetups().listeners().add( s -> bvb.clipBoxes.updateClipBoxes() );
 	}
 	
