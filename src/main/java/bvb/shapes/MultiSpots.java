@@ -266,6 +266,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 				nLoadTimePoint++;
 				verticesTP.clear();
 				sizesTP.clear();
+				propertyTP.clear();
 			}
 		}
 		//just a last part of the array
