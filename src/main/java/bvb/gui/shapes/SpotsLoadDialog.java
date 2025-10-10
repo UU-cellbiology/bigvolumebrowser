@@ -76,6 +76,7 @@ public class SpotsLoadDialog
     boolean bColumnsAssigned = false;
     
     final JButton butOk;
+    
     final JButton butCancel;
     
     public boolean bAllSuccess = false;
@@ -92,11 +93,9 @@ public class SpotsLoadDialog
 			bAllSuccess = true;
 			JOptionPane pane = getOptionPane((JComponent)e.getSource());
             pane.setValue(butOk);
-			//fLoadSpots.dispose();
 			}); 
 		butCancel = new JButton("Cancel");
 		butCancel.addActionListener(e -> {
-			//fLoadSpots.dispose();
             JOptionPane pane = getOptionPane((JComponent)e.getSource());
             pane.setValue(butCancel);
 			}); 
@@ -197,14 +196,14 @@ public class SpotsLoadDialog
 
 		///COLUMN ASSIGNMENT PANEL COORDINATES XYZT
 		JPanel pColumnsAssignCoords = new JPanel();
-		for (int i=0;i<4;i++)
+		for (int i = 0; i < 4; i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
 			cbColumnsAssign.get( i ).addActionListener( (e)-> updateWindow());
 		}
 		
-		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "T", "SizeX", "SizeY", "SizeZ"};		
+		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "T", "SizeX", "SizeY", "SizeZ", "Property"};		
 
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -220,9 +219,9 @@ public class SpotsLoadDialog
 			pColumnsAssignCoords.add( cbColumnsAssign.get( i ), gbc );
 		}
 
-		///COLUMN ASSIGNMENT PANEL SIZES
+		///COLUMN ASSIGNMENT PANEL SIZES/PROPERTY
 		JPanel pColumnsAssignSize = new JPanel();
-		for (int i=4;i<7;i++)
+		for (int i = 4; i < 8; i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
@@ -233,7 +232,7 @@ public class SpotsLoadDialog
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.insets = new Insets(0,0,0,0);
-		for (int i = 4; i < 7; i++)
+		for (int i = 4; i < 8; i++)
 		{
 			pColumnsAssignSize.add(new JLabel(sColSelectionLabels[i]), gbc);
 			gbc.gridx++;
@@ -503,10 +502,10 @@ public class SpotsLoadDialog
 		HashMap< JComboBox<String>, Integer> mapCols = new HashMap<>();
 		
 		int nCoordAssign = 0;
-		for(int i=0; i < cbColumnsAssign.size(); i++)
+		for(int i = 0; i < cbColumnsAssign.size(); i++)
 		{
 			final JComboBox<String> cbBox = cbColumnsAssign.get( i );
-			if(cbBox.getSelectedIndex()!=0)
+			if(cbBox.getSelectedIndex() != 0)
 			{
 				mapCols.put( cbBox,  cbBox.getSelectedIndex() );
 				if(i <= 2)
@@ -575,9 +574,9 @@ public class SpotsLoadDialog
 			return dummyTableModel();
 		}
 		 String [][] data = new String[dataParsed.size()][headers.length];
-		 for(int i=0;i<dataParsed.size();i++)
+		 for(int i = 0; i < dataParsed.size(); i++)
 		 {
-			 for(int j=0;j<headers.length; j++)
+			 for(int j = 0; j < headers.length; j++)
 			 {
 				 data[i][j] = dataParsed.get( i )[j];
 			 }
@@ -601,10 +600,10 @@ public class SpotsLoadDialog
 	    
 		data = new Float[3][3];
 
-		for(int i=0;i<3;i++)
+		for(int i = 0; i < 3; i++)
 		{
 			columnNames[i] = "Column"+Integer.toString( i+1 );
-			for(int j=0;j<3;j++)
+			for(int j = 0; j < 3; j++)
 			{
 				data[i][j] = new Float(0.0f);
 			}

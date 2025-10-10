@@ -80,9 +80,11 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private int spotShape = 0;
 	
-	float vertices[]; 
+	float vertices[] = null; 
 	
-	float spotSizes[]; 
+	float spotSizes[] = null;
+	
+	float property[] = null; 
 	
 	private int nSpotsN;
 	
@@ -137,13 +139,13 @@ public class VisSpots extends AbstractClipTransformVis
 
 	}
 	
-	public void setVertices( ArrayList< RealPoint > points)
+	void setVertices( ArrayList< RealPoint > points)
 	{
 		int i,j;	
 		
 		nSpotsN = points.size();
 		
-		vertices = new float [nSpotsN*3]; //assume 3D
+		vertices = new float [nSpotsN * 3]; //assume 3D
 	
 		for (i = 0; i < nSpotsN; i++)
 		{
@@ -156,23 +158,46 @@ public class VisSpots extends AbstractClipTransformVis
 		initialized = false;
 	}
 	
-	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_)
-	{
-		
-		if(points.size()!= spotSizes_.length)
+	/** any of the last two arguments can be null **/
+	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_, final float [] property_)
+	{	
+		setVertices(points);
+
+		if(spotSizes_ != null)
 		{
-			System.err.println( "Number of spots coordinates is not equal to radii");
-			return;
+			if(points.size() != spotSizes_.length)
+			{
+				System.err.println( "Number of spots is not equal to number of sizes records!");
+				return;
+			}	
+			setSizes(spotSizes_);
 		}
 		
-		setVertices(points);
-		setSizes(spotSizes_);
-		
+		if(property_ != null)
+		{
+			if(points.size() != property_.length)
+			{
+				System.err.println( "Number of spots is not equal to number of spot property records!");
+				return;
+			}	
+			setProperty(property_);
+		}
 		initialized = false;
 	}
 	
 	void setSizes(final float [] spotSizes_)
 	{
+		if(vertices == null)
+		{
+			System.err.println( "Error setting spot sizes, first coordinates need to be initialized!");
+			return;
+		}
+		
+		if(vertices.length/3 != spotSizes_.length)
+		{
+			System.err.println( "Number of spots is not equal to the provided number of sizes.");
+			return;
+		}
 		spotSizes = new float[spotSizes_.length];
 		
 		for (int i = 0; i < spotSizes_.length; i++)
@@ -182,6 +207,28 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		fSpotSize = -1.0f;
 		
+	}
+	
+	void setProperty(final float [] property_)
+	{
+		if(vertices == null)
+		{
+			System.err.println( "Error setting up spots properties, first coordinates need to be initialized!");
+			return;
+		}
+		
+		if(vertices.length/3 != property_.length)
+		{
+			System.err.println( "Number of spots is not equal to number of provided property items");
+			return;
+		}
+		property = new float[property_.length];
+		
+		for (int i = 0; i < property_.length; i++)
+		{
+			property[i] = property_[i];
+		}
+				
 	}
 	
 	public void setMapAlphaMode(int nMapAlphaMode_)

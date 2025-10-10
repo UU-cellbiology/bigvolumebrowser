@@ -83,9 +83,9 @@ public class DebugTransparencyBlending
 			diameters[i] = ( float ) ( 0.2*(nDiameter + Math.random()*nDiameter));
 		}
 		//do not provide radius
-		samePoints.setPoints( verticesSame );
+		samePoints.setPoints( verticesSame, null, null );
 		//specify radius for each spot
-		diffPoints.setPoints( verticesDiff, diameters );
+		diffPoints.setPoints( verticesDiff, diameters, null );
 		//diffPoints.setRenderType( VisSpots.RENDER_GAUSS_UNIFORM );
 
 		testBVB.addShape( samePoints );

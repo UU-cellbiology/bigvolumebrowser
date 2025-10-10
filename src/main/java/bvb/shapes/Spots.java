@@ -57,13 +57,17 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	FinalRealInterval boundBox = null;
 	
+	int nMapAlphaMode = 0;
+
 	String sLUTName = "";
 	
 	LUTUploaderGPU lutGPU  = null;
 	
 	float [] sizeMinMax = null;
 	
-	int nMapAlphaMode = 0;
+	float [] propertyMinMax = null;
+	
+	boolean bHasProperty = false;
 	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -74,51 +78,50 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		defineTransparency();
 	}
 	
-	
-	public void setPoints(final ArrayList<RealPoint> vertices)
-	{
-		setPoints(vertices, null);
-	}
-
-	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes)
+	/** any of the last two arguments can be null **/
+	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float[] spotProperty)
 	{
 		if(visRender == null)
 		{
 			visRender = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		}
-		if(spotSizes == null || spotSizes.length != vertices.size())
-		{	
-			((VisSpots)visRender).setVertices(vertices);	
-		}
-		else
+		
+		((VisSpots)visRender).setVertices(vertices, spotSizes, spotProperty);	
+		if(spotSizes != null)
 		{
-			((VisSpots)visRender).setVertices(vertices, spotSizes);		
 			pointSize = -1.0f;
 		}
+		if(spotProperty != null)
+		{
+			bHasProperty = true;
+			propertyMinMax = getMinMax(spotProperty);
+		}
+		
 		setBoundingBox(vertices, spotSizes);
 	}
 	
+	/** spotSizes argument can be null **/
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{		
 		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize, 1.0f);		
-		sizeMinMax = getSizeMinMax(spotSizes);
+		sizeMinMax = getMinMax(spotSizes);
 	}
 	
-	public static float [] getSizeMinMax(final float[] spotSizes)
+	public static float [] getMinMax(final float[] values)
 	{
-		if(spotSizes == null)
+		if(values == null)
 			return null;
-		final float [] sizeMinMax = new float [2];
-		sizeMinMax[0] = Float.POSITIVE_INFINITY;
-		sizeMinMax[1] = Float.NEGATIVE_INFINITY;
-		for(int v = 0; v < spotSizes.length; v++)
+		final float [] valuesMinMax = new float [2];
+		valuesMinMax[0] = Float.POSITIVE_INFINITY;
+		valuesMinMax[1] = Float.NEGATIVE_INFINITY;
+		for(int v = 0; v < values.length; v++)
 		{
-			if(spotSizes[v] < sizeMinMax[0])
-				sizeMinMax[0] = spotSizes[v];
-			if(spotSizes[v] > sizeMinMax[1])
-				sizeMinMax[1] = spotSizes[v];
+			if(values[v] < valuesMinMax[0])
+				valuesMinMax[0] = values[v];
+			if(values[v] > valuesMinMax[1])
+				valuesMinMax[1] = values[v];
 		}
-		return sizeMinMax;
+		return valuesMinMax;
 	}
 	
 	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize_, final float sizeScale)
@@ -192,16 +195,18 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	void defineTransparency()
 	{
-
 		bTransparent = false;
+		
 		if(renderType >= VisSpots.RENDER_GAUSS)
 		{
 			bTransparent = true;
 		}
+		
 		if(pointColor.getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
 		{
 			bTransparent = true;
 		}
+		
 		if(nMapAlphaMode != 0)
 		{
 			bTransparent = true;			
@@ -211,8 +216,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	@Override
 	public void setPointSize (final float pointSize_)
-	{
-		
+	{		
 		if(pointSize < 0)
 		{
 			System.err.println("This Spots Shape object has different spots size.");
@@ -224,10 +228,10 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		boundBox.realMax( bb[1] );
 		//adjust bbox dimensions
 		final double diff = 0.5*( pointSize - pointSize_);
-		for(int d=0;d<3;d++)
+		for(int d = 0;d < 3; d++)
 		{
-			bb[0][d]+=diff;
-			bb[1][d]-=diff;
+			bb[0][d] += diff;
+			bb[1][d] -= diff;
 		}
 		boundBox = FinalRealInterval.wrap( bb[0], bb[1]);
 		pointSize = pointSize_;
@@ -333,11 +337,22 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public float[] getSizeRange()
 	{
 		final float [] sizeMinMaxOut = new float[2];
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{
 			sizeMinMaxOut[i] = sizeMinMax[i];
 		}
 		return sizeMinMaxOut;
+	}
+	
+	@Override
+	public float[] getPropertyRange()
+	{
+		final float [] properyMinMaxOut = new float[2];
+		for(int i = 0; i < 2; i++)
+		{
+			properyMinMaxOut[i] = propertyMinMax[i];
+		}
+		return properyMinMaxOut;
 	}
 
 
@@ -363,6 +378,12 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		{
 			nMapMode = 0;
 			System.out.println("No spot size data available for " + this.toString());
+		}
+		//no property, cannot map LUT
+		if(nMapMode == 5 && !bHasProperty)
+		{
+			nMapMode = 0;
+			System.out.println("No spot property data available for " + this.toString());
 		}
 		if(nMapMode > 0 && lutGPU == null)
 		{
@@ -406,8 +427,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	@Override
 	public boolean hasProperty()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return bHasProperty ;
 	}
 
 
@@ -415,11 +435,17 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setMapAlphaMode( int nMapAlphaMode_ )
 	{
 		nMapAlphaMode = nMapAlphaMode_;
-		//no sizes, cannot map LUT
+		//no sizes, cannot map alpha
 		if(nMapAlphaMode == 4 && pointSize > 0.0f)
 		{
 			nMapAlphaMode = 0;
 			System.out.println("No spot size data available for " + this.toString());
+		}
+		//no property, cannot map alpha
+		if(nMapAlphaMode == 5 && !bHasProperty)
+		{
+			nMapAlphaMode = 0;
+			System.out.println("No spot property data available for " + this.toString());
 		}
 		((VisSpots)visRender).setMapAlphaMode( nMapAlphaMode );
 		defineTransparency();

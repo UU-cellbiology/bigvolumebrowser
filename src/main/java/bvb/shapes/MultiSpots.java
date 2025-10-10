@@ -29,6 +29,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	float [] sizeMinMax = null;
 	
+	float [] propertyMinMax = null;
+	
 	float fSizeScale = 1.0f;
 	
 	int nMapLUTMode = 0;
@@ -46,6 +48,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	boolean bInvertedAlpha = false;
 	
 	final float [] fMapAlphaMinMax = new float[2];
+	
+	boolean bHasProperty = false;
 	
 	void defineTransparency()
 	{
@@ -82,8 +86,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		final double diff = 0.5*( pointSize - pointSize_);
 		for(int d = 0; d < 3; d++)
 		{
-			bb[0][d]+=diff;
-			bb[1][d]-=diff;
+			bb[0][d] += diff;
+			bb[1][d] -= diff;
 		}
 		boundBox = FinalRealInterval.wrap( bb[0], bb[1]);
 		pointSize = pointSize_;
@@ -238,6 +242,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		int nLoadTimePoint = 0;
 		final ArrayList<RealPoint> verticesTP = new ArrayList<>();
 		final ArrayList<Float> sizesTP = new ArrayList<>();
+		final ArrayList<Float> propertyTP = new ArrayList<>();
 		for(int i = 0; i < nTotSpotsN; i++)
 		{
 			if(Math.abs(patTimesIndices[i][0] - nCurrTimepoint)<0.00001)
@@ -248,43 +253,62 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 				{
 					sizesTP.add( sptParser.sizes[index] );
 				}			
+				if(sptParser.parseProperty)
+				{
+					propertyTP.add( sptParser.property[index] );
+				}
 			}
 			else
 			{
 				//add a new spots object
-				addSpots(verticesTP, sizesTP, nLoadTimePoint);
+				addSpots(verticesTP, sizesTP, propertyTP, nLoadTimePoint);
 				nCurrTimepoint = patTimesIndices[i][0];
 				nLoadTimePoint++;
 				verticesTP.clear();
 				sizesTP.clear();
 			}
 		}
+		//just a last part of the array
 		if(verticesTP.size() != 0)
 		{
-			addSpots(verticesTP, sizesTP, nLoadTimePoint);	
+			addSpots(verticesTP, sizesTP, propertyTP, nLoadTimePoint);	
 		}
 		return nLoadTimePoint;
 	}
 	
-	public void addSpots(final ArrayList<RealPoint> verticesTP, final ArrayList<Float> sizesTP, final int nLoadTimePoint)
+	public void addSpots(final ArrayList<RealPoint> verticesTP, final ArrayList<Float> sizesTP, final ArrayList<Float> propertyTP, final int nLoadTimePoint)
 	{
 		//add a new spots object
 		VisSpots spotsTP = new VisSpots(pointSize, pointColor, pointShape, renderType);
-		if(sizesTP.size() == 0)
+		
+		float [] sizesF = null;
+		float [] propertyF = null;
+
+		if(sizesTP.size() != 0)
 		{
-			spotsTP.setVertices( verticesTP );
-			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, null, pointSize, 1.0f) );
-		}
-		else
-		{
-			final float [] sizesF = new float[sizesTP.size()];
+			sizesF = new float[sizesTP.size()];
 			for (int j = 0; j < sizesTP.size(); j++)
 			{
 				sizesF[j] = sizesTP.get( j );
 			}
-			spotsTP.setVertices( verticesTP, sizesF );
-			boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, sizesF, pointSize, fSizeScale) );
-			float [] sizeMinMaxCurr = Spots.getSizeMinMax( sizesF );
+		}
+		
+		if(propertyTP.size() != 0)
+		{
+			bHasProperty = true;
+			propertyF = new float[propertyTP.size()];
+			for (int j = 0; j < propertyTP.size(); j++)
+			{
+				propertyF[j] = propertyTP.get( j );
+			}
+		}
+		spotsTP.setVertices( verticesTP, sizesF, propertyF );
+		
+		boundBox = Intervals.union( boundBox, Spots.getBBoxSpots(verticesTP, sizesF, pointSize, fSizeScale) );
+		
+		if(sizesTP.size() != 0)
+		{
+			float [] sizeMinMaxCurr = Spots.getMinMax( sizesF );
 			if(sizeMinMax == null)
 			{
 				sizeMinMax = new float[2];
@@ -295,6 +319,20 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 			sizeMinMax[1] = Math.max( sizeMinMax[1], sizeMinMaxCurr[1] );
 
 		}
+		
+		if(bHasProperty)
+		{
+			float [] propertyMinMaxCurr = Spots.getMinMax( propertyF );
+			if(propertyMinMax == null)
+			{
+				propertyMinMax = new float[2];
+				propertyMinMax[0] = Float.POSITIVE_INFINITY;
+				propertyMinMax[1] = Float.NEGATIVE_INFINITY;
+			}
+			propertyMinMax[0] = Math.min( propertyMinMax[0], propertyMinMaxCurr[0] );
+			propertyMinMax[1] = Math.max( propertyMinMax[1], propertyMinMaxCurr[1] );
+		}
+			
 		visRendersTimeMap.put( spotsTP, nLoadTimePoint );
 	}
 	
@@ -318,6 +356,17 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 			sizeMinMaxOut[i] = sizeMinMax[i];
 		}
 		return sizeMinMaxOut;
+	}
+	
+	@Override
+	public float[] getPropertyRange()
+	{
+		final float [] propertyMinMaxOut = new float[2];
+		for(int i = 0; i < 2; i++)
+		{
+			propertyMinMaxOut[i] = propertyMinMax[i];
+		}
+		return propertyMinMaxOut;
 	}
 
 	@Override
@@ -351,6 +400,12 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		{
 			nMapLUTMode = 0;
 			System.out.println("No spot size data available for " + this.toString());
+		}
+		//no property, cannot map LUT
+		if(nMapLUTMode == 5 && !bHasProperty)
+		{
+			nMapLUTMode = 0;
+			System.out.println("No spot property data available for " + this.toString());
 		}
 		if(nMapLUTMode > 0 && lutGPU == null)
 		{
@@ -427,21 +482,25 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	@Override
 	public boolean hasProperty()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return bHasProperty;
 	}
 
 	@Override
 	public void setMapAlphaMode( int nMapAlphaMode_ )
 	{
 		nMapAlphaMode = nMapAlphaMode_;
-		//no sizes, cannot map LUT
+		//no sizes, cannot map alpha
 		if(nMapAlphaMode == 4 && pointSize > 0.0f)
 		{
 			nMapAlphaMode = 0;
 			System.out.println("No spot size data available for " + this.toString());
 		}
-
+		//no property, cannot map alpha
+		if(nMapAlphaMode == 5 && !bHasProperty)
+		{
+			nMapAlphaMode = 0;
+			System.out.println("No spot property data available for " + this.toString());
+		}
 		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());

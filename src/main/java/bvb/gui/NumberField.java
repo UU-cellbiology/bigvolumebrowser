@@ -283,12 +283,18 @@ public class NumberField extends JPanel {
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				int units = e.getWheelRotation();
-				double d = Double.parseDouble(getText());
-				boolean neg = d < 0;
-				if((units > 0 && !neg) || (units < 0 && neg))
-					handleKeyDown();
-				else if((units < 0 && !neg) || (units > 0 && neg))
-					handleKeyUp();
+				try
+				{
+					double d = Double.parseDouble(getText());
+					boolean neg = d < 0;
+					if((units > 0 && !neg) || (units < 0 && neg))
+						handleKeyDown();
+					else if((units < 0 && !neg) || (units > 0 && neg))
+						handleKeyUp();
+				}
+				catch(NumberFormatException eNF)
+				{
+				}
 			}
 		});
 

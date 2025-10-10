@@ -38,17 +38,23 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	
 	public boolean parseTime = false;
 	
+	public boolean parseProperty = false;
+	
 	final float [] xyz = new float[3];
 	
 	final float[] size_f = new float[1];
 	
 	final float[] time_f = new float[1];
+	
+	final float[] property_f = new float[1];
 
 	final public ArrayList<RealPoint> vertices = new ArrayList<>();
 	
 	public float [] sizes = null;
 	
 	public float [] times = null;
+	
+	public float [] property = null;
 	
 	ArrayList<Float> timesList = new ArrayList<>();
 	
@@ -70,10 +76,11 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	@Override
 	protected Void doInBackground() throws Exception
 	{		
-		vertices.clear();
 		ArrayList<Float> sizesList = new ArrayList<>();
 		
-
+		ArrayList<Float> propertyList = new ArrayList<>();
+		
+		vertices.clear();
 		
 		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
 		{
@@ -98,9 +105,6 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				if(line == null)
 					break;
 				bytesRead += line.getBytes().length + bytesNewLine;
-//				try {
-//					Thread.sleep(1);
-//				} catch (InterruptedException ignore) {}
 				IJ.showProgress( bytesRead/filesize );
 				la = line.split(sSeparator);
 				bAllParsedOK = parseCoordinates( la );
@@ -111,9 +115,13 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				}
 				if(parseTime)
 				{
-					bAllParsedOK &= parseTime( la );						
+					bAllParsedOK &= parseColumn(la, 3, "time", time_f);					
 				}
-				if( bAllParsedOK)
+				if(parseProperty)
+				{
+					bAllParsedOK &= parseColumn(la, 7, "property", property_f);					
+				}
+				if(bAllParsedOK)
 				{
 					vertices.add( new RealPoint(xyz));
 					if(parseSize)
@@ -124,6 +132,10 @@ public class SpotsParser extends SwingWorker<Void, Void>
 					{
 						timesList.add( new Float(time_f[0] ));					
 					}
+					if(parseProperty)
+					{
+						propertyList.add( new Float(property_f[0] ));	
+					}
 				}
 			}
 			
@@ -133,7 +145,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		{
 			sizes = new float[sizesList.size()];
 	
-			for(int i=0; i<sizesList.size(); i++)
+			for(int i = 0; i < sizesList.size(); i++)
 			{
 				sizes[i] = sizesList.get( i );
 			}
@@ -146,6 +158,17 @@ public class SpotsParser extends SwingWorker<Void, Void>
 			for(int i=0; i < timesList.size(); i++)
 			{
 				times[i] = timesList.get( i );
+			}
+			
+		}
+		
+		if(parseProperty)
+		{
+			property = new float[propertyList.size()];
+			
+			for(int i=0; i < propertyList.size(); i++)
+			{
+				property[i] = propertyList.get( i );
 			}
 			
 		}
@@ -163,12 +186,12 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	boolean parseCoordinates(final String [] la)
 	{
 		float coord = 0.0f;
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			coord = 0.0f;
 			if(nColIndices[d] >= 0)
 			{
-				if(nColIndices[d]>la.length-1)
+				if(nColIndices[d] > la.length - 1)
 				{
 					System.err.println("Spots file import warning: number of columns is wrong.");
 					return false;
@@ -197,7 +220,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				
 				xyz[d] = fScale * coord;
 				//sanity check
-				if(Float.isInfinite( xyz[d]))
+				if(Float.isInfinite( xyz[d] ))
 				{
 					System.err.println("Spots file import warning: found infinite coord value, skipping.");
 					return false;
@@ -208,45 +231,47 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		return true;
 	}
 	
-	boolean parseTime(final String [] la)
+	boolean parseColumn(final String [] la, final int nColIndex, String sColName, final float [] fRecord)
 	{
 		
-		float finTime = 0.0f;
+		float finVal = 0.0f;
 		try
 		{
-			finTime = Float.parseFloat( la[nColIndices[3]] );
-			if(Float.isInfinite( finTime ))
+			finVal = Float.parseFloat( la[nColIndices[nColIndex]] );
+			if(Float.isInfinite( finVal ))
 			{
-				System.err.println("Spots file import warning: found infinite time value, skipping.");
+				System.err.println("Spots file import warning: found infinite "+sColName+" value, skipping.");
 				return false;
 			}
-			if(Float.isNaN( finTime ))
+			if(Float.isNaN( finVal ))
 			{
-				System.err.println("Spots file import warning: found NaN size value, skipping.");
+				System.err.println("Spots file import warning: found NaN "+sColName+" value, skipping.");
 				return false;
 			}
 		}
 		catch(NumberFormatException e)
 		{
-			System.err.println("Spots file import warning: failed to parse size column.");
+			System.err.println("Spots file import warning: failed to parse "+sColName+" column.");
 			return false;
 		}	
-		time_f[0] = finTime;	
+		fRecord[0] = finVal;	
 		
 		return true;
+
 	}
+	
 	
 	boolean parseSizes(final String [] la)
 	{
 		float sizeOut = 0.0f;
 		int nNum = 0;
 		float finsize = 0.0f;
-		for(int d=4; d<7; d++)
+		for(int d = 4; d < 7; d++)
 		{
 			finsize = 0.0f;
 			if(nColIndices[d] >= 0)
 			{
-				if(nColIndices[d]>la.length-1)
+				if(nColIndices[d] > la.length-1)
 				{
 					System.err.println("Spots file import warning: number of columns is wrong.");
 					return false;
@@ -305,10 +330,10 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		}
      	catch (Exception e)
      	{
-     		System.err.println("Error spots import: "+ e.toString() );
+     		System.err.println("Error spots import: " + e.toString() );
      	}
     	IJ.showProgress( 1.0 );
-    	IJ.showStatus( "Finished spots import. Loaded "+Integer.toString( vertices.size()) +" spots.");   	
+    	IJ.showStatus( "Finished spots import. Loaded " + Integer.toString( vertices.size()) + " spots.");   	
     }
     
     /** filters vertices and sizes so that they are between
@@ -320,13 +345,13 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	final int nInN = vertices.size();
     	// 3D coordinates + filtermark
     	int nColN = 4;
-    	double dProgressTotal = (nColN-1)+3;
+    	double dProgressTotal = (nColN - 1) + 3;
     	double dProgressCurrent = 0.0;
     	int nColSize = 0;
     	int nColTime = 0;
     	
     	final int indMin = ( int ) Math.max( 0, Math.round( dPercMin*nInN/100. ) );
-    	final int indMax = ( int ) Math.min( nInN-1, Math.round( dPercMax*nInN/100. ) );
+    	final int indMax = ( int ) Math.min( nInN - 1, Math.round( dPercMax*nInN/100. ) );
     	IJ.showStatus( "Cleaning up spots data..");
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
     	// 3D coordinates + size + filtermark (always last)
@@ -343,9 +368,9 @@ public class SpotsParser extends SwingWorker<Void, Void>
 
     	final float [][] allData = new float[nInN][nColN];
 
-    	for(int i = 0; i< nInN; i++)
+    	for(int i = 0; i < nInN; i++)
     	{
-    		for(int d=0;d<3;d++)
+    		for(int d = 0; d < 3; d++)
     		{
     			allData[i][d] = vertices.get( i ).getFloatPosition( d );
     		}
@@ -389,7 +414,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	int nTotFiltCount = 0;
       	dProgressCurrent++;
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
-    	for(int i=0; i < nInN; i++)
+    	for(int i = 0; i < nInN; i++)
     	{
     		if(allData[i][nColN-1]<0.5f)
     		{
@@ -418,7 +443,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     		int nCount = 0;
         	for(int i = 0; i < nInN; i++)
         	{
-        		if(allData[i][nColN-1]<0.5f)
+        		if(allData[i][nColN - 1] < 0.5f)
         		{
         			times[nCount] = allData[i][nColTime];
         			nCount++;
