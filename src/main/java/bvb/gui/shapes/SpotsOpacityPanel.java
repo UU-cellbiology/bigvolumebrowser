@@ -85,6 +85,7 @@ public class SpotsOpacityPanel extends JPanel
 		
 		extraAlphaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.0,1.0,1.0) );
 		extraAlphaPanel.changeListeners().add( () -> updateExtraAlpha() );
+		extraAlphaPanel.setToolTipText( "Extra opacity\n coefficient" );
 		final JPopupMenu menuExtraAlpha = new JPopupMenu();
 		menuExtraAlpha.add( runnableItem(  "set bounds ...", extraAlphaPanel::setBoundsDialog ) );
 		extraAlphaPanel.setPopup( () -> menuExtraAlpha );	

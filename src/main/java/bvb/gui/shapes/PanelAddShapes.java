@@ -167,10 +167,9 @@ public class PanelAddShapes extends JPanel
 					
 				}	
 				Prefs.set( "BVB.nSpotsSize", dialSpots.cbSize.getSelectedIndex());
-				bAskForSize = false;
 
 			}
-			if(!sptShape.showSelectionDialog( bAskForSize ))
+			if(!sptShape.showSelectionDialog( sptParser.parseSize, sptParser.parseProperty ))
 			{
 				return;
 			}

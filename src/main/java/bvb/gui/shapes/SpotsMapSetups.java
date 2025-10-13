@@ -10,6 +10,8 @@ import bvb.shapes.BasicSpots;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.shapes.BasicShape;
 
+/** class used to store LUT and Alpha mapping of Spots object
+ * to different axis or properties (for GUI) **/
 public class SpotsMapSetups
 {
 	private final Map< BasicSpots, float[][]> spotsToMaps = new HashMap<>();
