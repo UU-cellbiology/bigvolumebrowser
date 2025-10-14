@@ -148,7 +148,6 @@ public class PanelAddShapes extends JPanel
 			
 			SpotsShapeDialog sptShape = new SpotsShapeDialog();
 			sptShape.fileSpots = dialSpots.fileSpots;
-			boolean bAskForSize = true;
 			
 			//parse sizes
 			if(nSizeCols > 0)
@@ -179,6 +178,7 @@ public class PanelAddShapes extends JPanel
 				sptParser.bDataCleanup = true;
 				sptParser.dPercMin = sptShape.dSpotsPercMin;
 				sptParser.dPercMax = sptShape.dSpotsPercMax;
+				sptParser.bCleanupCols = sptShape.bCleanupCols;
 			}
 			if(sptShape.bExportCleanData)
 			{

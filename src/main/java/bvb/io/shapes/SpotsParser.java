@@ -68,6 +68,8 @@ public class SpotsParser extends SwingWorker<Void, Void>
 
 	public boolean bExportCleanData = false;
 	
+	public boolean [] bCleanupCols = new boolean[5];
+	
 	public String sExportFilename;
 	
 	public boolean bSpotsAdded = false;
@@ -345,10 +347,17 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	final int nInN = vertices.size();
     	// 3D coordinates + filtermark
     	int nColN = 4;
-    	double dProgressTotal = (nColN - 1) + 3;
+    	double dProgressTotal  = 0.0;
+    	for(int i = 0; i < 5; i++)
+    	{
+    		if (bCleanupCols[i])
+    			{dProgressTotal++;}
+    	}
+    	dProgressTotal += 3;
     	double dProgressCurrent = 0.0;
     	int nColSize = 0;
     	int nColTime = 0;
+    	int nColProperty = 0;
     	
     	final int indMin = ( int ) Math.max( 0, Math.round( dPercMin*nInN/100. ) );
     	final int indMax = ( int ) Math.min( nInN - 1, Math.round( dPercMax*nInN/100. ) );
@@ -363,6 +372,11 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	if(parseTime)
     	{
     		nColTime = nColN - 1;
+    		nColN ++;
+    	}
+    	if(parseProperty)
+    	{
+    		nColProperty = nColN - 1;
     		nColN ++;
     	}
 
@@ -382,31 +396,48 @@ public class SpotsParser extends SwingWorker<Void, Void>
     		{
     			allData[i][nColTime] = times[i];
     		}
+    		if(parseProperty)
+    		{
+    			allData[i][nColProperty] = property[i];
+    		}
     	}
     	dProgressCurrent++;
     	IJ.showProgress( dProgressCurrent/dProgressTotal);
     	
     	//now let's sort by each column and mark outliers
-    	//filter only by XYZ and size
-    	int nColLast = 3;
-    	if(parseSize)
-    	{
-    		nColLast = 4;
-    	}
+    	//filter only by user specified columns 
+    	int nColLast =  nColN - 1;
     	for(int nCol = 0; nCol < nColLast; nCol++)
     	{
-        	dProgressCurrent++;
-        	IJ.showProgress( dProgressCurrent/dProgressTotal);
-
-    		final int nColX = nCol;
-    		Arrays.sort(allData, (a, b) -> Float.compare(a[nColX], b[nColX]));
-    		for(int i = 0; i < indMin; i++)
+    		boolean bFilter = false;
+    		if(nCol < 3 && bCleanupCols[nCol])
     		{
-    			allData[i][nColN-1] = 1.0f;
+    			bFilter = true;
     		}
-    		for(int i = indMax; i < nInN; i++)
+        	if(parseSize && nCol == nColSize && bCleanupCols[3])
+        	{
+        		bFilter = true;
+        	}
+        	if(parseProperty && nCol == nColProperty && bCleanupCols[4])
+        	{
+        		bFilter = true;
+        	}
+    			
+    		if(bFilter)
     		{
-    			allData[i][nColN-1] = 1.0f;
+	        	dProgressCurrent++;
+	        	IJ.showProgress( dProgressCurrent/dProgressTotal);
+	
+	    		final int nColX = nCol;
+	    		Arrays.sort(allData, (a, b) -> Float.compare(a[nColX], b[nColX]));
+	    		for(int i = 0; i < indMin; i++)
+	    		{
+	    			allData[i][nColN-1] = 1.0f;
+	    		}
+	    		for(int i = indMax; i < nInN; i++)
+	    		{
+	    			allData[i][nColN-1] = 1.0f;
+	    		}
     		}
     	}
     	
@@ -450,6 +481,19 @@ public class SpotsParser extends SwingWorker<Void, Void>
         		}
         	}
     	}
+    	if(parseProperty)
+    	{
+    		times = new float[nTotFiltCount];
+    		int nCount = 0;
+        	for(int i = 0; i < nInN; i++)
+        	{
+        		if(allData[i][nColN - 1] < 0.5f)
+        		{
+        			property[nCount] = allData[i][nColProperty];
+        			nCount++;
+        		}
+        	}
+    	}
     	
     	
       	dProgressCurrent++;
@@ -461,16 +505,16 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	final float fInverseScale = 1.0f/fScale;
     	final float fInverseSizeScale = 1.0f/fSizeScale;
     	String sUnits = "um";
-    	if(fInverseScale>2.0)
+    	if(fInverseScale > 2.0)
     		sUnits = "nm";
-    	if(fInverseScale<0.5)
+    	if(fInverseScale < 0.5)
     		sUnits = "mm";
     	String sSize = "diameter";
-    	if(fSizeScale>5.0f)
+    	if(fSizeScale > 5.0f)
     	{
     		sSize  = "SD";
     	}
-    	if(fSizeScale<5.0f && fSizeScale>1.1f)
+    	if(fSizeScale < 5.0f && fSizeScale > 1.1f)
     	{
     		sSize  = "radius";
     	}
@@ -497,27 +541,35 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				{
 					writer.write(", T");	
 				}
+				if(parseProperty)
+				{
+					writer.write(", Property");	
+				}
 				writer.write("\n");
 		    	for(int i = 0; i < nInN;i++)
 		    	{
 		    		if(allData[i][nColN-1]<0.5f)
 		    		{
 		    			//coordinates
-		    			for(int j=0;j<3;j++)
+		    			for(int j = 0; j < 3; j++)
 		    			{
-		    				writer.write(df3.format(allData[i][j]*fInverseScale) + ",");
+		    				writer.write(df3.format(allData[i][j]*fInverseScale));
+		    				if(j < 2)
+		    				{
+		    					writer.write(",");
+		    				}
 		    			}
 		    			if(parseSize)
 		    			{
-		    				writer.write(df3.format(allData[i][nColSize]*fInverseScale*fInverseSizeScale));
-		    			}
-		    			if(parseSize && parseTime)
-		    			{
-		    				writer.write(",");
+		    				writer.write("," + df3.format(allData[i][nColSize]*fInverseScale*fInverseSizeScale));
 		    			}
 		    			if(parseTime)
 		    			{
-		    				writer.write(df3.format(allData[i][nColTime]));
+		    				writer.write("," + df3.format(allData[i][nColTime]));
+		    			}
+		    			if(parseProperty)
+		    			{
+		    				writer.write("," + df3.format(allData[i][nColProperty]));
 		    			}
 		    			writer.write("\n");
 		    		}
