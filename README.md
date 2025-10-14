@@ -2,17 +2,16 @@
 
 # BigVolumeBrowser
 
-[FIJI](https://fiji.sc) plugin for 3D exploration of large datasets.
+[FIJI](https://fiji.sc) plugin for 3D exploration of multiple large datasets and shapes.  
 
-Currently at the stage of active development (2025/07/30).
+**Users**: full description/manuals are in the **[wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.
 
-Documentation coming soon.
+**Developers**: please check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).
 
-**For users**: download zip file with jars from the latest [Releases](https://github.com/UU-cellbiology/bigvolumebrowser/releases).   
-Unpack it to FIJI's *jars* folder, restart FIJI.   
-Hopefully the interface is self-explanatory.
+----------
 
-**For developers**: please check the code in [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).
+Not happy with it? Something is missing?  
+You can consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).
 
 ----------
 **Acknowledgements:**  

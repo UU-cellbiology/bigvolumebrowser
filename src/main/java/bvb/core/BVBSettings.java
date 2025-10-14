@@ -62,7 +62,7 @@ public class BVBSettings
 	
 	public static boolean bPyramidize = Prefs.get( "BVB.bPyramidize", false );
 	
-	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", false ); 
+	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", true ); 
 	
 	public static int nDefaultWidthControlPanel = 400;
 	

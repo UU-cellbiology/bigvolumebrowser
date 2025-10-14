@@ -33,13 +33,13 @@ import java.awt.Color;
 /** helper class to store user selection of colors **/
 public class ColorUserSettings {
 	
-	public Color[] colors = new Color[4];
+	public final Color[] colors = new Color[4];
 	
 	public ColorUserSettings()
 	{
 		for(int i=0;i<4;i++)
 		{
-			colors[i] = Color.WHITE;
+			colors[i] = null;
 		}
 	}
 	public void setColor(Color color_in, int index)
