@@ -68,6 +68,7 @@ public class ClipPanel extends JPanel
 	final public ClipSetups clipSetups;
 	
 	final JComboBox<String> cbClipState;
+	
 	final JPanelConsistent pClipState;
 	
 	JButton butCoordSystem;

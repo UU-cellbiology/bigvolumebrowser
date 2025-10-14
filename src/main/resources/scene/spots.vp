@@ -1,5 +1,6 @@
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in float sDiam;
+layout (location = 1) in float fDiam;
+layout (location = 2) in float fProperty;
 
 uniform float pointSizeReal;
 uniform float pointScale;
@@ -7,7 +8,8 @@ uniform float fSizeScale;
 uniform mat4 pvm;
 uniform vec2 windowSize;
 out vec3 posW;
-out float sDiamfp;
+out float fDiamfp;
+out float fPropertyfp;
 
 void main()
 {
@@ -42,13 +44,13 @@ void main()
 
 	if(pointSizeReal >= 0.0)
 	{
- 		sDiamfp = pointSizeReal;
+ 		fDiamfp = pointSizeReal;
  	}
  	else
  	{
- 		sDiamfp = sDiam;		
+ 		fDiamfp = fDiam;		
  	}	
- 	shift.xyz = shift.xyz * 0.5 * sDiamfp * fSizeScale / length(shift.xyz);
+ 	shift.xyz = shift.xyz * 0.5 * fDiamfp * fSizeScale / length(shift.xyz);
  	
  	shift.xyz = aPos + shift.xyz ;
  	
@@ -66,5 +68,6 @@ void main()
     gl_PointSize =  dRadius/pointScale;
     
     posW = aPos;
+    fPropertyfp = fProperty;
 
 }

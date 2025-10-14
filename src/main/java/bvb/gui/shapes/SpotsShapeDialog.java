@@ -37,10 +37,10 @@ public class SpotsShapeDialog
 	public boolean bExportCleanData = false;
 	public File fileSpots = null;
 	public String sExportFilename;
-	
+	public boolean [] bCleanupCols = new boolean[5];
 	public ColorUserSettings selectColors = new ColorUserSettings();
 	
-	public boolean showSelectionDialog(boolean bAskForSize)
+	public boolean showSelectionDialog(boolean bHasSize, boolean bHasProperty)
 	{
 		JPanel pSpotsParams = new JPanel(new GridBagLayout());
 		
@@ -78,35 +78,35 @@ public class SpotsShapeDialog
 		
 		//assemble everything
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx=0;
-		gbc.gridy=0;	
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
 		pSpotsParams.add(new JLabel("Spots color: "), gbc);
 		gbc.gridx++;
 		pSpotsParams.add(butSpotsColor, gbc);
 		
-		if(bAskForSize)
+		if(bHasSize)
 		{
-			gbc.gridx=0;
+			gbc.gridx = 0;
 			gbc.gridy++;
 			pSpotsParams.add(new JLabel("Spots size: "), gbc);
 			gbc.gridx++;
 			pSpotsParams.add(nfSpotSize, gbc);			
 		}
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pSpotsParams.add(new JLabel("Spots shape: "), gbc);
 		gbc.gridx++;
 		pSpotsParams.add(cbShape, gbc);
 
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pSpotsParams.add(new JLabel("Spots render: "), gbc);
 		gbc.gridx++;
 		pSpotsParams.add(cbFill, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pSpotsParams.add(new JLabel("Data cleanup: "), gbc);
 		gbc.gridx++;
@@ -127,7 +127,7 @@ public class SpotsShapeDialog
 			}
 			nShape = cbShape.getSelectedIndex();
 			nFill = cbFill.getSelectedIndex();
-			if(bAskForSize)
+			if(bHasSize)
 			{
 				
 				fSpotSize = Float.parseFloat( nfSpotSize.getText() );
@@ -139,7 +139,7 @@ public class SpotsShapeDialog
 			if(bSpotDataCleanUp)
 			{
 				//show percentile dialog
-				return showPercentile();
+				return showDataCleanUpDialog(bHasSize, bHasProperty);
 			}
 			
 			
@@ -150,7 +150,7 @@ public class SpotsShapeDialog
 
 	}
 	
-	boolean showPercentile()
+	boolean showDataCleanUpDialog(boolean bHasSize, boolean bHasProperty)
 	{
 		JPanel pCleanup = new JPanel(new GridBagLayout());
 		
@@ -167,22 +167,73 @@ public class SpotsShapeDialog
 		JCheckBox cbExportCleanData = new JCheckBox();
 		cbExportCleanData.setSelected( Prefs.get( "BVB.bExportCleanData", true ) );
 		
+		JPanel pCheckBoxes = new JPanel(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx=0;
-		gbc.gridy=0;	
+		
+		String [] sAxes = new String []{"X", "Y", "Z"};
+		final JCheckBox [] cbAxes = new JCheckBox[3];
+		for(int d = 0; d < 3; d++)
+		{
+			cbAxes[d] = new JCheckBox(sAxes[d]);
+			cbAxes[d].setSelected( Prefs.get( "BigTrace.SpotCleanupAxis"+sAxes[d],true) );
+		}
+		final JCheckBox cbSize = new JCheckBox("Size");
+		final JCheckBox cbProperty = new JCheckBox("Property");
+		
+		cbSize.setSelected( Prefs.get( "BigTrace.SpotCleanupSize",true) );
+		cbProperty.setSelected( Prefs.get( "BigTrace.SpotCleanupProperty",true) );
+		
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		for(int d = 0; d < 3; d++)
+		{
+			pCheckBoxes.add( cbAxes[d], gbc );
+			gbc.gridx++;
+		}
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 3;
+		if(bHasSize)
+		{
+			pCheckBoxes.add( cbSize, gbc );
+			
+		}
+		if(bHasProperty)
+		{
+			gbc.gridx = 0;
+			gbc.gridy++;
+			pCheckBoxes.add( cbProperty, gbc );
+		}
+		gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
 		pCleanup.add(new JLabel("Percentile % min: "), gbc);
 		gbc.gridx++;
 		pCleanup.add(nfPercMin, gbc);
 
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pCleanup.add(new JLabel("Percentile % max: "), gbc);
 		gbc.gridx++;
 		pCleanup.add(nfPercMax, gbc);
-		
-		gbc.gridx=0;
+
+		gbc.gridx = 0;
 		gbc.gridy++;
+		pCleanup.add(new JLabel("Filter: "), gbc);
+		gbc.gridx++;
+		pCleanup.add(new JLabel(), gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 2;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		pCleanup.add( pCheckBoxes, gbc );
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 1;
 		pCleanup.add(new JLabel("Save cleaned up data: "), gbc);
 		gbc.gridx++;
 		pCleanup.add(cbExportCleanData, gbc);
@@ -199,9 +250,23 @@ public class SpotsShapeDialog
 			Prefs.set("BVB.dSpotsPercMax", dSpotsPercMax);
 			bExportCleanData = cbExportCleanData.isSelected();
 			Prefs.set("BVB.bExportCleanData", bExportCleanData);
-			
-			
-			if(dSpotsPercMin>dSpotsPercMax)
+			for(int d = 0; d < 3; d++)
+			{
+				bCleanupCols[d] = cbAxes[d].isSelected();
+				Prefs.set( "BigTrace.SpotCleanupAxis"+sAxes[d], bCleanupCols[d]);
+			}
+
+			if(bHasSize)
+			{
+				bCleanupCols[3] = cbSize.isSelected();
+				Prefs.set( "BigTrace.SpotCleanupSize",bCleanupCols[3]);
+			}
+			if(bHasProperty)
+			{
+				bCleanupCols[4] = cbProperty.isSelected();
+				Prefs.set( "BigTrace.SpotCleanupProperty",bCleanupCols[4]);
+			}			
+			if(dSpotsPercMin > dSpotsPercMax)
 			{
 				final double temp = dSpotsPercMin;
 				dSpotsPercMin = dSpotsPercMax;

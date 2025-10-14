@@ -80,9 +80,11 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private int spotShape = 0;
 	
-	float vertices[]; 
+	float vertices[] = null; 
 	
-	float spotSizes[]; 
+	float spotSizes[] = null;
+	
+	float property[] = null; 
 	
 	private int nSpotsN;
 	
@@ -91,10 +93,24 @@ public class VisSpots extends AbstractClipTransformVis
 	volatile boolean bLocked = false;
 	
 	LUTUploaderGPU lutGPU = null;
+	
+	boolean bInvertLUT = false;
 	 
 	private int nMapLUTMode = 0;
 	
-	final float [] fMapMinRange = new float[2];
+	final float [] fMapLUTMinRange = new float[2];
+	
+	float fMapLUTGamma = 1.0f;
+	
+	boolean bInvertAlpha = false;
+	 
+	private int nMapAlphaMode = 0;
+	
+	final float [] fMapAlphaMinRange = new float[2];
+	
+	float fMapAlphaGamma = 1.0f;
+	
+	float fExtraAlpha = 1.0f;
 	
 	public VisSpots()
 	{
@@ -125,13 +141,13 @@ public class VisSpots extends AbstractClipTransformVis
 
 	}
 	
-	public void setVertices( ArrayList< RealPoint > points)
+	void setVertices( ArrayList< RealPoint > points)
 	{
 		int i,j;	
 		
 		nSpotsN = points.size();
 		
-		vertices = new float [nSpotsN*3]; //assume 3D
+		vertices = new float [nSpotsN * 3]; //assume 3D
 	
 		for (i = 0; i < nSpotsN; i++)
 		{
@@ -144,26 +160,49 @@ public class VisSpots extends AbstractClipTransformVis
 		initialized = false;
 	}
 	
-	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_)
-	{
-		
-		if(points.size()!= spotSizes_.length)
+	/** any of the last two arguments can be null **/
+	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_, final float [] property_)
+	{	
+		setVertices(points);
+
+		if(spotSizes_ != null)
 		{
-			System.err.println( "Number of spots coordinates is not equal to radii");
-			return;
+			if(points.size() != spotSizes_.length)
+			{
+				System.err.println( "Number of spots is not equal to number of sizes records!");
+				return;
+			}	
+			setSizes(spotSizes_);
 		}
 		
-		setVertices(points);
-		setSizes(spotSizes_);
-		
+		if(property_ != null)
+		{
+			if(points.size() != property_.length)
+			{
+				System.err.println( "Number of spots is not equal to number of spot property records!");
+				return;
+			}	
+			setProperty(property_);
+		}
 		initialized = false;
 	}
 	
 	void setSizes(final float [] spotSizes_)
 	{
+		if(vertices == null)
+		{
+			System.err.println( "Error setting spot sizes, first coordinates need to be initialized!");
+			return;
+		}
+		
+		if(vertices.length/3 != spotSizes_.length)
+		{
+			System.err.println( "Number of spots is not equal to the provided number of sizes.");
+			return;
+		}
 		spotSizes = new float[spotSizes_.length];
 		
-		for (int i=0;i<spotSizes_.length; i++)
+		for (int i = 0; i < spotSizes_.length; i++)
 		{
 			spotSizes[i] = spotSizes_[i];
 		}
@@ -172,17 +211,82 @@ public class VisSpots extends AbstractClipTransformVis
 		
 	}
 	
+	void setProperty(final float [] property_)
+	{
+		if(vertices == null)
+		{
+			System.err.println( "Error setting up spots properties, first coordinates need to be initialized!");
+			return;
+		}
+		
+		if(vertices.length/3 != property_.length)
+		{
+			System.err.println( "Number of spots is not equal to number of provided property items");
+			return;
+		}
+		property = new float[property_.length];
+		
+		for (int i = 0; i < property_.length; i++)
+		{
+			property[i] = property_[i];
+		}
+				
+	}
+	
+	public void setMapAlphaMode(int nMapAlphaMode_)
+	{
+		nMapAlphaMode = nMapAlphaMode_;
+	}
+	
+	public int getMapAlphaMode()
+	{
+		return nMapAlphaMode;
+	}
+
+	
 	public void setMapLUTMode(int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
 	}
 	
-	public void setMapRange(final float fMin, final float fMax)
+	public void setInvertedLUT(boolean bInv)
 	{
-		fMapMinRange[0] = fMin;
-		fMapMinRange[1] = fMax - fMin;
+		bInvertLUT = bInv;
+	}
+	public boolean isInvertedLUT()
+	{
+		return bInvertLUT;
 	}
 	
+	public void setMapLUTRange(final float fMin, final float fMax)
+	{
+		fMapLUTMinRange[0] = fMin;
+		fMapLUTMinRange[1] = fMax - fMin;
+	}
+	public void setInvertedAlpha(boolean bInv)
+	{
+		bInvertAlpha = bInv;
+	}
+	public boolean isInvertedAlpha()
+	{
+		return bInvertAlpha;
+	}
+	
+	public void setMapAlphaRange(final float fMin, final float fMax)
+	{
+		fMapAlphaMinRange[0] = fMin;
+		fMapAlphaMinRange[1] = fMax - fMin;
+	}
+	
+	public void setExtraAlphaCoefficient(float dCoeff)
+	{
+		fExtraAlpha = dCoeff;
+	}
+	
+	public float getExtraAlphaCoefficient()
+	{
+		return fExtraAlpha;
+	}
 	public void setSizeScale(final float fSizeScale_)
 	{
 		fSizeScale = fSizeScale_;
@@ -196,6 +300,16 @@ public class VisSpots extends AbstractClipTransformVis
 	public int getMapLUTMode()
 	{
 		return nMapLUTMode;
+	}
+	
+	public void setMapLUTGamma(final float fGamma)
+	{
+		fMapLUTGamma = fGamma;
+	}
+	
+	public void setMapAlphaGamma(final float fGamma)
+	{
+		fMapAlphaGamma = fGamma;
 	}
 	
 	public void setLUTUploaderGPU (final LUTUploaderGPU lutGPU)
@@ -263,10 +377,12 @@ public class VisSpots extends AbstractClipTransformVis
 
 		// ..:: VERTEX BUFFER ::..
 
-		final int[] tmp = new int[ 2 ];
-		gl.glGenBuffers( 2, tmp, 0 );
+		final int[] tmp = new int[ 3 ];
+		gl.glGenBuffers( 3, tmp, 0 );
 		final int posVbo = tmp[ 0 ];
 		final int sizeVbo = tmp[ 1 ];
+		final int propertyVbo = tmp[ 2 ];
+
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
@@ -279,6 +395,17 @@ public class VisSpots extends AbstractClipTransformVis
 			gl.glBufferData( GL.GL_ARRAY_BUFFER, spotSizes.length * Float.BYTES, FloatBuffer.wrap( spotSizes ), GL.GL_STATIC_DRAW );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 		}
+		
+		// ..:: PROPERTY BUFFER ::..
+
+		if( property != null )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, property.length * Float.BYTES, FloatBuffer.wrap( property ), GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+		}
+		
+		
 		// ..:: VERTEX ARRAY OBJECT ::..
 
 		gl.glGenVertexArrays( 1, tmp, 0 );
@@ -292,6 +419,10 @@ public class VisSpots extends AbstractClipTransformVis
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
 		gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
+		gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 2 );
 		
 		gl.glBindVertexArray( 0 );
 		
@@ -410,12 +541,27 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
+		prog.getUniform1f("mapGamma").set(fMapLUTGamma);
+		prog.getUniform1i("bInvLUT").set( bInvertLUT?1:0 );
+		
+		prog.getUniform1i("nMapAlphaMode").set(nMapAlphaMode);
+		prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
+		prog.getUniform1i("bInvAlpha").set( bInvertAlpha?1:0 );
+		prog.getUniform1f("extraAlpha").set(fExtraAlpha);
+
+		
+		
 
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
 			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
-			prog.getUniform1f("mapMin").set(fMapMinRange[0]);
-			prog.getUniform1f("mapRange").set(fMapMinRange[1]);	
+			prog.getUniform1f("mapMin").set(fMapLUTMinRange[0]);
+			prog.getUniform1f("mapRange").set(fMapLUTMinRange[1]);	
+		}
+		if(nMapAlphaMode > 0 )
+		{
+			prog.getUniform1f("alphaMin").set(fMapAlphaMinRange[0]);
+			prog.getUniform1f("alphaRange").set(fMapAlphaMinRange[1]);		
 		}
 		prog.setUniforms( context );		
 		prog.use( context );
@@ -423,7 +569,7 @@ public class VisSpots extends AbstractClipTransformVis
 		if(nMapLUTMode > 0)
 		{
 			gl.glActiveTexture( GL_TEXTURE0 );
-			if(lutGPU.getTextureID()>0)
+			if(lutGPU.getTextureID() > 0)
 			{
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
 			}

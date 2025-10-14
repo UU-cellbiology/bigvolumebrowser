@@ -35,6 +35,8 @@ public class TransformCenterPanel extends JPanel
 
 	private boolean blockUpdates = false;
 	
+	/** a map to store object's center coordinates,
+	 *  to reduce calculations **/
 	private final Map< Object, double[] > objToDefCenters = new HashMap<>();
 	
 	public TransformCenterPanel(final TransformSetups transformSetups_) 
@@ -89,7 +91,7 @@ public class TransformCenterPanel extends JPanel
 		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
 		boolean bFirstCS = true;
 		boolean [] allTrEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			allTrEqual[d] = true;
 		}

@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 
 import bdv.viewer.animate.TextOverlayAnimator;
@@ -96,80 +95,90 @@ public class PanelAddShapes extends JPanel
 			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
 			Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
 			//column indices
-			final int [] nColInd = new int[7];
+			final int [] nColInd = new int[8];
 			//whether size was provided
 			int nSizeCols = 0;
-			boolean bParseTime = false;
-			for(int d=0; d<7;d++)
+			sptParser.parseTime = false;
+			sptParser.parseProperty = false;
+
+			for(int d = 0; d < 8; d++)
 			{
-				if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()>0)
+				if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex() > 0)
 				{
 					nColInd[d] = dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()-1;
-					if(d>3)
+					if(d > 3 && d < 7)
 					{
 						nSizeCols++;
 					}
-					if(d==3)
-						bParseTime = true;
+					if(d == 3)
+					{
+						sptParser.parseTime = true;
+					}
+					if(d == 7)
+					{
+						sptParser.parseProperty = true;
+					}
+					
 				}
 				else
 				{
 					nColInd[d] = -1;
 				}
 			}
+			
 			sptParser.nColIndices = nColInd;
-			sptParser.parseTime = bParseTime;
 			
 			//scale factor, convert to micrometers
 			switch (dialSpots.cbUnits.getSelectedIndex())
 			{
-			//milli
-			case 0:
-				sptParser.fScale = 1000.0f;
-				break;
-			//nano
-			case 2:
-				sptParser.fScale = 0.001f;
-				break;
-			//micro
-			default:
-				sptParser.fScale = 1.0f;
+				//milli
+				case 0:
+					sptParser.fScale = 1000.0f;
+					break;
+				//nano
+				case 2:
+					sptParser.fScale = 0.001f;
+					break;
+				//micro
+				default:
+					sptParser.fScale = 1.0f;
 			}
+			
 			Prefs.set( "BVB.nSpotsUnits", dialSpots.cbUnits.getSelectedIndex());
 			
 			SpotsShapeDialog sptShape = new SpotsShapeDialog();
 			sptShape.fileSpots = dialSpots.fileSpots;
-			boolean bAskForSize = true;
 			
 			//parse sizes
-			if(nSizeCols>0)
+			if(nSizeCols > 0)
 			{
 				sptParser.parseSize = true;
 				switch(dialSpots.cbSize.getSelectedIndex())
 				{
-				//radius
-				case 1:
-					sptParser.fSizeScale = 2.0f;
-					break;
-				//SD
-				case 2:
-					sptParser.fSizeScale = 6.0f;
-					break;
+					//radius
+					case 1:
+						sptParser.fSizeScale = 2.0f;
+						break;
+					//SD
+					case 2:
+						sptParser.fSizeScale = 6.0f;
+						break;
 					
 				}	
 				Prefs.set( "BVB.nSpotsSize", dialSpots.cbSize.getSelectedIndex());
-				bAskForSize = false;
 
 			}
-			if(!sptShape.showSelectionDialog( bAskForSize ))
+			if(!sptShape.showSelectionDialog( sptParser.parseSize, sptParser.parseProperty ))
 			{
 				return;
 			}
+			
 			if(sptShape.bSpotDataCleanUp)
 			{
 				sptParser.bDataCleanup = true;
 				sptParser.dPercMin = sptShape.dSpotsPercMin;
 				sptParser.dPercMax = sptShape.dSpotsPercMax;
+				sptParser.bCleanupCols = sptShape.bCleanupCols;
 			}
 			if(sptShape.bExportCleanData)
 			{
@@ -190,42 +199,26 @@ public class PanelAddShapes extends JPanel
 						if(!sptParser.parseTime)
 						{
 							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
-							importedSpots.setPoints( sptParser.vertices, sptParser.sizes);
-							//importedSpots.setLUT( "Fire" );
-							//importedSpots.setMapLUTMode( 1 );
-							RealInterval testInt = importedSpots.boundingBox();
-							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
-							if(sptParser.parseSize)
-							{
-								float[] range = importedSpots.getSizeRange();
-								importedSpots.setMapRange(range[0], range[1]);
-							}
+							importedSpots.setPoints( sptParser.vertices, sptParser.sizes, sptParser.property);
 							spots = importedSpots;
 						}
 						else
 						{
 							MultiSpots importedSpots = new MultiSpots();
 							int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
-							//importedSpots.setLUT( "Fire" );
-							//importedSpots.setMapLUTMode( 1 );
-							RealInterval testInt = importedSpots.boundingBox();
-							importedSpots.setMapRange( (float) testInt.realMin( 2 ), (float)testInt.realMax( 2 ) );
-							if(sptParser.parseSize)
-							{
-								float[] range = importedSpots.getSizeRange();
-								importedSpots.setMapRange(range[0], range[1]);
-							}
 							spots = importedSpots;
+							
 							//update time points
-							if(nMaxTP >= 0)
+							if(nMaxTP > 0)
 							{
 								bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
 							}
 						}	
 						spots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
+						
 						bvb.addShape( spots );						
 						
-						IJ.showStatus( "Uploading " +Long.toString( sptParser.nTotSpots )+" to GPU...done.");
+						IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots ) + " to GPU...done.");
 					}
 				}
 			
@@ -377,7 +370,7 @@ public class PanelAddShapes extends JPanel
 			{
 				MultiMeshColor mmColor = new MultiMeshColor();
 				Color meshColor = null;
-				for(int i=0;i<loadedMeshes.size();i++)
+				for(int i = 0; i < loadedMeshes.size(); i++)
 				{
 					int nTP = -1;
 
@@ -397,7 +390,7 @@ public class PanelAddShapes extends JPanel
 		{
 			IJ.showStatus( "Uploading " + Integer.toString( loadedMeshes.size() ) + " meshes." );
 			final ArrayList<BasicShape> finMeshesShapes = new ArrayList<>();
-			for(int i=0;i<loadedMeshes.size();i++)
+			for(int i = 0; i < loadedMeshes.size(); i++)
 			{		
 				final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
 				int nTP = -1;
@@ -417,7 +410,7 @@ public class PanelAddShapes extends JPanel
 			bvb.addShapes( finMeshesShapes, Misc.getSourceStyleName( sFilename ) );
 		}
 		//update time points
-		if(nMaxTP>=0)
+		if(nMaxTP > 0)
 		{
 			bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
 		}

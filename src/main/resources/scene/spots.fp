@@ -5,7 +5,8 @@ uniform vec2 ellipseAxes;
 uniform int renderType;
 uniform int pointShape;
 in vec3 posW;
-in float sDiamfp;
+in float fDiamfp;
+in float fPropertyfp;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -15,8 +16,17 @@ uniform int wOIT;
 uniform sampler2D lutTexture;
 uniform int nMapLUTMode;
 uniform int sizeLUT;
+uniform int bInvLUT;
 uniform float mapMin;
 uniform float mapRange;
+uniform float mapGamma;
+
+uniform int nMapAlphaMode;
+uniform int bInvAlpha;
+uniform float alphaMin;
+uniform float alphaRange;
+uniform float alphaGamma;
+uniform float extraAlpha;
 
 
 void checkClipping()
@@ -44,15 +54,26 @@ vec4 getInputColor()
 			vec3 axis = vec3(0);
 			axis[nMapLUTMode-1] = 1;
 			val = dot(axis, posW);
-			val = 0.5 + (sizeLUT-1)*((val-mapMin)/mapRange);
-		}
-		if(nMapLUTMode == 4)
-		{
-			val = sDiamfp;
-			val = 0.5 + (sizeLUT-1)*(1.0-((val-mapMin)/mapRange));
-			
 		}
 
+		if(nMapLUTMode == 4)
+		{
+			val = fDiamfp;			
+		}
+		if(nMapLUTMode == 5)
+		{
+			val = fPropertyfp;			
+		}
+
+		val = pow(clamp((val-mapMin)/mapRange,0.0,1.0), mapGamma);
+		
+		if(bInvLUT != 0)
+		{
+			val = 1.0 - val;
+		}
+		
+		val = 0.5 + (sizeLUT-1)*val;
+		
 		//2D texture with fixed width of 256
 		vec2 q = vec2(0);
 		q.y = floor(val/256.0);
@@ -67,6 +88,45 @@ vec4 getInputColor()
 	}
 }
 
+float getInputAlpha()
+{
+
+	if(nMapAlphaMode > 0)
+	{
+		float val = 0.0;
+		if(nMapAlphaMode < 4)
+		{
+			vec3 axis = vec3(0);
+			axis[nMapAlphaMode - 1] = 1;
+			val = dot(axis, posW);
+		}
+
+		if(nMapAlphaMode == 4)
+		{
+			val = fDiamfp;			
+		}
+		
+		if(nMapLUTMode == 5)
+		{
+			val = fPropertyfp;			
+		}
+		
+		val = pow(clamp((val-alphaMin)/alphaRange,0.0,1.0), alphaGamma);
+		
+		if(bInvAlpha != 0)
+		{
+			val = 1.0 - val;
+		}
+		
+		return val * colorin.a;
+		
+	}
+	else
+	{
+	 	return colorin.a;
+	}
+}
+
 void main()
 {
 	checkClipping();
@@ -75,6 +135,7 @@ void main()
 	vec2 coord = 2.0 * gl_PointCoord - 1.0;
 	
 	vec4 colorout = getInputColor();
+	colorout.a = extraAlpha * getInputAlpha();
 	
 	if(pointShape == 0)
 	{
@@ -94,7 +155,7 @@ void main()
 		}
 		else if(renderType >= 2)
 		{		
-			colorout.a = exp(-4.5 * norm) * colorin.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
+			colorout.a = exp(-4.5 * norm) * colorout.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
 		}
 	}
 	else
@@ -117,7 +178,7 @@ void main()
 			if(renderType >= 2)
 			{
 				vec2 fade = abs(( 1 /sqrt(ellipseAxes)) - abs(coord));
-				colorout.a = fade.x * fade.y * colorin.a; 
+				colorout.a = fade.x * fade.y * colorout.a; 
 			}
 		}
 		

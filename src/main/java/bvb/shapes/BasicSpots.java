@@ -12,6 +12,7 @@ public interface BasicSpots
 	public void setColor(Color pointColor_);
 	public Color getColor();
 	
+	
 	public void setLUT(String sLUTName);
 	public void setLUT(final IndexColorModel icm_, String sLUTName); 
 	public String getLUTName();
@@ -25,7 +26,20 @@ public interface BasicSpots
 	
 	public int getMapLUTMode();
 	
-	public void setMapRange(final float fMin, final float fMax);
+	public void setInvertedLUT(boolean bInv);
+	
+	public boolean isInvertedLUT();
+	
+	public void setMapLUTRange(final float fMin, final float fMax);
+	public void setMapLUTGamma(final float fGamma);
+	
+	public void setMapAlphaMode(final int nMapLUTMode);
+	public int getMapAlphaMode();
+	public void setMapAlphaRange(final float fMin, final float fMax);
+	public void setMapAlphaGamma(final float fGamma);
+	
+	public void setInvertedAlpha(boolean bInv);
+	public boolean isInvertedAlpha();
 	
 	public void setRenderType(int nRenderType);
 	public int getRenderType();
@@ -33,14 +47,20 @@ public interface BasicSpots
 	public void setPointShape(int nShape);
 	public int getPointShape();
 	
-	public float [] getSizeRange();
-	/** returns scale factor for various size spots **/
-	public float getSizeScale();
-	
 	/** sets extra scale factor for various size spots **/
 	public void setSizeScale(final float fSizeScale);
+	/** returns scale factor for various size spots **/
+	public float getSizeScale();
+
+	/** returns null if spots have the same size**/
+	public float [] getSizeRange();
+
+	public boolean hasProperty();
 	
+	/** returns null if spots do not have set property**/	
+	public float [] getPropertyRange();
 	
-	
+	public void setExtraAlphaCoefficient(float dCoeff);
+	public float getExtraAlphaCoefficient();
 	
 }

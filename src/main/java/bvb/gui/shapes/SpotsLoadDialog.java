@@ -19,10 +19,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -41,8 +41,6 @@ public class SpotsLoadDialog
 	
 	final BigVolumeBrowser bvb;
 
-	JDialog fLoadSpots = null;
-
 	JPanel pLoadSpots = null;
 
 	public File fileSpots = null;
@@ -51,7 +49,7 @@ public class SpotsLoadDialog
 	
 	final JLabel jStatus = new JLabel ("Status:");
 	
-	int panelWidth = 800;
+	int panelWidth = 1000;
 	
 	int panelHeight = 400;
 	
@@ -77,7 +75,9 @@ public class SpotsLoadDialog
     
     boolean bColumnsAssigned = false;
     
-    JButton butOk = null;
+    final JButton butOk;
+    
+    final JButton butCancel;
     
     public boolean bAllSuccess = false;
 	
@@ -85,35 +85,21 @@ public class SpotsLoadDialog
 	{
 		bvb = bvb_;
 		
-		///OK/CANCEL PANEL		
-		JPanel pOkCancel = new JPanel(new GridBagLayout());
-
+		///OK/CANCEL BUTTONS		
 		butOk = new JButton("OK");
 		GridBagConstraints gbc = new GridBagConstraints();
 		butOk.setEnabled( false );
 		butOk.addActionListener(e -> {
 			bAllSuccess = true;
-			fLoadSpots.dispose();
+			JOptionPane pane = getOptionPane((JComponent)e.getSource());
+            pane.setValue(butOk);
 			}); 
-		JButton butCancel = new JButton("Cancel");
+		butCancel = new JButton("Cancel");
 		butCancel.addActionListener(e -> {
-			fLoadSpots.dispose();
+            JOptionPane pane = getOptionPane((JComponent)e.getSource());
+            pane.setValue(butCancel);
 			}); 
-		//filler
-		gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.weightx = 0.01;
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-	    pOkCancel.add(new JLabel(), gbc);
-	    gbc.fill = GridBagConstraints.NONE;
-	    gbc.weightx = 0.0;
 
-		gbc.gridx ++;
-		pOkCancel.add( butOk, gbc );
-		gbc.gridx ++;
-		pOkCancel.add( butCancel, gbc );
-
-		
 		//FILE SELECTION PANEL
 		JPanel pFileSelect = new JPanel(new GridBagLayout());
 		jlFileName.setHorizontalAlignment( SwingConstants.LEFT );
@@ -210,14 +196,14 @@ public class SpotsLoadDialog
 
 		///COLUMN ASSIGNMENT PANEL COORDINATES XYZT
 		JPanel pColumnsAssignCoords = new JPanel();
-		for (int i=0;i<4;i++)
+		for (int i = 0; i < 4; i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
 			cbColumnsAssign.get( i ).addActionListener( (e)-> updateWindow());
 		}
 		
-		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "T", "SizeX", "SizeY", "SizeZ"};		
+		String [] sColSelectionLabels = new String [] {"X", "Y", "Z", "T", "SizeX", "SizeY", "SizeZ", "Property"};		
 
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -233,9 +219,9 @@ public class SpotsLoadDialog
 			pColumnsAssignCoords.add( cbColumnsAssign.get( i ), gbc );
 		}
 
-		///COLUMN ASSIGNMENT PANEL SIZES
+		///COLUMN ASSIGNMENT PANEL SIZES/PROPERTY
 		JPanel pColumnsAssignSize = new JPanel();
-		for (int i=4;i<7;i++)
+		for (int i = 4; i < 8; i++)
 		{
 			cbColumnsAssign.add(  new JComboBox<>(new String[] {"NA"}));
 			cbColumnsAssign.get( i ).setEnabled( false );
@@ -246,7 +232,7 @@ public class SpotsLoadDialog
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.insets = new Insets(0,0,0,0);
-		for (int i = 4; i < 7; i++)
+		for (int i = 4; i < 8; i++)
 		{
 			pColumnsAssignSize.add(new JLabel(sColSelectionLabels[i]), gbc);
 			gbc.gridx++;
@@ -264,9 +250,7 @@ public class SpotsLoadDialog
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 		
 		JScrollPane scrollTable = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
-		
-		
+			
 		///FINAL PANEL
 		pLoadSpots = new JPanel(new GridBagLayout());
 		gbc = new GridBagConstraints();
@@ -313,23 +297,31 @@ public class SpotsLoadDialog
 	    
 		gbc.gridy ++;
 		gbc.anchor = GridBagConstraints.SOUTHEAST;
-		pLoadSpots.add(pOkCancel, gbc);
-
-		JFrame jfLoadSpots = new JFrame("Load spots/particles");
-		//jfLoadSpots.add( pLoadSpots );
-		fLoadSpots = new JDialog(jfLoadSpots  , "Load spots/particles", true);
-		fLoadSpots.add( pLoadSpots );
-		fLoadSpots.setPreferredSize( new Dimension(panelWidth,panelHeight) );
-	    java.awt.Point bvv_p = bvb.bvvFrame.getLocationOnScreen();
-	    java.awt.Dimension bvv_d = bvb.bvvFrame.getSize();
-	    fLoadSpots.setLocation(bvv_p.x + (int)Math.round(bvv_d.width*0.5- panelWidth*0.5), bvv_p.y+ (int)Math.round(bvv_d.height*0.5 - panelHeight*0.5));
+		pLoadSpots.setPreferredSize( new Dimension(panelWidth,panelHeight) );
 
 	}
 	
+    protected JOptionPane getOptionPane(JComponent parent) {
+        JOptionPane pane = null;
+        if (!(parent instanceof JOptionPane)) {
+            pane = getOptionPane((JComponent)parent.getParent());
+        } else {
+            pane = (JOptionPane) parent;
+        }
+        return pane;
+    }
+	
 	public void show()
 	{
-		fLoadSpots.pack();
-		fLoadSpots.setVisible( true );
+		  JOptionPane.showOptionDialog(
+                  null, 
+                  pLoadSpots, 
+                  "Load spots/particle", 
+                  JOptionPane.YES_NO_OPTION, 
+                  JOptionPane.PLAIN_MESSAGE, 
+                  null, 
+                  new Object[]{butOk, butCancel}, 
+                  butOk);
 	}
 	
 	boolean analyzeFile()
@@ -507,26 +499,26 @@ public class SpotsLoadDialog
 	
 	void checkColumnAssignment()
 	{
-		HashMap< JComboBox<String>, String> mapCols = new HashMap<>();
+		HashMap< JComboBox<String>, Integer> mapCols = new HashMap<>();
 		
 		int nCoordAssign = 0;
-		for(int i=0; i<cbColumnsAssign.size(); i++)
+		for(int i = 0; i < cbColumnsAssign.size(); i++)
 		{
 			final JComboBox<String> cbBox = cbColumnsAssign.get( i );
-			if(cbBox.getSelectedIndex()!=0)
+			if(cbBox.getSelectedIndex() != 0)
 			{
-				mapCols.put( cbBox, cbBox.getItemAt( cbBox.getSelectedIndex() ) );
-				if(i<=2)
+				mapCols.put( cbBox,  cbBox.getSelectedIndex() );
+				if(i <= 2)
 				{
 					nCoordAssign++;
 				}
 			}
 		}
 		
-		Collection< String > colNames = mapCols.values();
-		Set<String> colUniq = new HashSet<>();
-		colUniq .addAll( colNames );
-		if(nCoordAssign>1)
+		Collection< Integer > colNames = mapCols.values();
+		Set<Integer> colUniq = new HashSet<>();
+		colUniq.addAll( colNames );
+		if(nCoordAssign > 1)
 		{
 			butOk.setEnabled( true );
 			if(colUniq.size() != mapCols.size())
@@ -554,7 +546,7 @@ public class SpotsLoadDialog
 			colNames[0] = "NA";
 			for(int i = 0; i < headers.length; i++)
 			{
-				colNames[i+1] = headers[i];
+				colNames[i+1] = headers[i].substring( 0, Math.min(10, headers[i].length()) );
 			}
 		
 			for(JComboBox<String> cbBox: cbColumnsAssign)
@@ -582,9 +574,9 @@ public class SpotsLoadDialog
 			return dummyTableModel();
 		}
 		 String [][] data = new String[dataParsed.size()][headers.length];
-		 for(int i=0;i<dataParsed.size();i++)
+		 for(int i = 0; i < dataParsed.size(); i++)
 		 {
-			 for(int j=0;j<headers.length; j++)
+			 for(int j = 0; j < headers.length; j++)
 			 {
 				 data[i][j] = dataParsed.get( i )[j];
 			 }
@@ -608,10 +600,10 @@ public class SpotsLoadDialog
 	    
 		data = new Float[3][3];
 
-		for(int i=0;i<3;i++)
+		for(int i = 0; i < 3; i++)
 		{
 			columnNames[i] = "Column"+Integer.toString( i+1 );
-			for(int j=0;j<3;j++)
+			for(int j = 0; j < 3; j++)
 			{
 				data[i][j] = new Float(0.0f);
 			}

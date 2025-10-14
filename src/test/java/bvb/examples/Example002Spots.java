@@ -81,10 +81,10 @@ public class Example002Spots
 			verticesDiff.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
 			diameters[i] = ( float ) ( 0.2*(nDiameter + Math.random()*nDiameter));
 		}
-		//do not provide radius
-		samePoints.setPoints( verticesSame );
+		//do not provide radius or property
+		samePoints.setPoints( verticesSame, null, null);
 		//specify radius for each spot
-		diffPoints.setPoints( verticesDiff, diameters );
+		diffPoints.setPoints( verticesDiff, diameters, null );
 		//diffPoints.setRenderType( VisSpots.RENDER_GAUSS_UNIFORM );
 
 		testBVB.addShape( samePoints );

@@ -107,7 +107,7 @@ public class ClipRangePanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i=0;i<3;i++)
+		for(int i = 0; i < 3; i++)
 		{
 			clipAxesPanels[i].setEnabled( bEnabled );
 		}
@@ -135,7 +135,7 @@ public class ClipRangePanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.getClipState()!=0)
+			if(objCl.getClipState() != 0)
 			{
 				final Bounds3D bounds = new Bounds3D(clipSetups.clipAxesBounds.getBounds( objCl ));
 				final double [] minBound = bounds.getMinBound();
@@ -192,7 +192,7 @@ public class ClipRangePanel extends JPanel
 				}
 				else
 				{
-					for (int d=0; d<3; d++)
+					for (int d = 0; d < 3; d++)
 					{
 						final BoundedRange axisRange = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
 						allRangesEqual[d] &= Misc.compareBoundedRanges(range[d], axisRange );
@@ -310,7 +310,7 @@ public class ClipRangePanel extends JPanel
 			max = Math.max( max, bmin );
 			double min = Math.max( bmin, currRangeAxis.getMin() );
 			min = Math.min( max, min );
-			final BoundedRange newRange = new BoundedRange (bmin,bmax, min, max);
+			final BoundedRange newRange = new BoundedRange (bmin, bmax, min, max);
 			clipAxesPanels[nAxis].setRange( newRange );
 			updateClipAxisRangeBounds(nAxis);
 		}

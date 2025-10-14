@@ -57,11 +57,19 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	FinalRealInterval boundBox = null;
 	
+	int nMapAlphaMode = 0;
+
 	String sLUTName = "";
 	
 	LUTUploaderGPU lutGPU  = null;
 	
 	float [] sizeMinMax = null;
+	
+	float [] propertyMinMax = null;
+	
+	boolean bHasProperty = false;
+	
+	float fExtraAlpha = 1.0f;
 	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
@@ -72,75 +80,75 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		defineTransparency();
 	}
 	
-	
-	public void setPoints(final ArrayList<RealPoint> vertices)
-	{
-		setPoints(vertices, null);
-	}
-
-	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes)
+	/** any of the last two arguments can be null **/
+	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float[] spotProperty)
 	{
 		if(visRender == null)
 		{
 			visRender = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		}
-		if(spotSizes == null || spotSizes.length != vertices.size())
-		{	
-			((VisSpots)visRender).setVertices(vertices);	
-		}
-		else
+		
+		((VisSpots)visRender).setVertices(vertices, spotSizes, spotProperty);	
+		if(spotSizes != null)
 		{
-			((VisSpots)visRender).setVertices(vertices, spotSizes);		
 			pointSize = -1.0f;
 		}
+		if(spotProperty != null)
+		{
+			bHasProperty = true;
+			propertyMinMax = getMinMax(spotProperty);
+		}
+		
 		setBoundingBox(vertices, spotSizes);
 	}
 	
+	/** spotSizes argument can be null **/
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
 	{		
-		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize);		
-		sizeMinMax = getSizeMinMax(spotSizes);
+		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize, 1.0f);		
+		sizeMinMax = getMinMax(spotSizes);
 	}
 	
-	public static float [] getSizeMinMax(final float[] spotSizes)
+	public static float [] getMinMax(final float[] values)
 	{
-		if(spotSizes == null)
+		if(values == null)
 			return null;
-		final float [] sizeMinMax = new float [2];
-		sizeMinMax[0] = Float.POSITIVE_INFINITY;
-		sizeMinMax[1] = Float.NEGATIVE_INFINITY;
-		for(int v = 0; v < spotSizes.length; v++)
+		final float [] valuesMinMax = new float [2];
+		valuesMinMax[0] = Float.POSITIVE_INFINITY;
+		valuesMinMax[1] = Float.NEGATIVE_INFINITY;
+		for(int v = 0; v < values.length; v++)
 		{
-			if(spotSizes[v] < sizeMinMax[0])
-				sizeMinMax[0] = spotSizes[v];
-			if(spotSizes[v] > sizeMinMax[1])
-				sizeMinMax[1] = spotSizes[v];
+			if(values[v] < valuesMinMax[0])
+				valuesMinMax[0] = values[v];
+			if(values[v] > valuesMinMax[1])
+				valuesMinMax[1] = values[v];
 		}
-		return sizeMinMax;
+		return valuesMinMax;
 	}
-	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize)
+	
+	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize_, final float sizeScale)
 	{
 		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
 				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
 				Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
-		
+		double pointRadius = 0.5 * pointSize_;
 		if(spotSizes == null)
 		{
 			for ( final RealPoint v : vertices )
 			{
 				final double x = v.getDoublePosition(0), y = v.getDoublePosition(1), z = v.getDoublePosition(2);
-				if ( x - pointSize < boundingBox[ 0 ] )
-					boundingBox[ 0 ] = x - pointSize;
-				if ( y - pointSize < boundingBox[ 1 ] )
-					boundingBox[ 1 ] = y - pointSize;
-				if ( z - pointSize < boundingBox[ 2 ] )
-					boundingBox[ 2 ] = z - pointSize;
-				if ( x + pointSize > boundingBox[ 3 ] )
-					boundingBox[ 3 ] = x + pointSize;
-				if ( y + pointSize > boundingBox[ 4 ] )
-					boundingBox[ 4 ] = y + pointSize;
-				if ( z + pointSize > boundingBox[ 5 ] )
-					boundingBox[ 5 ] = z + pointSize;
+				if ( x - pointRadius < boundingBox[ 0 ] )
+					boundingBox[ 0 ] = x - pointRadius;
+				if ( y - pointRadius < boundingBox[ 1 ] )
+					boundingBox[ 1 ] = y - pointRadius;
+				if ( z - pointRadius < boundingBox[ 2 ] )
+					boundingBox[ 2 ] = z - pointRadius;
+				if ( x + pointRadius > boundingBox[ 3 ] )
+					boundingBox[ 3 ] = x + pointRadius;
+				if ( y + pointRadius > boundingBox[ 4 ] )
+					boundingBox[ 4 ] = y + pointRadius;
+				if ( z + pointRadius > boundingBox[ 5 ] )
+					boundingBox[ 5 ] = z + pointRadius;
 			}
 			
 		}
@@ -150,19 +158,19 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 			for ( int v = 0; v < vertices.size(); v++ )
 			{
 				final double x = vertices.get( v ).getDoublePosition(0), y = vertices.get( v ).getDoublePosition(1), z = vertices.get( v ).getDoublePosition(2);
-				final double pSize = spotSizes[v];
-				if ( x - pSize < boundingBox[ 0 ] )
-					boundingBox[ 0 ] = x - pSize;
-				if ( y - pSize < boundingBox[ 1 ] )
-					boundingBox[ 1 ] = y - pSize;
-				if ( z - pSize < boundingBox[ 2 ] )
-					boundingBox[ 2 ] = z - pSize;
-				if ( x + pSize > boundingBox[ 3 ] )
-					boundingBox[ 3 ] = x + pSize;
-				if ( y + pSize > boundingBox[ 4 ] )
-					boundingBox[ 4 ] = y + pSize;
-				if ( z + pSize > boundingBox[ 5 ] )
-					boundingBox[ 5 ] = z + pSize;
+				final double pRad = 0.5 * spotSizes[v]*sizeScale;
+				if ( x - pRad < boundingBox[ 0 ] )
+					boundingBox[ 0 ] = x - pRad;
+				if ( y - pRad < boundingBox[ 1 ] )
+					boundingBox[ 1 ] = y - pRad;
+				if ( z - pRad < boundingBox[ 2 ] )
+					boundingBox[ 2 ] = z - pRad;
+				if ( x + pRad > boundingBox[ 3 ] )
+					boundingBox[ 3 ] = x + pRad;
+				if ( y + pRad > boundingBox[ 4 ] )
+					boundingBox[ 4 ] = y + pRad;
+				if ( z + pRad > boundingBox[ 5 ] )
+					boundingBox[ 5 ] = z + pRad;
 				
 			}
 
@@ -189,22 +197,33 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	void defineTransparency()
 	{
-
 		bTransparent = false;
+		
 		if(renderType >= VisSpots.RENDER_GAUSS)
 		{
 			bTransparent = true;
 		}
+		
 		if(pointColor.getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
 		{
 			bTransparent = true;
 		}
+		
+		if(nMapAlphaMode != 0)
+		{
+			bTransparent = true;			
+		}
+		
+		if(fExtraAlpha < BasicShape.TRANSPARENCY_THRESHOLD / 255.0f)
+		{
+			bTransparent = true;		
+		}
+
 	}
 	
 	@Override
 	public void setPointSize (final float pointSize_)
-	{
-		
+	{		
 		if(pointSize < 0)
 		{
 			System.err.println("This Spots Shape object has different spots size.");
@@ -216,10 +235,10 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		boundBox.realMax( bb[1] );
 		//adjust bbox dimensions
 		final double diff = 0.5*( pointSize - pointSize_);
-		for(int d=0;d<3;d++)
+		for(int d = 0;d < 3; d++)
 		{
-			bb[0][d]+=diff;
-			bb[1][d]-=diff;
+			bb[0][d] += diff;
+			bb[1][d] -= diff;
 		}
 		boundBox = FinalRealInterval.wrap( bb[0], bb[1]);
 		pointSize = pointSize_;
@@ -278,28 +297,6 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		return sLUTName;
 	}
 	
-	@Override
-	public void setMapLUTMode(int nMapLUTMode_)
-	{
-		int nMapMode = nMapLUTMode_;
-		//no sizes, cannot map LUT
-		if(nMapMode == 4 && pointSize > 0.0f)
-		{
-			nMapMode = 0;
-			System.out.println("No spot size data available for " + this.toString());
-		}
-		if(nMapMode > 0 && lutGPU == null)
-		{
-			this.setLUT( IJ.getLuts()[0] );
-		}
-		((VisSpots)visRender).setMapLUTMode( nMapMode ); 
-	}
-	
-	@Override
-	public int getMapLUTMode()
-	{
-		return ((VisSpots)visRender).getMapLUTMode();
-	}
 	
 	@Override
 	public void setRenderType(int nRenderType)
@@ -309,12 +306,6 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		defineTransparency();
 		return;
 	}	
-	
-	@Override
-	public void setMapRange(final float fMin, final float fMax)
-	{
-		((VisSpots)visRender).setMapRange( fMin, fMax );
-	}
 	
 	@Override
 	public int getRenderType()
@@ -353,11 +344,22 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public float[] getSizeRange()
 	{
 		final float [] sizeMinMaxOut = new float[2];
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{
 			sizeMinMaxOut[i] = sizeMinMax[i];
 		}
 		return sizeMinMaxOut;
+	}
+	
+	@Override
+	public float[] getPropertyRange()
+	{
+		final float [] properyMinMaxOut = new float[2];
+		for(int i = 0; i < 2; i++)
+		{
+			properyMinMaxOut[i] = propertyMinMax[i];
+		}
+		return properyMinMaxOut;
 	}
 
 
@@ -372,8 +374,132 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setSizeScale( float fSizeScale )
 	{
 		((VisSpots)visRender).setSizeScale( fSizeScale );
+		//adjust bounding box?? too complicated for now	
+	}
+	@Override
+	public void setMapLUTMode(int nMapLUTMode_)
+	{
+		int nMapMode = nMapLUTMode_;
+		//no sizes, cannot map LUT
+		if(nMapMode == 4 && pointSize > 0.0f)
+		{
+			nMapMode = 0;
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		//no property, cannot map LUT
+		if(nMapMode == 5 && !bHasProperty)
+		{
+			nMapMode = 0;
+			System.out.println("No spot property data available for " + this.toString());
+		}
+		if(nMapMode > 0 && lutGPU == null)
+		{
+			this.setLUT( IJ.getLuts()[0] );
+		}
+		((VisSpots)visRender).setMapLUTMode( nMapMode ); 
+	}
+	
+	@Override
+	public int getMapLUTMode()
+	{
+		return ((VisSpots)visRender).getMapLUTMode();
+	}
+	
+	@Override
+	public void setMapLUTRange(final float fMin, final float fMax)
+	{
+		((VisSpots)visRender).setMapLUTRange( fMin, fMax );
+	}
+	
+	@Override
+	public void setMapLUTGamma(final float fGamma)
+	{
+		((VisSpots)visRender).setMapLUTGamma( fGamma );		
+	}
+	
+	@Override
+	public void setInvertedLUT(boolean bInv)
+	{
+		((VisSpots)visRender).setInvertedLUT( bInv );
 		
+	}
+	
+	@Override
+	public boolean isInvertedLUT()
+	{
+		return ((VisSpots)visRender).isInvertedLUT();
 	}
 
 
+	@Override
+	public boolean hasProperty()
+	{
+		return bHasProperty ;
+	}
+
+
+	@Override
+	public void setMapAlphaMode( int nMapAlphaMode_ )
+	{
+		nMapAlphaMode = nMapAlphaMode_;
+		//no sizes, cannot map alpha
+		if(nMapAlphaMode == 4 && pointSize > 0.0f)
+		{
+			nMapAlphaMode = 0;
+			System.out.println("No spot size data available for " + this.toString());
+		}
+		//no property, cannot map alpha
+		if(nMapAlphaMode == 5 && !bHasProperty)
+		{
+			nMapAlphaMode = 0;
+			System.out.println("No spot property data available for " + this.toString());
+		}
+		((VisSpots)visRender).setMapAlphaMode( nMapAlphaMode );
+		defineTransparency();
+		
+	}
+	
+	@Override
+	public int getMapAlphaMode()
+	{
+		return nMapAlphaMode;
+	}
+
+	@Override
+	public void setMapAlphaRange( float fMin, float fMax )
+	{
+		((VisSpots)visRender).setMapAlphaRange( fMin, fMax );	
+	}
+
+	@Override
+	public void setMapAlphaGamma( float fGamma )
+	{
+		((VisSpots)visRender).setMapAlphaGamma( fGamma );		
+	}
+
+	@Override
+	public void setInvertedAlpha( boolean bInv )
+	{
+		((VisSpots)visRender).setInvertedAlpha( bInv );		
+	}
+
+	@Override
+	public boolean isInvertedAlpha()
+	{
+		return ((VisSpots)visRender).isInvertedAlpha();
+	}
+
+	@Override
+	public void setExtraAlphaCoefficient( float dCoeff )
+	{
+		fExtraAlpha = dCoeff;
+		((VisSpots)visRender).setExtraAlphaCoefficient( fExtraAlpha );
+		defineTransparency();
+	}
+	
+	@Override
+	public float getExtraAlphaCoefficient( )
+	{
+		return ((VisSpots)visRender).getExtraAlphaCoefficient( );
+	}
 }
