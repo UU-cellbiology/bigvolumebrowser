@@ -121,6 +121,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 								vbox.setLineThickness( NOT_SELECTED_WIDTH );
 							}
 						}
+
 						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
 					}
 				}
@@ -146,7 +147,8 @@ public class VolumeBBoxes extends AbstractBasicShape
 								vbox.setLineThickness( NOT_SELECTED_WIDTH );
 							}
 						}
-						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);						
+						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+						
 					}
 				}
 			});

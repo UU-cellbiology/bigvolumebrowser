@@ -68,6 +68,7 @@ import org.scijava.ui.behaviour.util.Behaviours;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
+import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.Rotate3DViewerStyle;
 import bvb.shapes.BasicShape;
@@ -112,6 +113,7 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
+		actions.runnableAction(() -> actionSelectObject(), "select object", "E" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
@@ -472,6 +474,16 @@ public class BVBActions
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+	}
+	
+	void actionSelectObject()
+	{
+		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+		//solution for now, to not interfere with typing
+		if(!bvb.bLocked && !(c instanceof JTextField))
+		{
+			CanvasSelection.findClosestObjectOnCanvasOnClick(bvb);
+		}
 	}
 	
 }
