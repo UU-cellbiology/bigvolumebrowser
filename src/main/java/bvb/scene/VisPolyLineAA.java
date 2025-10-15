@@ -87,6 +87,8 @@ public class VisPolyLineAA
 	float fDashSpacing = 2.5f;
 
 	private boolean initialized;
+	
+	float fAntiAlias = 1.5f;
 
 	public VisPolyLineAA()
 	{
@@ -188,7 +190,7 @@ public class VisPolyLineAA
 		
 		initialized = false;
 	}
-	
+
 	public void setVertices(final float [][] points)
 	{				
 		nPointsN = points.length;
@@ -204,6 +206,11 @@ public class VisPolyLineAA
 		}
 		
 		initialized = false;
+	}
+	
+	public void setAntiAlias(final float fIn)
+	{
+		fAntiAlias = fIn;
 	}
 	
 	private void generateBuffers(final GL3 gl )
@@ -264,31 +271,31 @@ public class VisPolyLineAA
 		final float [] vertNext = new float [nTotLength];
 		
 	
-		for(int nV = 1; nV<nPointsN+1; nV++)
+		for(int nV = 1; nV < nPointsN+1; nV++)
 		{
 			for(int nDup = 0; nDup<2; nDup++)
 			{
-				for (int d=0;d<3; d++)
+				for (int d = 0; d < 3; d++)
 				{	
-					vertAll[nV*6+nDup*3+d] = vertices[(nV-1)*3+d];
+					vertAll[nV*6 + nDup*3 + d] = vertices[(nV-1)*3 + d];
 				}
 			}
 		}
-		for(int nDup = 0; nDup<2; nDup++)
+		for(int nDup = 0; nDup < 2; nDup++)
 		{
-			for (int d=0;d<3; d++)
+			for (int d = 0; d < 3; d++)
 			{	
 				vertAll[nDup*3+d] = vertices[d];
 			}
 		}
 		for(int nDup = 0; nDup<2; nDup++)
 		{
-			for (int d=0;d<3; d++)
+			for (int d = 0; d < 3; d++)
 			{	
-				vertAll[(nPointsN+1)*6+nDup*3+d] = vertices[(nPointsN-1)*3+d];
+				vertAll[(nPointsN+1)*6 + nDup*3 + d] = vertices[(nPointsN-1)*3 + d];
 			}
 		}
-		for(int i = 0; i<nTotLength; i++)
+		for(int i = 0; i<  nTotLength; i++)
 		{
 			vertCurr[i] = vertAll[i+6];
 			vertPrev[i] = vertAll[i];
@@ -299,15 +306,16 @@ public class VisPolyLineAA
 		for(int i = 1; i<nPointsN;i++)
 		{
 			double dLen = 0;
-			for(int d=0; d<3; d++)
+			for(int d = 0; d < 3; d++)
 			{
-				dLen += Math.pow( vertices[i*3+d]-vertices[(i-1)*3+d], 2 );
+				dLen += Math.pow( vertices[i*3 + d]-vertices[(i-1)*3 + d], 2 );
 			}
 			nCumLength[i] = ( float ) Math.sqrt(dLen)+nCumLength[i-1];
 		}
 		
 		lineLength = nCumLength[nPointsN-1];
-		for(int nV = 0; nV<nPointsN; nV++)
+		
+		for(int nV = 0; nV < nPointsN; nV++)
 		{
 				UV[nV*4] = nCumLength[nV];
 				UV[nV*4+1] = 1.0f;
@@ -353,7 +361,7 @@ public class VisPolyLineAA
 		initialized = false;
 	}
 
-	public void draw( GL3 gl, Matrix4fc pvm)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final boolean bWeightedOIT)
 	{
 		if ( !initialized )
 			init( gl );
@@ -373,8 +381,11 @@ public class VisPolyLineAA
 		prog.getUniform1f( "linelength" ).set( lineLength );
 		prog.getUniform1i( "dashed" ).set( bDashed ? 1:0);
 		prog.getUniform1f( "spacing" ).set( fDashSpacing );
+		//prog.getUniform1f( "thickness" ).set( 6.0f);
 		prog.getUniform1f( "thickness" ).set( fLineThickness );
-		prog.getUniform1f( "antialias" ).set( 1.5f);
+
+		prog.getUniform1f( "antialias" ).set( fAntiAlias);
+		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		
 		//TODO include clipping interval and transform
 		

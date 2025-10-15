@@ -64,6 +64,12 @@ public class BVBSettings
 	
 	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", true ); 
 	
+	/** whether to highlight selected boxes/clipboxes **/
+	public static boolean bHighlightSelectedBoxes = Prefs.get( "BVB.bHighlightSelectedBoxes", true ); 
+	
+	/** highlight color of boxes/clipboxes **/
+	public static Color boxHighlightColor = new Color((int)Prefs.get( "BVB.boxHighlightColor", Color.BLUE.getRGB() ));
+	
 	public static int nDefaultWidthControlPanel = 400;
 	
 	public static int nDefaultHeightControlPanel = 600;

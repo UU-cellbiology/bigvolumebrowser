@@ -178,14 +178,28 @@ public class ViewPanel extends JPanel
 		nfFocusScreenFraction.setText( df3.format( BVBSettings.dFocusScreenFraction ) );
 		
 		JCheckBox cbZoomLoad = new JCheckBox();
-		cbZoomLoad.setSelected(BVBSettings.bFocusOnSourcesOnLoad);
-		
+		cbZoomLoad.setSelected(BVBSettings.bFocusOnSourcesOnLoad);		
 		
 		JCheckBox cbShowScaleBar = new JCheckBox();
 		cbShowScaleBar.setSelected(BVBSettings.bShowScaleBar);
 		
 		JCheckBox cbShowMultiBox = new JCheckBox();
 		cbShowMultiBox.setSelected(BVBSettings.bShowMultiBox);
+		
+		JCheckBox cbHighLightBox = new JCheckBox();
+		cbHighLightBox.setSelected(BVBSettings.bHighlightSelectedBoxes);
+		
+		JButton butHighLightColor = new JButton( new ColorIcon( BVBSettings.boxHighlightColor) );	
+		butHighLightColor.addActionListener( e -> {
+			Color newColor = JColorChooser.showDialog(pViewSettings, "Choose highlight color", BVBSettings.boxHighlightColor );
+			if (newColor != null)
+			{
+				selectColors.setColor(newColor, 1);
+
+				butHighLightColor.setIcon(new ColorIcon(newColor));
+			}
+			
+		});
 		
 		JCheckBox cbPyramidize = new JCheckBox();
 		cbPyramidize.setSelected(BVBSettings.bPyramidize);
@@ -209,9 +223,21 @@ public class ViewPanel extends JPanel
 		
 		gbc.gridx=0;
 		gbc.gridy++;
-		pViewSettings.add(new JLabel("Show MultiBox "), gbc);
+		pViewSettings.add(new JLabel("Show MultiBox"), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbShowMultiBox, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Highlight selected objects"), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbHighLightBox, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Highlight color: "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(butHighLightColor, gbc);
 		
 		gbc.gridx=0;
 		gbc.gridy++;
@@ -259,7 +285,16 @@ public class ViewPanel extends JPanel
 			{
 				bRepaintBVV = true;
 				bvb.setCanvasBGColor(tempC);
+				Prefs.set( "BVB.canvasBGColor", tempC.getRGB() );
 				
+			}
+			
+			tempC = selectColors.getColor(1);
+			if(tempC != null)
+			{
+				bRepaintBVV = true;
+				BVBSettings.boxHighlightColor = tempC;
+				Prefs.set( "BVB.boxHighlightColor", tempC.getRGB() );				
 			}
 			
 			BVBSettings.nTransformAnimationDuration = Integer.parseInt(nfAnimationDuration.getText());
@@ -275,6 +310,9 @@ public class ViewPanel extends JPanel
 			BVBSettings.bShowMultiBox = cbShowMultiBox.isSelected();
 			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
 			bdv.util.Prefs.showMultibox( BVBSettings.bShowMultiBox );
+			
+			BVBSettings.bHighlightSelectedBoxes = cbHighLightBox.isSelected();
+			Prefs.set("BVB.bHighlightSelectedBoxes", BVBSettings.bHighlightSelectedBoxes);
 			
 			BVBSettings.dFocusScreenFraction = Double.parseDouble(nfFocusScreenFraction.getText());
 			Prefs.set("BVB.dFocusScreenFraction",BVBSettings.dFocusScreenFraction);

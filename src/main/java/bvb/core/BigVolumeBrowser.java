@@ -508,9 +508,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
 		
 		//draw boxes around volume
-		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
+//		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 		//draw clip boxes
-		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
+	//	clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 
 		int shapeN = shapes.size();
 		for(int i=0; i<shapeN; i++)
@@ -566,12 +566,17 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		int shapeN = shapes.size();
 		//disable depth writing
 		gl.glDepthMask(false);
-		for(int i=0; i<shapeN; i++)
+		for(int i = 0; i < shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(sh.isTransparent())
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT  );
 		}
+		//draw boxes around volume
+		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+		//draw clip boxes
+		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+		
 		gl.glDepthMask(true);
 		if(BVBSettings.bWeightedOIT)
 		{

@@ -43,6 +43,7 @@ import org.joml.Matrix4fc;
 
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.AbstractBasicShape;
 import bvb.shapes.BasicShape;
@@ -62,9 +63,11 @@ public class VolumeBBoxes extends AbstractBasicShape
 	private boolean bVisible = false;
 	
 	private boolean bLocked = false;
+
+	public static final float NOT_SELECTED_WIDTH = 1.5f, SELECTED_WIDTH = 4.0f;
 	
-	private float lineThickness = 1.0f;
-	
+	private float lineThickness = NOT_SELECTED_WIDTH;
+ 
 	private Color lineColor = Color.WHITE;
 	
 	private boolean bDashed = false;
@@ -97,23 +100,53 @@ public class VolumeBBoxes extends AbstractBasicShape
 			}
 			
 			bLocked = true;			
-			
+
 			bvvSourceToBox.forEach( (sac, vbox)-> {
 				if(bvb.bvvViewer.state().isSourceVisible( sac ))
-				{
+				{					
 					if(vbox != null)
 					{
-						vbox.draw( gl, pvm, vm, screen_size, -1, false);
+						if(BVBSettings.bHighlightSelectedBoxes)
+						{
+							final List< Object > selectedObj = this.bvb.selectedObjects.getSelectedObjects();
+							if(selectedObj.contains( bvb.bvvViewer.getConverterSetups().getConverterSetup( sac ) ))
+							{
+								final Color origColor = vbox.getLineColor();
+								vbox.setLineColor( BVBSettings.boxHighlightColor );
+								vbox.setLineThickness( SELECTED_WIDTH );
+								vbox.setAntiAlias(  SELECTED_WIDTH);
+								vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+								vbox.setAntiAlias(1.5f);
+								vbox.setLineColor(origColor );
+								vbox.setLineThickness( NOT_SELECTED_WIDTH );
+							}
+						}
+						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
 					}
 				}
 			});
 			
 			shapeToBox.forEach( (sh, vbox)-> {
 				if(sh.isVisible())
-				{
+				{					
 					if(vbox != null)
 					{
-						vbox.draw( gl, pvm, vm, screen_size, -1, false);
+						if(BVBSettings.bHighlightSelectedBoxes)
+						{
+							final List< Object > selectedObj = this.bvb.selectedObjects.getSelectedObjects();
+							if(selectedObj.contains( sh ))
+							{
+								final Color origColor = vbox.getLineColor();
+								vbox.setLineColor( BVBSettings.boxHighlightColor );
+								vbox.setLineThickness( SELECTED_WIDTH );
+								vbox.setAntiAlias(  SELECTED_WIDTH );
+								vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+								vbox.setAntiAlias(1.5f);
+								vbox.setLineColor(origColor );
+								vbox.setLineThickness( NOT_SELECTED_WIDTH );
+							}
+						}
+						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);						
 					}
 				}
 			});

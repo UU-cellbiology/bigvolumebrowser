@@ -172,7 +172,7 @@ public class VolumeBox extends AbstractBasicShape
 		{
 			for (final VisPolyLineAA edge : edgesVis)
 			{
-				edge.draw(gl, pvm);
+				edge.draw(gl, pvm, bWeightedOIT_);
 			}
 		}
 	}
@@ -181,10 +181,24 @@ public class VolumeBox extends AbstractBasicShape
 	{
 		
 		lineColor = new Color(lineColor_.getRed(),lineColor_.getGreen(),lineColor_.getBlue(),lineColor_.getAlpha());
-		for(int i =0; i<edgesVis.size();i++)
+		for(int i = 0; i < edgesVis.size(); i++)
 		{
 			edgesVis.get(i).setColor(lineColor);
 		}
+	}
+	
+	public Color getLineColor() 
+	{		
+		return new Color(lineColor.getRed(),lineColor.getGreen(),lineColor.getBlue(),lineColor.getAlpha());
+	}
+	
+	public void setAntiAlias(final float fAA)
+	{
+		for(int i = 0; i < edgesVis.size(); i++)
+		{
+			edgesVis.get(i).setAntiAlias( fAA );
+		}
+		
 	}
 	
 	public void setLineThickness(float line_thickness) 

@@ -36,6 +36,7 @@ void main()
     vec2 t1 = normalize(screen_next.xy - screen_curr.xy);
     vec2 n1 = vec2(-t1.y, t1.x);
     v_uv = vec2(uv.x, uv.y*w);
+    
     if (prev.xyz == curr.xyz) 
     {
         //v_uv.x = -w;
@@ -45,8 +46,8 @@ void main()
     } 
     else if (curr.xyz == next.xyz) 
     {
-        //v_uv.x = linelength+w;
-        // position = screen_curr.xy + w*t0 + uv.y*w*n0;
+        //v_uv.x = linelength + w;
+        //position = screen_curr.xy + w*t0 + uv.y*w*n0;
         //not rounded ends
         position = screen_curr.xy + uv.y*w*n0;
         
@@ -56,7 +57,7 @@ void main()
         vec2 miter = normalize(n0 + n1);
         // The max operator avoid glitches when miter is too large
         float dy = w / max(dot(miter, n1), 1.0);
-        position = screen_curr.xy + dy*uv.y*miter;
+        position = screen_curr.xy + dy * uv.y * miter;
     }
 
     // Back to NDC coordinates

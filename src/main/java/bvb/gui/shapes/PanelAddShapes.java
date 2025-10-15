@@ -59,7 +59,7 @@ public class PanelAddShapes extends JPanel
 		URL icon_path = this.getClass().getResource("/icons/spots.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butSpots = new JButton(tabIcon);
-	    butSpots.setToolTipText("Import spots from text file");
+	    butSpots.setToolTipText("Import spots/point cloud\n from text file");
 	    butSpots.addActionListener( (e)->loadSpotsDialog());				
 	    
 		icon_path = this.getClass().getResource("/icons/mesh.png");
