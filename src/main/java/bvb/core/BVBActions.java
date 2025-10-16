@@ -41,6 +41,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -55,6 +56,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.SpinnerNumberModel;
@@ -113,11 +115,13 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
-		actions.runnableAction(() -> actionSelectObject(), "select object", "E" );
+		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
+		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
+		actions.runnableAction(() -> actionSelectClosestObject(2), "toggle object selection", "ctrl E" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
-		actions.install( bvb.bvvHandle.getKeybindings(), "BigTrace actions" );
+		actions.install( bvb.bvvHandle.getKeybindings(), "BigVolumeBrowser actions" );
 		
 	}
 	
@@ -396,7 +400,7 @@ public class BVBActions
 		
 		if(bvb.selectedObjects.areSourcesSelected())
 		{
-			final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
+			final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedConverterSetups();
 			for ( final ConverterSetup cs : csList )
 			{				
 				SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( cs );
@@ -443,8 +447,11 @@ public class BVBActions
 		String shortCutInfo ="<html><center><b>Shortcuts:</b></center><br>"
 				+"&nbsp;<b>P</b> - show BVB cards panel<br><br>"
 				+"&nbsp;<b>C</b> - center the view on selected objects<br><br>"
+				+"&nbsp;<b>E</b> - select object on canvas<br><br>"
+				+"&nbsp;<b>Shift + E</b> - add object on canvas to selection<br><br>"
+				+"&nbsp;<b>Ctrl + E</b> - toggle object selection on canvas<br><br>"				
 				+"&nbsp;<b>V</b> - toggle visibility of selected objects<br><br>"
-				+"&nbsp;<b>O</b> - toggle render method<br><br>"
+				+"&nbsp;<b>O</b> - toggle sources render method<br><br>"
 				+"&nbsp;<b>S</b> - separate brightness/color dialog<br><br>"
 				+"&nbsp;<b>Shift + X/Y/Z</b> - rotate to major plane<br><br>"					
 				+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
@@ -468,7 +475,7 @@ public class BVBActions
 		pHelp.add(jlInfo,gbc);
 		
 		JFrame frame = new JFrame("BigVolumeBrowser Help");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setContentPane(pHelp);
         
         //Display the window.
@@ -476,13 +483,77 @@ public class BVBActions
         frame.setVisible(true);
 	}
 	
-	void actionSelectObject()
+	/** selects (nMode 0) or adds to selection (nMode 1) or toggles selection (nMode 2)
+	 * of the closest object **/
+	void actionSelectClosestObject(final int nMode)
 	{
 		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//solution for now, to not interfere with typing
 		if(!bvb.bLocked && !(c instanceof JTextField))
 		{
-			CanvasSelection.findClosestObjectOnCanvasOnClick(bvb);
+
+			final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+			final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
+
+			boolean bShouldNotBeSelected = false;
+
+			if( nMode >= 1 )
+			{
+				for(final SourceAndConverter<?> sac:bvb.selectedObjects.getSelectedSources())
+				{
+					selectedSAC.add( sac );
+				}
+				for(final BasicShape sh:bvb.selectedObjects.getSelectedShapes())
+				{
+					selectedShapes.add( sh );
+				}
+			}
+			if( nMode == 1)
+			{
+				bShouldNotBeSelected = true;
+			}
+			
+			final Object closestObj = CanvasSelection.findClosestObjectOnCanvasOnClick(bvb, bShouldNotBeSelected);
+
+			if( nMode <= 1 )
+			{
+				if(closestObj instanceof SourceAndConverter)
+				{
+					selectedSAC.add( ( SourceAndConverter< ? > ) closestObj );
+				}
+				if(closestObj instanceof BasicShape)
+				{
+					selectedShapes.add( ( BasicShape ) closestObj );
+				}
+			}
+			else
+			{
+				if(closestObj instanceof SourceAndConverter)
+				{
+					if(selectedSAC.contains( closestObj ))
+					{
+						selectedSAC.remove( closestObj );
+					}
+					else
+					{
+						selectedSAC.add( ( SourceAndConverter< ? > ) closestObj );
+					}
+				}
+				if(closestObj instanceof BasicShape)
+				{
+					if(selectedShapes.contains( closestObj ))
+					{
+						selectedShapes.remove( closestObj );
+					}
+					else
+					{
+						selectedShapes.add( ( BasicShape ) closestObj );
+					}
+				}
+			}
+			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
+			bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
+			bvb.updateSceneRender();
 		}
 	}
 	

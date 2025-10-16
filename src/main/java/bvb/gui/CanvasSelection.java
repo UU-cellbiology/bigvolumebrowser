@@ -1,6 +1,7 @@
 package bvb.gui;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import net.imglib2.FinalRealInterval;
@@ -23,22 +24,29 @@ import bvvpg.core.util.MatrixMath;
 public class CanvasSelection
 {
 
-	public static void findClosestObjectOnCanvasOnClick(final BigVolumeBrowser bvb)
+	public static Object findClosestObjectOnCanvasOnClick(final BigVolumeBrowser bvb, boolean bShouldNotBeSelected)
 	{	
+		double minZ = Double.POSITIVE_INFINITY; 
 		
-		final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
-		final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
+		Object closestObject = null;
 		
 		final Line3D clickRay =  findClickRay(bvb, true);
+		if(clickRay == null)
+			return null;
 		
 		final AffineTransform3D viewTransform = new AffineTransform3D();
 		bvb.bvvViewer.state().getViewerTransform(viewTransform);
-
+		final List<SourceAndConverter<?>> selectedSAC = bvb.selectedObjects.getSelectedSources();
+		final List<BasicShape> selectedShapes = bvb.selectedObjects.getSelectedShapes();
 		//sources
 		final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
 		final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 		for(final SourceAndConverter< ? > sac :visibleSet)
 		{
+			if(bShouldNotBeSelected && selectedSAC.contains( sac ))
+			{
+				continue;
+			}
 			final Source< ? > src = sac.getSpimSource();
 			if(src.isPresent( nTimePoint ))
 			{
@@ -59,8 +67,14 @@ public class CanvasSelection
 				final ArrayList< RealPoint > intersectionPoints = Intersections3D.cuboidLinesIntersect(objectCube, clickRay);
 				if(intersectionPoints.size() > 0)
 				{
-					System.out.println(src.getName());
-					selectedSAC.add( sac );
+					for(final RealPoint rp:intersectionPoints)
+					{
+						if(rp.getDoublePosition( 2 ) < minZ)
+						{
+							minZ = rp.getDoublePosition( 2 );
+							closestObject = sac;
+						}
+					}
 				}
 			}
 		}
@@ -68,27 +82,36 @@ public class CanvasSelection
 		
 		for(final BasicShape sh : bvb.shapes)
 		{
+			if(bShouldNotBeSelected && selectedShapes.contains( sh ))
+			{
+				continue;
+			}
+
 			if(sh.isVisible())
 			{				
-				Cuboid3D objectCube = new Cuboid3D(sh.boundingBox());
+				Cuboid3D objectCube = new Cuboid3D(sh.boundingBoxNotTransformed());
+				final AffineTransform3D shTransform = new AffineTransform3D();
+				sh.getTransform( shTransform );				
+				objectCube.applyTransform( shTransform );
 				objectCube.applyTransform( viewTransform );
 				final ArrayList< RealPoint > intersectionPoints = Intersections3D.cuboidLinesIntersect(objectCube, clickRay);
 				if(intersectionPoints.size() > 0)
 				{
-					System.out.println(sh.toString());
-					selectedShapes.add( sh );
+					for(final RealPoint rp:intersectionPoints)
+					{
+						if(rp.getDoublePosition( 2 ) < minZ)
+						{
+							minZ = rp.getDoublePosition( 2 );
+							closestObject = sh;
+						}
+					}
 				}
 
 			}
 		}
-		if(selectedSAC.size() > 0)
-		{
-			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
-		}
-		if(selectedShapes.size() > 0)
-		{
-			bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
-		}
+		
+		return closestObject;
+
 	}
 	/** returns a click line through the frustum,
 	 * in the world system of  coordinates.

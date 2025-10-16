@@ -218,7 +218,7 @@ public class CenterZoomBVV
 		
 		final ArrayList<SourceAndConverter< ? >> allSources = new ArrayList<>();		
 		//selected sources
-		final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
+		final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedConverterSetups();
 		for(ConverterSetup cs : csList)
 		{
 			//is it visible?

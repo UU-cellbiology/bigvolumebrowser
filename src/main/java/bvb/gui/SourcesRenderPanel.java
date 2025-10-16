@@ -187,7 +187,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	{
 		updateColors();
 		
-		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 		if(csList== null || csList.isEmpty())
 		{
 			setChoicesEnabled(false);
@@ -250,7 +250,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	@Override
 	public synchronized void actionPerformed( ActionEvent arg0 )
 	{
-		final List< ConverterSetup > csList = selectedSources.getSelectedSources();
+		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 		
 		if(csList== null || csList.isEmpty())
 			return;

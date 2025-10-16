@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bdv.tools.brightness.ConverterSetup;
+import bdv.viewer.SourceAndConverter;
+import bdv.viewer.SourceToConverterSetupBimap;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
 import bvvpg.pgcards.sourcetable.SourceSelectionState;
@@ -45,7 +47,10 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 										ShapeSelectionState.Listener
 {
 	
+	private final SourceToConverterSetupBimap bimap;
+	
 	private List< ConverterSetup > csList = new ArrayList<>();
+	
 	private List< BasicShape > shList = new ArrayList<>();
 	
 	private final List< Object > objList = new ArrayList<>();
@@ -64,6 +69,7 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 		bvb.bvvViewer.sourceGroupSelection.addSourceSelectionStateListener( this );
 		bvb.bvvViewer.sourceSelectionWindowState.addSourceSelectionWindowStateListener( this );	
 		bvb.shapeSelection.addShapesSelectionStateListener( this );
+		bimap = bvb.bvvViewer.getConverterSetups();
 	}
 
 	@Override
@@ -142,9 +148,19 @@ public class SelectedObjects implements SourceSelectionWindowState.Listener,
 		return !shList.isEmpty();
 	}
 	
-	public List< ConverterSetup > getSelectedSources()
+	public List< ConverterSetup > getSelectedConverterSetups()
 	{
 		return csList;
+	}
+	
+	public List<SourceAndConverter<?>> getSelectedSources()
+	{
+		final ArrayList<SourceAndConverter<?>> sacList = new ArrayList<>();
+		for(final ConverterSetup cs : csList)
+		{
+			sacList.add( bimap.getSource( cs ) );
+		}
+		return sacList;
 	}
 	
 	public List< Object > getSelectedObjects()

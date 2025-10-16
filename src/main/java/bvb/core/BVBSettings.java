@@ -68,7 +68,7 @@ public class BVBSettings
 	public static boolean bHighlightSelectedBoxes = Prefs.get( "BVB.bHighlightSelectedBoxes", true ); 
 	
 	/** highlight color of boxes/clipboxes **/
-	public static Color boxHighlightColor = new Color((int)Prefs.get( "BVB.boxHighlightColor", Color.BLUE.getRGB() ));
+	public static Color boxHighlightColor = new Color((int)Prefs.get( "BVB.boxHighlightColor", new Color(0,153,255,255).getRGB() ));
 	
 	public static int nDefaultWidthControlPanel = 400;
 	

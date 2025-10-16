@@ -219,7 +219,7 @@ public class PanelData extends JPanel
 		//sources
 		if(bvb.selectedObjects.areSourcesSelected())
 		{
-			final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedSources();
+			final List< ConverterSetup > csList = bvb.selectedObjects.getSelectedConverterSetups();
 	
 			for (Entry< DataTreeNode, DataTreeNode > entry : bvb.dataTreeModel.dataChildParent.entrySet()) 
 			{
