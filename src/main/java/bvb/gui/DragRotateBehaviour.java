@@ -39,7 +39,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.vistools.BvvHandle;
 
-public class RotateBehaviour implements DragBehaviour
+public class DragRotateBehaviour implements DragBehaviour
 {
 	/**
 	 * Coordinates where mouse dragging started.
@@ -53,13 +53,14 @@ public class RotateBehaviour implements DragBehaviour
 	final private static double step = Math.PI / 180;
 	
 	private int centerX = 0, centerY = 0;
+	
 	final BigVolumeBrowser bvb;
 	final BvvHandle bvvHandle;
 	private final AffineTransform3D transform = new AffineTransform3D();
 	private final AffineTransform3D affineDragStart = new AffineTransform3D();
 	private final AffineTransform3D affineDragCurrent = new AffineTransform3D();
 
-	public RotateBehaviour( final double speed, BigVolumeBrowser bvb_)
+	public DragRotateBehaviour( final double speed, BigVolumeBrowser bvb_)
 	{	
 		bvb = bvb_;
 		this.bvvHandle = bvb.bvvHandle;
