@@ -92,7 +92,7 @@ public class Navigationexample
 			meshBunny = new MeshColor(bunny);
 			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
 			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
-			if(i==1)
+			if( i == 1)
 			{
 				meshBunny.setCartesianGrid( 2.0f, 0.1f );
 			}
