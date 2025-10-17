@@ -116,7 +116,7 @@ public class TransformRotationPanel extends JPanel
 		{			
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
 			final double [] prevAngles =  new double[3];
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
 				prevAngles[d] = eAngles[d];
 			}

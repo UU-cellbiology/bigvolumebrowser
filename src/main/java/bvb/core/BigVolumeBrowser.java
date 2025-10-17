@@ -155,6 +155,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	boolean bShowBGShader = BVBSettings.bShowRandomShader;
 	
 	final VisQuad bgQuad = new VisQuad((int)Math.ceil(Math.random()*4.0));
+	
+	public boolean bManualTransformMode;
 
 	public static interface Listener 
 	{

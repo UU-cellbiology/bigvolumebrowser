@@ -144,7 +144,7 @@ public class TransformPanel extends JPanel
 		icon_path = this.getClass().getResource("/icons/red_crossx2.png");
 		icon = new ImageIcon(icon_path);
 		butResetAll = new JButton(icon);
-		butResetAll.setToolTipText( "Reset all clip" );
+		butResetAll.setToolTipText( "Reset all transforms" );
 		butResetAll.addActionListener((e)->	resetFullTransform()); 
 
 		gbc.gridx ++;

@@ -100,9 +100,9 @@ public class BVBActions
 		final BvvHandle handle = bvb.bvvHandle;
 		
 		//change drag rotation for navigation "3D Viewer" style
-		final Rotate3DViewerStyle dragRotate = new Rotate3DViewerStyle( 0.75, handle);
-		final Rotate3DViewerStyle dragRotateFast = new Rotate3DViewerStyle( 2.0, handle);
-		final Rotate3DViewerStyle dragRotateSlow = new Rotate3DViewerStyle( 0.1, handle);
+		final Rotate3DViewerStyle dragRotate = new Rotate3DViewerStyle( 0.75, bvb);
+		final Rotate3DViewerStyle dragRotateFast = new Rotate3DViewerStyle( 2.0, bvb);
+		final Rotate3DViewerStyle dragRotateSlow = new Rotate3DViewerStyle( 0.1, bvb);
 		
 		behaviours.behaviour( dragRotate, "drag rotate", "button1" );
 		behaviours.behaviour( dragRotateFast, "drag rotate fast", "shift button1" );
@@ -114,6 +114,9 @@ public class BVBActions
 	{
 		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
+		actions.runnableAction(() -> dummy(), "toggle manual transformation", "T" );
+
+		actions.runnableAction(() -> actionToggleManualTransform(), "toggle manual transformation (BVB)", "T" );
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
@@ -554,6 +557,19 @@ public class BVBActions
 			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
 			bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 			bvb.updateSceneRender();
+		}
+	}
+	
+	void actionToggleManualTransform()
+	{
+		bvb.bManualTransformMode =  !bvb.bManualTransformMode;
+		if(bvb.bManualTransformMode)
+		{
+			bvb.bvvViewer.showMessage( "manual transform on" );
+		}
+		else
+		{
+			bvb.bvvViewer.showMessage( "manual transform off" );
 		}
 	}
 	
