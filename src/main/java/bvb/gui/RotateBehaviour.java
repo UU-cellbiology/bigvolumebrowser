@@ -39,7 +39,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.vistools.BvvHandle;
 
-public class Rotate3DViewerStyle implements DragBehaviour
+public class RotateBehaviour implements DragBehaviour
 {
 	/**
 	 * Coordinates where mouse dragging started.
@@ -59,7 +59,7 @@ public class Rotate3DViewerStyle implements DragBehaviour
 	private final AffineTransform3D affineDragStart = new AffineTransform3D();
 	private final AffineTransform3D affineDragCurrent = new AffineTransform3D();
 
-	public Rotate3DViewerStyle( final double speed, BigVolumeBrowser bvb_)
+	public RotateBehaviour( final double speed, BigVolumeBrowser bvb_)
 	{	
 		bvb = bvb_;
 		this.bvvHandle = bvb.bvvHandle;
@@ -81,39 +81,59 @@ public class Rotate3DViewerStyle implements DragBehaviour
 	public void drag( final int x, final int y )
 	{
 		
-		final double rotationX = (y - oY) *  step * speed;
-		final double rotationY = (oX - x) * step * speed ;
-		//final double dX = oX - x;
-		//final double dY = oY - y;
-		//final double v = step * speed;
-
-		affineDragCurrent.set( affineDragStart );
-
-		// center shift
-		affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) - centerX, 0, 3 );
-		affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) - centerY, 1, 3 );	
-
-		affineDragCurrent.rotate( 0, rotationX );
-		affineDragCurrent.rotate( 1, rotationY );
-
-		// center un-shift
-		affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) + centerX, 0, 3 );
-		affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) + centerY, 1, 3 );
+		double rotationX = (y - oY) *  step * speed;
+		double rotationY = (oX - x) * step * speed ;
 		
 		//does not depend on how far we from initial click
 		oX = x;
 		oY = y;
+		
+		transform.set( bvvHandle.getViewerPanel().state().getViewerTransform() );
+
+		//apply rotation to the view transform
 		if(!bvb.bManualTransformMode)
 		{
-			transform.set( bvvHandle.getViewerPanel().state().getViewerTransform() );
+			affineDragCurrent.set( affineDragStart );
+
+			// center shift
+			affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) - centerX, 0, 3 );
+			affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) - centerY, 1, 3 );	
+
+			affineDragCurrent.rotate( 0, rotationX );
+			affineDragCurrent.rotate( 1, rotationY );
+
+			// center un-shift
+			affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) + centerX, 0, 3 );
+			affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) + centerY, 1, 3 );
+
 			transform.preConcatenate( affineDragCurrent );
 			bvvHandle.getViewerPanel().state().setViewerTransform(transform);
-		}
+		}		
+		//apply rotation to selected objects
 		else
 		{
-			//bvb.bvbCards.transformPanel.transformSetups.s
 			if(bvb.selectedObjects.isAnythingSelected())
 			{
+				//see where x and y axis of the current view are looking
+				final double [] vx = new double [] {1.0, 0.0, 0.0};
+				final double [] vy = new double [] {0.0, 1.0, 0.0};		
+				//let's remove translation
+				for(int d = 0; d < 3; d++)
+				{
+					transform.set( 0, d, 3);					
+				}
+				transform.apply( vx, vx );
+				transform.apply( vy, vy );
+				
+				if(vx[0]<0.0)
+				{
+					rotationX *= -1;
+				}
+				if(vy[1]<0.0)
+				{
+					rotationY *= -1;
+				}
+
 				final TransformSetups transformSetups = bvb.bvbCards.transformPanel.transformSetups;
 				final List< Object > objList = bvb.selectedObjects.getSelectedObjects();
 				for ( final Object obj: objList)

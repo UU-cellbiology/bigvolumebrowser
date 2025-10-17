@@ -72,7 +72,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
-import bvb.gui.Rotate3DViewerStyle;
+import bvb.gui.RotateBehaviour;
 import bvb.shapes.BasicShape;
 import bvvpg.vistools.BvvHandle;
 
@@ -100,9 +100,9 @@ public class BVBActions
 		final BvvHandle handle = bvb.bvvHandle;
 		
 		//change drag rotation for navigation "3D Viewer" style
-		final Rotate3DViewerStyle dragRotate = new Rotate3DViewerStyle( 0.75, bvb);
-		final Rotate3DViewerStyle dragRotateFast = new Rotate3DViewerStyle( 2.0, bvb);
-		final Rotate3DViewerStyle dragRotateSlow = new Rotate3DViewerStyle( 0.1, bvb);
+		final RotateBehaviour dragRotate = new RotateBehaviour( 0.75, bvb);
+		final RotateBehaviour dragRotateFast = new RotateBehaviour( 2.0, bvb);
+		final RotateBehaviour dragRotateSlow = new RotateBehaviour( 0.1, bvb);
 		
 		behaviours.behaviour( dragRotate, "drag rotate", "button1" );
 		behaviours.behaviour( dragRotateFast, "drag rotate fast", "shift button1" );
