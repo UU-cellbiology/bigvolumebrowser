@@ -108,7 +108,7 @@ public class BVBActions
 		//behaviours.behaviour( dragRotate, "drag rotate", "button1" );
 		//behaviours.behaviour( dragRotateFast, "drag rotate fast", "shift button1" );
 		//behaviours.behaviour( dragRotateSlow, "drag rotate slow", "ctrl button1" );
-		TransformHandlerBVB transformHandlerBVB = new TransformHandlerBVB(bvb);
+		final TransformHandlerBVB transformHandlerBVB = new TransformHandlerBVB(bvb);
 		transformHandlerBVB.install( behaviours );
 		
 		behaviours.install( handle.getTriggerbindings(), "BigVolumeBrowser Behaviours" );

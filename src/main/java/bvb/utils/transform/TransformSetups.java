@@ -35,7 +35,7 @@ public class TransformSetups
 
 	public boolean bTransformClip = Prefs.get( "BVB.bTransformClip", true );
 	
-	public boolean bCenterPanel = Prefs.get( "BVB.bCenterPanel", true );
+	public boolean bLocalCoordinates = Prefs.get( "BVB.bCenterPanel", true );
 	
 	public TransformSetups (final BigVolumeBrowser bvb_)
 	{

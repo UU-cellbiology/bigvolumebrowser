@@ -69,7 +69,7 @@ public class TransformPanel extends JPanel
 		tabTrPane.addTab( "Rotate", transformRotationPanel );
 		tabTrPane.addTab( "Scale", transformScalePanel );
 		
-		if(!transformSetups.bCenterPanel)
+		if(!transformSetups.bLocalCoordinates)
 		{
 			tabTrPane.setTitleAt( 0, "Translate" );
 		}	
@@ -103,18 +103,18 @@ public class TransformPanel extends JPanel
 		translateIcon[1] = new ImageIcon(icon_path);
 		gbc.gridx ++;
 		gbc.weightx = 0.6;
-		butCenterTranslate = new JButton(translateIcon[transformSetups.bCenterPanel?1:0]);
-		butCenterTranslate.setToolTipText(translateToolTip[transformSetups.bCenterPanel?1:0]);
+		butCenterTranslate = new JButton(translateIcon[transformSetups.bLocalCoordinates?1:0]);
+		butCenterTranslate.setToolTipText(translateToolTip[transformSetups.bLocalCoordinates?1:0]);
 
 		butCenterTranslate.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed( ActionEvent arg0 )
 			{
-				transformSetups.bCenterPanel = !transformSetups.bCenterPanel;
+				transformSetups.bLocalCoordinates = !transformSetups.bLocalCoordinates;
 				int ind = 0;
 				
-				if(transformSetups.bCenterPanel)
+				if(transformSetups.bLocalCoordinates)
 				{
 					tabTrPane.setTitleAt( 0, "Center" );
 					ind = 1;
@@ -123,7 +123,7 @@ public class TransformPanel extends JPanel
 					tabTrPane.setTitleAt( 0, "Translate" );
 				butCenterTranslate.setIcon( translateIcon[ind]  );
 				butCenterTranslate.setToolTipText(translateToolTip[ind]);
-				Prefs.set( "BVB.bCenterPanel", transformSetups.bCenterPanel );
+				Prefs.set( "BVB.bCenterPanel", transformSetups.bLocalCoordinates );
 				transformCentersPanel.updateGUI();
 				//updateGUI();
 			}

@@ -3,9 +3,7 @@ package bvb.gui.transform;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -37,7 +35,7 @@ public class TransformCenterPanel extends JPanel
 	
 	/** a map to store object's center coordinates,
 	 *  to reduce calculations **/
-	private final Map< Object, double[] > objToDefCenters = new HashMap<>();
+	//private final Map< Object, double[] > objToDefCenters = new HashMap<>();
 	
 	public TransformCenterPanel(final TransformSetups transformSetups_) 
 	{
@@ -107,7 +105,7 @@ public class TransformCenterPanel extends JPanel
 			double [] maxBound = null;
 			double [] center = null;
 			
-			if(transformSetups.bCenterPanel)
+			if(transformSetups.bLocalCoordinates)
 			{
 				minBound = minBoundSetup;
 				maxBound = maxBoundSetup;
@@ -115,11 +113,7 @@ public class TransformCenterPanel extends JPanel
 			}
 			else
 			{
-				double [] defcenter = objToDefCenters.get(obj);
-				if(defcenter == null)
-				{
-					defcenter = getDefaultCenter(obj);
-				}
+				double [] defcenter = transformSetups.transformCenters.getNonTransformedCenters( obj );
 				minBound = new double[3];
 				maxBound = new double[3];
 				center = new double[3];
@@ -187,13 +181,9 @@ public class TransformCenterPanel extends JPanel
 		{
 			final Bounds3D bounds = transformSetups.transformCenterBounds.getBounds( obj );
 			double [] defcenter = new double[3];
-			if(!transformSetups.bCenterPanel)
+			if(!transformSetups.bLocalCoordinates)
 			{
-				defcenter = objToDefCenters.get(obj);
-				if(defcenter == null)
-				{
-					defcenter = getDefaultCenter(obj);
-				}
+				defcenter = transformSetups.transformCenters.getNonTransformedCenters( obj );
 			}
 			double minBound = minBoundGUI + defcenter[nAxis];
 			double maxBound = maxBoundGUI + defcenter[nAxis];
@@ -206,7 +196,7 @@ public class TransformCenterPanel extends JPanel
 			}
 			final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
 			final double [] newCenters = new double [3];
-			for(int d=0; d<3; d++)
+			for(int d = 0; d < 3; d++)
 			{
 				newCenters[d] = oldCenters[d];
 			}
@@ -282,30 +272,6 @@ public class TransformCenterPanel extends JPanel
 		updateGUI();
 		transformSetups.updateBVV();
 	}
-	
-	double [] getDefaultCenter(Object obj)
-	{
-		
-		double [] center = null;
-		if(obj instanceof ConverterSetup)
-		{
-			final Source< ? > src = transformSetups.converterSetups.getSource( (ConverterSetup)obj ).getSpimSource();
-			RealInterval interval = Misc.getSourceBoundingBoxAllTP(src);
-			center = Misc.getIntervalCenter( interval );
-			AffineTransform3D srcTrFixed = new AffineTransform3D();
-			(( TransformedSource< ? > )src).getFixedTransform( srcTrFixed );
-			srcTrFixed.inverse().apply( center, center );
-		}
-
-		if(obj instanceof BasicShape)
-		{
-			center = Misc.getIntervalCenter( ((BasicShape)obj).boundingBoxNotTransformed() );
-		}
-		objToDefCenters.put( obj, center );
-		
-		return center;
-	}
-
 	
 	@Override
 	public void setEnabled(boolean bEnabled)
