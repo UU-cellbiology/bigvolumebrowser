@@ -55,7 +55,7 @@ public class TransformCenterPanel extends JPanel
 		gbc.weightx = 0.99;
 		final JPopupMenu [] menus = new JPopupMenu[3];
 		
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			gbc.gridy++;
 			
@@ -117,7 +117,7 @@ public class TransformCenterPanel extends JPanel
 				minBound = new double[3];
 				maxBound = new double[3];
 				center = new double[3];
-				for(int d=0;d<3;d++)
+				for(int d = 0; d < 3; d++)
 				{
 					minBound[d] = minBoundSetup[d] - defcenter[d];
 					maxBound[d] = maxBoundSetup[d] - defcenter[d];
@@ -127,7 +127,7 @@ public class TransformCenterPanel extends JPanel
 			
 			if(bFirstCS)
 			{
-				for (int d=0; d<3; d++)
+				for (int d = 0; d < 3; d++)
 				{
 					boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
 				}
@@ -135,7 +135,7 @@ public class TransformCenterPanel extends JPanel
 			}
 			else
 			{
-				for (int d=0; d<3; d++)
+				for (int d = 0; d < 3; d++)
 				{
 					final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
 					allTrEqual[d] &= boundValue[d].equals( translationRange );
@@ -288,7 +288,7 @@ public class TransformCenterPanel extends JPanel
 		int nSign = -1;
 		if(bPositive)
 			nSign = 1;
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			out[0][d] = v1[d] + nSign * shift[d];
 			out[1][d] = v2[d] + nSign * shift[d];
@@ -300,9 +300,9 @@ public class TransformCenterPanel extends JPanel
 	
 	void setSliderColors(Color [] colors)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			centerPanels[i].setSliderForeground( colors[i] );	
+			centerPanels[d].setSliderForeground( colors[d] );	
 		}
 	}
 	

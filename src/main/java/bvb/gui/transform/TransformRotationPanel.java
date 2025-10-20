@@ -135,7 +135,8 @@ public class TransformRotationPanel extends JPanel
 				double [] viewCenter = new double [] {transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getWidth()*0.5,
 						transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getHeight()*0.5,
 						0.0};
-				//new center
+				
+				//new center of the FOV
 				viewTr.applyInverse( viewCenter, viewCenter );
 				
 				final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
@@ -144,6 +145,8 @@ public class TransformRotationPanel extends JPanel
 				{
 					newCenters[d] = oldCenters[d] - viewCenter[d];
 				}
+				
+				//build rotation transform
 				final AffineTransform3D rotationTr = new AffineTransform3D();
 				for(int d = 0; d < 3; d++)
 				{
@@ -156,15 +159,17 @@ public class TransformRotationPanel extends JPanel
 				}
 
 				transformSetups.transformCenters.setCenters( obj, newCenters );	
-			}
+			}			
 			
 			transformSetups.updateTransform( obj, prevAngles );
 
 		}
 		
 		blockUpdates = false;
+		
 		updateGUI();
-		if(!transformSetups.bLocalCoordinates)
+		
+		if( !transformSetups.bLocalCoordinates )
 		{
 			transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.updateGUI();
 		}
@@ -182,7 +187,7 @@ public class TransformRotationPanel extends JPanel
 		{
 			final double [] prevAngles =  new double[3];
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
 				prevAngles[d] = eAngles [d];
 			}
