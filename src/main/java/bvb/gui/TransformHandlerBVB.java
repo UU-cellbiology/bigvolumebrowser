@@ -51,6 +51,8 @@ public class TransformHandlerBVB
 	/** rotation angles from mouse displacement **/
 	final double [] rotationXY = new double [2];
 	
+	private final Map< Object, double[] > objToOldCenters = new HashMap<>();
+	
 	private final TransformState transform;
 	
 	final BigVolumeBrowser bvb;
@@ -102,7 +104,9 @@ public class TransformHandlerBVB
 			oY = y;
 			centerX = bvvHandle.getViewerPanel().getDisplay().getWidth()/2;
 			centerY = bvvHandle.getViewerPanel().getDisplay().getHeight()/2;
+			
 			transform.get( affineDragStart );
+			
 			for (int d = 0; d < 3; d++)
 			{
 				vXY[0][d] = 0.0;
@@ -111,7 +115,7 @@ public class TransformHandlerBVB
 			vXY[0][0] = 1.0;
 			vXY[1][1] = 1.0;
 			
-			final AffineTransform3D viewTransform = new AffineTransform3D();
+			final AffineTransform3D viewTransform = affineDragStart.copy();
 			transform.get( viewTransform );
 			//let's remove translation
 			for(int d = 0; d < 3; d++)
@@ -124,6 +128,7 @@ public class TransformHandlerBVB
 				viewTransform.applyInverse( vXY[i], vXY[i]);
 				LinAlgHelpers.normalize( vXY[i] );
 			}
+			
 		}
 
 		@Override
@@ -131,29 +136,29 @@ public class TransformHandlerBVB
 		{
 			
 			rotationXY[0]  = (y - oY) *  step * speed;
-			rotationXY[1]  = (oX - x) * step * speed ;
-			
+			rotationXY[1]  = (oX - x) * step * speed;
+
+			affineDragCurrent.set( affineDragStart );
+
+			// center shift
+			affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) - centerX, 0, 3 );
+			affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) - centerY, 1, 3 );	
+
+			affineDragCurrent.rotate( 0, rotationXY[0] );
+			affineDragCurrent.rotate( 1, rotationXY[1] );
+
+			// center un-shift
+			affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) + centerX, 0, 3 );
+			affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) + centerY, 1, 3 );
 			//apply rotation to the view transform
 			if(!bvb.bManualTransformMode)
 			{
-				affineDragCurrent.set( affineDragStart );
-
-				// center shift
-				affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) - centerX, 0, 3 );
-				affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) - centerY, 1, 3 );	
-
-				affineDragCurrent.rotate( 0, rotationXY[0] );
-				affineDragCurrent.rotate( 1, rotationXY[1] );
-
-				// center un-shift
-				affineDragCurrent.set( affineDragCurrent.get( 0, 3 ) + centerX, 0, 3 );
-				affineDragCurrent.set( affineDragCurrent.get( 1, 3 ) + centerY, 1, 3 );
 				transform.set( affineDragCurrent );
-
 			}		
 			//apply rotation to selected objects
 			else
 			{
+				//slower moving
 				oX = x;
 				oY = y;
 				if(bvb.selectedObjects.isAnythingSelected())
@@ -187,6 +192,20 @@ public class TransformHandlerBVB
 						}
 						
 						transformSetups.transformRotation.setAngles( obj, eAngles );
+					
+						//update center positions if needed
+						if(!transformSetups.bLocalCoordinates)
+						{
+							final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
+							final double [] newCenters = new double [3];
+							for(int d = 0; d < 3; d++)
+							{
+								newCenters[d] = oldCenters[d];
+							}
+							affineDragCurrent.apply( newCenters, newCenters );
+							affineDragStart.applyInverse( newCenters, newCenters );
+							transformSetups.transformCenters.setCenters( obj, newCenters );					
+						}
 						transformSetups.updateTransform( obj, prevAngles );
 					}
 					transformSetups.updateBVV();
@@ -203,9 +222,7 @@ public class TransformHandlerBVB
 	
 	private class TranslateXY implements DragBehaviour
 	{
-		private final Map< Object, double[] > objToOldCenters = new HashMap<>();
 		
-	
 		@Override
 		public void init( final int x, final int y )
 		{

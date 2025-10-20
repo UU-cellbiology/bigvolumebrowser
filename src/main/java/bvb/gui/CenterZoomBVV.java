@@ -391,7 +391,7 @@ public class CenterZoomBVV
 	
 		
 		//width
-		for (int z=0 ; z<2; z++)
+		for (int z = 0; z < 2; z++)
 		{
 			//take coordinates in original data volume space
 			matPerspWorld.unproject(0.0f, 0.5f*sH, z, //z=1 ->far from camera z=0 -> close to camera
@@ -400,7 +400,7 @@ public class CenterZoomBVV
 		}
 		
 		//height
-		for (int z=0 ; z<2; z++)
+		for (int z = 0; z < 2; z++)
 		{
 			matPerspWorld.unproject(sW*0.5f, sH, z, 
 					new int[] { 0, 0, sW, sH },temp);	
@@ -408,7 +408,7 @@ public class CenterZoomBVV
 		}
 		
 		//Z view axis
-		for (int z = 0 ; z < 2; z++)
+		for (int z = 0; z < 2; z++)
 		{
 			matPerspWorld.unproject(sW*0.5f, sH*0.5f, z, 
 					new int[] { 0, 0, sW, sH },temp);	
@@ -480,7 +480,7 @@ public class CenterZoomBVV
 		RealPoint [] boxRayLine = new RealPoint[2];
 		boxRayLine[0] =  new RealPoint (centerCoord );
 		double [] boxRayPoint = new double[3];
-		for (int d=0; d<3; d++)
+		for (int d = 0; d < 3; d++)
 		{
 			boxRayPoint[d] = minInt[d];
 		}

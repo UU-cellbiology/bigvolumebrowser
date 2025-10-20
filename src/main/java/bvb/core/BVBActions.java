@@ -72,7 +72,6 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
-import bvb.gui.DragRotateBehaviour;
 import bvb.gui.TransformHandlerBVB;
 import bvb.shapes.BasicShape;
 import bvvpg.vistools.BvvHandle;
@@ -95,23 +94,14 @@ public class BVBActions
 		installActions();
 	}
 	
-	/** install smoother rotation **/
+	/** install separate drag/rotation working with manual transform **/
 	void installBehaviors()
-	{
-		final BvvHandle handle = bvb.bvvHandle;
-		
-		//change drag rotation for navigation "3D Viewer" style
-		//final DragRotateBehaviour dragRotate = new DragRotateBehaviour( 0.75, bvb);
-		//final DragRotateBehaviour dragRotateFast = new DragRotateBehaviour( 2.0, bvb);
-		//final DragRotateBehaviour dragRotateSlow = new DragRotateBehaviour( 0.1, bvb);
-		
-		//behaviours.behaviour( dragRotate, "drag rotate", "button1" );
-		//behaviours.behaviour( dragRotateFast, "drag rotate fast", "shift button1" );
-		//behaviours.behaviour( dragRotateSlow, "drag rotate slow", "ctrl button1" );
+	{		
 		final TransformHandlerBVB transformHandlerBVB = new TransformHandlerBVB(bvb);
+
 		transformHandlerBVB.install( behaviours );
 		
-		behaviours.install( handle.getTriggerbindings(), "BigVolumeBrowser Behaviours" );
+		behaviours.install( bvb.bvvHandle.getTriggerbindings(), "BigVolumeBrowser Behaviours" );
 	}
 	
 	void installActions()

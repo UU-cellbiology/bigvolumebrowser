@@ -37,11 +37,11 @@ public class TransformPanel extends JPanel
 	
 	final JButton butResetAll;
 	
-	JButton butCenterTranslate;
+	JButton butCoordSystem;
 	
-	final ImageIcon [] translateIcon = new ImageIcon[2];
+	final ImageIcon [] coordIcon = new ImageIcon[2];
 	
-	final String[] translateToolTip = new String[2];
+	final String[] coordToolTip = new String[2];
 	
 	final JTabbedPane tabTrPane;
 	
@@ -66,12 +66,14 @@ public class TransformPanel extends JPanel
 		tabTrPane = new JTabbedPane(SwingConstants.TOP);
 
 		tabTrPane.addTab( "Center", transformCentersPanel );
-		tabTrPane.addTab( "Rotate", transformRotationPanel );
+		tabTrPane.addTab( "Rotate(L)", transformRotationPanel );
 		tabTrPane.addTab( "Scale", transformScalePanel );
 		
 		if(!transformSetups.bLocalCoordinates)
 		{
 			tabTrPane.setTitleAt( 0, "Translate" );
+			tabTrPane.setTitleAt( 1, "Rotate(W)" );
+
 		}	
 		
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -94,19 +96,19 @@ public class TransformPanel extends JPanel
 		this.add(cbTransformClip,gbc);
 		
 		
-		translateToolTip[0] = "Using translate panel";
-		translateToolTip[1] = "Using center panel";
+		coordToolTip[0] = "Global world coordinates";
+		coordToolTip[1] = "Local volume coordinates";
 
-		URL icon_path = this.getClass().getResource("/icons/transform_translate.png");
-		translateIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/transform_center.png");
-		translateIcon[1] = new ImageIcon(icon_path);
+		URL icon_path = this.getClass().getResource("/icons/frame_global.png");
+		coordIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource("/icons/frame_local.png");
+		coordIcon[1] = new ImageIcon(icon_path);
 		gbc.gridx ++;
 		gbc.weightx = 0.6;
-		butCenterTranslate = new JButton(translateIcon[transformSetups.bLocalCoordinates?1:0]);
-		butCenterTranslate.setToolTipText(translateToolTip[transformSetups.bLocalCoordinates?1:0]);
+		butCoordSystem = new JButton(coordIcon[transformSetups.bLocalCoordinates?1:0]);
+		butCoordSystem.setToolTipText(coordToolTip[transformSetups.bLocalCoordinates?1:0]);
 
-		butCenterTranslate.addActionListener(new ActionListener()
+		butCoordSystem.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed( ActionEvent arg0 )
@@ -117,19 +119,23 @@ public class TransformPanel extends JPanel
 				if(transformSetups.bLocalCoordinates)
 				{
 					tabTrPane.setTitleAt( 0, "Center" );
+					tabTrPane.setTitleAt( 1, "Rotate(L)" );
 					ind = 1;
 				}
 				else
+				{
 					tabTrPane.setTitleAt( 0, "Translate" );
-				butCenterTranslate.setIcon( translateIcon[ind]  );
-				butCenterTranslate.setToolTipText(translateToolTip[ind]);
+					tabTrPane.setTitleAt( 1, "Rotate(W)" );
+				}
+				butCoordSystem.setIcon( coordIcon[ind]  );
+				butCoordSystem.setToolTipText(coordToolTip[ind]);
 				Prefs.set( "BVB.bCenterPanel", transformSetups.bLocalCoordinates );
 				transformCentersPanel.updateGUI();
 				//updateGUI();
 			}
 	
 		});
-		this.add(butCenterTranslate,gbc);			
+		this.add(butCoordSystem,gbc);			
 		
 		gbc.weightx = 0.05;
 		gbc.fill = GridBagConstraints.NONE;
