@@ -74,7 +74,6 @@ import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.TransformHandlerBVB;
 import bvb.shapes.BasicShape;
-import bvvpg.vistools.BvvHandle;
 
 import ij.Prefs;
 

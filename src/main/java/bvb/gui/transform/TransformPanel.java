@@ -221,13 +221,13 @@ public class TransformPanel extends JPanel
 		switch(tabTrPane.getSelectedIndex())
 		{
 		case 0:
-			transformScalePanel.resetScale();
-			break;
-		case 1:
 			transformCentersPanel.resetCenters();
 			break;
-		case 2:
+		case 1:
 			transformRotationPanel.resetRotation();
+			break;
+		case 2:
+			transformScalePanel.resetScale();
 			break;
 		default:
 		}

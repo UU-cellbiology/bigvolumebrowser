@@ -8,6 +8,8 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import net.imglib2.realtransform.AffineTransform3D;
+
 import bdv.util.BoundedValueDouble;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
@@ -111,11 +113,12 @@ public class TransformRotationPanel extends JPanel
 			return;
 		
 		blockUpdates = true;
+		final AffineTransform3D viewTr = transformSetups.bvb.bvvViewer.state().getViewerTransform();
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{			
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			final double [] prevAngles =  new double[3];
+			final double [] prevAngles = new double[3];
 			for(int d = 0; d < 3; d++)
 			{
 				prevAngles[d] = eAngles[d];
@@ -124,12 +127,47 @@ public class TransformRotationPanel extends JPanel
 			eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
 
 			transformSetups.transformRotation.setAngles( obj, eAngles );
+			
+			if(!transformSetups.bLocalCoordinates)
+			{
+				
+				//get new rotation center
+				double [] viewCenter = new double [] {transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getWidth()*0.5,
+						transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getHeight()*0.5,
+						0.0};
+				//new center
+				viewTr.applyInverse( viewCenter, viewCenter );
+				
+				final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
+				final double [] newCenters = new double [3];
+				for(int d = 0; d < 3; d++)
+				{
+					newCenters[d] = oldCenters[d] - viewCenter[d];
+				}
+				final AffineTransform3D rotationTr = new AffineTransform3D();
+				for(int d = 0; d < 3; d++)
+				{
+					rotationTr.rotate( d, eAngles[d] -  prevAngles[d]);
+				}
+				rotationTr.apply( newCenters, newCenters );
+				for(int d = 0; d < 3; d++)
+				{
+					newCenters[d] += viewCenter[d];
+				}
+
+				transformSetups.transformCenters.setCenters( obj, newCenters );	
+			}
+			
 			transformSetups.updateTransform( obj, prevAngles );
 
 		}
 		
 		blockUpdates = false;
 		updateGUI();
+		if(!transformSetups.bLocalCoordinates)
+		{
+			transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.updateGUI();
+		}
 	}
 	
 	public void resetRotation()
