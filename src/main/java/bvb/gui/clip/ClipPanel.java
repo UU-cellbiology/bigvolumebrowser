@@ -156,9 +156,9 @@ public class ClipPanel extends JPanel
 	    //PROJECTION MATRIX
 	    coordToolTip[0] = "Global world coordinates";
 	    coordToolTip[1] = "Local volume coordinates";
-		URL icon_path = this.getClass().getResource("/icons/clip_global.png");
+		URL icon_path = this.getClass().getResource("/icons/frame_global.png");
 		coordIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/clip_local.png");
+		icon_path = this.getClass().getResource("/icons/frame_local.png");
 		coordIcon[1] = new ImageIcon(icon_path);
 		
 		butCoordSystem = new JButton(coordIcon[clipSetups.bLocalCoordinates?1:0]);

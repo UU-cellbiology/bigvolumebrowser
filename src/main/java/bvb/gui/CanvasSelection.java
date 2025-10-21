@@ -130,7 +130,7 @@ public class CanvasSelection
 		int sW = bvb.bvvViewer.getWidth();
 		int sH = bvb.bvvViewer.getHeight();
 		Matrix4f matPerspWorld = new Matrix4f();
-		MatrixMath.screenPerspective(0, BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar, sW, sH, 0, matPerspWorld ).mul( MatrixMath.affine( viewTransform, new Matrix4f() ) );
+		MatrixMath.screenPerspective(bvb.bvvViewer.getProjectionType(), BVVSettings.dCam, BVVSettings.dClipNear, BVVSettings.dClipFar, sW, sH, 0, matPerspWorld ).mul( MatrixMath.affine( viewTransform, new Matrix4f() ) );
 		
 
 		Vector3f temp = new Vector3f(); 

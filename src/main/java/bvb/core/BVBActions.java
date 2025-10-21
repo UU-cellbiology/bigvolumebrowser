@@ -72,9 +72,8 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
-import bvb.gui.Rotate3DViewerStyle;
+import bvb.gui.TransformHandlerBVB;
 import bvb.shapes.BasicShape;
-import bvvpg.vistools.BvvHandle;
 
 import ij.Prefs;
 
@@ -94,26 +93,23 @@ public class BVBActions
 		installActions();
 	}
 	
-	/** install smoother rotation **/
+	/** install separate drag/rotation working with manual transform **/
 	void installBehaviors()
-	{
-		final BvvHandle handle = bvb.bvvHandle;
+	{		
+		final TransformHandlerBVB transformHandlerBVB = new TransformHandlerBVB(bvb);
+
+		transformHandlerBVB.install( behaviours );
 		
-		//change drag rotation for navigation "3D Viewer" style
-		final Rotate3DViewerStyle dragRotate = new Rotate3DViewerStyle( 0.75, handle);
-		final Rotate3DViewerStyle dragRotateFast = new Rotate3DViewerStyle( 2.0, handle);
-		final Rotate3DViewerStyle dragRotateSlow = new Rotate3DViewerStyle( 0.1, handle);
-		
-		behaviours.behaviour( dragRotate, "drag rotate", "button1" );
-		behaviours.behaviour( dragRotateFast, "drag rotate fast", "shift button1" );
-		behaviours.behaviour( dragRotateSlow, "drag rotate slow", "ctrl button1" );
-		behaviours.install( handle.getTriggerbindings(), "BigTrace Behaviours" );
+		behaviours.install( bvb.bvvHandle.getTriggerbindings(), "BigVolumeBrowser Behaviours" );
 	}
 	
 	void installActions()
 	{
 		actions.runnableAction(() -> dummy(), "cycle current", "C" );
 		actions.runnableAction(() -> actionCenterView(), "center view (zoom out)", "C" );
+		actions.runnableAction(() -> dummy(), "toggle manual transformation", "T" );
+
+		actions.runnableAction(() -> actionToggleManualTransform(), "toggle manual transformation (BVB)", "T" );
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
@@ -554,6 +550,19 @@ public class BVBActions
 			bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
 			bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 			bvb.updateSceneRender();
+		}
+	}
+	
+	void actionToggleManualTransform()
+	{
+		bvb.bManualTransformMode =  !bvb.bManualTransformMode;
+		if(bvb.bManualTransformMode)
+		{
+			bvb.bvvViewer.showMessage( "manual transform on" );
+		}
+		else
+		{
+			bvb.bvvViewer.showMessage( "manual transform off" );
 		}
 	}
 	

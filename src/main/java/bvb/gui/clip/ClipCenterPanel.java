@@ -39,7 +39,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import bdv.util.BoundedValueDouble;
-import bvb.shapes.BasicShape;
 import bvb.utils.BoundedValueDoubleBVB;
 import bvb.utils.Bounds3D;
 import bvb.utils.Misc;
@@ -118,7 +117,7 @@ public class ClipCenterPanel extends JPanel
 		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
 		boolean bFirstCS = true;
 		boolean [] allCenterEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			allCenterEqual[d] = true;
 		}
@@ -141,9 +140,9 @@ public class ClipCenterPanel extends JPanel
 					final double [] objCenter = clipSetups.getCurrentObjectCenter( obj );
 					if(objCenter != null)
 					{
-						for(int d=0;d<3;d++)
+						for(int d = 0; d < 3; d++)
 						{
-							center[d] = centerIn[d]-objCenter[d];
+							center[d] = centerIn[d] - objCenter[d];
 							minBound[d] -= objCenter[d];
 							maxBound[d] -= objCenter[d];
 						}						
@@ -153,7 +152,7 @@ public class ClipCenterPanel extends JPanel
 				{
 					center = centerIn;
 				}
-				for(int d=0;d<3;d++)
+				for(int d = 0; d < 3; d++)
 				{
 					minBound[d] = Math.min(minBound[d], center[d]);
 					maxBound[d] = Math.max(maxBound[d], center[d]);
@@ -168,7 +167,7 @@ public class ClipCenterPanel extends JPanel
 				}
 				else
 				{
-					for (int d=0; d<3; d++)
+					for (int d = 0; d < 3; d++)
 					{
 						final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
 						allCenterEqual[d] &= Misc.compareBoundedValues( boundValue[d], centerRange );
@@ -213,7 +212,6 @@ public class ClipCenterPanel extends JPanel
 		minBoundAbs = Math.min( currValAbs, minBoundAbs );
 		maxBoundAbs = Math.max( currValAbs, maxBoundAbs );
 		
-		boolean bUpdateView = false;
 		
 		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
@@ -224,10 +222,6 @@ public class ClipCenterPanel extends JPanel
 			if(clipSetups.bLocalCoordinates)
 			{				
 				relShift = clipSetups.getCurrentObjectCenter( obj );
-				if(obj instanceof BasicShape)
-				{
-					bUpdateView = true;
-				}
 			}
 
 			double currVal = currValAbs + relShift[nAxis];
@@ -250,10 +244,7 @@ public class ClipCenterPanel extends JPanel
 			clipSetups.clipCenters.setCenters( objCl, newCenter );
 			clipSetups.updateClipTransform( objCl, null );
 		}
-		if( bUpdateView )
-		{
-			clipSetups.bvb.updateSceneRender();
-		}
+		clipSetups.bvb.updateSceneRender();
 		blockUpdates = false;
 		updateGUI();
 	}

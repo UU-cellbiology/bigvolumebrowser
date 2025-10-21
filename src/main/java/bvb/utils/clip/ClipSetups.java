@@ -112,9 +112,7 @@ public class ClipSetups
 	}
 	
 	void getRotation(final AffineTransform3D trRot, final Clippable3D obj, final double [] previousAngles)
-	{
-		
-		
+	{		
 		final double [] qCurr = clipRotation.getQuaternion( obj );
 		final double [] eAngles = clipRotation.getAngles( obj );
 		

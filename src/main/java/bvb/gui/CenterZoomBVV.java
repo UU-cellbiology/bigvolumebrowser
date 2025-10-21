@@ -102,7 +102,7 @@ public class CenterZoomBVV
 			}
 		}
 		
-		if(focusSet.size()==0)
+		if(focusSet.size() == 0)
 			return null;
 		
 		return getIntervalFromObjectsList(bvb, focusSet );
@@ -114,7 +114,7 @@ public class CenterZoomBVV
 		RealInterval allInt = null;
 
 		//just in case
-		if(objList.size()>0)
+		if(objList.size() > 0)
 		{
 			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			for(final Object obj : objList)
@@ -142,7 +142,7 @@ public class CenterZoomBVV
 							clipInt = Intervals.intersect( clipInt, sourceInt );
 							//clipping interval could be outside of source, let's check it
 							boolean bIntersectOk = true;
-							for(int d = 0; d<3; d++)
+							for(int d = 0; d < 3; d++)
 							{
 								if(clipInt.realMin( d )>=clipInt.realMax( d ))
 								{
@@ -180,7 +180,7 @@ public class CenterZoomBVV
 							clipInt = Intervals.intersect( clipInt, shapeInt );
 							//clipping interval could be outside of source, let's check it
 							boolean bIntersectOk = true;
-							for(int d = 0; d<3; d++)
+							for(int d = 0; d < 3; d++)
 							{
 								if(clipInt.realMin( d )>=clipInt.realMax( d ))
 								{
@@ -229,7 +229,7 @@ public class CenterZoomBVV
 			}
 		}
 		//nothing visible in selected, let's add all visible
-		if(allSources.size()==0)
+		if(allSources.size() == 0)
 		{
 			for(SourceAndConverter< ? > sac :visibleSet)
 			{
@@ -271,9 +271,9 @@ public class CenterZoomBVV
 						clipInt = Intervals.intersect( clipInt, sourceInt );
 						//clipping interval could be outside of source, let's check it
 						boolean bIntersectOk = true;
-						for(int d = 0; d<3; d++)
+						for(int d = 0; d < 3; d++)
 						{
-							if(clipInt.realMin( d )>=clipInt.realMax( d ))
+							if(clipInt.realMin( d ) >= clipInt.realMax( d ))
 							{
 								bIntersectOk = false;
 								break;
@@ -377,8 +377,8 @@ public class CenterZoomBVV
 		final FinalRealInterval rotInterval = viewRotFinal.estimateBounds( inInterval );
 		
 		//move to the center of the canvas
-		dl[0] = 0.5f*sW;
-		dl[1] = 0.5f*sH;
+		dl[0] = 0.5f * sW;
+		dl[1] = 0.5f * sH;
 		dl[2] = 0.0;
 		transform.translate( dl );
 	
@@ -391,30 +391,30 @@ public class CenterZoomBVV
 	
 		
 		//width
-		for (int z=0 ; z<2; z++)
+		for (int z = 0; z < 2; z++)
 		{
 			//take coordinates in original data volume space
-			matPerspWorld.unproject(0.0f,0.5f*sH,z, //z=1 ->far from camera z=0 -> close to camera
+			matPerspWorld.unproject(0.0f, 0.5f*sH, z, //z=1 ->far from camera z=0 -> close to camera
 					new int[] { 0, 0, sW, sH },temp);
-			camRayLinesWH[0][z] = new RealPoint(temp.x,temp.y,temp.z);
+			camRayLinesWH[0][z] = new RealPoint(temp.x, temp.y, temp.z);
 		}
 		
 		//height
-		for (int z=0 ; z<2; z++)
+		for (int z = 0; z < 2; z++)
 		{
-			matPerspWorld.unproject(sW*0.5f,sH,z, 
+			matPerspWorld.unproject(sW*0.5f, sH, z, 
 					new int[] { 0, 0, sW, sH },temp);	
-			camRayLinesWH[1][z] = new RealPoint(temp.x,temp.y,temp.z);
+			camRayLinesWH[1][z] = new RealPoint(temp.x, temp.y, temp.z);
 		}
 		
 		//Z view axis
-		for (int z=0 ; z<2; z++)
+		for (int z = 0; z < 2; z++)
 		{
-			matPerspWorld.unproject(sW*0.5f,sH*0.5f,z, 
+			matPerspWorld.unproject(sW*0.5f, sH*0.5f, z, 
 					new int[] { 0, 0, sW, sH },temp);	
-			camRayLinesNearFar[z][0] = new RealPoint(temp.x,temp.y,temp.z);
+			camRayLinesNearFar[z][0] = new RealPoint(temp.x, temp.y, temp.z);
 		}
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{
 			camRayLinesNearFar[i][1] = camRayLinesWH[1][i];
 		}
@@ -423,20 +423,20 @@ public class CenterZoomBVV
 		RealPoint[][] boxRayWH = new RealPoint[2][2];
 		
 		//width and height
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{	
 			boxRayWH[i] = makeBoxRayLineWH(i, rotInterval.minAsDoubleArray(), centerCoord, viewRotFinal );
-			scales[i] = zoomFraction*getMaxScaleFactorIntersect(camRayLinesWH[i], boxRayWH[i]);
+			scales[i] = zoomFraction * getMaxScaleFactorIntersect(camRayLinesWH[i], boxRayWH[i]);
 		}
 		
 		//clip near and clip far
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{	
-			scales[i+2] = zoomFraction*getMaxScaleFactorIntersect( camRayLinesNearFar[i], boxRayWH[1]);
+			scales[i+2] = zoomFraction * getMaxScaleFactorIntersect( camRayLinesNearFar[i], boxRayWH[1]);
 		}
 
 		double finScale = Double.MAX_VALUE;
-		for(int i=0; i<4; i++)
+		for(int i = 0; i < 4; i++)
 		{
 			finScale = Math.min( finScale, scales[i] );
 		}
@@ -480,7 +480,7 @@ public class CenterZoomBVV
 		RealPoint [] boxRayLine = new RealPoint[2];
 		boxRayLine[0] =  new RealPoint (centerCoord );
 		double [] boxRayPoint = new double[3];
-		for (int d=0; d<3; d++)
+		for (int d = 0; d < 3; d++)
 		{
 			boxRayPoint[d] = minInt[d];
 		}
