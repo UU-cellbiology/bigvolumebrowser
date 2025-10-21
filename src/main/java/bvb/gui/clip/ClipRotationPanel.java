@@ -39,6 +39,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.util.BoundedValueDouble;
 import bvb.shapes.BasicShape;
+import bvb.utils.Misc;
 import bvb.utils.clip.ClipSetups;
 import bvvpg.source.converters.Clippable3D;
 import bvvpg.ui.panels.BoundedValuePanelPG;
@@ -103,7 +104,7 @@ public class ClipRotationPanel extends JPanel
 		double [] angles = new double[3];
 		boolean bFirstCS = true;
 		boolean [] allAnglesEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			allAnglesEqual[d] = true;
 		}
@@ -140,7 +141,7 @@ public class ClipRotationPanel extends JPanel
 					if(clipSetups.bLocalCoordinates)
 					{
 						final double[] trAngles = clipSetups.bvb.bvbCards.transformPanel.transformSetups.transformRotation.getAngles( obj );
-						for(int d=0;d<3;d++)
+						for(int d = 0; d < 3; d++)
 						{
 							currAngles[d] = tempAngles[d] - trAngles[d];
 						}
@@ -149,9 +150,9 @@ public class ClipRotationPanel extends JPanel
 					{
 						currAngles = tempAngles;
 					}
-					for (int d=0; d<3; d++)
+					for (int d = 0; d < 3; d++)
 					{
-						allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
+						allAnglesEqual[d] &= (Math.abs( angles[d] - currAngles[d] )<0.00001);
 					}
 				}
 			}		
@@ -161,13 +162,17 @@ public class ClipRotationPanel extends JPanel
 		{
 			final double [] finalAngles = angles;
 			final boolean [] isConsistent = allAnglesEqual;
+			for(int d = 0; d < 3; d++)
+			{
+				finalAngles[d] = Misc.angleToMinusPiPlusPi( finalAngles[d]  ); 
+			}
 			SwingUtilities.invokeLater( () -> {
 				synchronized ( ClipRotationPanel.this )
-				{
+				{					
 					blockUpdates = true;
-					for (int d=0;d<3;d++)
-					{
-	
+					
+					for (int d = 0; d < 3; d++)
+					{	
 						clipRotationPanels[d].setConsistent( isConsistent[d] );
 						clipRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
 					}
@@ -231,16 +236,9 @@ public class ClipRotationPanel extends JPanel
 			{
 				final double [] prevAngles = new double [3];
 				final double [] resetAngles = new double [3];
-//				if(clipSetups.bLocalCoordinates)
-//				{
-//					final double [] trAngles = clipSetups.bvb.controlPanel.tabPanelView.transformPanel.transformSetups.transformRotation.getAngles( obj );
-//					for (int d=0;d<3;d++)
-//					{
-//						resetAngles[d] = trAngles[d];
-//					}
-//				}
 				final double[] prevAnglesHM = clipSetups.clipRotation.getAngles( objCl );
-				for (int d=0;d<3;d++)
+				
+				for (int d = 0; d < 3; d++)
 				{
 					prevAngles[d] = prevAnglesHM[d];				
 				}

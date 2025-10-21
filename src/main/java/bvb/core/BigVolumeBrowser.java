@@ -373,19 +373,27 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			startBVB(BVVFrameTitle);
 		}
+		//let's check it we have some timepoints already (if only shapes are loaded)
+		final int nPrevTPN = bvvViewer.state().getNumTimepoints();
 		
+		//add data to BVV
 		List< BvvStackSource< ? > > bvvSources = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
-
 		
+		//see if we reset timepoint number
+		if(bvvViewer.state().getNumTimepoints() < nPrevTPN)
+		{
+			bvvViewer.state().setNumTimepoints( nPrevTPN );
+		}
 		//check for display settings stored in spimdata
 		@SuppressWarnings( "unchecked" )
 		List<BasicViewSetup> views = ( List< BasicViewSetup > ) (spimData.getSequenceDescription().getViewSetupsOrdered());
 		int nSetup = 0;
 		for(BasicViewSetup view : views)
-		{
-	
+		{	
 			boolean bLutSet = false;
+			
 			Map< String, Entity > attr = view.getAttributes();
+			
 			for (Map.Entry<String, Entity> entry : attr.entrySet()) 				
 			{			
 				if(entry.getKey().equals( "displaysettings"))

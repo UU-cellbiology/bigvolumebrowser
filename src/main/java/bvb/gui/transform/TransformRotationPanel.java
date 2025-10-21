@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bdv.util.BoundedValueDouble;
+import bvb.utils.Misc;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.ui.panels.BoundedValuePanelPG;
 
@@ -92,11 +93,17 @@ public class TransformRotationPanel extends JPanel
 		
 		final double [] finalAngles = angles;
 		final boolean [] isConsistent = allAnglesEqual;
+		
+		for(int d = 0; d < 3; d++)
+		{
+			finalAngles[d] = Misc.angleToMinusPiPlusPi( finalAngles[d]  ); 
+		}
+			
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( TransformRotationPanel.this )
 			{
 				blockUpdates = true;
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 
 					trRotationPanels[d].setConsistent( isConsistent[d] );

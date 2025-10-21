@@ -486,4 +486,17 @@ public class Misc
 		
 	}
 	
+	public static double angleToMinusPiPlusPi(final double dAngle)
+	{
+		double out = dAngle;
+		
+		while (out > Math.PI) {
+		    out -= 2 * Math.PI;
+		}
+		while (out < -Math.PI) {
+		    out += 2 * Math.PI;
+		}
+		return out;
+	}
+	
 }
