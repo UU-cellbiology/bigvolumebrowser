@@ -107,8 +107,8 @@ public class ViewPanel extends JPanel
 		icon_path = this.getClass().getResource("/icons/proj_ortho.png");
 		projIcon[1] = new ImageIcon(icon_path);
 
-	    butProjType = new JButton(projIcon[bvb.bvvViewer.getProjectionType()]);
-	    butProjType.setToolTipText( projToolTip[bvb.bvvViewer.getProjectionType() ]);
+	    butProjType = new JButton( projIcon[ bvb.bvvViewer.getProjectionType() ] );
+	    butProjType.setToolTipText( projToolTip[ bvb.bvvViewer.getProjectionType() ]);
 	    
 	    butProjType.addActionListener(new ActionListener()
 		{
@@ -253,15 +253,15 @@ public class ViewPanel extends JPanel
 		
 		gbc.gridx=0;
 		gbc.gridy++;
-		pViewSettings.add(new JLabel("Focus on loaded sources "), gbc);
+		pViewSettings.add(new JLabel("Focus on loaded objects "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbZoomLoad, gbc);
 
-		gbc.gridx=0;
-		gbc.gridy++;
-		pViewSettings.add(new JLabel("Pyramidize loaded data "), gbc);
-		gbc.gridx++;
-		pViewSettings.add(cbPyramidize, gbc);
+//		gbc.gridx=0;
+//		gbc.gridy++;
+//		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
+//		gbc.gridx++;
+//		pViewSettings.add(cbPyramidize, gbc);
 		
 		gbc.gridx=0;
 		gbc.gridy++;
@@ -284,9 +284,7 @@ public class ViewPanel extends JPanel
 			if(tempC != null)
 			{
 				bRepaintBVV = true;
-				bvb.setCanvasBGColor(tempC);
-				Prefs.set( "BVB.canvasBGColor", tempC.getRGB() );
-				
+				bvb.setCanvasBGColor(tempC);				
 			}
 			
 			tempC = selectColors.getColor(1);

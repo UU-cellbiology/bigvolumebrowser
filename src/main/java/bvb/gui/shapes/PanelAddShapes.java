@@ -24,10 +24,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.imglib2.mesh.Mesh;
 
-import bdv.viewer.animate.TextOverlayAnimator;
-import bdv.viewer.animate.TextOverlayAnimator.TextPosition;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.ColorTextOverlayAnimator;
+import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.gui.GBCHelper;
 import bvb.io.shapes.GltfImporter;
 import bvb.io.shapes.SpotsParser;
@@ -224,7 +224,7 @@ public class PanelAddShapes extends JPanel
 			
 			}
 			);
-			bvb.bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "Loading spots, please wait...", 5000, TextPosition.CENTER )  );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading spots, please wait...", 5000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
 			
 			sptParser.execute();
 		}
@@ -282,13 +282,13 @@ public class PanelAddShapes extends JPanel
 	
 	void loadGLTfile(String sFilename)
 	{
-		bvb.bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "Loading meshes from glTF, please wait...", 3000, TextPosition.CENTER )  );
+		bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading meshes from glTF, please wait...", 3000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
 		GltfImporter gltfImporter = new GltfImporter();
 		final List< BasicShape > meshes = gltfImporter.loadGLTF( sFilename );
 		
 		if (meshes != null)
 		{
-			if(meshes.size()>0)
+			if(meshes.size() > 0)
 			{
 				bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
 			}
@@ -304,7 +304,7 @@ public class PanelAddShapes extends JPanel
 		GridBagConstraints gbc = new GridBagConstraints();
 		String[] sOptions = { "Group meshes by color", "Each mesh separately" };
 		JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
-		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesh", true)?0:1);
+		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesh", true) ? 0 : 1);
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
@@ -327,7 +327,7 @@ public class PanelAddShapes extends JPanel
 			return;
 		}
 
-		bvb.bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "Loading meshes, please wait...", 5000, TextPosition.CENTER )  );
+		bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading meshes, please wait...", 5000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
 		
 		final WRLParser loaderWRT = new WRLParser();
 		//loaderWRT.nMaxMeshes = 4;

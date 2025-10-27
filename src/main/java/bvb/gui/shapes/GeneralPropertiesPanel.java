@@ -10,7 +10,9 @@ import javax.swing.JPanel;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.NumberField;
+import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
 
@@ -121,11 +123,11 @@ public class GeneralPropertiesPanel extends JPanel
 		bvb.repaintBVV();
 		if(BVBSettings.bWeightedOIT)
 		{
-			bvb.bvvViewer.showMessage( "weighted OIT" );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "weighted OIT", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
 		else
 		{
-			bvb.bvvViewer.showMessage( "alpha compositing" );			
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "alpha compositing", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
 	}
 	

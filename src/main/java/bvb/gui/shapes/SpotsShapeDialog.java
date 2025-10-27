@@ -85,7 +85,7 @@ public class SpotsShapeDialog
 		gbc.gridx++;
 		pSpotsParams.add(butSpotsColor, gbc);
 		
-		if(bHasSize)
+		if(!bHasSize)
 		{
 			gbc.gridx = 0;
 			gbc.gridy++;
@@ -127,9 +127,8 @@ public class SpotsShapeDialog
 			}
 			nShape = cbShape.getSelectedIndex();
 			nFill = cbFill.getSelectedIndex();
-			if(bHasSize)
-			{
-				
+			if(!bHasSize)
+			{			
 				fSpotSize = Float.parseFloat( nfSpotSize.getText() );
 				Prefs.set("BVB.spotSize", fSpotSize);
 			}

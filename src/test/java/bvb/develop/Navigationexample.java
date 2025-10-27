@@ -71,7 +71,7 @@ public class Navigationexample
 		meshBunny.setColor(meshColor );
 		
 		//and finally add mesh to BVB
-		bvbTest.addShape( meshBunny );	
+		//bvbTest.addShape( meshBunny );	
 		
 
 		//now let's show other ways to render meshed
@@ -83,19 +83,19 @@ public class Navigationexample
 		//show different grid surface renders
 		int [] arrSurfaceGrid = new int [] {VisMeshColor.GRID_WIRE,  
 				VisMeshColor.GRID_CARTESIAN};
-		int nBunnyCount = 1;
-		for(int i=0;i<2;i++)
+		int nBunnyCount = 0;
+		for(int i = 0; i < 3; i++)
 		{		
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
 			meshBunny = new MeshColor(bunny);
 			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
-			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
-			if( i == 1)
-			{
-				meshBunny.setCartesianGrid( 2.0f, 0.1f );
-			}
+//			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
+	//		if( i == 1)
+		//	{
+			//	meshBunny.setCartesianGrid( 2.0f, 0.1f );
+			//}
 			meshBunny.setColor( meshColor );
 			nBunnyCount++;
 			meshBunny.setName( "bunny" + nBunnyCount ); 
@@ -106,24 +106,24 @@ public class Navigationexample
 		//let's start next row
 		Meshes.translate( bunny, new double[] {-displacementX*3.0, displacementY,0} );
 		
-		//show different surface renders
-		int [] arrSurfaceRender = new int [] {VisMeshColor.SURFACE_SHADE,  
-				VisMeshColor.SURFACE_SHINY, VisMeshColor.SURFACE_SILHOUETTE};
-		
-		for(int i=0;i<3;i++)
-		{		
-			//translate along X and add a copy
-			Meshes.translate( bunny, new double[] {displacementX,0,0} );
-			
-			meshBunny = new MeshColor(bunny);
-			
-			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
-			meshBunny.setSurfaceGrid( VisMeshColor.GRID_FILLED);
-			meshBunny.setColor( meshColor );
-			nBunnyCount++;
-			meshBunny.setName( "bunny" + nBunnyCount ); 
-			bvbTest.addShape( meshBunny );		
-		}
+//		//show different surface renders
+//		int [] arrSurfaceRender = new int [] {VisMeshColor.SURFACE_SHADE,  
+//				VisMeshColor.SURFACE_SHINY, VisMeshColor.SURFACE_SILHOUETTE};
+//		
+//		for(int i=0;i<3;i++)
+//		{		
+//			//translate along X and add a copy
+//			Meshes.translate( bunny, new double[] {displacementX,0,0} );
+//			
+//			meshBunny = new MeshColor(bunny);
+//			
+//			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
+//			meshBunny.setSurfaceGrid( VisMeshColor.GRID_FILLED);
+//			meshBunny.setColor( meshColor );
+//			nBunnyCount++;
+//			meshBunny.setName( "bunny" + nBunnyCount ); 
+//			bvbTest.addShape( meshBunny );		
+//		}
 		
 		//focus on everything
 		bvbTest.bvbActions.actionCenterView();

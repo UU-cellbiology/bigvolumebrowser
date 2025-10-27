@@ -39,6 +39,9 @@ public class BVBSettings
 	
 	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
+
+	/** background color of BVV canvas **/
+	public static Color canvasOverlayColor = new Color((int)Prefs.get( "BVB.canvasOverlayColor", Color.WHITE.getRGB() ));
 	
 	/** status of displaying boxes around sources **/
 	public static boolean bShowVolumeBoxes = Prefs.get("BVB.bShowVolumeBoxes", true);

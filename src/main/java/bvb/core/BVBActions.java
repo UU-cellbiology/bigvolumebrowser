@@ -72,7 +72,9 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
+import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
+import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
 
 import ij.Prefs;
@@ -558,11 +560,11 @@ public class BVBActions
 		bvb.bManualTransformMode =  !bvb.bManualTransformMode;
 		if(bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.showMessage( "manual transform on" );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
 		else
 		{
-			bvb.bvvViewer.showMessage( "manual transform off" );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
 	}
 	

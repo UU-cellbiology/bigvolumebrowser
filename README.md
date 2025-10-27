@@ -19,7 +19,8 @@ Powered (and made possible) by a hard work of very talented people behind:
 - [ImageJ](https://github.com/imagej) 
 - [FIJI](https://fiji.sc/) 
 - [imglib2](https://github.com/imglib/imglib2) 
-- [BioFormats](https://github.com/ome/bioformats) 
+- [BioFormats](https://github.com/ome/bioformats)
+- [JglTF](https://github.com/javagl/JglTF) 
 - [BigDataViewer (BDV)](https://github.com/bigdataviewer) 
 - [BDV-loaders](https://github.com/BIOP/bigdataviewer-image-loaders) 
 - [BigVolumeViewer](https://github.com/bigdataviewer/bigvolumeviewer-core) [(playground edition)](https://github.com/UU-cellbiology/bvv-playground). 

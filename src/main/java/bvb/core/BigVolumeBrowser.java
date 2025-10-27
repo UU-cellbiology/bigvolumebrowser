@@ -59,8 +59,6 @@ import bdv.util.Prefs;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.TimePointListener;
-import bdv.viewer.animate.TextOverlayAnimator;
-import bdv.viewer.animate.TextOverlayAnimator.TextPosition;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.Entity;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
@@ -80,6 +78,8 @@ import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
 import bvvpg.vistools.BvvStackSource;
 import bvb.gui.CenterZoomBVV;
+import bvb.gui.ColorTextOverlayAnimator;
+import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.gui.SelectedObjects;
 import bvb.gui.ShapeSelectionState;
 import bvb.gui.VolumeBBoxes;
@@ -218,7 +218,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			bvbCards.installCards();
 			
 			bLocked = false;
-			bvvViewer.addOverlayAnimator( new TextOverlayAnimator( "No data loaded", 5000, TextPosition.CENTER )  );
+			bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "No data loaded", 5000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
 
 			if(bShowBGShader)
 			{
@@ -229,6 +229,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	void initBVV()
 	{
+	
 		//start empty bvv
 		bvv = BvvFunctions.show( Bvv.options().
 				dCam(BVVSettings.dCam).
@@ -240,7 +241,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				cacheBlockSize( BVVSettings.cacheBlockSize ).
 				maxCacheSizeInMB( BVVSettings.maxCacheSizeInMB ).
 				ditherWidth(BVVSettings.ditherWidth).
-				frameTitle(BVVFrameTitle)
+				frameTitle(BVVFrameTitle)				
 				);
 		
 		bvvHandle = ( BvvHandleFrame ) bvv.getBvvHandle();
@@ -755,6 +756,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		BVBSettings.canvasBGColor = new Color(bgColor.getRed(),bgColor.getGreen(),bgColor.getBlue(),bgColor.getAlpha());		
 		ij.Prefs.set("BVB.canvasBGColor", bgColor.getRGB());
 		final Color bbFrameColor = BVBSettings.getInvertedColor(bgColor);
+		BVBSettings.canvasOverlayColor = new Color(bbFrameColor.getRed(),bbFrameColor.getGreen(),bbFrameColor.getBlue(),bbFrameColor.getAlpha());		
+		ij.Prefs.set("BVB.canvasOverlayColor", bbFrameColor.getRGB());
 		volumeBoxes.setLineColor( bbFrameColor );
 		clipBoxes.setLineColor( bbFrameColor );
 	}

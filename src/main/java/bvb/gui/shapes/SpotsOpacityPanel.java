@@ -150,13 +150,14 @@ public class SpotsOpacityPanel extends JPanel
 		allComp.add( cbInverted );
 		allComp.add( alphaRangePanel );
 		allComp.add( alphaGammaPanel );
+		allComp.add( extraAlphaPanel );
 		allComp.add( butResetToDefault );
 	}
 
 	synchronized void updateGUI()
 	{
-		boolean bFirstMesh = true;
-	
+		
+		boolean bFirstMesh = true;	
 		boolean bMapAlphaSame = true;
 		boolean bAlphaInvertedSame = true;	
 		BoundedRange range = null;
