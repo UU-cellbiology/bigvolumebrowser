@@ -401,7 +401,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				{
 					Displaysettings sett = ( Displaysettings ) entry.getValue();
 					bvvSources.get( nSetup ).setDisplayRange( sett.min, sett.max );
-					if(!bLutSet)
+					if(!bLutSet && views.size() > 1)
 						bvvSources.get( nSetup ).setColor(new ARGBType(ARGBType.rgba( sett.color[0], sett.color[1], sett.color[2], 255 ) ));
 				}
 				//check if there is a FIJI lut name stored

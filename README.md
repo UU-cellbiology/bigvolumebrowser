@@ -4,15 +4,21 @@
 
 [FIJI](https://fiji.sc) plugin for 3D exploration of multiple large datasets and shapes.  
 
-**Users**: full description/manuals are in the **[wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.
+**Users**: please, please check full description/tutorials in the **[wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.  
+Or assume GUI is friendly and 
 
-**Developers**: please check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).
+**Open source developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out. 
+
+**Companies**: contact me for standalone/integration solutions.  
 
 ----------
+**Questions with answers:**  
 
-Not happy with it? Something is missing?  
-You can consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).
-
+What's next here? See the development [roadmap](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Improvements).  
+Want to contribute? Submit a [PR](https://en.wikipedia.org/wiki/Fork_and_pull_model). Or create an [issue](https://github.com/UU-cellbiology/bigvolumebrowser/issues).  
+Wanna see live progress on development? Check [this feed](https://bsky.app/hashtag/bigvolumebrowser).  
+Not happy with it? Something is fundamentally wrong?  
+Consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).    
 ----------
 **Acknowledgements:**  
 Powered (and made possible) by a hard work of very talented people behind:   

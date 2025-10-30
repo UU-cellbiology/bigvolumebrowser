@@ -54,7 +54,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile( sFilename );
 		
-		if(nmesh != null)
+		if(nmesh != null && nmesh.vertices().size() > 0)
 		{			
 			visRender = new VisMeshColor( nmesh );
 			boundBox = Meshes.boundingBox( nmesh );
@@ -62,7 +62,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		}
 		else
 		{
-			System.err.println("Sorry, cannot load mesh. Only STL and PLY formats are supported for now.");
+			System.err.println("Sorry, cannot load this mesh. Something wrong with a file or import.");
 		}
 	}
 	
@@ -119,7 +119,10 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	@Override
 	public RealInterval boundingBoxNotTransformed()
 	{		
-		return new FinalRealInterval(boundBox);
+		if(boundBox == null)
+			return null;
+		else
+			return new FinalRealInterval(boundBox);
 	}
 	
 	/** define if the shape is transparent **/

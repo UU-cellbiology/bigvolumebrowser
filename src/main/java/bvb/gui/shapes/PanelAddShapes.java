@@ -256,7 +256,11 @@ public class PanelAddShapes extends JPanel
             case "stl":
             case "ply":
                 final MeshColor loadedMesh = new MeshColor(sFilename);
-                bvb.addShape( loadedMesh );
+                //weird way to check if loading went well, but let's keep it for now. 
+                if(loadedMesh.boundingBoxNotTransformed() != null)
+                {
+                	bvb.addShape( loadedMesh );
+                }
             	break;
             //Imaris wrl files
             case "wrl":

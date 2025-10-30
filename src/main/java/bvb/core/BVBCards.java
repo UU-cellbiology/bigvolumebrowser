@@ -81,15 +81,16 @@ public class BVBCards
 
 	    bvb.bvbCards.panelShapes.setPreferredSize( tableViewPrefSize );
 	    bvb.bvbCards.panelData.setPreferredSize( tableViewPrefSize );
-	    bvb.bvvFrame.getCardPanel().addCard("Shapes", panelShapes, false, new Insets( 0, 0, 0, 0 ) );
-	    bvb.bvvFrame.getCardPanel().addCard("All objects", panelData, true, new Insets( 0, 0, 0, 0 ) );
-	    bvb.bvvFrame.getCardPanel().addCard("Sources render", sourcesRenderPanel, false, new Insets( 0, 0, 0, 0 ) );
-	    bvb.bvvFrame.getCardPanel().addCard("Shapes render", panelShapesProperties, false, new Insets( 0, 0, 0, 0 ) );	     
-	    bvb.bvvFrame.getCardPanel().addCard("View", viewPanel, false, new Insets( 0, 0, 0, 0 ) );
-	    bvb.bvvFrame.getCardPanel().addCard("Clipping", clipPanel, false, new Insets( 0, 0, 0, 0 ) );
-	    bvb.bvvFrame.getCardPanel().addCard("Transform", transformPanel, false, new Insets( 0, 0, 0, 0 ) );		   
-	    bvb.bvvFrame.getCardPanel().addCard("Add volumes", panelAddSources, true, new Insets( 0, 0, 0, 0 ) );		   
-	    bvb.bvvFrame.getCardPanel().addCard("Add shapes", panelAddShapes, true, new Insets( 0, 0, 0, 0 ) );		   		    
+	    final Insets zeroInsets = new Insets( 0, 0, 0, 0 );
+	    bvb.bvvFrame.getCardPanel().addCard("Shapes", panelShapes, false, zeroInsets );
+	    bvb.bvvFrame.getCardPanel().addCard("All objects", panelData, true, zeroInsets );
+	    bvb.bvvFrame.getCardPanel().addCard("Sources render", sourcesRenderPanel, false, zeroInsets );
+	    bvb.bvvFrame.getCardPanel().addCard("Shapes render", panelShapesProperties, false, zeroInsets );	     
+	    bvb.bvvFrame.getCardPanel().addCard("View", viewPanel, false, zeroInsets );
+	    bvb.bvvFrame.getCardPanel().addCard("Clipping", clipPanel, false, zeroInsets );
+	    bvb.bvvFrame.getCardPanel().addCard("Transform", transformPanel, false, zeroInsets );		   
+	    bvb.bvvFrame.getCardPanel().addCard("Add volumes", panelAddSources, true, zeroInsets );		   
+	    bvb.bvvFrame.getCardPanel().addCard("Add shapes", panelAddShapes, true, zeroInsets );		   		    
 	   
 	    bvb.bvvFrame.getSplitPanel().setCollapsed( false );
 	    bvb.bvvHandle.getConverterSetups().listeners().add( s -> bvb.clipBoxes.updateClipBoxes() );
@@ -97,7 +98,7 @@ public class BVBCards
 	
 	public void resetClipTransformPanels()
 	{
-		//probably it is possible just 
+		// probably it is possible just 
 		// to reset clip/transform setups, but for now we redo everything.
 		clipPanel = new ClipPanel(bvb);
 		transformPanel = new TransformPanel(bvb);
