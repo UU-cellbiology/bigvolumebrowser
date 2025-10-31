@@ -68,9 +68,10 @@ public class Example003Mesh
 		
 		//let's add an empty volume around it
 		RealInterval bunnyInt = Meshes.boundingBox( bunny );
-		bvbTest.addRAI(RAIdummy.dummyRAI(bunnyInt));
 		meshBunny.setColor(meshColor );
-		
+		int nMeshCount = 1;
+		meshBunny.setName( "bunny" + nMeshCount );
+		nMeshCount++;
 		//and finally add mesh to BVB
 		bvbTest.addShape( meshBunny );	
 		
@@ -85,20 +86,22 @@ public class Example003Mesh
 		int [] arrSurfaceGrid = new int [] {VisMeshColor.GRID_WIRE,  
 				VisMeshColor.GRID_CARTESIAN};
 		
-		for(int i=0;i<2;i++)
+		for(int i = 0; i < 2; i++)
 		{		
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
 			meshBunny = new MeshColor(bunny);
-			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
 			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
 			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
-			if(i==1)
+			if(i == 1)
 			{
 				meshBunny.setCartesianGrid( 2.0f, 0.1f );
 			}
 			meshBunny.setColor( meshColor );
+			
+			meshBunny.setName( "bunny" + nMeshCount );
+			nMeshCount++;
 			bvbTest.addShape( meshBunny );		
 		}
 		
@@ -110,17 +113,18 @@ public class Example003Mesh
 		int [] arrSurfaceRender = new int [] {VisMeshColor.SURFACE_SHADE,  
 				VisMeshColor.SURFACE_SHINY, VisMeshColor.SURFACE_SILHOUETTE};
 		
-		for(int i=0;i<3;i++)
+		for(int i = 0; i < 3; i++)
 		{		
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
-			meshBunny = new MeshColor(bunny);
-			bvbTest.addRAI(RAIdummy.dummyRAI(Meshes.boundingBox( bunny )));
-			
+			meshBunny = new MeshColor(bunny);			
 			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
 			meshBunny.setSurfaceGrid( VisMeshColor.GRID_FILLED);
 			meshBunny.setColor( meshColor );
+			
+			meshBunny.setName( "bunny" + nMeshCount );
+			nMeshCount++;
 			bvbTest.addShape( meshBunny );		
 		}
 		

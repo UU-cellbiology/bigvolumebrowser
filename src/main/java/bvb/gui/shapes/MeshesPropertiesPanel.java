@@ -21,6 +21,7 @@ import bvb.gui.ColorUserSettings;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
 import bvb.gui.NumberField;
+import bvb.scene.VisMeshColor;
 import bvb.shapes.BasicMeshColor;
 import bvb.shapes.BasicShape;
 
@@ -209,40 +210,54 @@ public class MeshesPropertiesPanel extends JPanel
 			synchronized ( MeshesPropertiesPanel.this )
 			{
 				blockUpdates = true;
-				for (int d=0;d<3;d++)
+				
+				pRender.setConsistent( bRenderSameFin );
+				pColor.setConsistent( bColorSameFin );
+				pPointSize.setConsistent( bPointSizeSameFin );
+				pSurface.setConsistent( bSurfaceSameFin );
+				pGrid.setConsistent( bGridSameFin );
+				nfMeshPointSize.setEnabled( true );
+				cbSurface.setEnabled( true );	
+				cbGrid.setEnabled( true );
+
+				if(bRenderSameFin)
 				{
-
-					pRender.setConsistent( bRenderSameFin );
-					pColor.setConsistent( bColorSameFin );
-					pPointSize.setConsistent( bPointSizeSameFin );
-					pSurface.setConsistent( bSurfaceSameFin );
-					pGrid.setConsistent( bGridSameFin );
-					
-					if(bRenderSameFin)
+					cbRender.setSelectedIndex( nRenderFin );
+					//only shapes render
+					if(nRenderFin == 0)
 					{
-						cbRender.setSelectedIndex( nRenderFin );
+						pPointSize.setConsistent( true );	
+						nfMeshPointSize.setEnabled( false );	
 					}
-					
-					if(bColorSameFin)
+					else
 					{
-						selectColors.setColor( cColorFin, 0 );
-						butColor.setIcon(  new ColorIcon( cColorFin ) );
-					}
-
-					if(bPointSizeSameFin)
-					{
-						nfMeshPointSize.setText( String.format("%.2f", fPointSizeFin));
-					}
-					if(bSurfaceSameFin)
-					{
-						cbSurface.setSelectedIndex( nSurfaceFin );
-					}
-					
-					if(bGridSameFin)
-					{
-						cbGrid.setSelectedIndex( nGridFin );
+						pSurface.setConsistent( true );
+						pGrid.setConsistent( true );
+						cbSurface.setEnabled( false );	
+						cbGrid.setEnabled( false );
 					}
 				}
+
+				if(bColorSameFin)
+				{
+					selectColors.setColor( cColorFin, 0 );
+					butColor.setIcon(  new ColorIcon( cColorFin ) );
+				}
+
+				if(bPointSizeSameFin)
+				{
+					nfMeshPointSize.setText( String.format("%.2f", fPointSizeFin));
+				}
+				if(bSurfaceSameFin)
+				{
+					cbSurface.setSelectedIndex( nSurfaceFin );
+				}
+
+				if(bGridSameFin)
+				{
+					cbGrid.setSelectedIndex( nGridFin );
+				}
+
 				blockUpdates = false;
 			}
 		} );
@@ -294,7 +309,10 @@ public class MeshesPropertiesPanel extends JPanel
 			{
 				if(sh instanceof BasicMeshColor)
 				{
-					((BasicMeshColor)sh).setPointSize( fv );
+					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.POINTS)
+					{
+						((BasicMeshColor)sh).setPointSize( fv );
+					}
 				}
 			}
 			bvb.repaintBVV();
@@ -312,7 +330,10 @@ public class MeshesPropertiesPanel extends JPanel
 			{
 				if(sh instanceof BasicMeshColor)
 				{
-					((BasicMeshColor)sh).setSurfaceRender( nSurfaceType );
+					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.MESH)
+					{
+						((BasicMeshColor)sh).setSurfaceRender( nSurfaceType );
+					}
 				}
 			}
 			bvb.repaintBVV();
@@ -330,7 +351,10 @@ public class MeshesPropertiesPanel extends JPanel
 			{
 				if(sh instanceof BasicMeshColor)
 				{
-					((BasicMeshColor)sh).setSurfaceGrid( nGridType );
+					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.MESH)
+					{
+						((BasicMeshColor)sh).setSurfaceGrid( nGridType );
+					}
 				}
 			}
 			bvb.repaintBVV();
