@@ -12,7 +12,6 @@ Or assume GUI is friendly and just mess around with it, who needs manuals?
 **Companies**: contact me for standalone/integration solutions.  
 
 ----------
-
 **Questions with answers:**  
 
 What's next here? See the development [roadmap](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Improvements).  
@@ -20,6 +19,7 @@ Want to contribute? Submit a [PR](https://en.wikipedia.org/wiki/Fork_and_pull_mo
 Wanna see live progress on development? Check [this feed](https://bsky.app/hashtag/bigvolumebrowser).  
 Not happy with it? Something is fundamentally wrong?  
 Consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).    
+
 ----------
 **Acknowledgements:**  
 Powered (and made possible) by a hard work of very talented people behind:   
