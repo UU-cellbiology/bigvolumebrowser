@@ -9,7 +9,7 @@ Or assume GUI is friendly and just mess around with it, who needs manuals?
 
 **Open source developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out. 
 
-**Companies**: contact me for standalone/integration solutions.  
+**Companies**: contact for standalone/integration solutions.  
 
 ----------
 **Questions with answers:**  

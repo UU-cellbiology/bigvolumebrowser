@@ -80,9 +80,9 @@ public class Navigationexample
 		final double displacementX = 1.1*(bunnyInt.realMax( 0 )-bunnyInt.realMin( 0 ));
 		final double displacementY = -1.3*(bunnyInt.realMax( 1 )-bunnyInt.realMin( 1 ));
 		
-		//show different grid surface renders
-		int [] arrSurfaceGrid = new int [] {VisMesh.GRID_WIRE,  
-				VisMesh.GRID_CARTESIAN};
+//		//show different grid surface renders
+//		int [] arrSurfaceGrid = new int [] {VisMesh.GRID_WIRE,  
+//				VisMesh.GRID_CARTESIAN};
 		int nBunnyCount = 0;
 		for(int i = 0; i < 3; i++)
 		{		
