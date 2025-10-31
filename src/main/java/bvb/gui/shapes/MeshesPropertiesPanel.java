@@ -21,8 +21,8 @@ import bvb.gui.ColorUserSettings;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
 import bvb.gui.NumberField;
-import bvb.scene.VisMeshColor;
-import bvb.shapes.BasicMeshColor;
+import bvb.scene.VisMesh;
+import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 
 public class MeshesPropertiesPanel extends JPanel
@@ -172,9 +172,9 @@ public class MeshesPropertiesPanel extends JPanel
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
 		{
-			if(sh instanceof BasicMeshColor)
+			if(sh instanceof BasicMeshShape)
 			{
-				final BasicMeshColor meshShape = (BasicMeshColor)sh;
+				final BasicMeshShape meshShape = (BasicMeshShape)sh;
 				if(bFirstMesh)
 				{
 					nRender = meshShape.getRenderType();
@@ -271,9 +271,9 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					((BasicMeshColor)sh).setRenderType( nRenderType );
+					((BasicMeshShape)sh).setRenderType( nRenderType );
 				}
 			}
 			bvb.repaintBVV();
@@ -289,9 +289,9 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					((BasicMeshColor)sh).setColor( cColor );
+					((BasicMeshShape)sh).setColor( cColor );
 				}
 			}
 			bvb.repaintBVV();
@@ -307,11 +307,11 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.POINTS)
+					if(((BasicMeshShape)sh).getRenderType() == VisMesh.POINTS)
 					{
-						((BasicMeshColor)sh).setPointSize( fv );
+						((BasicMeshShape)sh).setPointSize( fv );
 					}
 				}
 			}
@@ -328,11 +328,11 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.MESH)
+					if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 					{
-						((BasicMeshColor)sh).setSurfaceRender( nSurfaceType );
+						((BasicMeshShape)sh).setSurfaceRender( nSurfaceType );
 					}
 				}
 			}
@@ -349,11 +349,11 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.MESH)
+					if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 					{
-						((BasicMeshColor)sh).setSurfaceGrid( nGridType );
+						((BasicMeshShape)sh).setSurfaceGrid( nGridType );
 					}
 				}
 			}

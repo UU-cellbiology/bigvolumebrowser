@@ -38,10 +38,9 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
-import bvb.shapes.MeshColor;
-import bvb.shapes.MeshTexture;
-import bvb.shapes.Spots;
+import bvb.shapes.BasicSpots;
 import bvvpg.vistools.BvvStackSource;
 import mpicbg.spim.data.generic.AbstractSpimData;
 
@@ -153,11 +152,11 @@ public class DataTreeModel implements TreeModel
 		{
 			final DataTreeNode shNode = new DataTreeNode(this, sh);
 			shNode.setDescription( sh.toString() );
-			if(sh instanceof MeshColor || sh instanceof MeshTexture)
+			if(sh instanceof BasicMeshShape)
 			{
 				shNode.setIcon( iconMeshColor );
 			}
-			if(sh instanceof Spots )
+			if(sh instanceof BasicSpots )
 			{
 				shNode.setIcon( iconSpots );
 			}

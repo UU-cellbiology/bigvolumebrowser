@@ -11,6 +11,8 @@ public abstract class AbstractBasicShape implements BasicShape
 
 	String sName = "";
 	
+
+	
 	@Override
 	public boolean isVisible()
 	{
@@ -46,5 +48,6 @@ public abstract class AbstractBasicShape implements BasicShape
 	{
 		sName = sName_;
 	}
+	
 
 }

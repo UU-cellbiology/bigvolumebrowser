@@ -2,12 +2,18 @@ package bvb.shapes;
 
 import java.awt.Color;
 
-public interface BasicMeshColor
+public interface BasicMeshShape
 {
 	
 	public void setColor(final Color colorin);
 	
 	public Color getColor();
+	
+	public boolean hasTexture();
+	
+	public void useTexture(boolean bUseTexture);
+	
+	public boolean isTextureUsed();
 
 	public void setRenderType(final int nRenderType_);
 	

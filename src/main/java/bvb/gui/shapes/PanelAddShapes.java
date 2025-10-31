@@ -33,8 +33,8 @@ import bvb.io.shapes.GltfImporter;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
-import bvb.shapes.MeshColor;
-import bvb.shapes.MultiMeshColor;
+import bvb.shapes.MeshShape;
+import bvb.shapes.MultiMeshShape;
 import bvb.shapes.MultiSpots;
 import bvb.shapes.Spots;
 import bvb.utils.Misc;
@@ -255,7 +255,7 @@ public class PanelAddShapes extends JPanel
             //if it is stl or ply
             case "stl":
             case "ply":
-                final MeshColor loadedMesh = new MeshColor(sFilename);
+                final MeshShape loadedMesh = new MeshShape(sFilename);
                 //weird way to check if loading went well, but let's keep it for now. 
                 if(loadedMesh.boundingBoxNotTransformed() != null)
                 {
@@ -344,10 +344,10 @@ public class PanelAddShapes extends JPanel
 			if(loaderWRT.containsColorInfo())
 			{
 				Set<Color> uniqueColors = new HashSet<>(loaderWRT.meshColors);
-				HashMap<Color,MultiMeshColor> meshGroups = new HashMap<>();
+				HashMap<Color,MultiMeshShape> meshGroups = new HashMap<>();
 				for (final Color color:uniqueColors)
 				{
-					meshGroups.put( color,  new MultiMeshColor() );
+					meshGroups.put( color,  new MultiMeshShape() );
 				}
 				for(int i = 0; i < loadedMeshes.size(); i++)
 				{
@@ -359,10 +359,10 @@ public class PanelAddShapes extends JPanel
 						nMaxTP = Math.max( nMaxTP, nTP );
 					}
 					Color meshColor = loaderWRT.meshColors.get( i );
-					meshGroups.get( meshColor ).addMesh( loadedMeshes.get( i ), nTP, meshColor );
+					meshGroups.get( meshColor ).addMesh( loadedMeshes.get( i ), null, nTP, meshColor );
 				}
 				int nC = 0;
-				for (Entry< Color, MultiMeshColor > pair : meshGroups.entrySet()) 
+				for (Entry< Color, MultiMeshShape > pair : meshGroups.entrySet()) 
 				{
 					pair.getValue().setName( "c" +Integer.toString( nC )+"_"+Misc.getSourceStyleName( sFilename )  ); 
 					bvb.addShape( pair.getValue() ); 
@@ -372,7 +372,7 @@ public class PanelAddShapes extends JPanel
 			}
 			else
 			{
-				MultiMeshColor mmColor = new MultiMeshColor();
+				MultiMeshShape mmColor = new MultiMeshShape();
 				Color meshColor = null;
 				for(int i = 0; i < loadedMeshes.size(); i++)
 				{
@@ -383,7 +383,7 @@ public class PanelAddShapes extends JPanel
 						nTP = loaderWRT.timePoints.get( i );
 						nMaxTP = Math.max( nMaxTP, nTP );
 					}
-					mmColor.addMesh( loadedMeshes.get( i ), nTP, meshColor );					
+					mmColor.addMesh( loadedMeshes.get( i ), null, nTP, meshColor );					
 				}
 				mmColor.setName( Misc.getSourceStyleName( sFilename )  );
 				bvb.addShape(mmColor);
@@ -396,7 +396,7 @@ public class PanelAddShapes extends JPanel
 			final ArrayList<BasicShape> finMeshesShapes = new ArrayList<>();
 			for(int i = 0; i < loadedMeshes.size(); i++)
 			{		
-				final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+				final MeshShape meshBVB = new MeshShape(loadedMeshes.get( i ));
 				int nTP = -1;
 				if(loaderWRT.isTimeData())
 				{

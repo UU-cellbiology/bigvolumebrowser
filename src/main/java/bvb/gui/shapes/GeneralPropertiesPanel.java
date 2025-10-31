@@ -13,7 +13,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.NumberField;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
-import bvb.shapes.BasicMeshColor;
+import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 
 public class GeneralPropertiesPanel extends JPanel
@@ -138,9 +138,9 @@ public class GeneralPropertiesPanel extends JPanel
 		final List< BasicShape> shapeList = bvb.shapes;
 		for ( final BasicShape sh: shapeList)
 		{
-			if(sh instanceof BasicMeshColor)
+			if(sh instanceof BasicMeshShape)
 			{
-				((BasicMeshColor)sh).setSilhouetteDecay( fv );
+				((BasicMeshShape)sh).setSilhouetteDecay( fv );
 			}
 		}
 		bvb.repaintBVV();
@@ -154,9 +154,9 @@ public class GeneralPropertiesPanel extends JPanel
 		
 		for ( final BasicShape sh: shapeList)
 		{
-			if(sh instanceof BasicMeshColor)
+			if(sh instanceof BasicMeshShape)
 			{
-				((BasicMeshColor)sh).setWireLineWidth( valWidth );
+				((BasicMeshShape)sh).setWireLineWidth( valWidth );
 			}
 		}
 		bvb.repaintBVV();
@@ -171,9 +171,9 @@ public class GeneralPropertiesPanel extends JPanel
 		
 		for ( final BasicShape sh: shapeList)
 		{
-			if(sh instanceof BasicMeshColor)
+			if(sh instanceof BasicMeshShape)
 			{
-				((BasicMeshColor)sh).setCartesianGrid( valStep,valFr );
+				((BasicMeshShape)sh).setCartesianGrid( valStep,valFr );
 			}
 		}
 		bvb.repaintBVV();

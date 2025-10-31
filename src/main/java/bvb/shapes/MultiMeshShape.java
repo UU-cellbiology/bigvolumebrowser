@@ -1,6 +1,7 @@
 package bvb.shapes;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +10,14 @@ import net.imglib2.mesh.Meshes;
 import net.imglib2.util.Intervals;
 
 import bvb.scene.AbstractClipTransformVis;
-import bvb.scene.VisMeshColor;
+import bvb.scene.VisMesh;
 
 /** a collection of meshes with different timepoints assigned to them **/
-public class MultiMeshColor extends AbstractClipTransformMulti implements BasicMeshColor
+public class MultiMeshShape extends AbstractClipTransformMulti implements BasicMeshShape
 {
+	boolean bHasTexture = false;
+	
+	boolean bUseTexture = false;
 	
 	/** define if the shape is transparent **/
 	void defineTransparency()
@@ -21,7 +25,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 		if(visRendersTimeMap.size()>0 )
 		{
 			bTransparent = false;
-			if(getRenderType() == VisMeshColor.MESH && getSurfaceRender() ==  VisMeshColor.SURFACE_SILHOUETTE)
+			if(getRenderType() == VisMesh.MESH && getSurfaceRender() ==  VisMesh.SURFACE_SILHOUETTE)
 			{
 				bTransparent = true;
 			}
@@ -33,16 +37,29 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	}
 
 
+	/** Adds a mesh to the object.
+	 * For meshes without texture imageTexture should be null **/
 	@SuppressWarnings( "hiding" )
-	public void addMesh(final Mesh nmesh, final int nTimePoint, final Color colorin )
+	public void addMesh(final Mesh nmesh, final BufferedImage imageTexture, final int nTimePoint, final Color colorin )
 	{		
 		if(nmesh != null)
 		{
-			final VisMeshColor meshShape = new VisMeshColor( nmesh );
+			final VisMesh meshShape;
+			
+			if(imageTexture == null)
+			{
+				meshShape = new VisMesh( nmesh );
+			}
+			else
+			{
+				bHasTexture = true;
+				meshShape = new VisMesh( nmesh, imageTexture );
+			}
 			if(colorin != null)
 			{
 				meshShape.setColor( colorin );
 			}
+			
 			boundBox = Intervals.union( boundBox, Meshes.boundingBox( nmesh ) );
 			visRendersTimeMap.put( meshShape, nTimePoint );
 		}
@@ -56,7 +73,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
-				((VisMeshColor)visRender).setRenderType( nRenderType);
+				((VisMesh)visRender).setRenderType( nRenderType);
 			}
 			defineTransparency();
 		}
@@ -65,7 +82,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	@Override
 	public int getRenderType()
 	{
-		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getRenderType();
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getRenderType();
 	}
 	
 	@Override
@@ -76,8 +93,8 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
-				((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
-				((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );	
+				((VisMesh)visRender).setRenderType( VisMesh.MESH );
+				((VisMesh)visRender).setSurfaceRenderType( nSurfaceRenderType );	
 			}
 			defineTransparency();
 		}
@@ -86,7 +103,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	@Override
 	public int getSurfaceRender()
 	{
-		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getSurfaceRenderType();
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getSurfaceRenderType();
 	}
 	
 	@Override
@@ -97,8 +114,8 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
-				((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
-				((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
+				((VisMesh)visRender).setRenderType( VisMesh.MESH );
+				((VisMesh)visRender).setSurfaceGridType( nSurfaceGridType );
 			}
 			defineTransparency();
 		}
@@ -107,7 +124,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	@Override
 	public int getSurfaceGrid()
 	{
-		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getSurfaceGridType();
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getSurfaceGridType();
 	}
 	
 	@Override
@@ -118,7 +135,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
-				((VisMeshColor)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
+				((VisMesh)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
 			}
 		}
 	}
@@ -131,7 +148,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
-				((VisMeshColor)visRender).setColor( colorin );
+				((VisMesh)visRender).setColor( colorin );
 			}
 			defineTransparency();
 		}
@@ -140,7 +157,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	@Override
 	public Color getColor()
 	{
-		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getColor();
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getColor();
 	}
 
 	@Override
@@ -151,7 +168,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
-				((VisMeshColor)visRender).setPointsSize( fPointSize );
+				((VisMesh)visRender).setPointsSize( fPointSize );
 			}
 		}
 		
@@ -160,7 +177,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 	@Override
 	public float getPointSize()
 	{
-		return ((VisMeshColor)visRendersTimeMap.keySet().toArray()[0]).getPointsSize();
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getPointsSize();
 	}
 	
 	@Override
@@ -171,7 +188,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
-				((VisMeshColor)visRender).setWireLineWidth( fThickness );
+				((VisMesh)visRender).setWireLineWidth( fThickness );
 			}
 		}
 	}
@@ -185,7 +202,7 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
-				((VisMeshColor)visRender).setSilhouetteDecay( silhouetteDecay_ );
+				((VisMesh)visRender).setSilhouetteDecay( silhouetteDecay_ );
 			}
 		}
 	}
@@ -199,6 +216,39 @@ public class MultiMeshColor extends AbstractClipTransformMulti implements BasicM
 		}
 		
 		return sName;
+	}
+
+
+	@Override
+	public boolean hasTexture()
+	{
+		return bHasTexture;
+	}
+
+
+	@Override
+	public void useTexture( boolean bUseTexture_ )
+	{
+		if(bHasTexture)
+		{
+			bUseTexture = bUseTexture_;
+			if(visRendersTimeMap.size()>0 )
+			{
+				final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+				for(final AbstractClipTransformVis visRender:visRenders)
+				{		
+					((VisMesh)visRender).useTexture( bUseTexture );
+				}
+			}
+		}
+		
+	}
+
+
+	@Override
+	public boolean isTextureUsed()
+	{
+		return bUseTexture;
 	}
 
 }
