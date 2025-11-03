@@ -141,7 +141,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
 				final int nTP = visRendersTimeMap.get( visRender );
-				if(nTP<0 || nTP == nTimePoint_)
+				if(nTP < 0 || nTP == nTimePoint_)
 				{
 					visRender.draw( gl, pvm, vm, screen_size, nTimePoint_, bWeightedOIT_ );
 				}

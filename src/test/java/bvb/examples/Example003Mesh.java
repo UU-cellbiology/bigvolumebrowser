@@ -108,7 +108,7 @@ public class Example003Mesh
 		bvbTest.addShape( meshBunnyNext  );		
 		
 		//now let's load three meshes together as multi-mesh object
-		MultiMeshShape multiMeshShape = new MultiMeshShape();
+		final MultiMeshShape multiMeshShape = new MultiMeshShape();
 		
 		final double displacementY = -1.3 * (bunnyInt.realMax( 1 ) - bunnyInt.realMin( 1 ));
 

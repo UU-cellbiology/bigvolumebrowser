@@ -205,7 +205,7 @@ public class MeshesPropertiesPanel extends JPanel
 					}
 					else
 					{
-						bTextureSame &= (bTextureSame.booleanValue() && meshShape.isTextureUsed());
+						bTextureSame &= (bTextureActive == meshShape.isTextureUsed());
 					}
 				}
 				if(bFirstMesh)

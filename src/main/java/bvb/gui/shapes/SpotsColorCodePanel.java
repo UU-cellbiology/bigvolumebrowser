@@ -62,7 +62,7 @@ public class SpotsColorCodePanel extends JPanel
 	
 		GridBagConstraints gbc = new GridBagConstraints();	
 		GBCHelper.alighLeft(gbc);
-		String[] sMapLUT = {"Single color", "X coord LUT", "Y coord LUT", "Z coord LUT", "Size LUT", "Property"};		
+		String[] sMapLUT = {"Single color", "X coord", "Y coord", "Z coord", "Size", "Property"};		
  
 		cbMapLUT = new JComboBox< >(sMapLUT);
 		cbMapLUT.addActionListener( (e) -> updateLUTMapping());
