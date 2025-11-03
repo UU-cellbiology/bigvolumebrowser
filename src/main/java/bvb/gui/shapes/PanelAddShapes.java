@@ -33,8 +33,8 @@ import bvb.io.shapes.GltfImporter;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
-import bvb.shapes.MeshColor;
-import bvb.shapes.MultiMeshColor;
+import bvb.shapes.MeshShape;
+import bvb.shapes.MultiMeshShape;
 import bvb.shapes.MultiSpots;
 import bvb.shapes.Spots;
 import bvb.utils.Misc;
@@ -255,7 +255,7 @@ public class PanelAddShapes extends JPanel
             //if it is stl or ply
             case "stl":
             case "ply":
-                final MeshColor loadedMesh = new MeshColor(sFilename);
+                final MeshShape loadedMesh = new MeshShape(sFilename);
                 //weird way to check if loading went well, but let's keep it for now. 
                 if(loadedMesh.boundingBoxNotTransformed() != null)
                 {
@@ -294,7 +294,53 @@ public class PanelAddShapes extends JPanel
 		{
 			if(meshes.size() > 0)
 			{
-				bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+				if(meshes.size() == 1)
+				{
+					bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+				}
+				else
+				{
+					JPanel pGLTSettings = new JPanel(new GridBagLayout());
+					
+					GridBagConstraints gbc = new GridBagConstraints();
+					String[] sOptions = { "Group meshes into single object", "Each mesh separately" };
+					JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
+					cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesGLT", true) ? 0 : 1);
+					gbc.gridx = 0;
+					gbc.gridy = 0;	
+					GBCHelper.alighLoose(gbc);
+					pGLTSettings .add(new JLabel("Multiple meshes:"), gbc);
+					gbc.gridx++;
+					pGLTSettings .add( cbMultiMesh, gbc );
+					boolean bGroupMesh = true;
+					
+					int reply = JOptionPane.showConfirmDialog(null, pGLTSettings, "Loading glTG mesh file options", 
+					        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+					if (reply == JOptionPane.OK_OPTION) 
+					{
+						bGroupMesh = cbMultiMesh.getSelectedIndex() == 0;
+						Prefs.set( "BVB.BVB.bGroupMesGLT", bGroupMesh);
+						
+					}
+					else
+					{
+						return;
+					}
+					if(bGroupMesh)
+					{
+						MultiMeshShape mmGLT = new MultiMeshShape();
+						for(BasicShape sh : meshes)
+						{
+							mmGLT.addMeshShape( (MeshShape)sh );
+						}
+						mmGLT.setName( Misc.getSourceStyleName( sFilename )  );
+						bvb.addShape(mmGLT);
+					}
+					else
+					{
+						bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+					}
+				}
 			}
 		}
 	}
@@ -308,7 +354,7 @@ public class PanelAddShapes extends JPanel
 		GridBagConstraints gbc = new GridBagConstraints();
 		String[] sOptions = { "Group meshes by color", "Each mesh separately" };
 		JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
-		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesh", true) ? 0 : 1);
+		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMeshColorWRL", true) ? 0 : 1);
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
@@ -323,7 +369,7 @@ public class PanelAddShapes extends JPanel
 		if (reply == JOptionPane.OK_OPTION) 
 		{
 			bGroupMesh = cbMultiMesh.getSelectedIndex() == 0;
-			Prefs.set( "BVB.bGroupMesh", bGroupMesh);
+			Prefs.set( "BVB.BVB.bGroupMeshColorWRL", bGroupMesh);
 			
 		}
 		else
@@ -344,10 +390,10 @@ public class PanelAddShapes extends JPanel
 			if(loaderWRT.containsColorInfo())
 			{
 				Set<Color> uniqueColors = new HashSet<>(loaderWRT.meshColors);
-				HashMap<Color,MultiMeshColor> meshGroups = new HashMap<>();
+				HashMap<Color,MultiMeshShape> meshGroups = new HashMap<>();
 				for (final Color color:uniqueColors)
 				{
-					meshGroups.put( color,  new MultiMeshColor() );
+					meshGroups.put( color,  new MultiMeshShape() );
 				}
 				for(int i = 0; i < loadedMeshes.size(); i++)
 				{
@@ -359,10 +405,10 @@ public class PanelAddShapes extends JPanel
 						nMaxTP = Math.max( nMaxTP, nTP );
 					}
 					Color meshColor = loaderWRT.meshColors.get( i );
-					meshGroups.get( meshColor ).addMesh( loadedMeshes.get( i ), nTP, meshColor );
+					meshGroups.get( meshColor ).addMesh( loadedMeshes.get( i ), null, nTP, meshColor );
 				}
 				int nC = 0;
-				for (Entry< Color, MultiMeshColor > pair : meshGroups.entrySet()) 
+				for (Entry< Color, MultiMeshShape > pair : meshGroups.entrySet()) 
 				{
 					pair.getValue().setName( "c" +Integer.toString( nC )+"_"+Misc.getSourceStyleName( sFilename )  ); 
 					bvb.addShape( pair.getValue() ); 
@@ -372,7 +418,7 @@ public class PanelAddShapes extends JPanel
 			}
 			else
 			{
-				MultiMeshColor mmColor = new MultiMeshColor();
+				MultiMeshShape mmColor = new MultiMeshShape();
 				Color meshColor = null;
 				for(int i = 0; i < loadedMeshes.size(); i++)
 				{
@@ -383,7 +429,7 @@ public class PanelAddShapes extends JPanel
 						nTP = loaderWRT.timePoints.get( i );
 						nMaxTP = Math.max( nMaxTP, nTP );
 					}
-					mmColor.addMesh( loadedMeshes.get( i ), nTP, meshColor );					
+					mmColor.addMesh( loadedMeshes.get( i ), null, nTP, meshColor );					
 				}
 				mmColor.setName( Misc.getSourceStyleName( sFilename )  );
 				bvb.addShape(mmColor);
@@ -396,7 +442,7 @@ public class PanelAddShapes extends JPanel
 			final ArrayList<BasicShape> finMeshesShapes = new ArrayList<>();
 			for(int i = 0; i < loadedMeshes.size(); i++)
 			{		
-				final MeshColor meshBVB = new MeshColor(loadedMeshes.get( i ));
+				final MeshShape meshBVB = new MeshShape(loadedMeshes.get( i ));
 				int nTP = -1;
 				if(loaderWRT.isTimeData())
 				{

@@ -29,12 +29,19 @@
 package bvb.scene;
 
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_RGBA;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
 import static com.jogamp.opengl.GL2GL3.GL_LINE;
 import static com.jogamp.opengl.GL2GL3.GL_FILL;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -67,13 +74,17 @@ import net.imglib2.util.LinAlgHelpers;
 
 /** example class showing different ways to render a mesh**/
 
-public class VisMeshColor extends AbstractClipTransformVis
+public class VisMesh extends AbstractClipTransformVis
 {	
 	private Shader progPoints;
 	
 	private Shader progMesh;
 
 	private int vao;
+	
+	private BufferedImage imageTexture = null;
+	
+	private int texId;
 	
 	private Vector4f l_color =  new Vector4f(Color.WHITE.getComponents(null));	
 
@@ -91,7 +102,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 	
 	int surfaceRender = SURFACE_SHADE;
 	
-	public static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
+	static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
 	
 	int silhouetteRender = silhouette_TRANSPARENT;	
 
@@ -109,27 +120,45 @@ public class VisMeshColor extends AbstractClipTransformVis
 	
 	volatile boolean bLocked = false;
 	
-	public VisMeshColor()
+	boolean bHasTexture = false;
+	
+	boolean bUseTexture = false;  
+	
+	public VisMesh()
 	{
 		initShader();
 	}
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisMeshColor.class, "/scene/scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisMeshColor.class, "/scene/scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisMesh.class, "/scene/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisMesh.class, "/scene/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 			
-		final Segment meshVp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh_color.vp" ).instantiate();
-		final Segment meshFp = new SegmentTemplate( VisMeshColor.class, "/scene/mesh_color.fp" ).instantiate();
+		final Segment meshVp = new SegmentTemplate( VisMesh.class, "/scene/mesh.vp" ).instantiate();
+		final Segment meshFp = new SegmentTemplate( VisMesh.class, "/scene/mesh.fp" ).instantiate();
 		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	
-	public VisMeshColor(final Mesh meshin)
+	public VisMesh(final Mesh meshin)
 	{
 		this();
 		setMesh(meshin);
 		
+	}
+	
+	public VisMesh(final Mesh meshin, final BufferedImage imageTexture )
+	{
+		this(imageTexture);
+		setMesh(meshin);
+		bHasTexture  = true;
+		bUseTexture = true;
+	}	
+	
+	public VisMesh(final BufferedImage imageTexture)
+	{
+		this.imageTexture = imageTexture;
+		initShader();
 	}
 	
 	public Color getColor()
@@ -140,6 +169,24 @@ public class VisMeshColor extends AbstractClipTransformVis
 	public void setColor(final Color color_in)
 	{
 		l_color = new Vector4f(color_in.getComponents(null));
+	}
+	
+	public boolean hasTexture()
+	{
+		return bHasTexture;
+	}
+	
+	public synchronized void useTexture(boolean bUseTexture_)
+	{
+		if(bHasTexture)
+		{
+			bUseTexture = bUseTexture_;
+		}
+	}
+	
+	public boolean isTextureUsed()
+	{
+		return bUseTexture;
 	}
 	
 	public void setRenderType(final int nRenderType_)
@@ -221,32 +268,18 @@ public class VisMeshColor extends AbstractClipTransformVis
 		}
 	}	
 	
-	
-	private boolean initMesh( final GL3 gl )
-	{
-		return initGPUBufferMesh(gl);	
-	}
-	
-	@Override
-	public void reload()
-	{
-		initShader();
-		
-		initialized = false;
-	}
-	
 	/** upload MeshData to GPU **/
-	private boolean initGPUBufferMesh( GL3 gl )
+	private boolean initMeshGPU( final GL3 gl )
 	{
-		
 		final IntBuffer indicesT = mesh.triangles().indices().duplicate();
 		indicesT.rewind();
 
-		final int[] tmp = new int[ 3 ];
-		gl.glGenBuffers( 3, tmp, 0 );
+		final int[] tmp = new int[ 4 ];
+		gl.glGenBuffers( 4, tmp, 0 );
 		final int meshPosVbo = tmp[ 0 ];
 		final int meshNormalVbo = tmp[ 1 ];
 		final int meshEbo = tmp[ 2 ];
+		final int meshUVVbo = tmp[ 3 ];
 		
 		if(mesh == null)
 			return false;
@@ -271,6 +304,37 @@ public class VisMeshColor extends AbstractClipTransformVis
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
 		gl.glBufferData( GL.GL_ELEMENT_ARRAY_BUFFER, indices.limit() * Integer.BYTES, indices, GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, 0 );
+		
+		if(bHasTexture)
+		{
+			final FloatBuffer uvs = mesh.vertices().texCoords();
+			uvs.rewind();
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshUVVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, uvs.limit() * Float.BYTES, uvs, GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+			
+			// ..:: TEXTURE ::..
+
+			gl.glGenTextures( 1, tmp, 0 );
+			texId = tmp[ 0 ];
+			final ByteBuffer pixelBuffer = convertImageToByteBuffer(imageTexture, false);
+			int width = imageTexture.getWidth();
+		    int height = imageTexture.getHeight();
+			gl.glActiveTexture( GL_TEXTURE0 );
+			gl.glBindTexture( GL_TEXTURE_2D, texId );
+			gl.glTexImage2D( GL_TEXTURE_2D, 
+					0, 
+					GL_RGBA, 
+					width, 
+					height, 
+					0, 
+					GL_RGBA, 
+					GL_UNSIGNED_BYTE, 
+					pixelBuffer);
+			gl.glGenerateMipmap( GL_TEXTURE_2D );
+			gl.glBindTexture( GL_TEXTURE_2D, 0 );
+			
+		}
 
 		gl.glGenVertexArrays( 1, tmp, 0 );
 		vao = tmp[ 0 ];
@@ -282,6 +346,10 @@ public class VisMeshColor extends AbstractClipTransformVis
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshNormalVbo );
 		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshUVVbo );
+		gl.glVertexAttribPointer( 2, 2, GL_FLOAT, false, 2 * Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 2 );
 
 		
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
@@ -290,6 +358,13 @@ public class VisMeshColor extends AbstractClipTransformVis
 		initialized = true;
 
 		return true; 
+	}
+	
+	@Override
+	public void reload()
+	{
+		initShader();		
+		initialized = false;
 	}
 
 	@Override
@@ -312,7 +387,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 		
 		if ( !initialized )
 		{
-			if(!initMesh(gl))
+			if(!initMeshGPU(gl))
 			{
 				bLocked = false;
 				return;
@@ -341,7 +416,7 @@ public class VisMeshColor extends AbstractClipTransformVis
 			progMesh.getUniformMatrix4f( "pvm" ).set( pvtm );
 			progMesh.getUniformMatrix4f( "vm" ).set( vtm );
 			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
-			progMesh.getUniform4f("colorin").set(l_color);
+			progMesh.getUniform4f("colorMesh").set(l_color);
 			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
 			progMesh.getUniform1i("gridType").set(gridType);
 			progMesh.getUniform1f("cartesianGridStep").set(cartesianGridStep);
@@ -363,11 +438,19 @@ public class VisMeshColor extends AbstractClipTransformVis
 				progMesh.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 			progMesh.getUniform1i("wOIT").set(bWeightedOIT?1:0);
+			progMesh.getUniform1i("bUseTexture").set(bUseTexture?1:0);
 			progMesh.setUniforms( context );
 			progMesh.use( context );
 
 //			gl.glEnable(GL.GL_BLEND);
 //			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			
+			if(bHasTexture && bUseTexture)
+			{
+				gl.glActiveTexture( GL_TEXTURE0 );
+				gl.glBindTexture( GL_TEXTURE_2D, texId );
+			}
+			
 			if(gridType == GRID_WIRE)
 			{
 				gl.glLineWidth( fWireLineWidth );
@@ -380,6 +463,11 @@ public class VisMeshColor extends AbstractClipTransformVis
 				gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL_FILL);
 			}
 			gl.glBindVertexArray( 0 );
+			if(bHasTexture && bUseTexture)
+			{
+				gl.glBindTexture( GL_TEXTURE_2D, 0 );
+				gl.glBindVertexArray( 0 );
+			}
 
 		}
 		else
@@ -442,5 +530,38 @@ public class VisMeshColor extends AbstractClipTransformVis
 
 	    return foo;
 	}
+	
+	
+	public static ByteBuffer convertImageToByteBuffer(BufferedImage image, boolean flipVertically) 
+	{
+	    int width = image.getWidth();
+	    int height = image.getHeight();
 
+	    // Use TYPE_4BYTE_ABGR so we know the byte order
+	    BufferedImage convertedImg = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+	    convertedImg.getGraphics().drawImage(image, 0, 0, null);
+
+	    byte[] abgr = ((DataBufferByte) convertedImg.getRaster().getDataBuffer()).getData();
+	    ByteBuffer rgbaBuffer = ByteBuffer.allocateDirect(width * height * 4);
+
+	    int stride = width * 4;
+
+	    for (int y = 0; y < height; y++) {
+	        int row = flipVertically ? (height - 1 - y) : y;
+	        int rowStart = row * stride;
+
+	        for (int x = 0; x < width; x++) {
+	            int i = rowStart + x * 4;
+	            byte a = abgr[i + 0];
+	            byte b = abgr[i + 1];
+	            byte g = abgr[i + 2];
+	            byte r = abgr[i + 3];
+
+	            rgbaBuffer.put(r).put(g).put(b).put(a); // RGBA order
+	        }
+	    }
+
+	    rgbaBuffer.flip();
+	    return rgbaBuffer;
+	}
 }

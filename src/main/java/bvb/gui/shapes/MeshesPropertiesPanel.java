@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -21,14 +22,15 @@ import bvb.gui.ColorUserSettings;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
 import bvb.gui.NumberField;
-import bvb.scene.VisMeshColor;
-import bvb.shapes.BasicMeshColor;
+import bvb.scene.VisMesh;
+import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 
 public class MeshesPropertiesPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	final JPanelConsistent pColor;
+	final JPanelConsistent pTexture;
 	final JPanelConsistent pRender;
 	final JPanelConsistent pPointSize;
 	final JPanelConsistent pSurface;
@@ -37,6 +39,7 @@ public class MeshesPropertiesPanel extends JPanel
 	final JComboBox<String> cbRender;
 	final NumberField nfMeshPointSize;
 	final JButton butColor;
+	final JCheckBox cbTexture;
 	final JComboBox<String> cbSurface;	
 	final JComboBox<String> cbGrid;
 	
@@ -74,6 +77,15 @@ public class MeshesPropertiesPanel extends JPanel
 		pColor.add( new JLabel("Color: "), gbc );
 		gbc.gridx++;
 		pColor.add( butColor, gbc );
+		
+		cbTexture = new JCheckBox();
+		cbTexture.addItemListener( (e)-> updateUseOfTexture());
+		pTexture = new JPanelConsistent(new GridBagLayout());
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pTexture.add( new JLabel("Texture"), gbc );
+		gbc.gridx++;
+		pTexture.add( cbTexture, gbc );
 
 		String[] sRender = {"Surface", "Points"};
 		cbRender = new JComboBox< >(sRender);
@@ -128,6 +140,7 @@ public class MeshesPropertiesPanel extends JPanel
 		pGrid.add( cbGrid, gbc );		
 		
 		allComp.add( butColor );
+		allComp.add( cbTexture );
 		allComp.add( cbSurface );
 		allComp.add( cbGrid );
 		allComp.add( cbRender );
@@ -141,7 +154,9 @@ public class MeshesPropertiesPanel extends JPanel
 
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		this.add( pColor, gbc );
-		
+
+		gbc.gridy ++;	
+		this.add( pTexture, gbc );
 		gbc.gridy ++;	
 		this.add( pRender, gbc );
 
@@ -164,6 +179,11 @@ public class MeshesPropertiesPanel extends JPanel
 		boolean bPointSizeSame = true;
 		boolean bGridSame = true;
 		boolean bSurfaceSame = true;
+		
+		Boolean bTextureSame = null;
+		boolean bTextureActive = false;
+		boolean bHasTexture = false;
+		
 		float fPointSize = 0.0f;
 		Color currColor = Color.WHITE;
 		int nRender = 0;
@@ -172,9 +192,22 @@ public class MeshesPropertiesPanel extends JPanel
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
 		{
-			if(sh instanceof BasicMeshColor)
+			if(sh instanceof BasicMeshShape)
 			{
-				final BasicMeshColor meshShape = (BasicMeshColor)sh;
+				final BasicMeshShape meshShape = (BasicMeshShape)sh;
+				bHasTexture = bHasTexture || meshShape.hasTexture();
+				if(bHasTexture)
+				{
+					if(bTextureSame == null)
+					{
+						bTextureSame = true;
+						bTextureActive = meshShape.isTextureUsed();
+					}
+					else
+					{
+						bTextureSame &= (bTextureSame.booleanValue() && meshShape.isTextureUsed());
+					}
+				}
 				if(bFirstMesh)
 				{
 					nRender = meshShape.getRenderType();
@@ -196,6 +229,9 @@ public class MeshesPropertiesPanel extends JPanel
 		}
 		
 		final Color cColorFin = currColor;
+		final boolean bHasTextureFin = bHasTexture;
+		final boolean bTextureSameFin = (bTextureSame == null)?false:bTextureSame.booleanValue();
+		final boolean bTextureActiveFin = bTextureActive;
 		final float fPointSizeFin = fPointSize;
 		final int nRenderFin = nRender;
 		final int nSurfaceFin = nSurface;
@@ -213,6 +249,18 @@ public class MeshesPropertiesPanel extends JPanel
 				
 				pRender.setConsistent( bRenderSameFin );
 				pColor.setConsistent( bColorSameFin );
+				if(bHasTextureFin)
+				{
+					pTexture.setConsistent( bTextureSameFin );
+					cbTexture.setEnabled( true );
+					cbTexture.setSelected( bTextureActiveFin );
+				}
+				else
+				{
+					pTexture.setConsistent( true );
+					cbTexture.setSelected( false );
+					cbTexture.setEnabled( false );
+				}
 				pPointSize.setConsistent( bPointSizeSameFin );
 				pSurface.setConsistent( bSurfaceSameFin );
 				pGrid.setConsistent( bGridSameFin );
@@ -271,9 +319,9 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					((BasicMeshColor)sh).setRenderType( nRenderType );
+					((BasicMeshShape)sh).setRenderType( nRenderType );
 				}
 			}
 			bvb.repaintBVV();
@@ -289,9 +337,27 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					((BasicMeshColor)sh).setColor( cColor );
+					((BasicMeshShape)sh).setColor( cColor );
+				}
+			}
+			bvb.repaintBVV();
+			updateGUI();
+		}
+	}
+	
+	synchronized void updateUseOfTexture()
+	{
+		if(!blockUpdates)
+		{
+			final boolean bUseTexture = cbTexture.isSelected();
+			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+			for ( final BasicShape sh: shapeList)
+			{
+				if(sh instanceof BasicMeshShape)
+				{
+					((BasicMeshShape)sh).useTexture( bUseTexture );
 				}
 			}
 			bvb.repaintBVV();
@@ -307,11 +373,11 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.POINTS)
+					if(((BasicMeshShape)sh).getRenderType() == VisMesh.POINTS)
 					{
-						((BasicMeshColor)sh).setPointSize( fv );
+						((BasicMeshShape)sh).setPointSize( fv );
 					}
 				}
 			}
@@ -328,11 +394,11 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.MESH)
+					if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 					{
-						((BasicMeshColor)sh).setSurfaceRender( nSurfaceType );
+						((BasicMeshShape)sh).setSurfaceRender( nSurfaceType );
 					}
 				}
 			}
@@ -349,11 +415,11 @@ public class MeshesPropertiesPanel extends JPanel
 			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 			for ( final BasicShape sh: shapeList)
 			{
-				if(sh instanceof BasicMeshColor)
+				if(sh instanceof BasicMeshShape)
 				{
-					if(((BasicMeshColor)sh).getRenderType() == VisMeshColor.MESH)
+					if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 					{
-						((BasicMeshColor)sh).setSurfaceGrid( nGridType );
+						((BasicMeshShape)sh).setSurfaceGrid( nGridType );
 					}
 				}
 			}

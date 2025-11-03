@@ -36,8 +36,8 @@ import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 
 import bvb.core.BigVolumeBrowser;
-import bvb.scene.VisMeshColor;
-import bvb.shapes.MeshColor;
+import bvb.scene.VisMesh;
+import bvb.shapes.MeshShape;
 import ij.ImageJ;
 
 public class Navigationexample
@@ -56,15 +56,15 @@ public class Navigationexample
 		//load and show bunny mesh from file
 		String fMeshFilename  = "src/test/resources/mesh/bunny.stl";
 		
-		MeshColor meshBunny = new MeshColor(fMeshFilename);
+		MeshShape meshBunny = new MeshShape(fMeshFilename);
 		
 		//render with points
-		meshBunny.setRenderType( VisMeshColor.POINTS);
+		meshBunny.setRenderType( VisMesh.POINTS);
 		meshBunny.setPointSize( 0.4f );
 		meshBunny.setColor( meshColor );
 		
 		//now let's load mesh separately
-		Mesh bunny = MeshColor.loadMeshFromFile( fMeshFilename );
+		Mesh bunny = MeshShape.loadMeshFromFile( fMeshFilename );
 		
 		//let's add an empty volume around it
 		RealInterval bunnyInt = Meshes.boundingBox( bunny );
@@ -80,17 +80,17 @@ public class Navigationexample
 		final double displacementX = 1.1*(bunnyInt.realMax( 0 )-bunnyInt.realMin( 0 ));
 		final double displacementY = -1.3*(bunnyInt.realMax( 1 )-bunnyInt.realMin( 1 ));
 		
-		//show different grid surface renders
-		int [] arrSurfaceGrid = new int [] {VisMeshColor.GRID_WIRE,  
-				VisMeshColor.GRID_CARTESIAN};
+//		//show different grid surface renders
+//		int [] arrSurfaceGrid = new int [] {VisMesh.GRID_WIRE,  
+//				VisMesh.GRID_CARTESIAN};
 		int nBunnyCount = 0;
 		for(int i = 0; i < 3; i++)
 		{		
 			//translate along X and add a copy
 			Meshes.translate( bunny, new double[] {displacementX,0,0} );
 			
-			meshBunny = new MeshColor(bunny);
-			meshBunny.setSurfaceRender( VisMeshColor.SURFACE_SHADE);
+			meshBunny = new MeshShape(bunny);
+			meshBunny.setSurfaceRender( VisMesh.SURFACE_SHADE);
 //			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
 	//		if( i == 1)
 		//	{

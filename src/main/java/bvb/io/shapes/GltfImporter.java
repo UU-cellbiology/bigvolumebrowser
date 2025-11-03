@@ -36,8 +36,8 @@ import de.javagl.jgltf.model.io.GltfModelReader;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import ij.IJ;
 import bvb.shapes.BasicShape;
-import bvb.shapes.MeshColor;
-import bvb.shapes.MeshTexture;
+import bvb.shapes.MeshShape;
+//import bvb.shapes.MeshTexture;
 
 /** A primitive Gltf importer based on de.javagl.jgltf library. 
  * Written in a very inefficient way, but should work ok on small meshes. **/
@@ -161,7 +161,7 @@ public class GltfImporter
 						exc.printStackTrace();
 						break;
 					}
-					final MeshTexture meshTexture = new MeshTexture(currMesh, image);
+					final MeshShape meshTexture = new MeshShape(currMesh, image);
 					meshTexture.setTransform( nodeTransform );
 					meshTexture.setName( meshName );
 					shapesOut.add( meshTexture );
@@ -178,7 +178,7 @@ public class GltfImporter
 						rgba[d] = ( float ) Math.min(rgba[d], 1.0);
 					}
 					final Color colorMesh = new Color(rgba[0], rgba[1], rgba[2], rgba[3]);
-					final MeshColor meshShape = new MeshColor(currMesh);
+					final MeshShape meshShape = new MeshShape(currMesh);
 					meshShape.setColor( colorMesh );
 					meshShape.setName( meshName );
 					meshShape.setTransform(nodeTransform);

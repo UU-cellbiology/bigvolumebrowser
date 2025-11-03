@@ -46,5 +46,6 @@ public abstract class AbstractBasicShape implements BasicShape
 	{
 		sName = sName_;
 	}
+	
 
 }

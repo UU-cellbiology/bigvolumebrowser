@@ -7,7 +7,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.ValuePair;
 
 import bvb.core.BigVolumeBrowser;
-import bvb.shapes.MeshColor;
+import bvb.shapes.MeshShape;
 import bvvpg.vistools.BvvStackSource;
 import ij.ImageJ;
 import mpicbg.spim.data.generic.AbstractSpimData;
@@ -23,7 +23,7 @@ public class DebugTransparency
 		
 		bvb.startBVB("");
 		
-		MeshColor cube = new MeshColor("/home/eugene/Desktop/projects/BVB/stl/3D_model_of_a_Cube.stl");
+		MeshShape cube = new MeshShape("/home/eugene/Desktop/projects/BVB/stl/3D_model_of_a_Cube.stl");
 		cube.setColor( new Color(0,255,255,255) );
 		AffineTransform3D tr = new AffineTransform3D();
 		tr.translate( -0.5,-0.5,-0.5 );

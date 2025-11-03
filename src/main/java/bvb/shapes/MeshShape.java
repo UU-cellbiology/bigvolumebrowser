@@ -29,6 +29,7 @@
 package bvb.shapes;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import net.imglib2.FinalRealInterval;
@@ -41,22 +42,27 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import org.apache.commons.io.FilenameUtils;
 
-import bvb.scene.VisMeshColor;
+import bvb.scene.AbstractClipTransformVis;
+import bvb.scene.VisMesh;
 import bvb.utils.Misc;
 
-public class MeshColor extends AbstractClipTransformSingleShape implements BasicMeshColor
+public class MeshShape extends AbstractClipTransformSingleShape implements BasicMeshShape
 {
 	
 	RealInterval boundBox = null;
 	
-	public MeshColor(String sFilename)
+	boolean bHasTexture = false;
+	
+	boolean bUseTexture = false;
+	
+	public MeshShape(String sFilename)
 	{
 		//load mesh from file
 		Mesh nmesh = loadMeshFromFile( sFilename );
 		
 		if(nmesh != null && nmesh.vertices().size() > 0)
 		{			
-			visRender = new VisMeshColor( nmesh );
+			visRender = new VisMesh( nmesh );
 			boundBox = Meshes.boundingBox( nmesh );
 			setName(Misc.getSourceStyleName( sFilename ));
 		}
@@ -66,11 +72,23 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		}
 	}
 	
-	public MeshColor(final Mesh nmesh)
+	public MeshShape(final Mesh nmesh)
 	{
 		if(nmesh != null)
 		{
-			visRender = new VisMeshColor( nmesh );
+			visRender = new VisMesh( nmesh );
+			boundBox = Meshes.boundingBox( nmesh );
+		}
+	}
+	/** constructor for mesh with texture **/
+	public MeshShape(final Mesh nmesh, final BufferedImage imageTexture)
+	{
+	
+		if(nmesh != null)
+		{
+			visRender = new VisMesh( nmesh, imageTexture );
+			bHasTexture = true;
+			bUseTexture = true;
 			boundBox = Meshes.boundingBox( nmesh );
 		}
 	}
@@ -107,6 +125,11 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		return null;
 	}
 	
+	AbstractClipTransformVis getVisObject()
+	{
+		return visRender;
+	}
+	
 	@Override
 	public RealInterval boundingBox()
 	{
@@ -121,7 +144,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{		
 		if(boundBox == null)
 			return null;
-		else
+
 			return new FinalRealInterval(boundBox);
 	}
 	
@@ -131,11 +154,11 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		if(visRender != null)
 		{
 			bTransparent = false;
-			if(getRenderType() == VisMeshColor.MESH && getSurfaceRender() ==  VisMeshColor.SURFACE_SILHOUETTE)
+			if(getRenderType() == VisMesh.MESH && getSurfaceRender() ==  VisMesh.SURFACE_SILHOUETTE)
 			{
 				bTransparent = true;
 			}
-			if(((VisMeshColor)visRender).getColor().getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
+			if(((VisMesh)visRender).getColor().getAlpha() < BasicShape.TRANSPARENCY_THRESHOLD)
 			{
 				bTransparent = true;
 			}
@@ -148,7 +171,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setRenderType( nRenderType_ );
+			((VisMesh)visRender).setRenderType( nRenderType_ );
 			defineTransparency();
 		}	
 	}	
@@ -156,7 +179,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	@Override
 	public int getRenderType()
 	{		
-		return ((VisMeshColor)visRender).getRenderType();
+		return ((VisMesh)visRender).getRenderType();
 	}	
 	
 	@Override
@@ -164,8 +187,8 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );			
-			((VisMeshColor)visRender).setSurfaceRenderType( nSurfaceRenderType );
+			((VisMesh)visRender).setRenderType( VisMesh.MESH );			
+			((VisMesh)visRender).setSurfaceRenderType( nSurfaceRenderType );
 			defineTransparency();	
 		}
 	}
@@ -173,7 +196,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	@Override
 	public int getSurfaceRender()
 	{
-		return ((VisMeshColor)visRender).getSurfaceRenderType();
+		return ((VisMesh)visRender).getSurfaceRenderType();
 	}
 	
 	@Override
@@ -181,8 +204,8 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{
 		if(visRender != null )
 		{			
-			((VisMeshColor)visRender).setRenderType( VisMeshColor.MESH );
-			((VisMeshColor)visRender).setSurfaceGridType( nSurfaceGridType );
+			((VisMesh)visRender).setRenderType( VisMesh.MESH );
+			((VisMesh)visRender).setSurfaceGridType( nSurfaceGridType );
 			defineTransparency();
 		}
 	}
@@ -190,7 +213,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	@Override
 	public int getSurfaceGrid()
 	{
-		return ((VisMeshColor)visRender).getSurfaceGridType();
+		return ((VisMesh)visRender).getSurfaceGridType();
 	}
 	
 	@Override
@@ -198,7 +221,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
+			((VisMesh)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
 		}
 	}
 	
@@ -207,7 +230,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setColor( colorin );
+			((VisMesh)visRender).setColor( colorin );
 			defineTransparency();
 		}
 	}
@@ -216,21 +239,21 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	@Override
 	public Color getColor()
 	{		
-		return ((VisMeshColor)visRender).getColor();
+		return ((VisMesh)visRender).getColor();
 	}
 	
 
 	@Override
 	public void setPointSize( float fPointSize )
 	{
-		((VisMeshColor)visRender).setPointsSize( fPointSize );
+		((VisMesh)visRender).setPointsSize( fPointSize );
 		
 	}
 
 	@Override
 	public float getPointSize()
 	{
-		return ((VisMeshColor)visRender).getPointsSize();
+		return ((VisMesh)visRender).getPointsSize();
 	}
 	
 	
@@ -239,7 +262,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{		
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setWireLineWidth( fThickness );
+			((VisMesh)visRender).setWireLineWidth( fThickness );
 		}
 	}
 	
@@ -248,7 +271,7 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 	{		
 		if(visRender != null )
 		{
-			((VisMeshColor)visRender).setSilhouetteDecay( silhouetteDecay_ );
+			((VisMesh)visRender).setSilhouetteDecay( silhouetteDecay_ );
 		}
 	}
 	
@@ -267,5 +290,25 @@ public class MeshColor extends AbstractClipTransformSingleShape implements Basic
 		return sName;
 	}
 	
+	@Override
+	public boolean hasTexture()
+	{
+		return bHasTexture;
+	}
 	
+	@Override
+	public synchronized void useTexture(boolean bUseTexture_)
+	{
+		if(bHasTexture)
+		{
+			bUseTexture = bUseTexture_;
+			((VisMesh)visRender).useTexture( bUseTexture );
+		}
+	}
+	
+	@Override
+	public boolean isTextureUsed()
+	{
+		return bUseTexture;
+	}
 }

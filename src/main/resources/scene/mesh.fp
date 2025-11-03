@@ -1,10 +1,16 @@
 out vec4 fragColor;
 
-uniform vec4 colorin;
+uniform vec4 colorMesh;
 uniform int surfaceRender;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 posW;
+in vec2 texCoord;
+
+uniform sampler2D texture1;
+
+uniform int bUseTexture;
+
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -87,8 +93,17 @@ void main()
 	
 	vec3 norm = normalize(Normal);
 	vec3 viewDir = normalize(-FragPos);
+
+	vec4 colorin = colorMesh;
+
+	if(bUseTexture > 0)
+	{
+		colorin = texture( texture1, texCoord );
+	}
+		
 	vec4 colorout = colorin;	
 	
+
 	//plain, shaded or shiny surface
 	if(surfaceRender<3)
 	{

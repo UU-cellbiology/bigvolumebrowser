@@ -90,7 +90,7 @@ public class TransformScalePanel extends JPanel
 			gbc.weightx = 0.1;
 			gbc.insets = new Insets(0,0,0,0);
 			gbc.fill = GridBagConstraints.HORIZONTAL;
-			models[d] = new SpinnerNumberModel(1.0,0.001,1000., 0.1);
+			models[d] = new SpinnerNumberModel(1.0,0.000000001,1000000000., 1.0);
 			spinners[d] = new JSpinner(models[d]);
 			this.add( spinners[d], gbc );
 			gbc.gridx++;

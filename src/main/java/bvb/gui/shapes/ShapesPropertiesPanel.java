@@ -9,7 +9,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import bvb.core.BigVolumeBrowser;
-import bvb.shapes.BasicMeshColor;
+import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
 
@@ -76,7 +76,7 @@ public class ShapesPropertiesPanel extends JPanel
 				panelSpotsProperties.updateGUI();
 				bSpotsUpdate = false;
 			}
-			if(sh instanceof BasicMeshColor && bMeshUpdate )
+			if(sh instanceof BasicMeshShape && bMeshUpdate )
 			{
 				panelMeshesProperties.setEnabled( true );
 				panelMeshesProperties.updateGUI();
