@@ -30,7 +30,7 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 	/** define if the shape is transparent **/
 	void defineTransparency()
 	{
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			bTransparent = false;
 			if(getRenderType() == VisMesh.MESH && getSurfaceRender() ==  VisMesh.SURFACE_SILHOUETTE)
@@ -85,6 +85,10 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 			boundBox = Intervals.union( boundBox, meshTransform.estimateBounds( meshShape.boundingBoxNotTransformed() ));
 			visRendersTransform.put(  meshShape.getVisObject(), meshTransform );
 			visRendersTimeMap.put( meshShape.getVisObject(), meshShape.getTimePoint() );
+		}
+		if(visRendersTimeMap.size() == 1 )
+		{
+			defineTransparency();
 		}
 	}
 

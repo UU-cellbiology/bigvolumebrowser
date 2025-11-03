@@ -102,7 +102,7 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	int surfaceRender = SURFACE_SHADE;
 	
-	public static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
+	static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
 	
 	int silhouetteRender = silhouette_TRANSPARENT;	
 

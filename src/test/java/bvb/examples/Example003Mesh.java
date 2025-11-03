@@ -30,14 +30,15 @@ package bvb.examples;
 
 
 import java.awt.Color;
-
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.scene.VisMesh;
 import bvb.shapes.MeshShape;
+import bvb.shapes.MultiMeshShape;
 import ij.ImageJ;
 
 public class Example003Mesh
@@ -56,77 +57,82 @@ public class Example003Mesh
 		//load and show bunny mesh from file
 		String fMeshFilename  = "src/test/resources/mesh/bunny.stl";
 		
+		//make a BVB mesh object
+		int nMeshCount = 1;
 		MeshShape meshBunny = new MeshShape(fMeshFilename);
 		
 		//render with points
 		meshBunny.setRenderType( VisMesh.POINTS);
 		meshBunny.setPointSize( 0.4f );
 		meshBunny.setColor( meshColor );
-		
-		//now let's load mesh separately
-		Mesh bunny = MeshShape.loadMeshFromFile( fMeshFilename );
-		
-		//let's add an empty volume around it
-		RealInterval bunnyInt = Meshes.boundingBox( bunny );
-		meshBunny.setColor(meshColor );
-		int nMeshCount = 1;
 		meshBunny.setName( "bunny" + nMeshCount );
 		nMeshCount++;
 		//and finally add mesh to BVB
 		bvbTest.addShape( meshBunny );	
 		
-
-		//now let's show other ways to render meshed
-
-		//we going to shift them next to each other
-		final double displacementX = 1.1*(bunnyInt.realMax( 0 )-bunnyInt.realMin( 0 ));
-		final double displacementY = -1.3*(bunnyInt.realMax( 1 )-bunnyInt.realMin( 1 ));
+		//now let's load imglib2 mesh separately
+		Mesh bunny = MeshShape.loadMeshFromFile( fMeshFilename );
 		
-		//show different grid surface renders
-		int [] arrSurfaceGrid = new int [] {VisMesh.GRID_WIRE,  
-				VisMesh.GRID_CARTESIAN};
 		
-		for(int i = 0; i < 2; i++)
-		{		
-			//translate along X and add a copy
-			Meshes.translate( bunny, new double[] {displacementX,0,0} );
+		//its bounding box
+		RealInterval bunnyInt = Meshes.boundingBox( bunny );				
+	
+		//let's modify original mesh 
+		final double displacementX = 1.1 * (bunnyInt.realMax( 0 ) - bunnyInt.realMin( 0 ));
+		//translate along X 
+		Meshes.translate( bunny, new double[] {displacementX,0,0} );
+		
+		// render as wireframe
+		MeshShape meshBunnyNext = new MeshShape(bunny);
+		meshBunnyNext.setSurfaceRender( VisMesh.SURFACE_SHADE);
+		meshBunnyNext.setSurfaceGrid( VisMesh.GRID_WIRE );
+		meshBunnyNext.setColor( meshColor );
 			
-			meshBunny = new MeshShape(bunny);
-			meshBunny.setSurfaceRender( VisMesh.SURFACE_SHADE);
-			meshBunny.setSurfaceGrid( arrSurfaceGrid[i] );
-			if(i == 1)
-			{
-				meshBunny.setCartesianGrid( 2.0f, 0.1f );
-			}
-			meshBunny.setColor( meshColor );
+		meshBunnyNext.setName( "bunny" + nMeshCount );
+		nMeshCount++;
+		bvbTest.addShape( meshBunnyNext  );		
+
+		//now let's modify meshShape transform
+		meshBunnyNext = new MeshShape(bunny);
+		final AffineTransform3D meshTranslate = new AffineTransform3D();
+		
+		meshTranslate.translate( displacementX, 0.0, 0.0 );
+		meshBunnyNext.setTransform( meshTranslate );
+		
+		// render as silhouette
+		meshBunnyNext.setSurfaceRender( VisMesh.SURFACE_SHINY);
+		meshBunnyNext.setSurfaceGrid( VisMesh.GRID_FILLED );
+		meshBunnyNext.setColor( meshColor );
 			
-			meshBunny.setName( "bunny" + nMeshCount );
-			nMeshCount++;
-			bvbTest.addShape( meshBunny );		
-		}
+		meshBunnyNext.setName( "bunny" + nMeshCount );
+		nMeshCount++;
+		bvbTest.addShape( meshBunnyNext  );		
 		
+		//now let's load three meshes together as multi-mesh object
+		MultiMeshShape multiMeshShape = new MultiMeshShape();
 		
-		//let's start next row
-		Meshes.translate( bunny, new double[] {-displacementX*3.0, displacementY,0} );
-		
-		//show different surface renders
-		int [] arrSurfaceRender = new int [] {VisMesh.SURFACE_SHADE,  
-				VisMesh.SURFACE_SHINY, VisMesh.SURFACE_SILHOUETTE};
+		final double displacementY = -1.3 * (bunnyInt.realMax( 1 ) - bunnyInt.realMin( 1 ));
+
 		
 		for(int i = 0; i < 3; i++)
-		{		
-			//translate along X and add a copy
-			Meshes.translate( bunny, new double[] {displacementX,0,0} );
+		{	
+			meshTranslate.identity();
+			meshTranslate.translate( displacementX*(i-1), displacementY, 0.0 );
 			
-			meshBunny = new MeshShape(bunny);			
-			meshBunny.setSurfaceRender( arrSurfaceRender[i]);
-			meshBunny.setSurfaceGrid( VisMesh.GRID_FILLED);
-			meshBunny.setColor( meshColor );
+			meshBunnyNext = new MeshShape(bunny);	
+			meshBunnyNext.setTransform( meshTranslate );
+			meshBunnyNext.setSurfaceRender( VisMesh.SURFACE_SILHOUETTE);
+			meshBunnyNext.setSurfaceGrid( VisMesh.GRID_FILLED);
+			meshBunnyNext.setColor( meshColor );
 			
-			meshBunny.setName( "bunny" + nMeshCount );
+			meshBunnyNext.setName( "bunny" + nMeshCount );
 			nMeshCount++;
-			bvbTest.addShape( meshBunny );		
+			multiMeshShape.addMeshShape( meshBunnyNext );
+			
 		}
+		
+		multiMeshShape.setName( "three bunnies" );
+		bvbTest.addShape( multiMeshShape );		
 		
 		//focus on everything
 		bvbTest.bvbActions.actionCenterView();
