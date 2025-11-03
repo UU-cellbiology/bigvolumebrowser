@@ -28,7 +28,6 @@
  */
 package bvb.examples;
 
-
 import java.awt.Color;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
