@@ -42,6 +42,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import org.apache.commons.io.FilenameUtils;
 
+import bvb.scene.AbstractClipTransformVis;
 import bvb.scene.VisMesh;
 import bvb.utils.Misc;
 
@@ -122,6 +123,11 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 			}
 		}
 		return null;
+	}
+	
+	AbstractClipTransformVis getVisObject()
+	{
+		return visRender;
 	}
 	
 	@Override

@@ -294,7 +294,53 @@ public class PanelAddShapes extends JPanel
 		{
 			if(meshes.size() > 0)
 			{
-				bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+				if(meshes.size() == 1)
+				{
+					bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+				}
+				else
+				{
+					JPanel pGLTSettings = new JPanel(new GridBagLayout());
+					
+					GridBagConstraints gbc = new GridBagConstraints();
+					String[] sOptions = { "Group meshes into single object", "Each mesh separately" };
+					JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
+					cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesGLT", true) ? 0 : 1);
+					gbc.gridx = 0;
+					gbc.gridy = 0;	
+					GBCHelper.alighLoose(gbc);
+					pGLTSettings .add(new JLabel("Multiple meshes:"), gbc);
+					gbc.gridx++;
+					pGLTSettings .add( cbMultiMesh, gbc );
+					boolean bGroupMesh = true;
+					
+					int reply = JOptionPane.showConfirmDialog(null, pGLTSettings, "Loading glTG mesh file options", 
+					        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+					if (reply == JOptionPane.OK_OPTION) 
+					{
+						bGroupMesh = cbMultiMesh.getSelectedIndex() == 0;
+						Prefs.set( "BVB.BVB.bGroupMesGLT", bGroupMesh);
+						
+					}
+					else
+					{
+						return;
+					}
+					if(bGroupMesh)
+					{
+						MultiMeshShape mmGLT = new MultiMeshShape();
+						for(BasicShape sh : meshes)
+						{
+							mmGLT.addMeshShape( (MeshShape)sh );
+						}
+						mmGLT.setName( Misc.getSourceStyleName( sFilename )  );
+						bvb.addShape(mmGLT);
+					}
+					else
+					{
+						bvb.addShapes( meshes, Misc.getSourceStyleName( sFilename ) );
+					}
+				}
 			}
 		}
 	}
@@ -308,7 +354,7 @@ public class PanelAddShapes extends JPanel
 		GridBagConstraints gbc = new GridBagConstraints();
 		String[] sOptions = { "Group meshes by color", "Each mesh separately" };
 		JComboBox<String> cbMultiMesh = new JComboBox<>(sOptions);
-		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMesh", true) ? 0 : 1);
+		cbMultiMesh.setSelectedIndex(Prefs.get( "BVB.bGroupMeshColorWRL", true) ? 0 : 1);
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
@@ -323,7 +369,7 @@ public class PanelAddShapes extends JPanel
 		if (reply == JOptionPane.OK_OPTION) 
 		{
 			bGroupMesh = cbMultiMesh.getSelectedIndex() == 0;
-			Prefs.set( "BVB.bGroupMesh", bGroupMesh);
+			Prefs.set( "BVB.BVB.bGroupMeshColorWRL", bGroupMesh);
 			
 		}
 		else

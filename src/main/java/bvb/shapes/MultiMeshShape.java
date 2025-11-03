@@ -4,9 +4,12 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
+import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Intervals;
 
 import bvb.scene.AbstractClipTransformVis;
@@ -19,6 +22,11 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 	
 	boolean bUseTexture = false;
 	
+	final AffineTransform3D transform = new AffineTransform3D();
+	
+	/** in the case meshes are transformed, we store initial transform **/
+	final ConcurrentHashMap<AbstractClipTransformVis, AffineTransform3D> visRendersTransform = new ConcurrentHashMap<>();
+
 	/** define if the shape is transparent **/
 	void defineTransparency()
 	{
@@ -62,8 +70,24 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 			
 			boundBox = Intervals.union( boundBox, Meshes.boundingBox( nmesh ) );
 			visRendersTimeMap.put( meshShape, nTimePoint );
+			visRendersTransform.put(meshShape, new AffineTransform3D());
 		}
 	}
+	
+	public void addMeshShape(final MeshShape meshShape)
+	{
+		if(meshShape != null)
+		{
+			bHasTexture = bHasTexture || meshShape.hasTexture();
+			AffineTransform3D meshTransform = new AffineTransform3D();
+			meshShape.getTransform( meshTransform );
+			
+			boundBox = Intervals.union( boundBox, meshTransform.estimateBounds( meshShape.boundingBoxNotTransformed() ));
+			visRendersTransform.put(  meshShape.getVisObject(), meshTransform );
+			visRendersTimeMap.put( meshShape.getVisObject(), meshShape.getTimePoint() );
+		}
+	}
+
 
 	@Override
 	public void setRenderType(final int nRenderType)
@@ -250,5 +274,40 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 	{
 		return bUseTexture;
 	}
+	
+	@Override
+	public void getTransform(final AffineTransform3D t)
+	{
+		if(visRendersTimeMap.size() == 0)
+		{
+			t.set( new AffineTransform3D());
+			return;
+		}
+		t.set( transform );
+	}
+	
+	@Override
+	public void setTransform(final AffineTransform3D t)
+	{
+		transform.set( t );
+		final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+		for(final AbstractClipTransformVis visRender:visRenders)
+		{
+			final AffineTransform3D trObj = visRendersTransform.get( visRender );
+			final AffineTransform3D trObjCum = new AffineTransform3D();
+			trObjCum.set( trObj );
+			trObjCum.preConcatenate( transform );
+			visRender.setTransform( trObjCum );
+		}
+	}
+	
+	@Override
+	public RealInterval boundingBox()
+	{
+		if(visRendersTimeMap.size() == 0)
+			return null;
+				
+		return transform.estimateBounds( boundBox );
+	}	
 
 }

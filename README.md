@@ -2,14 +2,11 @@
 
 # BigVolumeBrowser
 
-[FIJI](https://fiji.sc) plugin for 3D exploration of multiple large datasets and shapes.  
+[FIJI](https://fiji.sc) plugin for 3D exploration of multiple large volumetric datasets and shapes.  
 
 **Users**: please check full description/tutorials in the **[wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.  
-Or assume GUI is friendly and just mess around with it, who needs manuals?
 
-**Open source developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out. 
-
-**Companies**: contact for standalone/integration solutions.  
+**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out. 
 
 ----------
 **Questions with answers:**  

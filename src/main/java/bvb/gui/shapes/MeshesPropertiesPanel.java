@@ -230,7 +230,7 @@ public class MeshesPropertiesPanel extends JPanel
 		
 		final Color cColorFin = currColor;
 		final boolean bHasTextureFin = bHasTexture;
-		final boolean bTextureSameFin = (bTextureSame==null)?false:bTextureSame.booleanValue();
+		final boolean bTextureSameFin = (bTextureSame == null)?false:bTextureSame.booleanValue();
 		final boolean bTextureActiveFin = bTextureActive;
 		final float fPointSizeFin = fPointSize;
 		final int nRenderFin = nRender;
