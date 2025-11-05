@@ -87,7 +87,7 @@ public class ClipRangePanel extends JPanel
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", clipAxesPanels[d]::setBoundsDialog ) );
 			menus[d].add( runnableItem(  "shrink bounds to selection", clipAxesPanels[d]::shrinkBoundsToRange ) );
-			Misc.setToolTipRecursively( clipAxesPanels[d], "Clipbox range " + clipBoxAxes[d] );
+			clipAxesPanels[d].setToolTipText( "Clipbox range " + clipBoxAxes[d] );
 			this.add(clipAxesPanels[d],cd);
 		}
 		menus[0].add( runnableItem(  "reset bounds", () -> resetBounds(0)));

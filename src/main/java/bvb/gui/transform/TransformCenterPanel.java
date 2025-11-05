@@ -62,7 +62,7 @@ public class TransformCenterPanel extends JPanel
 			centerPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", centerPanels[d]::setBoundsDialog ) );
-			Misc.setToolTipRecursively( centerPanels[d], "Coordinate " + sAxes[d]);
+			centerPanels[d].setToolTipText( "Coordinate " + sAxes[d] );
 			this.add(centerPanels[d],gbc);
 		}
 

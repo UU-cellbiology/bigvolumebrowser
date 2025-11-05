@@ -81,7 +81,7 @@ public class ClipCenterPanel extends JPanel
 			clipCenterPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", clipCenterPanels[d]::setBoundsDialog ) );
-			Misc.setToolTipRecursively( clipCenterPanels[d] , "Clipbox center " + clipBoxAxes[d] );
+			clipCenterPanels[d].setToolTipText( "Clipbox center " + clipBoxAxes[d] );
 			this.add(clipCenterPanels[d],cd);
 		}
 

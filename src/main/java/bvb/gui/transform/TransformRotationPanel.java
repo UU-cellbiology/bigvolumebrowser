@@ -47,7 +47,7 @@ public class TransformRotationPanel extends JPanel
 		{
 			gbc.gridy++;
 			trRotationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( -dRange, dRange, 0.0 ));
-			Misc.setToolTipRecursively( trRotationPanels[d],  "Angle around " + sAxes[d] );
+			trRotationPanels[d].setToolTipText( "Angle around " + sAxes[d] );
 			this.add(trRotationPanels[d],gbc);
 		}
 		

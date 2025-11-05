@@ -74,11 +74,11 @@ public class SpotsColorCodePanel extends JPanel
 		menuLutRange.add( runnableItem(  "set bounds ...", lutRangePanel::setBoundsDialog ) );
 		menuLutRange.add( runnableItem(  "shrink bounds to selection", lutRangePanel::shrinkBoundsToRange ) );
 		lutRangePanel.setPopup( () -> menuLutRange );	
-		Misc.setToolTipRecursively( lutRangePanel,  "LUT mapping range" );
+		lutRangePanel.setToolTipText( "LUT mapping range" );
 		
 		lutGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
 		lutGammaPanel.changeListeners().add(  () -> updateLUTMapGamma() );
-		Misc.setToolTipRecursively( lutGammaPanel,  "LUT mapping gamma" );
+		lutGammaPanel.setToolTipText( "LUT mapping gamma" );
 		gbc.weighty = 0.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;

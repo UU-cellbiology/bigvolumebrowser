@@ -76,7 +76,7 @@ public class ClipRotationPanel extends JPanel
 		{
 			gbc.gridy++;
 			clipRotationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( -dRange, dRange, 0.0 ));
-			Misc.setToolTipRecursively( clipRotationPanels[d], "Angle around " + clipBoxAxes[d] );
+			clipRotationPanels[d].setToolTipText( "Angle around " + clipBoxAxes[d] );
 			this.add(clipRotationPanels[d],gbc);
 		}
 		

@@ -34,9 +34,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import javax.swing.JComponent;
-import java.awt.Component;
-
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -502,13 +499,5 @@ public class Misc
 		return out;
 	}
 	
-	public static void setToolTipRecursively(JComponent c, String text) {
-
-	    c.setToolTipText(text);
-	  
-	    for (Component cc : c.getComponents())
-	        if (cc instanceof JComponent)
-	            setToolTipRecursively((JComponent) cc, text);
-	}
 	
 }
