@@ -73,13 +73,15 @@ public class ClipCenterPanel extends JPanel
 		cd.fill = GridBagConstraints.BOTH;
 		cd.weightx = 1.0;
 		final JPopupMenu [] menus = new JPopupMenu[3];
-		for(int d=0;d<3;d++)
+		String [] clipBoxAxes = new String[] {"X", "Y", "Z"};
+		for(int d = 0; d < 3; d++)
 		{
 			cd.gridy++;
 			
 			clipCenterPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", clipCenterPanels[d]::setBoundsDialog ) );
+			Misc.setToolTipRecursively( clipCenterPanels[d] , "Clipbox center " + clipBoxAxes[d] );
 			this.add(clipCenterPanels[d],cd);
 		}
 

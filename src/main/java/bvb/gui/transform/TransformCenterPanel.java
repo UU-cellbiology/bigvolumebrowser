@@ -54,7 +54,7 @@ public class TransformCenterPanel extends JPanel
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 0.99;
 		final JPopupMenu [] menus = new JPopupMenu[3];
-		
+		String [] sAxes = new String[] {"X", "Y", "Z"};
 		for(int d = 0; d < 3; d++)
 		{
 			gbc.gridy++;
@@ -62,6 +62,7 @@ public class TransformCenterPanel extends JPanel
 			centerPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( 0.0, 1.0, 0.5 ));
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", centerPanels[d]::setBoundsDialog ) );
+			Misc.setToolTipRecursively( centerPanels[d], "Coordinate " + sAxes[d]);
 			this.add(centerPanels[d],gbc);
 		}
 

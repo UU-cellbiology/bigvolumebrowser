@@ -79,13 +79,13 @@ public class SpotsOpacityPanel extends JPanel
 		menuLutRange.add( runnableItem(  "set bounds ...", alphaRangePanel::setBoundsDialog ) );
 		menuLutRange.add( runnableItem(  "shrink bounds to selection", alphaRangePanel::shrinkBoundsToRange ) );
 		alphaRangePanel.setPopup( () -> menuLutRange );	
-		
+		Misc.setToolTipRecursively( alphaRangePanel,  "Opacity mapping range" );
 		alphaGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
 		alphaGammaPanel.changeListeners().add(  () -> updateAlphaMapGamma() );
-		
+		Misc.setToolTipRecursively( alphaGammaPanel,  "Opacity mapping gamma" );
 		extraAlphaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.0,1.0,1.0) );
 		extraAlphaPanel.changeListeners().add( () -> updateExtraAlpha() );
-		extraAlphaPanel.setToolTipText( "Extra opacity\n coefficient" );
+		Misc.setToolTipRecursively( extraAlphaPanel,  "Extra opacity\n coefficient" );
 		final JPopupMenu menuExtraAlpha = new JPopupMenu();
 		menuExtraAlpha.add( runnableItem(  "set bounds ...", extraAlphaPanel::setBoundsDialog ) );
 		extraAlphaPanel.setPopup( () -> menuExtraAlpha );	

@@ -187,7 +187,7 @@ public class ClipPanel extends JPanel
 					
 		this.add(butCoordSystem ,gbc);
 
-		cbShowClipBoxes = new JCheckBox ("Box",false);
+		cbShowClipBoxes = new JCheckBox ("Box", false);
 		gbc.gridx++;
 		this.add(cbShowClipBoxes ,gbc);
 
@@ -211,6 +211,7 @@ public class ClipPanel extends JPanel
 				
 				});
 		cbShowClipBoxes.setSelected( BVBSettings.bShowClipBoxes );
+		cbShowClipBoxes.setToolTipText( "Show/hide clipbox" );
 		
 		gbc.weightx = 0.1;
 		//gbc.anchor = GridBagConstraints.EAST;

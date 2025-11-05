@@ -78,14 +78,16 @@ public class ClipRangePanel extends JPanel
 		cd.fill = GridBagConstraints.BOTH;
 		cd.weightx = 1.0;
 		final JPopupMenu [] menus = new JPopupMenu[3];
-		for(int d=0;d<3;d++)
+		
+		String [] clipBoxAxes = new String[] {"X", "Y", "Z"};
+		for(int d = 0; d < 3; d++)
 		{
 			cd.gridy++;
 			clipAxesPanels[d] = new BoundedRangePanelPG();
 			menus[d] = new JPopupMenu();
 			menus[d].add( runnableItem(  "set bounds ...", clipAxesPanels[d]::setBoundsDialog ) );
 			menus[d].add( runnableItem(  "shrink bounds to selection", clipAxesPanels[d]::shrinkBoundsToRange ) );
-
+			Misc.setToolTipRecursively( clipAxesPanels[d], "Clipbox range " + clipBoxAxes[d] );
 			this.add(clipAxesPanels[d],cd);
 		}
 		menus[0].add( runnableItem(  "reset bounds", () -> resetBounds(0)));
@@ -107,9 +109,9 @@ public class ClipRangePanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i = 0; i < 3; i++)
+		for(int d = 0; d < 3; d++)
 		{
-			clipAxesPanels[i].setEnabled( bEnabled );
+			clipAxesPanels[d].setEnabled( bEnabled );
 		}
 	}
 	
@@ -122,7 +124,7 @@ public class ClipRangePanel extends JPanel
 		BoundedRange [] range = new BoundedRange[3];
 		boolean bFirstCS = true;
 		boolean [] allRangesEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			allRangesEqual[d] = true;
 		}
@@ -143,7 +145,7 @@ public class ClipRangePanel extends JPanel
 				final RealInterval clipInterval = objCl.getClipInterval();
 				if(clipInterval == null)
 				{
-					for(int d=0;d<3;d++)
+					for(int d = 0; d < 3; d++)
 					{
 						min[d] = minBound[d];
 						max[d] = maxBound[d];
@@ -184,7 +186,7 @@ public class ClipRangePanel extends JPanel
 				}
 				if(bFirstCS)
 				{
-					for (int d=0; d<3; d++)
+					for (int d = 0; d < 3; d++)
 					{
 						range[d] = new BoundedRange( minBound[d], maxBound[d], min[d], max[d] );
 					}
@@ -210,7 +212,7 @@ public class ClipRangePanel extends JPanel
 				synchronized ( ClipRangePanel.this )
 				{
 					blockUpdates = true;
-					for (int d=0;d<3;d++)
+					for (int d = 0; d < 3; d++)
 					{
 	
 						clipAxesPanels[d].setConsistent( isConsistent[d] );

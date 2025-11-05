@@ -42,12 +42,12 @@ public class TransformRotationPanel extends JPanel
 		gbc.gridx = 0;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 1.0;
-		
-		for(int d=0;d<3;d++)
+		String [] sAxes = new String[] {"X", "Y", "Z"};
+		for(int d = 0; d < 3; d++)
 		{
 			gbc.gridy++;
 			trRotationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( -dRange, dRange, 0.0 ));
-
+			Misc.setToolTipRecursively( trRotationPanels[d],  "Angle around " + sAxes[d] );
 			this.add(trRotationPanels[d],gbc);
 		}
 		

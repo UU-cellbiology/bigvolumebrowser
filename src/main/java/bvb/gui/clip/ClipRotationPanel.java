@@ -71,11 +71,12 @@ public class ClipRotationPanel extends JPanel
 		gbc.gridx = 0;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 1.0;
-		for(int d=0;d<3;d++)
+		String [] clipBoxAxes = new String[] {"X", "Y", "Z"};
+		for(int d = 0; d < 3; d++)
 		{
 			gbc.gridy++;
 			clipRotationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( -dRange, dRange, 0.0 ));
-
+			Misc.setToolTipRecursively( clipRotationPanels[d], "Angle around " + clipBoxAxes[d] );
 			this.add(clipRotationPanels[d],gbc);
 		}
 		
@@ -89,9 +90,9 @@ public class ClipRotationPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			clipRotationPanels[i].setEnabled( bEnabled );
+			clipRotationPanels[d].setEnabled( bEnabled );
 		}
 	}	
 	
