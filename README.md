@@ -1,8 +1,20 @@
-[![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml)
+[![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml)  
 
-# BigVolumeBrowser
+<picture>
+	<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/UU-cellbiology/bigvolumebrowser/main/logo/bvb_logo_dark_200.png">
+	<img align="right" alt="BVB logo" src="https://raw.githubusercontent.com/UU-cellbiology/bigvolumebrowser/main/logo/bvb_logo_bright_200.png">
+</picture>
 
-[FIJI](https://fiji.sc) plugin for 3D exploration of multiple large volumetric datasets and shapes.  
+[FIJI](https://fiji.sc/) plugin for interactive 3D exploration of multiple large (and small) volumetric datasets  
+and geometric shapes, built on [BigVolumeViewer](https://forum.image.sc/t/bigvolumeviewer-tech-demo/12104) ([fork](https://github.com/UU-cellbiology/bvv-playground)).  
+
+It can show volumetric microscopy data, SMLM datasets, and geometric objects   
+(point clouds and meshes) in various rendering modes.   
+Objects can be clipped and transformed freely in 3D, and it works with timelapse data.
+
+BVB performs lazy loading and supports a multi-scale pyramidal data formats,   
+allowing smooth exploration of datasets larger than GPU memory.
+
 
 **Users**: please check full description/tutorials in the **[wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.  
 
@@ -33,4 +45,5 @@ Powered (and made possible) by a hard work of very talented people behind:
 ----------
 
 Developed in [Cell Biology group](http://cellbiology.science.uu.nl) of Utrecht University.  
-<a href="mailto:katpyxa@gmail.com">E-mail</a> for any questions or tag <a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a> at <a href="https://forum.image.sc/">image.sc</a> forum.
+<a href="mailto:katpyxa@gmail.com">E-mail</a> for any questions or tag <a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a> at <a href="https://forum.image.sc/">image.sc</a> forum.   
+Logo design [Anna Vinokurova](https://www.behance.net/bozax)

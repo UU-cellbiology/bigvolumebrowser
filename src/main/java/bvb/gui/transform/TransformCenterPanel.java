@@ -139,7 +139,7 @@ public class TransformCenterPanel extends JPanel
 				for (int d = 0; d < 3; d++)
 				{
 					final BoundedValueDoubleBVB translationRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-					allTrEqual[d] &= boundValue[d].equals( translationRange );
+					allTrEqual[d] &= Misc.compareBoundedValues( boundValue[d], translationRange );
 					boundValue[d] = boundValue[d].join( translationRange );
 				}
 			}

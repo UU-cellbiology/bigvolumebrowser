@@ -84,10 +84,10 @@ public class Navigationexample
 //		int [] arrSurfaceGrid = new int [] {VisMesh.GRID_WIRE,  
 //				VisMesh.GRID_CARTESIAN};
 		int nBunnyCount = 0;
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < 2; i++)
 		{		
 			//translate along X and add a copy
-			Meshes.translate( bunny, new double[] {displacementX,0,0} );
+			Meshes.translate( bunny, new double[] {displacementX,-displacementX,0} );
 			
 			meshBunny = new MeshShape(bunny);
 			meshBunny.setSurfaceRender( VisMesh.SURFACE_SHADE);
