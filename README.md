@@ -2,23 +2,21 @@
 
 <picture>
 	<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/UU-cellbiology/bigvolumebrowser/main/logo/bvb_logo_dark_200.png">
-	<img align="right" alt="BVB logo" src="https://raw.githubusercontent.com/UU-cellbiology/bigvolumebrowser/main/logo/bvb_logo_bright_200.png">
+	<img align="right" style="padding:10px" alt="BVB logo" src="https://raw.githubusercontent.com/UU-cellbiology/bigvolumebrowser/main/logo/bvb_logo_bright_200.png">
 </picture>
 
-[FIJI](https://fiji.sc/) plugin for interactive 3D exploration of multiple large (and small) volumetric datasets  
-and geometric shapes, built on [BigVolumeViewer](https://forum.image.sc/t/bigvolumeviewer-tech-demo/12104) ([fork](https://github.com/UU-cellbiology/bvv-playground)).  
+[FIJI](https://fiji.sc/) plugin for interactive 3D exploration of multiple large (and small) volumetric datasets and geometric shapes, built on [BigVolumeViewer](https://forum.image.sc/t/bigvolumeviewer-tech-demo/12104) ([fork](https://github.com/UU-cellbiology/bvv-playground)).  
 
-It can show volumetric microscopy data, SMLM datasets, and geometric objects   
-(point clouds and meshes) in various rendering modes.   
+It can display volumetric (microscopy) data, SMLM datasets, and geometric objects (point clouds and meshes) in various rendering modes.   
 Objects can be clipped and transformed freely in 3D, and it works with timelapse data.
 
-BVB performs lazy loading and supports a multi-scale pyramidal data formats,   
-allowing smooth exploration of datasets larger than GPU memory.
+BVB performs lazy loading and supports a multi-scale pyramidal data formats.   
+This speeds up render and allows exploration of datasets larger than GPU memory.
 
 
-**Users**: please check full description/tutorials in the **[wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.  
+**Users**: please check full description/tutorials in the **[project's wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**. For questions, tag me (<a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a>) at <a href="https://forum.image.sc/">image.sc</a> forum.   
 
-**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out. 
+**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out, since the code comments are not in the best shape. 
 
 ----------
 **Questions with answers:**  
