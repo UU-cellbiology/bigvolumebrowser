@@ -28,16 +28,11 @@
  */
 package bvb.develop;
 
-import java.awt.Color;
-import java.util.ArrayList;
-
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealPoint;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.examples.RandomHyperSphere;
-import bvb.scene.VisSpots;
-import bvb.shapes.Spots;
+
 
 import ij.ImageJ;
 

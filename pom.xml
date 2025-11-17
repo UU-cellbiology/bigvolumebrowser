@@ -80,15 +80,19 @@
 		<license.licenseName>bsd_2</license.licenseName>
         <license.copyrightOwners>Cell Biology, Neurobiology and Biophysics Department of Utrecht University.</license.copyrightOwners>  			
 		<license.excludes>**/resources/**</license.excludes>
+		<bvv-playground.version>0.5.0</bvv-playground.version>
+		<bdv-loaders.version>0.10.0</bdv-loaders.version>
+		<jgltf.version>2.0.4</jgltf.version>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles> 
+		
 	</properties>
 
 	<dependencies>
 		<dependency>
 		  <groupId>nl.uu.science.cellbiology</groupId>
 		  <artifactId>bvv-playground</artifactId>
-		  <version>0.5.0-SNAPSHOT</version>
+		  <version>${bvv-playground.version}</version>
 		</dependency>
 		
 		<!-- BIOFORMATS -->
@@ -112,25 +116,19 @@
 			<groupId>com.formdev</groupId>
 			<artifactId>flatlaf</artifactId>
 		</dependency>
-
-		<!-- SCIFIO dependencies -->
-		<dependency>
-			<groupId>io.scif</groupId>
-			<artifactId>scifio</artifactId>
-		</dependency>
 		
 		<!-- Bioformats opener -->
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-image-loaders</artifactId>
-			<version>0.10.0</version> 
+			<version>${bdv-loaders.version}</version> 
 		</dependency>
 		
 		<!-- GLT format (mesh) reader -->
 		<dependency>
 		    <groupId>de.javagl</groupId>
 		    <artifactId>jgltf-model</artifactId>
-		    <version>2.0.4</version>
+		    <version>${jgltf.version}</version>
 		</dependency>
   		
 		<!-- ImgLib2 dependencies -->
@@ -138,26 +136,20 @@
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-algorithm</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-algorithm-gpl</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-realtransform</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-roi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ij</artifactId>
+			<artifactId>imglib2-cache</artifactId>
 		</dependency>
 
 		<dependency>
@@ -178,20 +170,16 @@
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
 		</dependency>
+		
 		<dependency>
-  			<groupId>sc.fiji</groupId>
-  			<artifactId>bigdataviewer_fiji</artifactId>
+			<groupId>sc.fiji</groupId>
+			<artifactId>spim_data</artifactId>
 		</dependency>
 		
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 		</dependency>
-		
-		<dependency>
-        	<groupId>gov.nist.math</groupId>
-        	<artifactId>jama</artifactId>
-        </dependency>
 
 	</dependencies>
 	
