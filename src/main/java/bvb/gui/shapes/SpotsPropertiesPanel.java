@@ -380,12 +380,12 @@ public class SpotsPropertiesPanel extends JPanel
 					cbShape.setSelectedIndex( nShapeFin );
 				}
 
-				
+				colorCodePanel.updateGUI();
+				opacityPanel.updateGUI();
 				blockUpdates = false;
 			}
 		} );
-		colorCodePanel.updateGUI();
-		opacityPanel.updateGUI();
+
 	}
 	
 	@Override
