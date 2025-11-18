@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '8'
-          distribution: 'zulu'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Set up CI environment
         run: .github/setup.sh
