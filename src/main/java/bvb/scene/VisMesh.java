@@ -347,10 +347,12 @@ public class VisMesh extends AbstractClipTransformVis
 		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 1 );
 		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshUVVbo );
-		gl.glVertexAttribPointer( 2, 2, GL_FLOAT, false, 2 * Float.BYTES, 0 );
-		gl.glEnableVertexAttribArray( 2 );
-
+		if(bHasTexture)
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, meshUVVbo );
+			gl.glVertexAttribPointer( 2, 2, GL_FLOAT, false, 2 * Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 2 );
+		}
 		
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, meshEbo );
 		gl.glBindVertexArray( 0 );

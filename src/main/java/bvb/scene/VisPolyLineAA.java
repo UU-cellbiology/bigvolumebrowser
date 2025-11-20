@@ -288,14 +288,14 @@ public class VisPolyLineAA
 				vertAll[nDup*3+d] = vertices[d];
 			}
 		}
-		for(int nDup = 0; nDup<2; nDup++)
+		for(int nDup = 0; nDup < 2; nDup++)
 		{
 			for (int d = 0; d < 3; d++)
 			{	
 				vertAll[(nPointsN+1)*6 + nDup*3 + d] = vertices[(nPointsN-1)*3 + d];
 			}
 		}
-		for(int i = 0; i<  nTotLength; i++)
+		for(int i = 0; i < nTotLength; i++)
 		{
 			vertCurr[i] = vertAll[i+6];
 			vertPrev[i] = vertAll[i];
@@ -303,7 +303,7 @@ public class VisPolyLineAA
 		}
 		
 		//cumulative length
-		for(int i = 1; i<nPointsN;i++)
+		for(int i = 1; i < nPointsN; i++)
 		{
 			double dLen = 0;
 			for(int d = 0; d < 3; d++)
