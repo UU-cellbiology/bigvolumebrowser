@@ -120,7 +120,8 @@ public class PanelAddShapes extends JPanel
 			sptParser.fileSpots = dialSpots.fileSpots;
 			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
 			Prefs.set( "BVB.bSpotsImportHasHeader", sptParser.bHeader);
-			sptParser.sSeparator = (String)dialSpots.cbSeparator.getSelectedItem();
+			String[] sSeparators = { ",", ";", " ", "\t" };
+			sptParser.sSeparator = sSeparators[dialSpots.cbSeparator.getSelectedIndex()];
 			Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
 			//column indices
 			final int [] nColInd = new int[8];
