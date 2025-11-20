@@ -416,13 +416,18 @@ public class VisSpots extends AbstractClipTransformVis
 		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
 		gl.glEnableVertexAttribArray( 0 );
 		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
-		gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
-		gl.glEnableVertexAttribArray( 1 );
-		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
-		gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
-		gl.glEnableVertexAttribArray( 2 );
+		if( fSpotSize < 0.0f )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
+			gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 1 );
+		}
+		if( property != null )
+		{		
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
+			gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 2 );
+		}
 		
 		gl.glBindVertexArray( 0 );
 		
