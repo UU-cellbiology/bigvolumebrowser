@@ -207,69 +207,77 @@ public class ViewPanel extends JPanel
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
 		
-		gbc.gridx=0;
-		gbc.gridy=0;	
+		NumberField nfLLSAngle = new NumberField(5);
+		nfLLSAngle.setText( df3.format( BVBSettings.dLLSAngle ) );
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
 		
 		pViewSettings.add(new JLabel("Background color: "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(butCanvasBGColor, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Show scale bar "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbShowScaleBar, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Show MultiBox"), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbShowMultiBox, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Highlight selected objects"), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbHighLightBox, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Highlight color: "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(butHighLightColor, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Transform animation duration (ms): "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(nfAnimationDuration,gbc);
 
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Screen fraction on zoom/focus: "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(nfFocusScreenFraction, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Focus on loaded objects "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbZoomLoad, gbc);
 
+		// not sure if we need it, skip for now
 //		gbc.gridx=0;
 //		gbc.gridy++;
 //		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
 //		gbc.gridx++;
 //		pViewSettings.add(cbPyramidize, gbc);
 		
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		pViewSettings.add(new JLabel("Show random shader on startup"), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbBGShader, gbc);
 		
-		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("LLS deskew angle (degrees)"), gbc);
+		gbc.gridx++;
+		pViewSettings.add(nfLLSAngle, gbc);	
 		
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -320,6 +328,9 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
+			
+			BVBSettings.dLLSAngle = Double.parseDouble(nfLLSAngle.getText());
+			Prefs.set("BVB.dLLSAngle",BVBSettings.dLLSAngle);
 			
 			if(bRepaintBVV)
 			{
