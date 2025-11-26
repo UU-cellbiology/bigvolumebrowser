@@ -73,6 +73,9 @@ public class BVBSettings
 	/** highlight color of boxes/clipboxes **/
 	public static Color boxHighlightColor = new Color((int)Prefs.get( "BVB.boxHighlightColor", new Color(0,153,255,255).getRGB() ));
 	
+	/** angle for lattice-light sheet data deskew in degrees**/
+	public static double dLLSAngle = Prefs.get("BVB.dLLSAngle", 30.);
+	
 	public static int nDefaultWidthControlPanel = 400;
 	
 	public static int nDefaultHeightControlPanel = 600;

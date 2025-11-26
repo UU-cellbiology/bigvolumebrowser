@@ -31,6 +31,9 @@ package bvb.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+
+import javax.swing.JOptionPane;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -55,6 +58,9 @@ import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.generic.AbstractSpimData;
+import mpicbg.spim.data.registration.ViewRegistration;
+import mpicbg.spim.data.registration.ViewTransformAffine;
+import mpicbg.spim.data.sequence.SequenceDescription;
 
 public class SpimDataLoader
 {
@@ -136,7 +142,7 @@ public class SpimDataLoader
 	    }
 	    
 		int nOpenSeries = 0;
-		if(nSeriesCount==1)
+		if(nSeriesCount == 1)
 		{
 			nOpenSeries = 0;
 		}
@@ -148,7 +154,7 @@ public class SpimDataLoader
 			int [] nDatasetIDs = new int[nSeriesCount];
 			int [] nDatasetType = new int[nSeriesCount];
 			
-			for(int nS=0;nS<nSeriesCount;nS++)
+			for(int nS = 0; nS < nSeriesCount; nS++)
 			{
 				if(seriesZsize[nS] > 1)
 				{
@@ -193,24 +199,48 @@ public class SpimDataLoader
 		}
 
 
-//		final SequenceDescription seq = spimData.getSequenceDescription();
-//		
-//		//see if data comes from LLS7
-//		String sTestLLS = seq.getViewDescription(0, 0).getViewSetup().getName();
-//		if(sTestLLS.length()>3)
-//		{
-//			if(sTestLLS.contains("LLS") && imageFileName.endsWith(".czi"))
-//			{
-//				if (JOptionPane.showConfirmDialog(null, "Looks like the input comes from Zeiss LLS7.\nDo you want to deskew it?\n"
-//						+ "(if it is already deskewed, click No)", "Loading option",
-//				        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
-//				{
-//					AffineTransform3D deskewTR = makeLLS7Transform(Math.PI/6.0);
-//					//seq.getViewDescription(0, 0).
-//				} 
-//			}
-//
-//		}
+		final SequenceDescription seq = spimData.getSequenceDescription();
+		
+		
+		
+		boolean bSuspectLLS = false;
+		
+		//see if data comes from LLS7
+		String sTestLLS = seq.getViewDescription(0, 0).getViewSetup().getName();
+		if(sTestLLS.length() > 3)
+		{
+			if(sTestLLS.contains("LLS") && imageFileName.endsWith(".czi"))
+			{
+				bSuspectLLS = true;
+			}
+		}
+		//LLS could be in the filename
+		final File f = new File(imageFileName);
+		
+		String justFileName = f.getName();
+		
+		if(justFileName.contains( "LLS" ))
+		{
+			bSuspectLLS = true;
+		}
+		//yeah, it could be LLS
+		if(bSuspectLLS)
+		{
+				if (JOptionPane.showConfirmDialog(null, "It could be that the input is lattice-light sheet data.\n"
+						+ "Do you want to deskew it?\n"
+						+ "Current deskew angle is set to "+Double.toString( BVBSettings.dLLSAngle )+"\n"
+						+ "If it is already deskewed, just click No.", "Loading option",
+				        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
+				{
+					AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle*Math.PI/180.0);
+					ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
+					List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
+					for (final ViewRegistration viewRegistration : listVR )
+					{
+						viewRegistration.preconcatenateTransform( vtLLS );
+					}
+				} 
+		}
 		
 		return spimData;
 		
