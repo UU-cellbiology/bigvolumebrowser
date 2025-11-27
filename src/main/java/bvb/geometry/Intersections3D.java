@@ -95,10 +95,10 @@ public class Intersections3D {
 		if(!cuboid.faces_init)
 			cuboid.iniFaces();
 		
-		for (int i=0;i<lines.size();i++)
+		for (int i = 0; i< lines.size(); i++)
 		{
 			nIntersLineN = 0;
-			for(int j=0;j<6;j++)
+			for(int j = 0; j < 6; j++)
 			{
 				//line intersects a cube
 				if(planeLineIntersect(cuboid.faces.get(j), lines.get(i),intersectionPoint))

@@ -58,7 +58,8 @@ public class Cuboid3D {
 	 * vertices is important for proper initialization of faces/volume check. Does
 	 * not initializes "faces", use iniFaces()
 	 **/
-	public Cuboid3D(final ArrayList<RealPoint> vertices_in) {
+	public Cuboid3D(final ArrayList<RealPoint> vertices_in) 
+	{
 		vertices = new double[8][3];
 		dMinMax = new double[2][3];
 
@@ -154,9 +155,13 @@ public class Cuboid3D {
 		{
 			transform.apply( vertices[i], vertices[i] );
 		}
+		checkFacesNormalsOrientation();
 	}
-	/** initializes equation for faces **/
-	public void iniFaces() {
+	/** initializes equation for faces (planes).
+	 * They are built in the way that all faces plane normales 
+	 * look "inside" the shape. It is important for intersection check. **/
+	public void iniFaces() 
+	{
 		faces = new ArrayList<>();
 		// int i,j;
 		// front
@@ -171,10 +176,35 @@ public class Cuboid3D {
 		faces.add(new Plane3D(vertices[2], vertices[1], vertices[5]));
 		// right
 		faces.add(new Plane3D(vertices[7], vertices[3], vertices[2]));
-
+		
 		faces_init = true;
+		
+		checkFacesNormalsOrientation();
 	}
-
+	
+	/** verifies that faces normales are looking inside the cuboid.
+	 * if not, inverts them **/
+	void checkFacesNormalsOrientation()
+	{
+		if(faces_init)
+		{
+			final double [] frontToBack = new double [3];
+			LinAlgHelpers.subtract(  vertices[6],  vertices[0], frontToBack );
+			LinAlgHelpers.normalize( frontToBack );
+			double direction = LinAlgHelpers.dot( frontToBack, faces.get( 0 ).n );
+			//invert faces normales so they look "inside" the shape
+			if(direction < 0)
+			{
+				for(int i = 0; i< 6; i++)
+				{
+					for(int d = 0; d < 3; d++)
+					{
+						faces.get( i ).n[d] *= -1.0;
+					}
+				}
+			}
+		}
+	}
 	/**
 	 * Verifies if point is inside the bounding box of cuboid. Faster version. For
 	 * proper non-rectangular shape boundaries' check use slower
@@ -209,12 +239,12 @@ public class Cuboid3D {
 		int i;
 		if (!faces_init) iniFaces();
 
-		for (i = 0; i < 6; i++) {
+		for (i = 0; i < 6; i++) 
+		{
 			LinAlgHelpers.subtract(pPoint, faces.get(i).p0, diff);
-			if (LinAlgHelpers.dot(diff, faces.get(i).n) < -0.00000001)// because of
-																																// the error in
-																																// line
-																																// calculation
+			// because how the faces normals are constructed
+			// (facing "inside" of the cuboid)
+			if (LinAlgHelpers.dot(diff, faces.get(i).n) < -0.00000001)																													// calculation
 			{
 				return false;
 			}
