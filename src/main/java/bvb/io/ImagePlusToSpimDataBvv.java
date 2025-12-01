@@ -51,7 +51,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.LutLoader;
 import ij.process.LUT;
-import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.ViewSetupAttributes;
 import mpicbg.spim.data.generic.sequence.BasicImgLoader;
