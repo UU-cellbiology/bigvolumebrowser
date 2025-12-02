@@ -28,7 +28,6 @@
  */
 package bvb.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -45,10 +44,9 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
+import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.ui.UIUtils;
 import bdv.viewer.ConverterSetups;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -58,28 +56,28 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	
 	final SelectedObjects selectedSources;
 	
-	ButtonGroup renderMode = new ButtonGroup();
+	final ButtonGroup renderMode = new ButtonGroup();
 	
-	JToggleButton [] butRender = new JToggleButton[2];
+	final JToggleButton [] butRender = new JToggleButton[3];
 	
-	JPanel panRender;
-	
-	ButtonGroup interpolationMode = new ButtonGroup();
-	
-	JToggleButton [] butInter = new JToggleButton[2];
-	
-	JPanel panInterpolation;
+	final JPanelConsistent panRender;
 	
 	
-	/**
-	 * Panel background if color reflects a set of sources all having the same color
-	 */
-	private Color consistentBg = Color.WHITE;
+	final ButtonGroup lightMode = new ButtonGroup();
+	
+	final JToggleButton [] butLight = new JToggleButton[3];
+	
+	final JPanelConsistent panLighting;
 
-	/**
-	 * Panel background if color reflects a set of sources with different colors
-	 */
-	private Color inConsistentBg = Color.WHITE;
+	
+	final ButtonGroup interpolationMode = new ButtonGroup();
+	
+	final JToggleButton [] butInter = new JToggleButton[2];
+	
+	final JPanelConsistent panInterpolation;
+	
+	private boolean blockUpdates = false;
+
 
 	public SourcesRenderPanel(final ConverterSetups convSetups, final SelectedObjects selectedSources_)
 	{
@@ -89,14 +87,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		int nButtonSize = 50;
 		
 		selectedSources = selectedSources_;
-		
-		String[] sMethods = new String[2];
-		sMethods[0] = "Max intensity";
-		sMethods[1] = "Volumetric";
-		
-		String[] sInterpolation = new String[2];
-		sInterpolation[0] = "Nearest";
-		sInterpolation[1] = "Trilinear";
 		
 	
 		URL icon_path = this.getClass().getResource("/icons/max_int.png");
@@ -109,6 +99,27 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		butRender[1] = new JToggleButton(tabIcon);
 		butRender[1].setToolTipText("Volumetric");
 		
+		icon_path = this.getClass().getResource("/icons/max_int.png");
+		tabIcon = new ImageIcon(icon_path);
+		butRender[2] = new JToggleButton(tabIcon);
+		butRender[2].setToolTipText("Surface");
+
+		
+		icon_path = this.getClass().getResource("/icons/light_plain.png");
+		tabIcon = new ImageIcon(icon_path);
+		butLight[0] = new JToggleButton(tabIcon);
+		butLight[0].setToolTipText("Plain");
+		
+		icon_path = this.getClass().getResource("/icons/light_shaded.png");
+		tabIcon = new ImageIcon(icon_path);
+		butLight[1] = new JToggleButton(tabIcon);
+		butLight[1].setToolTipText("Shaded");
+		
+		icon_path = this.getClass().getResource("/icons/light_shiny.png");
+		tabIcon = new ImageIcon(icon_path);
+		butLight[2] = new JToggleButton(tabIcon);
+		butLight[2].setToolTipText("Shiny");
+		
 		icon_path = this.getClass().getResource("/icons/nearest.png");
 		tabIcon = new ImageIcon(icon_path);
 		butInter[0] = new JToggleButton(tabIcon);
@@ -119,31 +130,49 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		butInter[1] = new JToggleButton(tabIcon);
 		butInter[1].setToolTipText("Trilinear");
 
-		panRender = new JPanel(new GridBagLayout());		
-		panInterpolation = new JPanel(new GridBagLayout());
+		panRender = new JPanelConsistent(new GridBagLayout());		
+		panLighting = new JPanelConsistent(new GridBagLayout());
+		panInterpolation = new JPanelConsistent(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridwidth = 2 ;
+		gbc.gridwidth = 1;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		panRender.add( new JLabel(),gbc );
+		gbc.gridwidth = 3;
+		gbc.gridx ++;
 		panRender.add( new JLabel("Render"),gbc );
+		gbc.gridwidth = 1;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
 		panInterpolation.add( new JLabel("Voxels"),gbc );
 		gbc.gridx = 0;
 		gbc.gridy++;
 		gbc.gridwidth = 1;
-		for(int i = 0; i < 2; i++)
-		{
-			
+		panRender.add( new JLabel("Mode"),gbc );
+		panLighting.add( new JLabel("Light "),gbc );
+		for(int i = 0; i < 3; i++)
+		{	
+			gbc.gridx++;	
 			butRender[i].setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
 			butRender[i].addActionListener( this );
 			renderMode.add( butRender[i] );
-			panRender.add( butRender[i], gbc );
-			
+			panRender.add( butRender[i], gbc );			
+			butLight[i].setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
+			butLight[i].addActionListener( this );
+			lightMode.add( butLight[i] );
+			panLighting.add( butLight[i], gbc );				
+		}
+		gbc.gridx = 0;
+		gbc.gridwidth = 1;
+		for(int i = 0; i < 2; i++)
+		{
 			butInter[i].setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
 			butInter[i].addActionListener( this );
 			interpolationMode.add( butInter[i] );
 			panInterpolation.add( butInter[i], gbc );
-			gbc.gridx++;
-		}
+			gbc.gridy++;
+		}		
+		
 		
 		gbc = new GridBagConstraints();
 		
@@ -152,7 +181,11 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		gbc.gridy = 0;
 		
 		this.add(panRender,gbc);	
+		gbc.gridy ++;
+		this.add(panLighting,gbc);	
+		gbc.gridy = 0;
 		gbc.gridx++;
+		gbc.gridheight = 2;
 		gbc.fill = SwingConstants.VERTICAL;
 		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
 		this.add(sp,gbc);
@@ -160,21 +193,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		gbc.gridx++;
 		gbc.fill = GridBagConstraints.NONE;
 		this.add( panInterpolation, gbc );
-//		gbc.gridx++;
-//		gbc.gridheight = 2;
-//		gbc.fill = SwingConstants.VERTICAL;
-//		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
-//		this.add(sp,gbc);
-//		gbc.fill = GridBagConstraints.NONE;
-//		gbc.gridheight = 1;
-//		gbc.gridx++;
-//
-//		gbc.gridx = 0;
-//		gbc.gridy++;
-//		this.add(panRender,gbc);			
-//		
-//		gbc.gridx += 2;
-//		this.add( panInterpolation, gbc );
 		
 	    selectedSources.addObjectSelectionListener(()->	updateGUI());
 	    
@@ -185,99 +203,141 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	
 	synchronized void updateGUI()
 	{
-		updateColors();
 		
 		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
-		if(csList== null || csList.isEmpty())
+		if(csList == null || csList.isEmpty())
 		{
 			setChoicesEnabled(false);
 			return;
 		}
+		
 		setChoicesEnabled(true);
 		
 		boolean bRenderConsistent = true;
 		boolean bInterpConsistent = true;
+		boolean bLightConsistent = true;
 		int nRenderM = -1;
 		int nInterpM = -1;
+		int nLightM = -1;
 		for ( final ConverterSetup cs: csList)
 		{
-			 
+			final GammaConverterSetup csG = ((GammaConverterSetup)cs);
 			if(nRenderM < 0)
 			{
-				nRenderM = ((GammaConverterSetup)cs).getRenderType();
-				nInterpM = ((GammaConverterSetup)cs).getVoxelRenderInterpolation();
+				nRenderM = csG.getRenderType();
+				nInterpM = csG.getVoxelRenderInterpolation();
+				nLightM = csG.getLightingType();
 			}
 			else
 			{
-				bRenderConsistent &= (nRenderM == ((GammaConverterSetup)cs).getRenderType());
-				bInterpConsistent &= (nInterpM == ((GammaConverterSetup)cs).getVoxelRenderInterpolation());
+				bRenderConsistent &= (nRenderM == csG.getRenderType());
+				bInterpConsistent &= (nInterpM == csG.getVoxelRenderInterpolation());
+				bLightConsistent &= (nLightM == csG.getLightingType());
 			}
 		}
 		
-		if(bRenderConsistent)
-		{
-			butRender[nRenderM].setSelected( true );
-			panRender.setBackground( consistentBg );
-
-		}
-		else
-		{
-			panRender.setBackground( inConsistentBg );
-			renderMode.clearSelection();
-		}
+		final boolean bRenderFin = bRenderConsistent;
+		final boolean bInterpFin = bInterpConsistent;
+		final boolean bLightFin = bLightConsistent;
+		final int nRenderFin = nRenderM;
+		final int nInterpFin = nInterpM;
+		final int nLightFin = nLightM;
 		
-		if(bInterpConsistent)
-		{
-			butInter[nInterpM].setSelected( true );
-			panInterpolation.setBackground( consistentBg );
-		}
-		else
-		{
-			panInterpolation.setBackground( inConsistentBg );
-			interpolationMode.clearSelection();
-		}
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( SourcesRenderPanel.this )
+			{
+				blockUpdates = true;
+
+				panRender.setConsistent( bRenderFin );
+				if(bRenderFin)
+				{
+					butRender[nRenderFin].setSelected( true );
+				}
+				else
+				{
+					renderMode.clearSelection();
+				}
+				
+				panLighting.setConsistent( bLightFin );
+				if(bLightFin)
+				{
+					butLight[nLightFin].setSelected( true );
+				}
+				else
+				{
+					lightMode.clearSelection();
+				}
+				
+				panInterpolation.setConsistent( bInterpFin );
+				if(bInterpFin)
+				{
+					butInter[nInterpFin].setSelected( true );					
+				}
+				else
+				{
+					interpolationMode.clearSelection();
+				}
+			}
+			blockUpdates = false;
+		} );
 	}
 	
 	void setChoicesEnabled(boolean bEnabled)
 	{
-		for(int i=0; i<2; i++)
+		
+		for(int i = 0; i < 3; i++)
+		{
+			butRender[i].setEnabled( bEnabled );
+			butLight[i].setEnabled( bEnabled );
+		}
+		for(int i = 0; i < 2; i++)
 		{
 			butInter[i].setEnabled( bEnabled );
-			butRender[i].setEnabled( bEnabled );
 		}
 	}
 
 	@Override
 	public synchronized void actionPerformed( ActionEvent arg0 )
 	{
-		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
-		
-		if(csList== null || csList.isEmpty())
-			return;
-		for(int i=0;i<2;i++)
+		if(!blockUpdates)
 		{
-			if(arg0.getSource() == butInter[i])
-			{
-				for ( final ConverterSetup cs: csList)
-				{
-					((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
-				}
+			final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
+			
+			if(csList== null || csList.isEmpty())
 				return;
+			for(int i = 0; i < 2; i++)
+			{
+				if(arg0.getSource() == butInter[i])
+				{
+					for ( final ConverterSetup cs: csList)
+					{
+						((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
+					}
+					return;
+				}
 			}
-			if(arg0.getSource() == butRender[i])
+			for(int i = 0; i < 3; i++)
 			{
-				for ( final ConverterSetup cs: csList)
+				if(arg0.getSource() == butRender[i])
 				{
-					((GammaConverterSetup)cs).setRenderType( i );
+					for ( final ConverterSetup cs: csList)
+					{
+						((GammaConverterSetup)cs).setRenderType( i );
+					}
+					return;
 				}
-				return;
+			}
+			for(int i = 0; i < 3; i++)
+			{
+				if(arg0.getSource() == butLight[i])
+				{
+					for ( final ConverterSetup cs: csList)
+					{
+						((GammaConverterSetup)cs).setLightingType( i );
+					}
+					return;
+				}
 			}
 		}
-	}
-	
-	private void updateColors()
-	{
-		consistentBg = UIManager.getColor( "Panel.background" );
-		inConsistentBg = UIUtils.mix( consistentBg, Color.red, 0.9 );
 	}
 }
