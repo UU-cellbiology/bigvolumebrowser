@@ -76,7 +76,15 @@ public class SpimDataLoader
 			exc.printStackTrace();
 			spimData = null;
 		}
+		//LLS could be in the filename
+		final File f = new File(xmlFileName);
 		
+		String justFileName = f.getName();
+		//could it be LLS?		
+		if(justFileName.contains( "LLS" ))
+		{
+			askAndDeskew(spimData);
+		}
 		return spimData;
 	}
 
@@ -200,9 +208,7 @@ public class SpimDataLoader
 
 
 		final SequenceDescription seq = spimData.getSequenceDescription();
-		
-		
-		
+
 		boolean bSuspectLLS = false;
 		
 		//see if data comes from LLS7
@@ -226,24 +232,29 @@ public class SpimDataLoader
 		//yeah, it could be LLS
 		if(bSuspectLLS)
 		{
-				if (JOptionPane.showConfirmDialog(null, "It could be that the input is lattice-light sheet data.\n"
-						+ "Do you want to deskew it?\n"
-						+ "Current deskew angle is set to "+Double.toString( BVBSettings.dLLSAngle )+"\n"
-						+ "If it is already deskewed, just click No.", "Loading option",
-				        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
-				{
-					AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle*Math.PI/180.0);
-					ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
-					List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
-					for (final ViewRegistration viewRegistration : listVR )
-					{
-						viewRegistration.preconcatenateTransform( vtLLS );
-					}
-				} 
+			askAndDeskew(spimData);
 		}
 		
 		return spimData;
 		
+	}
+	
+	public static void askAndDeskew(final AbstractSpimData<?> spimData)
+	{
+		if (JOptionPane.showConfirmDialog(null, "It could be that the input is lattice-light sheet data.\n"
+				+ "Do you want to deskew it?\n"
+				+ "Current deskew angle is set to "+Double.toString( BVBSettings.dLLSAngle )+"\n"
+				+ "If it is already deskewed, just click No.", "Loading option",
+		        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
+		{
+			AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle*Math.PI/180.0);
+			ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
+			List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
+			for (final ViewRegistration viewRegistration : listVR )
+			{
+				viewRegistration.preconcatenateTransform( vtLLS );
+			}
+		} 
 	}
 	
 	/** function generates new LLS7 transform (rotation/shear/z-scaling **/

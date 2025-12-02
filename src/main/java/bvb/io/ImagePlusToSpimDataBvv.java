@@ -33,10 +33,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
-import javax.swing.JOptionPane;
 
 import net.imglib2.FinalDimensions;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -46,19 +43,16 @@ import org.slf4j.LoggerFactory;
 
 import bdv.spimdata.SequenceDescriptionMinimal;
 import bdv.spimdata.SpimDataMinimal;
-import bvb.core.BVBSettings;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.LutLoader;
 import ij.process.LUT;
-import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.base.ViewSetupAttributes;
 import mpicbg.spim.data.generic.sequence.BasicImgLoader;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.registration.ViewRegistration;
 import mpicbg.spim.data.registration.ViewRegistrations;
-import mpicbg.spim.data.registration.ViewTransformAffine;
 import mpicbg.spim.data.sequence.Channel;
 import mpicbg.spim.data.sequence.FinalVoxelDimensions;
 import mpicbg.spim.data.sequence.MissingViews;
@@ -197,20 +191,7 @@ public class ImagePlusToSpimDataBvv {
 		//check if it is LLS data
 		if(imp.getTitle().contains( "LLS" ))
 		{
-			if (JOptionPane.showConfirmDialog(null, "It could be that the input is lattice-light sheet data.\n"
-					+ "Do you want to deskew it?\n"
-					+ "Current deskew angle is set to "+Double.toString( BVBSettings.dLLSAngle )+"\n"
-					+ "If it is already deskewed, just click No.", "Loading option",
-			        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
-			{
-				AffineTransform3D deskewTR = SpimDataLoader.makeLLS7Transform(BVBSettings.dLLSAngle*Math.PI/180.0);
-				ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
-				List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
-				for (final ViewRegistration viewRegistration : listVR )
-				{
-					viewRegistration.preconcatenateTransform( vtLLS );
-				}
-			} 
+			SpimDataLoader.askAndDeskew(spimData);
 		}
 		return spimData;
 	}
