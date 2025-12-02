@@ -99,7 +99,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		butRender[1] = new JToggleButton(tabIcon);
 		butRender[1].setToolTipText("Volumetric");
 		
-		icon_path = this.getClass().getResource("/icons/max_int.png");
+		icon_path = this.getClass().getResource("/icons/surface.png");
 		tabIcon = new ImageIcon(icon_path);
 		butRender[2] = new JToggleButton(tabIcon);
 		butRender[2].setToolTipText("Surface");
