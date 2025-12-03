@@ -236,6 +236,7 @@ public class SpotsPropertiesPanel extends JPanel
 		boolean bSizeScaleSame = true;
 		boolean bShapeSame = true;
 		boolean bRenderSame = true;
+		boolean bAllMultiColor = true;
 		float fPointSizeIn;
 		float fSizeScaleIn;
 		float fPointSize = -1.0f;
@@ -265,6 +266,7 @@ public class SpotsPropertiesPanel extends JPanel
 					}
 					nShape = spotsShape.getPointShape();
 					nRender = spotsShape.getRenderType();
+					bAllMultiColor = spotsShape.isMultiColor();
 					bFirstMesh = false;
 				}
 				else
@@ -298,6 +300,7 @@ public class SpotsPropertiesPanel extends JPanel
 					bRenderSame &= (nRender ==  spotsShape.getRenderType());
 					bShapeSame &= (nShape == spotsShape.getPointShape());
 					bColorSame &= currColor.equals( spotsShape.getColor() );
+					bAllMultiColor = (bAllMultiColor && spotsShape.isMultiColor());
 				}
 			}
 		}
@@ -313,6 +316,7 @@ public class SpotsPropertiesPanel extends JPanel
 		final boolean bSizeScaleSameFin = bSizeScaleSame;
 		final boolean bShapeSameFin = bShapeSame;
 		final boolean bRenderSameFin = bRenderSame;
+		final boolean bAllMultiColorFin = bAllMultiColor;
 
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( SpotsPropertiesPanel.this )
@@ -328,11 +332,18 @@ public class SpotsPropertiesPanel extends JPanel
 				pSizeScale.setConsistent( bSizeScaleSameFin );
 				pShape.setConsistent( bShapeSameFin );
 				pRender.setConsistent( bRenderSameFin );
-
+				butColor.setEnabled( true );
+				
 				if(bColorSameFin)
 				{
 					selectColors.setColor( cColorFin, 0 );
 					butColor.setIcon(  new ColorIcon( cColorFin ) );
+				}
+				
+				if(bAllMultiColorFin)
+				{
+					butColor.setIcon(  new ColorIcon( Color.GRAY ) );
+					butColor.setEnabled( false );
 				}
 
 				if(fSizeScaleFin > 0)

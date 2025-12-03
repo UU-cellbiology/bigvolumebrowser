@@ -90,7 +90,7 @@ public class SpotsColorCodePanel extends JPanel
 	
 		GridBagConstraints gbc = new GridBagConstraints();	
 		GBCHelper.alighLeft(gbc);
-		String[] sMapLUT = {"Single color", "X coord", "Y coord", "Z coord", "Size", "Property"};		
+		String[] sMapLUT = {"None", "X coord", "Y coord", "Z coord", "Size", "Property"};		
  
 		cbMapLUT = new JComboBox< >(sMapLUT);
 		cbMapLUT.addActionListener( (e) -> updateLUTMapping());
@@ -212,7 +212,11 @@ public class SpotsColorCodePanel extends JPanel
 				{
 					int nCurrMapLUTMode = spotsShape.getMapLUTMode();
 					bMapLUTSame &= (nMapLUT == nCurrMapLUTMode);
-					bColorSame &= currColor.equals( spotsShape.getColor() );		
+					bColorSame &= currColor.equals( spotsShape.getColor() );
+					if(spotsShape.isMultiColor())
+					{
+						bColorSame = false;
+					}
 					if(bLUTSame)
 					{
 						if(spotsShape.getLUTName() == "" || nCurrMapLUTMode == 0)

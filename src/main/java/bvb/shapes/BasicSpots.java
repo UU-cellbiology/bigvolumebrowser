@@ -38,12 +38,15 @@ public interface BasicSpots
 	public float getPointSize();
 	
 	public void setColor(Color pointColor_);
-	public Color getColor();
+	public Color getColor();	
 	
+	public boolean isMultiColor();
 	
 	public void setLUT(String sLUTName);
 	public void setLUT(final IndexColorModel icm_, String sLUTName); 
 	public String getLUTName();
+	
+	
 	/** LUT Mapping: 0 - no mapping, use color,
 	 * 1 - map LUT to X coord
 	 * 2 - map LUT to Y coord
