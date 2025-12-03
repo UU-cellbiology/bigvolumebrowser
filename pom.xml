@@ -63,7 +63,7 @@
     <scm>
         <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
         <developerConnection>scm:git:git@github.com:UU-cellbiology/bigvolumebrowser</developerConnection>
-        <tag>bigvolumebrowser-0.0.4</tag>
+        <tag>bigvolumebrowser-0.0.5</tag>
         <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
@@ -129,6 +129,12 @@
 		    <groupId>de.javagl</groupId>
 		    <artifactId>jgltf-model</artifactId>
 		    <version>${jgltf.version}</version>
+		</dependency>
+		<!-- LAS Reader -->
+		<dependency>
+			<groupId>com.github.mreutegg</groupId>
+  			<artifactId>laszip4j</artifactId>
+  			<version>0.20</version>
 		</dependency>
   		
 		<!-- ImgLib2 dependencies -->

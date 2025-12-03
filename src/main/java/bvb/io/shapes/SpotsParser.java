@@ -196,7 +196,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		{
 			property = new float[propertyList.size()];
 			
-			for(int i=0; i < propertyList.size(); i++)
+			for(int i = 0; i < propertyList.size(); i++)
 			{
 				property[i] = propertyList.get( i );
 			}

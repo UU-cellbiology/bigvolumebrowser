@@ -40,7 +40,9 @@ Powered (and made possible) by a hard work of very talented people behind:
 - [BDV-loaders](https://github.com/BIOP/bigdataviewer-image-loaders) 
 - [BigVolumeViewer](https://github.com/bigdataviewer/bigvolumeviewer-core) [(playground edition)](https://github.com/UU-cellbiology/bvv-playground). 
 
-
+ this application relies on components licensed under the [LGPL-2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html)
+- [laszip4j](https://github.com/mreutegg/laszip4j) v.0.20   
+  
 ----------
 
 Developed in [Cell Biology group](http://cellbiology.science.uu.nl) of Utrecht University.  

@@ -1,6 +1,7 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in float fDiam;
 layout (location = 2) in float fProperty;
+layout (location = 3) in vec4 fColors;
 
 uniform float pointSizeReal;
 uniform float pointScale;
@@ -10,6 +11,7 @@ uniform vec2 windowSize;
 out vec3 posW;
 out float fDiamfp;
 out float fPropertyfp;
+out vec4 fColorsfp;
 
 void main()
 {
@@ -69,5 +71,5 @@ void main()
     
     posW = aPos;
     fPropertyfp = fProperty;
-
+	fColorsfp = fColors;
 }

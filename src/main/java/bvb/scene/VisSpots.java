@@ -86,6 +86,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	float property[] = null; 
 	
+	float colors[] = null; 
+	
 	private int nSpotsN;
 	
 	private boolean initialized;
@@ -111,6 +113,10 @@ public class VisSpots extends AbstractClipTransformVis
 	float fMapAlphaGamma = 1.0f;
 	
 	float fExtraAlpha = 1.0f;
+	
+	int colorsVbo;
+	
+	boolean reInitColors = false;
 	
 	public VisSpots()
 	{
@@ -159,6 +165,7 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		initialized = false;
 	}
+
 	
 	/** any of the last two arguments can be null **/
 	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_, final float [] property_)
@@ -233,6 +240,31 @@ public class VisSpots extends AbstractClipTransformVis
 				
 	}
 	
+	public void setColors(final float [] colors_)
+	{
+		if(vertices == null)
+		{
+			System.err.println( "Error setting up spots colors, first coordinates need to be initialized!");
+			return;
+		}
+		if(vertices.length/3 != colors_.length/4)
+		{
+			System.err.println( "Number of spots is not equal to number of provided colors");
+			return;
+		}
+		
+		colors = new float[colors_.length];
+		
+		for (int i = 0; i < colors_.length; i++)
+		{
+			colors[i] = colors_[i];
+		}
+		if(initialized)
+		{
+			reInitColors = true;
+		}
+	}
+	
 	public void setMapAlphaMode(int nMapAlphaMode_)
 	{
 		nMapAlphaMode = nMapAlphaMode_;
@@ -243,8 +275,7 @@ public class VisSpots extends AbstractClipTransformVis
 		return nMapAlphaMode;
 	}
 
-	
-	public void setMapLUTMode(int nMapLUTMode_)
+	public void setMapLUTMode(final int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
 	}
@@ -278,7 +309,7 @@ public class VisSpots extends AbstractClipTransformVis
 		fMapAlphaMinRange[1] = fMax - fMin;
 	}
 	
-	public void setExtraAlphaCoefficient(float dCoeff)
+	public void setExtraAlphaCoefficient(final float dCoeff)
 	{
 		fExtraAlpha = dCoeff;
 	}
@@ -354,11 +385,9 @@ public class VisSpots extends AbstractClipTransformVis
 	public int getShape()
 	{
 		return spotShape;
-	}
+	}	
 	
-
-	
-	private void init( GL3 gl )
+	private void init( final GL3 gl )
 	{
 		
 		while (bLocked)
@@ -375,13 +404,16 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		bLocked = true;		
 
-		// ..:: VERTEX BUFFER ::..
+		// reserve buffers
 
-		final int[] tmp = new int[ 3 ];
-		gl.glGenBuffers( 3, tmp, 0 );
+		final int[] tmp = new int[ 4 ];
+		gl.glGenBuffers( 4, tmp, 0 );
 		final int posVbo = tmp[ 0 ];
 		final int sizeVbo = tmp[ 1 ];
 		final int propertyVbo = tmp[ 2 ];
+		colorsVbo = tmp[ 3 ];
+		
+		// ..:: VERTEX BUFFER ::..
 
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
 		gl.glBufferData( GL.GL_ARRAY_BUFFER, vertices.length * Float.BYTES, FloatBuffer.wrap( vertices ), GL.GL_STATIC_DRAW );
@@ -402,6 +434,15 @@ public class VisSpots extends AbstractClipTransformVis
 		{
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
 			gl.glBufferData( GL.GL_ARRAY_BUFFER, property.length * Float.BYTES, FloatBuffer.wrap( property ), GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+		}
+		
+		// ..:: COLORS BUFFER ::..
+
+		if( colors != null )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, colors.length * Float.BYTES, FloatBuffer.wrap( colors ), GL.GL_STATIC_DRAW );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 		}
 		
@@ -429,6 +470,13 @@ public class VisSpots extends AbstractClipTransformVis
 			gl.glEnableVertexAttribArray( 2 );
 		}
 		
+		if( colors != null )
+		{		
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
+			gl.glVertexAttribPointer( 3, 4, GL_FLOAT, false, 4*Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 3 );
+		}
+		
 		gl.glBindVertexArray( 0 );
 		
 		//make sure we can adjust the spot size
@@ -436,6 +484,37 @@ public class VisSpots extends AbstractClipTransformVis
 		initialized = true;
 		bLocked  = false;
 
+	}
+	
+	private void reInitColors( GL3 gl )
+	{
+		while (bLocked)
+		{
+			try
+			{
+				Thread.sleep( 10 );
+			}
+			catch ( InterruptedException exc )
+			{
+				exc.printStackTrace();
+			}
+		}
+		
+		bLocked = true;
+		gl.glBindVertexArray( vao );
+		if( colors != null )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
+			gl.glBufferData( GL.GL_ARRAY_BUFFER, colors.length * Float.BYTES, FloatBuffer.wrap( colors ), GL.GL_STATIC_DRAW );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
+			gl.glVertexAttribPointer( 3, 4, GL_FLOAT, false, 4*Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 3 );
+
+		}
+		gl.glBindVertexArray( 0 );
+		reInitColors = false;
+		bLocked  = false;
 	}
 	
 	@Override
@@ -448,11 +527,12 @@ public class VisSpots extends AbstractClipTransformVis
 	@Override
 	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final int nTimePoint, final boolean bWeightedOIT)
 	{
-		
-		//if (fSpotSize < 0.0001)
-			//return;
+	
 		if ( !initialized )
 			init( gl );
+		
+		if(reInitColors)
+			reInitColors( gl );
 		
 		while (bLocked)
 		{
@@ -517,7 +597,7 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform1f( "pointScale" ).set( fPointScale );
-		if(fSpotSize <0.0)
+		if(fSpotSize < 0.0)
 		{
 			prog.getUniform1f( "fSizeScale" ).set( fSizeScale );			
 		}
@@ -527,6 +607,7 @@ public class VisSpots extends AbstractClipTransformVis
 		}
 
 		prog.getUniform4f( "colorin" ).set( l_color );
+		prog.getUniform1i("nHasColors").set( colors == null ? 0:1 );
 		prog.getUniform2f( "windowSize" ).set( window_sizef );
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
 		prog.getUniform1i( "renderType" ).set( renderType );
@@ -553,8 +634,6 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
 		prog.getUniform1i("bInvAlpha").set( bInvertAlpha?1:0 );
 		prog.getUniform1f("extraAlpha").set(fExtraAlpha);
-
-		
 		
 
 		if(nMapLUTMode > 0 && lutGPU != null)
@@ -563,6 +642,7 @@ public class VisSpots extends AbstractClipTransformVis
 			prog.getUniform1f("mapMin").set(fMapLUTMinRange[0]);
 			prog.getUniform1f("mapRange").set(fMapLUTMinRange[1]);	
 		}
+		
 		if(nMapAlphaMode > 0 )
 		{
 			prog.getUniform1f("alphaMin").set(fMapAlphaMinRange[0]);

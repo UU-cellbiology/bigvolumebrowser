@@ -1,12 +1,14 @@
 out vec4 fragColor;
 
 uniform vec4 colorin;
+uniform int nHasColors;
 uniform vec2 ellipseAxes;
 uniform int renderType;
 uniform int pointShape;
 in vec3 posW;
 in float fDiamfp;
 in float fPropertyfp;
+in vec4 fColorsfp;
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -21,6 +23,7 @@ uniform float mapMin;
 uniform float mapRange;
 uniform float mapGamma;
 
+
 uniform int nMapAlphaMode;
 uniform int bInvAlpha;
 uniform float alphaMin;
@@ -32,7 +35,7 @@ uniform float extraAlpha;
 void checkClipping()
 {
     //ROI clipping
-	if(clipactive>0)
+	if(clipactive > 0)
 	{
 		vec3 posclip = ( cliptransform * vec4(posW,1.0) ).xyz;
 		vec3 s = step(clipmin, posclip) - step(clipmax, posclip);
@@ -45,14 +48,14 @@ void checkClipping()
 
 vec4 getInputColor()
 {
-
 	if(nMapLUTMode > 0)
 	{
 		float val = 0.0;
-		if(nMapLUTMode<4)
+		
+		if(nMapLUTMode < 4)
 		{
 			vec3 axis = vec3(0);
-			axis[nMapLUTMode-1] = 1;
+			axis[nMapLUTMode - 1] = 1;
 			val = dot(axis, posW);
 		}
 
@@ -60,6 +63,7 @@ vec4 getInputColor()
 		{
 			val = fDiamfp;			
 		}
+		
 		if(nMapLUTMode == 5)
 		{
 			val = fPropertyfp;			
@@ -76,15 +80,22 @@ vec4 getInputColor()
 		
 		//2D texture with fixed width of 256
 		vec2 q = vec2(0);
-		q.y = floor(val/256.0);
-		q.x = (val/256.0)- q.y;
-		q.y = (q.y+0.5)/ceil(sizeLUT/256.0);
+		q.y = floor(val / 256.0);
+		q.x = (val / 256.0)- q.y;
+		q.y = (q.y + 0.5) / ceil(sizeLUT / 256.0);
 		return texture(lutTexture, q);
 		
 	}
 	else
 	{
-	 	return colorin;
+		if(nHasColors > 0)
+		{
+			return fColorsfp;
+		}
+		else
+		{
+	 		return colorin;
+	 	}
 	}
 }
 

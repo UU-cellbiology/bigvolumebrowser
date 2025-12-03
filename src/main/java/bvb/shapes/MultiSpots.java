@@ -81,6 +81,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	float fExtraAlpha = 1.0f;
 	
+	boolean bIsMultiColor = false;
+	
 	void defineTransparency()
 	{
 
@@ -629,5 +631,11 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public float getExtraAlphaCoefficient()
 	{
 		return fExtraAlpha;
+	}
+
+	@Override
+	public boolean isMultiColor()
+	{
+		return bIsMultiColor;
 	}
 }

@@ -71,16 +71,17 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	float fExtraAlpha = 1.0f;
 	
+	boolean bIsMultiColor = false;
+	
 	public Spots(final float pointSize_, final Color pointColor_, final int nShape_, final int nRenderType_)
 	{
 		pointSize = pointSize_;		
 		renderType = nRenderType_;
-		pointColor = new Color(pointColor_.getRed(), pointColor_.getGreen(), pointColor_.getBlue(),pointColor_.getAlpha());
+		pointColor = new Color(pointColor_.getRed(), pointColor_.getGreen(), pointColor_.getBlue(), pointColor_.getAlpha());
 		pointShape = nShape_;
 		defineTransparency();
 	}
-	
-	/** any of the last two arguments can be null **/
+
 	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float[] spotProperty)
 	{
 		if(visRender == null)
@@ -88,11 +89,13 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 			visRender = new VisSpots(pointSize, pointColor, pointShape, renderType);
 		}
 		
-		((VisSpots)visRender).setVertices(vertices, spotSizes, spotProperty);	
+		((VisSpots)visRender).setVertices(vertices, spotSizes, spotProperty);
+
 		if(spotSizes != null)
 		{
 			pointSize = -1.0f;
 		}
+		
 		if(spotProperty != null)
 		{
 			bHasProperty = true;
@@ -101,6 +104,20 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		
 		setBoundingBox(vertices, spotSizes);
 	}
+	public void setColors( final float[] colors_)
+	{
+		if(visRender == null)
+		{
+			System.err.println( "Error setting up spots colors, first coordinates need to be initialized!");
+
+		}
+		else
+		{
+			((VisSpots)visRender).setColors( colors_ );
+			bIsMultiColor = true;
+		}
+	}
+
 	
 	/** spotSizes argument can be null **/
 	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
@@ -434,7 +451,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	@Override
 	public boolean hasProperty()
 	{
-		return bHasProperty ;
+		return bHasProperty;
 	}
 
 
@@ -501,5 +518,11 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public float getExtraAlphaCoefficient( )
 	{
 		return ((VisSpots)visRender).getExtraAlphaCoefficient( );
+	}
+
+	@Override
+	public boolean isMultiColor()
+	{
+		return bIsMultiColor;
 	}
 }
