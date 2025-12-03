@@ -85,7 +85,6 @@ public class DebugLasReader
 			int g = p.getGreen();
 			int b = p.getBlue();
 			int a = p.getIntensity();
-			p.ge
 			colors[nCount*4] = r/255f;
 			colors[nCount*4+1] = g/255f;
 			colors[nCount*4+2] = b/255f;

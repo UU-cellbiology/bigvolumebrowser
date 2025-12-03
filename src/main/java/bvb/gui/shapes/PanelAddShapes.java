@@ -32,7 +32,10 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.File;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +60,9 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.gui.GBCHelper;
+import bvb.gui.NumberField;
 import bvb.io.shapes.GltfImporter;
+import bvb.io.shapes.LASImport;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
@@ -116,147 +121,206 @@ public class PanelAddShapes extends JPanel
 		//get the values
 		if(dialSpots.bAllSuccess)
 		{
-			SpotsParser sptParser = new SpotsParser();
-			sptParser.fileSpots = dialSpots.fileSpots;
-			sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
-			Prefs.set( "BVB.bSpotsImportHasHeader", sptParser.bHeader);
-			String[] sSeparators = { ",", ";", " ", "\t" };
-			sptParser.sSeparator = sSeparators[dialSpots.cbSeparator.getSelectedIndex()];
-			Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
-			//column indices
-			final int [] nColInd = new int[8];
-			//whether size was provided
-			int nSizeCols = 0;
-			sptParser.parseTime = false;
-			sptParser.parseProperty = false;
-
-			for(int d = 0; d < 8; d++)
+			if(!dialSpots.bLAZfile)
 			{
-				if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex() > 0)
-				{
-					nColInd[d] = dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()-1;
-					if(d > 3 && d < 7)
-					{
-						nSizeCols++;
-					}
-					if(d == 3)
-					{
-						sptParser.parseTime = true;
-					}
-					if(d == 7)
-					{
-						sptParser.parseProperty = true;
-					}
-					
-				}
-				else
-				{
-					nColInd[d] = -1;
-				}
+				parseSpots(dialSpots);
 			}
-			
-			sptParser.nColIndices = nColInd;
-			
-			//scale factor, convert to micrometers
-			switch (dialSpots.cbUnits.getSelectedIndex())
+			else
 			{
-				//milli
-				case 0:
-					sptParser.fScale = 1000.0f;
-					break;
-				//nano
-				case 2:
-					sptParser.fScale = 0.001f;
-					break;
-				//micro
-				default:
-					sptParser.fScale = 1.0f;
+				importLAS(dialSpots.fileSpots);
 			}
-			
-			Prefs.set( "BVB.nSpotsUnits", dialSpots.cbUnits.getSelectedIndex());
-			
-			SpotsShapeDialog sptShape = new SpotsShapeDialog();
-			sptShape.fileSpots = dialSpots.fileSpots;
-			
-			//parse sizes
-			if(nSizeCols > 0)
-			{
-				sptParser.parseSize = true;
-				switch(dialSpots.cbSize.getSelectedIndex())
-				{
-					//radius
-					case 1:
-						sptParser.fSizeScale = 2.0f;
-						break;
-					//SD
-					case 2:
-						sptParser.fSizeScale = 6.0f;
-						break;
-					
-				}	
-				Prefs.set( "BVB.nSpotsSize", dialSpots.cbSize.getSelectedIndex());
-
-			}
-			if(!sptShape.showSelectionDialog( sptParser.parseSize, sptParser.parseProperty ))
-			{
-				return;
-			}
-			
-			if(sptShape.bSpotDataCleanUp)
-			{
-				sptParser.bDataCleanup = true;
-				sptParser.dPercMin = sptShape.dSpotsPercMin;
-				sptParser.dPercMax = sptShape.dSpotsPercMax;
-				sptParser.bCleanupCols = sptShape.bCleanupCols;
-			}
-			if(sptShape.bExportCleanData)
-			{
-				sptParser.bExportCleanData = true;
-				sptParser.sExportFilename = sptShape.sExportFilename;
-			}
-
-		
-			sptParser.addPropertyChangeListener( (e)->
-			{
-				if(sptParser.getState() == StateValue.DONE)
-				{
-					if(!sptParser.bSpotsAdded )
-					{
-						sptParser.bSpotsAdded = true; 
-						IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots )+" to GPU...");
-						BasicShape spots = null;
-						if(!sptParser.parseTime)
-						{
-							Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
-							importedSpots.setPoints( sptParser.vertices, sptParser.sizes, sptParser.property);
-							spots = importedSpots;
-						}
-						else
-						{
-							MultiSpots importedSpots = new MultiSpots();
-							int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
-							spots = importedSpots;
-							
-							//update time points
-							if(nMaxTP > 0)
-							{
-								bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
-							}
-						}	
-						spots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
-						
-						bvb.addShape( spots );						
-						
-						IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots ) + " to GPU...done.");
-					}
-				}
-			
-			}
-			);
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading spots, please wait...", 5000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
-			
-			sptParser.execute();
 		}
+	}
+	void importLAS (final File filein)
+	{
+		//show spots size dialog
+		JPanel pSpotsParams = new JPanel(new GridBagLayout());
+		
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
+		
+		NumberField nfSpotSize = new NumberField(5);
+		nfSpotSize.setText(df3.format( Prefs.get( "BVB.spotSizeLAS", 30.0 ) ));
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		GBCHelper.alighLoose(gbc);
+		pSpotsParams.add(new JLabel("Spots size: "), gbc);
+		gbc.gridx++;
+		pSpotsParams.add(nfSpotSize, gbc);
+		
+		int reply = JOptionPane.showConfirmDialog(null, pSpotsParams, "Import spots from LAS/LAZ", 
+		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		if (reply == JOptionPane.OK_OPTION) 
+		{
+			float fSpotSize = Float.parseFloat( nfSpotSize.getText() );
+			Prefs.set("BVB.spotSizeLAS", fSpotSize);
+			LASImport importLAS = new LASImport();
+			importLAS.fPointSize = fSpotSize;
+			importLAS.filein = filein;
+
+			importLAS.addPropertyChangeListener( (e)->
+			{			
+				if(importLAS.getState() == StateValue.DONE)
+				{
+					if(!importLAS.bSpotsRead )
+					{
+						importLAS.bSpotsRead = true; 
+						final Spots importedSpots = importLAS.spotsLAS;
+						importedSpots.setName( Misc.getSourceStyleName( filein ) );
+						bvb.addShape( importedSpots );
+					}
+				}
+			});
+			
+			importLAS.execute();
+			
+		}
+	}
+	
+	void parseSpots(final SpotsLoadDialog dialSpots)
+	{
+		SpotsParser sptParser = new SpotsParser();
+		sptParser.fileSpots = dialSpots.fileSpots;
+		sptParser.bHeader = dialSpots.cbHasHeader.isSelected();
+		Prefs.set( "BVB.bSpotsImportHasHeader", sptParser.bHeader);
+		String[] sSeparators = { ",", ";", " ", "\t" };
+		sptParser.sSeparator = sSeparators[dialSpots.cbSeparator.getSelectedIndex()];
+		Prefs.set( "BVB.nSpotsSeparator", dialSpots.cbSeparator.getSelectedIndex());
+		//column indices
+		final int [] nColInd = new int[8];
+		//whether size was provided
+		int nSizeCols = 0;
+		sptParser.parseTime = false;
+		sptParser.parseProperty = false;
+
+		for(int d = 0; d < 8; d++)
+		{
+			if(dialSpots.cbColumnsAssign.get( d ).getSelectedIndex() > 0)
+			{
+				nColInd[d] = dialSpots.cbColumnsAssign.get( d ).getSelectedIndex()-1;
+				if(d > 3 && d < 7)
+				{
+					nSizeCols++;
+				}
+				if(d == 3)
+				{
+					sptParser.parseTime = true;
+				}
+				if(d == 7)
+				{
+					sptParser.parseProperty = true;
+				}
+				
+			}
+			else
+			{
+				nColInd[d] = -1;
+			}
+		}
+		
+		sptParser.nColIndices = nColInd;
+		
+		//scale factor, convert to micrometers
+		switch (dialSpots.cbUnits.getSelectedIndex())
+		{
+			//milli
+			case 0:
+				sptParser.fScale = 1000.0f;
+				break;
+			//nano
+			case 2:
+				sptParser.fScale = 0.001f;
+				break;
+			//micro
+			default:
+				sptParser.fScale = 1.0f;
+		}
+		
+		Prefs.set( "BVB.nSpotsUnits", dialSpots.cbUnits.getSelectedIndex());
+		
+		SpotsShapeDialog sptShape = new SpotsShapeDialog();
+		sptShape.fileSpots = dialSpots.fileSpots;
+		
+		//parse sizes
+		if(nSizeCols > 0)
+		{
+			sptParser.parseSize = true;
+			switch(dialSpots.cbSize.getSelectedIndex())
+			{
+				//radius
+				case 1:
+					sptParser.fSizeScale = 2.0f;
+					break;
+				//SD
+				case 2:
+					sptParser.fSizeScale = 6.0f;
+					break;
+				
+			}	
+			Prefs.set( "BVB.nSpotsSize", dialSpots.cbSize.getSelectedIndex());
+
+		}
+		if(!sptShape.showSelectionDialog( sptParser.parseSize, sptParser.parseProperty ))
+		{
+			return;
+		}
+		
+		if(sptShape.bSpotDataCleanUp)
+		{
+			sptParser.bDataCleanup = true;
+			sptParser.dPercMin = sptShape.dSpotsPercMin;
+			sptParser.dPercMax = sptShape.dSpotsPercMax;
+			sptParser.bCleanupCols = sptShape.bCleanupCols;
+		}
+		if(sptShape.bExportCleanData)
+		{
+			sptParser.bExportCleanData = true;
+			sptParser.sExportFilename = sptShape.sExportFilename;
+		}
+
+	
+		sptParser.addPropertyChangeListener( (e)->
+		{
+			if(sptParser.getState() == StateValue.DONE)
+			{
+				if(!sptParser.bSpotsAdded )
+				{
+					sptParser.bSpotsAdded = true; 
+					IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots )+" to GPU...");
+					BasicShape spots = null;
+					if(!sptParser.parseTime)
+					{
+						Spots importedSpots = new Spots(sptShape.fSpotSize, sptShape.spotColor, sptShape.nShape, sptShape.nFill);
+						importedSpots.setPoints( sptParser.vertices, sptParser.sizes, sptParser.property);
+						spots = importedSpots;
+					}
+					else
+					{
+						MultiSpots importedSpots = new MultiSpots();
+						int nMaxTP = importedSpots.initFromSpotParser( sptParser, sptShape );
+						spots = importedSpots;
+						
+						//update time points
+						if(nMaxTP > 0)
+						{
+							bvb.bvvViewer.setNumTimepoints( Math.max( nMaxTP,  bvb.bvvViewer.state().getNumTimepoints()));			
+						}
+					}	
+					spots.setName( Misc.getSourceStyleName( sptParser.fileSpots ) );
+					
+					bvb.addShape( spots );						
+					
+					IJ.showStatus( "Uploading " + Long.toString( sptParser.nTotSpots ) + " to GPU...done.");
+				}
+			}
+		
+		}
+		);
+		bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading spots, please wait...", 5000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
+		
+		sptParser.execute();
 	}
 	
 	void loadMeshDialog()

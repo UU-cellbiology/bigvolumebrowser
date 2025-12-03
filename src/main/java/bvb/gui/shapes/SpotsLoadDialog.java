@@ -108,6 +108,8 @@ public class SpotsLoadDialog
     final JButton butCancel;
     
     public boolean bAllSuccess = false;
+    
+	public boolean bLAZfile = false;
 	
 	public SpotsLoadDialog(BigVolumeBrowser bvb_)
 	{
@@ -501,26 +503,52 @@ public class SpotsLoadDialog
 	{
 		if (fileSpots != null)
 		{
-			boolean bTriggerHeadersUpdate = false;
-	        if(!bParsedColumns)
-	        {
-	        	bParsedColumns = analyzeFile();
-	        	table.setModel(parsedTableModel());
-	        	jStatus.setText( sStatus );
-	        	bTriggerHeadersUpdate = true; 
-	        	butOk.setEnabled( false );
-	        }
-        	if(bTriggerHeadersUpdate)
-        	{
-        		updateAssignColumnsContent(bParsedColumns);
-        	}
-        	else
-        	{
-	        	if(bParsedColumns)
+			//check if it is LAS LAZ file
+			
+			String fileName = fileSpots.getName();
+			if(fileName.toLowerCase().endsWith( "las" )||fileName.toLowerCase().endsWith( "laz" ))
+			{
+				bLAZfile = true;
+				jStatus.setText( "Ready to load LAS/LAZ dataset");
+				butOk.setEnabled( true );
+				for(int i = 0; i<cbColumnsAssign.size(); i++ )
+				{
+					cbColumnsAssign.get( i).setEnabled( false );	
+				}
+				table.setEnabled( false );
+				table.setModel(dummyTableModel());
+				cbHasHeader.setEnabled( false );
+				cbSeparator.setEnabled( false );
+				cbUnits.setEnabled( false );
+				cbSize.setEnabled( false );
+			}
+			else
+			{
+				cbHasHeader.setEnabled( true );
+				cbSeparator.setEnabled( true );
+				cbUnits.setEnabled( true );
+				cbSize.setEnabled( true );
+				boolean bTriggerHeadersUpdate = false;
+		        if(!bParsedColumns)
+		        {
+		        	bParsedColumns = analyzeFile();
+		        	table.setModel(parsedTableModel());
+		        	jStatus.setText( sStatus );
+		        	bTriggerHeadersUpdate = true; 
+		        	butOk.setEnabled( false );
+		        }
+	        	if(bTriggerHeadersUpdate)
 	        	{
-	        		checkColumnAssignment();
+	        		updateAssignColumnsContent(bParsedColumns);
 	        	}
-        	}
+	        	else
+	        	{
+		        	if(bParsedColumns)
+		        	{
+		        		checkColumnAssignment();
+		        	}
+	        	}
+			}
 		}
 
 	}
