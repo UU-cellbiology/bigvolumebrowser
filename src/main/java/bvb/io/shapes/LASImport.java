@@ -32,7 +32,9 @@ public class LASImport extends SwingWorker<Void, Void>
 	protected Void doInBackground() throws Exception
 	{
 		final LASReader reader = new LASReader(filein);
+		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
+		
 		spotsLAS = new Spots(fPointSize, new Color(255,0,0,255), VisSpots.SHAPE_ROUND, VisSpots.RENDER_FILLED);
 		
 		long nRecords = reader.getHeader().getNumberOfPointRecords();
