@@ -48,6 +48,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.ConverterSetups;
+import bvb.core.BVBSettings;
 import bvvpg.source.converters.GammaConverterSetup;
 
 
@@ -89,17 +90,17 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		selectedSources = selectedSources_;
 		
 	
-		URL icon_path = this.getClass().getResource("/icons/max_int.png");
+		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "max_int.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
 		butRender[0] = new JToggleButton(tabIcon);
 		butRender[0].setToolTipText("Maximum intensity");
 		
-		icon_path = this.getClass().getResource("/icons/volumetric.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "volumetric.png");
 		tabIcon = new ImageIcon(icon_path);
 		butRender[1] = new JToggleButton(tabIcon);
 		butRender[1].setToolTipText("Volumetric");
 		
-		icon_path = this.getClass().getResource("/icons/surface.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "surface.png");
 		tabIcon = new ImageIcon(icon_path);
 		butRender[2] = new JToggleButton(tabIcon);
 		butRender[2].setToolTipText("Surface");
@@ -120,12 +121,12 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		butLight[2] = new JToggleButton(tabIcon);
 		butLight[2].setToolTipText("Shiny");
 		
-		icon_path = this.getClass().getResource("/icons/nearest.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "nearest.png");
 		tabIcon = new ImageIcon(icon_path);
 		butInter[0] = new JToggleButton(tabIcon);
 		butInter[0].setToolTipText("Nearest neighbor");
 		
-		icon_path = this.getClass().getResource("/icons/linear.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "linear.png");
 		tabIcon = new ImageIcon(icon_path);
 		butInter[1] = new JToggleButton(tabIcon);
 		butInter[1].setToolTipText("Trilinear");

@@ -38,6 +38,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import bvb.core.BVBSettings;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
@@ -91,11 +92,11 @@ public class DataTreeModel implements TreeModel
 		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
 		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
 		iconMoBIE = new ImageIcon(this.getClass().getResource("/icons/mobie-logo-small.png"));		
-		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/data-small-default.png"));
-		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/source-small.png"));
-		iconShapeGroup = new ImageIcon(this.getClass().getResource("/icons/shapes-small.png"));
-		iconMeshColor = new ImageIcon(this.getClass().getResource("/icons/mesh-small.png"));
-		iconSpots = new ImageIcon(this.getClass().getResource("/icons/spots-small.png"));
+		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "data-small-default.png"));
+		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "source-small.png"));
+		iconShapeGroup = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "shapes-small.png"));
+		iconMeshColor = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "mesh-small.png"));
+		iconSpots = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "spots-small.png"));
 
 	}
 	
