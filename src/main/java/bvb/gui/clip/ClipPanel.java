@@ -197,7 +197,7 @@ public class ClipPanel extends JPanel
 					public void itemStateChanged( ItemEvent e )
 					{
 						boolean bNewState =  (e.getStateChange() 
-								== ItemEvent.SELECTED ? true: false);
+								== ItemEvent.SELECTED ? true : false);
 						bvb.clipBoxes.setVisible( bNewState );
 						BVBSettings.bShowClipBoxes = bNewState;
 						Prefs.get("BVB.bShowClipBoxes", BVBSettings.bShowClipBoxes);
