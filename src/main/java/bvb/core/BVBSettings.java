@@ -84,6 +84,8 @@ public class BVBSettings
 	
 	public static boolean bWeightedOIT = Prefs.get( "BVB.bWeightedOIT", true );
 	
+	public static String sUITheme = "";
+	
 	public static Color getInvertedColor(Color color_in)
 	{		
 		return  new Color(255-color_in.getRed(),255-color_in.getGreen(),255-color_in.getBlue(),color_in.getAlpha());

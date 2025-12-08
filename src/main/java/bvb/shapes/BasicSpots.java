@@ -78,6 +78,9 @@ public interface BasicSpots
 	public void setPointShape(int nShape);
 	public int getPointShape();
 	
+	public void setPointShade(int nShade);
+	public int getPointShade();
+	
 	/** sets extra scale factor for various size spots **/
 	public void setSizeScale(final float fSizeScale);
 	/** returns scale factor for various size spots **/

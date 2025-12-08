@@ -29,19 +29,27 @@
 package bvb.io;
 
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bvb.core.BVBSettings;
+import bvb.gui.NumberField;
 import ch.epfl.biop.bdv.img.OpenersToSpimData;
 import ch.epfl.biop.bdv.img.opener.OpenerSettings;
 import ij.IJ;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import loci.common.DebugTools;
 import loci.common.services.DependencyException;
@@ -241,13 +249,41 @@ public class SpimDataLoader
 	
 	public static void askAndDeskew(final AbstractSpimData<?> spimData)
 	{
-		if (JOptionPane.showConfirmDialog(null, "It could be that the input is lattice-light sheet data.\n"
-				+ "Do you want to deskew it?\n"
-				+ "Current deskew angle is set to "+Double.toString( BVBSettings.dLLSAngle )+"\n"
-				+ "If it is already deskewed, just click No.", "Loading option",
+		
+		JPanel pDeskew = new JPanel(new GridBagLayout());
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		final DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
+		
+		NumberField nfDeskewAngle = new NumberField(5);
+		nfDeskewAngle.setText( df3.format( BVBSettings.dLLSAngle ) );
+
+		JLabel jText = new JLabel("<html>It could be that the input is (lattice) light sheet data.<br>"
+				+ "Do you want to deskew it?<br>"
+				+ "If it is already deskewed, just click No.</html>");
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		gbc.gridwidth = 2;
+		pDeskew.add( jText, gbc );
+		gbc.gridx = 0;
+		gbc.gridy ++;	
+		gbc.gridwidth = 1;
+		pDeskew.add( new JLabel("Deskew angle (degrees):"), gbc );
+		gbc.gridx ++;
+		pDeskew.add( nfDeskewAngle, gbc );
+		
+		
+		if (JOptionPane.showConfirmDialog(null, pDeskew, "Loading option",
 		        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
 		{
-			AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle*Math.PI/180.0);
+			double dAngle = Double.parseDouble( nfDeskewAngle.getText());
+			BVBSettings.dLLSAngle = dAngle;
+			Prefs.set("BVB.dLLSAngle",BVBSettings.dLLSAngle);
+			AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle * Math.PI / 180.0);
 			ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
 			List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
 			for (final ViewRegistration viewRegistration : listVR )

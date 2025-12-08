@@ -76,7 +76,7 @@ public class ViewPanel extends JPanel
 		//this.setBorder(new PanelTitle(" View "));
 	    
 	    //BOX AROUND
-		URL icon_path = this.getClass().getResource("/icons/boxvolume.png");
+		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "boxvolume.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butVBox = new JToggleButton(tabIcon);
 	    //butVBox.setSelected(btdata.bVolumeBox);
@@ -102,9 +102,9 @@ public class ViewPanel extends JPanel
 	    //PROJECTION MATRIX
 	    projToolTip[0] = "Perspective";
 	    projToolTip[1] = "Orthographic";
-		icon_path = this.getClass().getResource("/icons/proj_persp.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "proj_persp.png");
 		projIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/proj_ortho.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "proj_ortho.png");
 		projIcon[1] = new ImageIcon(icon_path);
 
 	    butProjType = new JButton( projIcon[ bvb.bvvViewer.getProjectionType() ] );
@@ -128,7 +128,7 @@ public class ViewPanel extends JPanel
 		});  
 	    
 		//SETTINGS
-		icon_path = this.getClass().getResource("/icons/settings.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "settings.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butSettings = new JButton(tabIcon);
 	    butSettings.setToolTipText("Settings");
@@ -206,10 +206,7 @@ public class ViewPanel extends JPanel
 		
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
-		
-		NumberField nfLLSAngle = new NumberField(5);
-		nfLLSAngle.setText( df3.format( BVBSettings.dLLSAngle ) );
-		
+				
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
@@ -272,13 +269,7 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(new JLabel("Show random shader on startup"), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbBGShader, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		pViewSettings.add(new JLabel("LLS deskew angle (degrees)"), gbc);
-		gbc.gridx++;
-		pViewSettings.add(nfLLSAngle, gbc);	
-		
+				
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -328,9 +319,6 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
-			
-			BVBSettings.dLLSAngle = Double.parseDouble(nfLLSAngle.getText());
-			Prefs.set("BVB.dLLSAngle",BVBSettings.dLLSAngle);
 			
 			if(bRepaintBVV)
 			{

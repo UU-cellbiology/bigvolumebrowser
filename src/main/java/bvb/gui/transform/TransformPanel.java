@@ -43,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.utils.transform.TransformSetups;
 import ij.Prefs;
@@ -127,9 +128,9 @@ public class TransformPanel extends JPanel
 		coordToolTip[0] = "Global world coordinates";
 		coordToolTip[1] = "Local volume coordinates";
 
-		URL icon_path = this.getClass().getResource("/icons/frame_global.png");
+		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "frame_global.png");
 		coordIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/frame_local.png");
+		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "frame_local.png");
 		coordIcon[1] = new ImageIcon(icon_path);
 		gbc.gridx ++;
 		gbc.weightx = 0.6;

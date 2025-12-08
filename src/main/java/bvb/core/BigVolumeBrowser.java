@@ -146,7 +146,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	private final ConcurrentHashMap < AbstractSpimData<?>, BVBSpimDataInfo> spimDataToInfo;
 
 	/** data sources panel tree model **/
-	public DataTreeModel dataTreeModel = new DataTreeModel();
+	public DataTreeModel dataTreeModel;
 	
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
@@ -195,9 +195,24 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	{
 		//switch to FlatLaf theme		
 		try {
-		    UIManager.setLookAndFeel( new FlatIntelliJLaf() );
-		    FlatLaf.registerCustomDefaultsSource( "flatlaf" );
-		    FlatIntelliJLaf.setup();
+			String sUIName = UIManager.getLookAndFeel().getDescription();
+			//already a flatlaf, let's see if it is dark or not
+			if(sUIName.toLowerCase().contains( "flatlaf" ))
+			{
+				//dark theme, let's change the colors
+				if(sUIName.toLowerCase().contains( "dark" ) || sUIName.toLowerCase().contains( "darcula")) 
+				{
+					BVBSettings.sUITheme = "dark/";
+				}
+			}
+			else
+			{
+				UIManager.setLookAndFeel( new FlatIntelliJLaf() );
+			    FlatLaf.registerCustomDefaultsSource( "flatlaf" );
+			    FlatIntelliJLaf.setup();
+			}
+			//System.out.println(sUIName);
+
 		} catch( Exception ex ) {
 		    System.err.println( "Failed to initialize LaF" );
 		}
@@ -205,6 +220,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			this.BVVFrameTitle = BVVFrameTitle_;
 		}
+		
+		dataTreeModel = new DataTreeModel();
 		
 		if(bvv == null)
 		{
