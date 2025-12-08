@@ -206,10 +206,7 @@ public class ViewPanel extends JPanel
 		
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
-		
-		NumberField nfLLSAngle = new NumberField(5);
-		nfLLSAngle.setText( df3.format( BVBSettings.dLLSAngle ) );
-		
+				
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
@@ -272,13 +269,7 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(new JLabel("Show random shader on startup"), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbBGShader, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		pViewSettings.add(new JLabel("LLS deskew angle (degrees)"), gbc);
-		gbc.gridx++;
-		pViewSettings.add(nfLLSAngle, gbc);	
-		
+				
 		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "View/Navigation Settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -328,9 +319,6 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
-			
-			BVBSettings.dLLSAngle = Double.parseDouble(nfLLSAngle.getText());
-			Prefs.set("BVB.dLLSAngle",BVBSettings.dLLSAngle);
 			
 			if(bRepaintBVV)
 			{
