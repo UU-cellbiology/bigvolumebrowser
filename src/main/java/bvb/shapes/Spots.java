@@ -55,6 +55,8 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	
 	int pointShape;
 	
+	int pointShade = 0;
+	
 	FinalRealInterval boundBox = null;
 	
 	int nMapAlphaMode = 0;
@@ -343,6 +345,21 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public int getPointShape()
 	{		
 		return pointShape;
+	}
+
+	@Override
+	public void setPointShade(int nShade)
+	{
+		pointShade = nShade;
+		((VisSpots)visRender).setShape(pointShade);
+		
+		return;
+	}	
+	
+	@Override
+	public int getPointShade()
+	{		
+		return pointShade;
 	}
 	
 		

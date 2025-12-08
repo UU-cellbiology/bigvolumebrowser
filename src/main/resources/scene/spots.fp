@@ -5,6 +5,7 @@ uniform int nHasColors;
 uniform vec2 ellipseAxes;
 uniform int renderType;
 uniform int pointShape;
+uniform int pointShade;
 in vec3 posW;
 in float fDiamfp;
 in float fPropertyfp;
@@ -30,7 +31,8 @@ uniform float alphaMin;
 uniform float alphaRange;
 uniform float alphaGamma;
 uniform float extraAlpha;
-
+const vec3 lightDir = normalize(vec3(0, -0.2, -1));
+const vec3 ambient = vec3(0.1, 0.1, 0.1);
 
 void checkClipping()
 {
@@ -157,16 +159,26 @@ void main()
 		//cut off everything outside the ellipse
 		if ( norm > 1) discard;
 		
-		//draw only outline,
-		//i.e. discard inside
-		if(renderType == 1)
+		switch (renderType)
 		{
-			if ( norm < 0.6) 
-				discard;
-		}
-		else if(renderType >= 2)
-		{		
-			colorout.a = exp(-4.5 * norm) * colorout.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
+			case 0:
+			if(pointShade>0)
+			{
+				float z = sqrt(1 - norm);
+				vec3 n = - vec3(coord.x * sqrt( ellipseAxes.x), coord.y * sqrt( ellipseAxes.y), z);
+				float diff =  abs(dot(n, lightDir));
+				colorout.rgb = colorout.rgb * (diff + ambient);
+			}
+				break;
+			case 1:
+				//draw only outline,
+				//i.e. discard inside
+				if ( norm < 0.6) 
+					discard;
+				break;
+			case 2:	
+					colorout.a = exp(-4.5 * norm) * colorout.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
+				break;
 		}
 	}
 	else

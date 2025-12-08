@@ -55,6 +55,8 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	
 	int pointShape;
 	
+	int pointShade = 0;
+	
 	float [] sizeMinMax = null;
 	
 	float [] propertyMinMax = null;
@@ -250,6 +252,27 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 
 	@Override
 	public int getPointShape()
+	{
+		return pointShape;
+	}
+	
+	@Override
+	public void setPointShade( int nShade )
+	{
+		pointShade = nShade;
+		if(visRendersTimeMap.size()>0 )
+		{
+			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+			for(final AbstractClipTransformVis visRender:visRenders)
+			{
+				((VisSpots)visRender).setShade( nShade );
+			}
+		}
+		
+	}
+
+	@Override
+	public int getPointShade()
 	{
 		return pointShape;
 	}

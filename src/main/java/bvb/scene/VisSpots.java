@@ -80,6 +80,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private int spotShape = 0;
 	
+	private int spotShade = 1;
+	
 	float vertices[] = null; 
 	
 	float spotSizes[] = null;
@@ -385,6 +387,18 @@ public class VisSpots extends AbstractClipTransformVis
 	public int getShape()
 	{
 		return spotShape;
+	}
+	
+	/** only for round filled spots 
+	 * 0 - plain, 1 - shaded **/
+	public void setShade(int nShade_)
+	{
+		spotShade = nShade_;		
+	}
+	
+	public int getShade()
+	{
+		return spotShade;
 	}	
 	
 	private void init( final GL3 gl )
@@ -612,6 +626,7 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
+		prog.getUniform1i( "pointShade" ).set( spotShade );
 		prog.getUniform1i("clipactive").set(0);
 		
 		if(clipState != 0 && clipInt != null)
