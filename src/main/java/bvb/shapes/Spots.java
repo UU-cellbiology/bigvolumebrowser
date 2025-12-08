@@ -351,7 +351,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	public void setPointShade(int nShade)
 	{
 		pointShade = nShade;
-		((VisSpots)visRender).setShape(pointShade);
+		((VisSpots)visRender).setShade(pointShade);
 		
 		return;
 	}	

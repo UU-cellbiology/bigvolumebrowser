@@ -80,7 +80,7 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	private int spotShape = 0;
 	
-	private int spotShade = 1;
+	private int spotShade = 0;
 	
 	float vertices[] = null; 
 	
