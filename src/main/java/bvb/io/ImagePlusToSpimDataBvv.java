@@ -76,10 +76,11 @@ public class ImagePlusToSpimDataBvv {
 		switch (imp.getType()) {
 			case ImagePlus.GRAY8:
 			case ImagePlus.GRAY16:
+			case ImagePlus.GRAY32:
 				break;
 			default:
 				String message = "Error in image " + imp.getShortTitle() +
-						": Only 8 and 16 are supported currently!";
+						": Only 8-, 16- and 32-bit images are supported currently!";
 				logger.error(message);
 				throw new UnsupportedOperationException(message);
 		}
@@ -107,6 +108,10 @@ public class ImagePlusToSpimDataBvv {
 					break;
 				case ImagePlus.GRAY16:
 					imgLoader = ImagePlusImageLoaderBvv.createUnsignedShortInstance(imp,
+							originTimePoint);
+					break;
+				case ImagePlus.GRAY32:
+					imgLoader = ImagePlusImageLoaderBvv.createFloatInstance(imp,
 							originTimePoint);
 					break;
 				default:
@@ -236,7 +241,7 @@ public class ImagePlusToSpimDataBvv {
 	}
 	public static boolean compareICM(IndexColorModel icm1, IndexColorModel icm2)
 	{
-		if(icm1.getMapSize()!=icm2.getMapSize())
+		if(icm1.getMapSize() != icm2.getMapSize())
 			return false;
 		final int size = icm1.getMapSize();
 

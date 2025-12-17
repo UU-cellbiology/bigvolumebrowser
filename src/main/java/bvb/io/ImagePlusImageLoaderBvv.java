@@ -45,6 +45,7 @@ import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.img.basictypeaccess.DataAccess;
 import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
+import net.imglib2.img.basictypeaccess.volatiles.array.VolatileFloatArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.CellGrid;
@@ -53,6 +54,8 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.type.volatiles.VolatileFloatType;
 import net.imglib2.type.volatiles.VolatileUnsignedByteType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
@@ -98,6 +101,15 @@ public class ImagePlusImageLoaderBvv<T extends NativeType<T>, V extends Volatile
 				new VolatileUnsignedByteType(), offsetTime);
 	}
 
+	public static
+	ImagePlusImageLoaderBvv<FloatType, VolatileFloatType, VolatileFloatArray>
+	createFloatInstance(final ImagePlus imp, final int offsetTime)
+	{
+		return new ImagePlusImageLoaderBvv<>(imp, array -> new VolatileFloatArray(
+				(float[]) array, true), new FloatType(),
+				new VolatileFloatType(), offsetTime);
+	}
+	
 	private static final double[][] mipmapResolutions = new double[][] { { 1, 1, 1 } };
 
 	private static final AffineTransform3D[] mipmapTransforms =

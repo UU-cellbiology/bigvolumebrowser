@@ -170,9 +170,9 @@ public class PanelAddSources extends JPanel
 			return;
 		}
 		
-		if (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16 ) 
+		if (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16 && imp.getType() != ImagePlus.GRAY32 ) 
 		{
-		    IJ.error("Only 8- or 16-bit grayscale images are currently supported.");
+		    IJ.error("Only 8-, 16- or 32-bit grayscale images are currently supported.");
 		    return;
 		}
 		bvb.addImagePlus( imp );
