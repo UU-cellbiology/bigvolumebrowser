@@ -198,7 +198,7 @@ public class SpimDataLoader
 		
 		SpimData spimData = null;
 
-		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8)
+		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8 || seriesBitDepth[nOpenSeries] == FormatTools.FLOAT)
 		{
 			OpenerSettings settings = OpenerSettings.BioFormats()
 					.location(new File(imageFileName))
@@ -210,7 +210,7 @@ public class SpimDataLoader
 		}
 		else
 		{
-			 IJ.error( "Sorry, only 8- and 16-bit BioFormats images are supported.");
+			 IJ.error( "Sorry, only 8-, 16- and 32-bit BioFormats images are supported.");
 			 return null;
 		}
 
