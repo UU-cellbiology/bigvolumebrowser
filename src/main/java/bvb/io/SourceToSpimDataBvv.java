@@ -33,11 +33,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.imglib2.FinalDimensions;
+import net.imglib2.Volatile;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import bdv.spimdata.SequenceDescriptionMinimal;
+import bdv.util.volatiles.VolatileTypeMatcher;
 import bdv.viewer.Source;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
@@ -50,16 +56,26 @@ public class SourceToSpimDataBvv
 {
 	/** wraps UnsignedByte, UnsignedShort, UnsignedLong or Float type source to a cached spimdata 
 	 * (of UnsignedShort type) to display in BVV, otherwise returns null **/
-	public static AbstractSpimData< ? > spimDataSourceWrap(final Source<?> src_)
+	@SuppressWarnings( { "rawtypes", "unchecked" } )
+	public static < T extends RealType< T > & NativeType< T >, V extends Volatile< T > & NativeType < V >> AbstractSpimData< ? > spimDataSourceWrap(final Source<?> src_)
 	{		
-		Object type = src_.getSource( 0, 0 ).getType() ;
+		final Object type = src_.getType() ;
 		
 		if(!(type instanceof RealType  && type instanceof NativeType))
 		{
-			System.err.println( "Volume view of image of type " + type + " is currently not supported.");
+			System.err.println( "Sources with pixel type " + type.getClass().getName() + " currently not supported in BigVolumeBrowser.");
 			return null;
 		}
-		final SourceImgLoaderBvv imgLoader = new SourceImgLoaderBvv(src_);
+		Volatile volatileType = ( Volatile )VolatileTypeMatcher.getVolatileTypeForType(( T ) type);
+		final SourceImgLoaderBvv imgLoader;
+		if( !needsConvertion(type) )
+		{
+			imgLoader = new SourceImgLoaderBvv(src_, (T) type,  volatileType );
+		}
+		else
+		{
+			imgLoader = new SourceImgLoaderBvv(src_, new UnsignedShortType(), new VolatileUnsignedShortType());			
+		}
 		
 		int numTimepoints = 0;
 		
@@ -80,11 +96,18 @@ public class SourceToSpimDataBvv
 		for ( int t = 0; t < numTimepoints; ++t )
 		{
 			AffineTransform3D transform = new AffineTransform3D();
-			//scale transform already in the multires, no need
-			//src_.getSourceTransform( t,0, transform );
 			registrations.add( new ViewRegistration( t, 0, transform ) );
 		}
 		File dummy = null;
 		return new AbstractSpimData<>( dummy, seq, new ViewRegistrations( registrations) );
+	}
+	
+	public static boolean needsConvertion (Object type)
+	{
+		if(type instanceof UnsignedByteType || 
+				type instanceof UnsignedShortType ||
+				type instanceof FloatType )
+			{return false;}
+		  return true;
 	}
 }

@@ -28,17 +28,19 @@
  */
 package bvb.io;
 
-import java.util.Random;
-
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.Volatile;
 import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.converter.Converters;
-import net.imglib2.converter.RealUnsignedShortConverter;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.img.basictypeaccess.DataAccess;
+import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
+import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
+import net.imglib2.img.basictypeaccess.volatiles.array.VolatileFloatArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 
 import net.imglib2.img.cell.CellGrid;
@@ -48,10 +50,6 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.type.volatiles.VolatileUnsignedShortType;
-import net.imglib2.util.Cast;
-import net.imglib2.util.Intervals;
-import net.imglib2.util.ValuePair;
 import net.imglib2.view.Views;
 
 import bdv.AbstractViewerSetupImgLoader;
@@ -63,10 +61,15 @@ import bdv.img.cache.VolatileCachedCellImg;
 import bdv.img.cache.VolatileGlobalCellCache;
 import bdv.viewer.Source;
 import bvb.utils.Misc;
-import ij.IJ;
 import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
 
-public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedShortType, VolatileUnsignedShortType > implements ViewerImgLoader
+
+/** **/
+public class SourceImgLoaderBvv < T extends RealType< T > & NativeType< T >, 
+								  V extends Volatile< T > & NativeType < V >, 
+								  A extends DataAccess & VolatileAccess> 
+								  extends AbstractViewerSetupImgLoader< T, V > 
+								  implements ViewerImgLoader
 {
 	final Source<?> src;
 	
@@ -78,22 +81,17 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 	
 	private VolatileGlobalCellCache cache;
 	
-	final Object typeIn;
+	private final CacheArrayLoader<A> loader;
 	
-	boolean bFloat = false;
+	final private boolean bConvertSrc; 
 	
-	double dMin,dMax;
-		
-	private final CacheArrayLoader<VolatileShortArray> loader;
-	
-	public SourceImgLoaderBvv(final Source<?> source_)
+	public SourceImgLoaderBvv(final Source< ? > source_, final T type, final V volatileType)
 	{
-		super( new UnsignedShortType(), new VolatileUnsignedShortType() );
+		super( type, volatileType );
 		
 		src = source_;
 		numScales = src.getNumMipmapLevels();
-		typeIn =  src.getSource( 0, 0 ).getType();
-		cache = new VolatileGlobalCellCache( numScales+1, 1 );
+		cache = new VolatileGlobalCellCache( numScales + 1, 1 );
 
 		mipmapTransforms = new AffineTransform3D[numScales];
 
@@ -104,7 +102,7 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 		
 		final double [] zeroScale = Misc.getScale( transformSource);
 
-		for(int i=0;i<numScales;i++)
+		for(int i = 0; i < numScales; i++)
 		{
 			AffineTransform3D transform = new AffineTransform3D();
 			src.getSourceTransform( 0, i, transform );			
@@ -112,23 +110,15 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 			
 			double [] currScale = Misc.getScale( transform );
 			mipmapResolutions[i] = new double [3];
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
 				mipmapResolutions[i][d] = currScale[d]/zeroScale[d];
 			}		
 		}
-
-		if(!(typeIn instanceof IntegerType) )
-		{
-			bFloat = true;
-			IJ.log( "Estimating Float Source range..." );
-			ValuePair< Double, Double > dPair = getMinMax(src); 
-			dMin = dPair.getA().doubleValue();
-			dMax = dPair.getB().doubleValue();
-			IJ.log( "found ["+Double.toString( dMin )+"," +Double.toString( dMax )+"]");
-		}
 		
-		loader = new SourceArrayLoader(src, bFloat, dMin, dMax);
+		bConvertSrc = SourceToSpimDataBvv.needsConvertion(type);
+		
+		loader = new SourceArrayLoader<>(src);
 	}
 
 	@Override
@@ -150,7 +140,8 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 	}
 	
 	
-	protected <T extends NativeType<T>> VolatileCachedCellImg<T, VolatileShortArray>
+	@SuppressWarnings( "hiding" )
+	protected <T extends NativeType<T>> VolatileCachedCellImg<T, A>
 	prepareCachedImage(final int timepointId, final int level, final int setupId,
 					   final LoadingStrategy loadingStrategy, final T typeCache)
 	{
@@ -159,7 +150,6 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 		
 		final CacheHints cacheHints = new CacheHints( loadingStrategy, priority, false );
 		
-		//final int[] cellDimensions = new int [] {(int)imageDimensions[level][0],(int)imageDimensions[level][1],1};
 		final int[] cellDimensions = new int [] {32,32,32};
 		
 		final CellGrid grid = new CellGrid(dimensions, cellDimensions);
@@ -167,22 +157,21 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 				loader, typeCache);
 	}
 	
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	@Override
-	public RandomAccessibleInterval< UnsignedShortType > getImage( int timepointId, int level, ImgLoaderHint... hints )
+	public RandomAccessibleInterval getImage( int timepointId, int level, ImgLoaderHint... hints )
 	{
 		final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
 		
-		if(!bFloat)
-		{
-			return convertIntegerRAIToShort(raiXYZ);
-		}
-		return convertRealRAIToShort(( RandomAccessibleInterval< FloatType > ) raiXYZ, dMin, dMax);
+		if(!bConvertSrc)
+			return raiXYZ;
+		
+		return convertIntegerRAIToShort(raiXYZ);
 			
 	}
 	
 	@Override
-	public RandomAccessibleInterval< VolatileUnsignedShortType > getVolatileImage( int timepointId, int level, ImgLoaderHint... hints )
+	public RandomAccessibleInterval< V > getVolatileImage( int timepointId, int level, ImgLoaderHint... hints )
 	{		
 		return prepareCachedImage(timepointId, level, 0, LoadingStrategy.VOLATILE, volatileType);
 	}
@@ -203,84 +192,100 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 	public void setCache( final VolatileGlobalCellCache cache )
 	{
 		this.cache = cache;
-	}
-		
+	}		
 	
-	static class SourceArrayLoader implements CacheArrayLoader<VolatileShortArray> 
+	static class SourceArrayLoader <A extends DataAccess> implements CacheArrayLoader<A> 
 	{
 		
 		final Source<?> src;
-		final boolean bFloatType;
-		final double dMin, dMax;
+		final boolean bConvert;
+		int bytesPerElement;
 		
-		public SourceArrayLoader (final Source<?> source_, final boolean bFloat_, final double dMin_, final double dMax_)
+		public SourceArrayLoader (final Source<?> source_)
 		{
 			src = source_;
-			bFloatType = bFloat_;
-			dMin = dMin_;
-			dMax = dMax_;
+			final Object type = src.getType();
+			bConvert = SourceToSpimDataBvv.needsConvertion(type);
+			bytesPerElement = calculateBytesPerElement(type);				
 		}
 		
 		@Override
 		public int getBytesPerElement() {
-			return 2;
+			return bytesPerElement;
 		}
 
+		@SuppressWarnings( { "unchecked" } )
 		@Override
-		public  VolatileShortArray loadArray( int timepoint, int setup, int level, int[] dimensions, long[] min ) throws InterruptedException
+		public A loadArray( int timepoint, int setup, int level, int[] dimensions, long[] min ) throws InterruptedException
 		{
 			final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepoint, level );
 			
-			final short[] data = new short[dimensions[0]*dimensions[1]*dimensions[2]];
-			
+			final int numElements = dimensions[0] * dimensions[1] * dimensions[2];
+				
 			final long[][] intRange = new long [2][3];
-			for(int d=0;d<3;d++)
+			
+			for(int d = 0; d < 3; d++)
 			{
 				intRange[0][d]= min[d];
-				intRange[1][d]= min[d]+dimensions[d]-1;
+				intRange[1][d]= min[d] + dimensions[d] - 1;
 			}
 
-			IterableInterval< UnsignedShortType > iterRAI;
-			if(!bFloatType)
+			final IterableInterval< ? > iterRAI;
+			if(!bConvert)
 			{
-				iterRAI = Views.flatIterable( convertIntegerRAIToShort(Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))));				
+				iterRAI = Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1])));				
 			}
 			else
 			{
-				iterRAI = Views.flatIterable( convertRealRAIToShort( ( RandomAccessibleInterval< ? > ) Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1])), dMin,dMax));
+				iterRAI = Views.flatIterable( convertIntegerRAIToShort(Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))));				
 			}
-			int nCount = 0;
-
-			Cursor< UnsignedShortType > cur = iterRAI.cursor();
-			while (cur.hasNext())
+			
+			if(raiXYZ.getType() instanceof UnsignedByteType )
 			{
-				cur.fwd();
-				data[nCount] = cur.get().getShort();
-				nCount++;
+				final byte[] data = new byte[numElements];
+				int nCount = 0;
+				Cursor< UnsignedByteType > cur = ( Cursor< UnsignedByteType > ) iterRAI.cursor();
+				while (cur.hasNext())
+				{
+					cur.fwd();
+					data[nCount] = cur.get().getByte();
+					nCount++;
+				}
+				return ( A ) new VolatileByteArray(data,true);
 			}
-			return new VolatileShortArray(data,true);
+			else if(raiXYZ.getType() instanceof FloatType )
+			{
+				final float[] data = new float[numElements];
+				int nCount = 0;
+				Cursor< FloatType > cur = ( Cursor< FloatType > ) iterRAI.cursor();
+				while (cur.hasNext())
+				{
+					cur.fwd();
+					data[nCount] = cur.get().getRealFloat();
+					nCount++;
+				}
+				return ( A ) new VolatileFloatArray(data,true);
+			}
+			else
+			{
+				final short[] data = new short[numElements];
+				int nCount = 0;
+				Cursor< UnsignedShortType > cur = ( Cursor< UnsignedShortType > ) iterRAI.cursor();
+				while (cur.hasNext())
+				{
+					cur.fwd();
+					data[nCount] = cur.get().getShort();
+					nCount++;
+				}
+				return ( A ) new VolatileShortArray(data,true);
+			}
 		}
 
 
 	}
-	@SuppressWarnings( { "unchecked", "rawtypes" } )
+	@SuppressWarnings( { "rawtypes" } )
 	public static RandomAccessibleInterval< UnsignedShortType > convertIntegerRAIToShort(RandomAccessibleInterval< ? > raiXYZ)
 	{
-	
-		Object typein = raiXYZ.getType();
-		if ( typein instanceof UnsignedShortType )
-		{
-			return (RandomAccessibleInterval <UnsignedShortType >) raiXYZ;
-		}
-		else if ( typein instanceof UnsignedByteType )
-		{
-			return Converters.convert(
-					raiXYZ,
-					( i, o ) -> o.setInteger( ((UnsignedByteType) i).get() ),
-					new UnsignedShortType( ) );
-		}
-		else
-		{
 			return Converters.convert(
 					raiXYZ,
 					( i, o ) -> 
@@ -288,46 +293,23 @@ public class SourceImgLoaderBvv extends AbstractViewerSetupImgLoader< UnsignedSh
 						o.setInteger(((IntegerType)i).getInteger());
 					},
 					new UnsignedShortType( ) );
-		}
-
 	}
 	
-	@SuppressWarnings( "unchecked" )
-	public static  <R extends RealType< R > > RandomAccessibleInterval< UnsignedShortType > convertRealRAIToShort(RandomAccessibleInterval< ? > raiXYZ, double minVal, double maxVal)
-	{	
-		
-		return Converters.convert( (RandomAccessibleInterval< R >)raiXYZ, new RealUnsignedShortConverter<>(minVal,maxVal), new UnsignedShortType() );
-
-	}
-	
-	//taken from LabKit
-	//https://github.com/juglab/labkit-ui/blob/01a5c8058459a0d1a2eedc10f7212f64e021f893/src/main/java/sc/fiji/labkit/ui/bdv/BdvAutoContrast.java#L51
-	private static ValuePair<Double, Double> getMinMax(final Source<?> src) 
+	static int calculateBytesPerElement(Object type) 
 	{
-		int level = src.getNumMipmapLevels() - 1;
-		RandomAccessibleInterval<?> source = src.getSource(0, level);
-		if (source.getType() instanceof RealType)
-			return getMinMaxForRealType(Cast.unchecked(source));
-		return new ValuePair<>(0.0, 255.0);
-	}
-	
-	private static ValuePair<Double, Double> getMinMaxForRealType(
-			RandomAccessibleInterval<? extends RealType<?>> source)
+		//short or converted (clipped) integer
+		int n = 2;
+		//System.out.println( "LOADING " + type.getClass().getName() );
+
+		if(type instanceof UnsignedByteType)
 		{
-			Cursor<? extends RealType<?>> cursor = source.cursor();
-			if (!cursor.hasNext()) return new ValuePair<>(0.0, 255.0);
-			long stepSize = Intervals.numElements(source) / 10000 + 1;
-			int randomLimit = (int) Math.min(Integer.MAX_VALUE, stepSize);
-			Random random = new Random(42);
-			double min = cursor.next().getRealDouble();
-			double max = min;
-			while (cursor.hasNext()) {
-				double value = cursor.get().getRealDouble();
-				cursor.jumpFwd(stepSize + random.nextInt(randomLimit));
-				min = Math.min(min, value);
-				max = Math.max(max, value);
-			}
-			return new ValuePair<>(min, max);
+			n = 1;
 		}
+		if(type instanceof FloatType)
+		{
+			n = 4;
+		}		
+		return n;
+	}
 
 }
