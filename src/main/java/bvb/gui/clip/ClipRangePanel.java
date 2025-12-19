@@ -169,7 +169,7 @@ public class ClipRangePanel extends JPanel
 					//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
 					//double [] clipCenter = clipSetups.clipCenters.getCenters( objCl );
 					double [] relShift = clipSetups.getCurrentObjectCenter( obj );
-					for(int d=0;d<3;d++)
+					for(int d = 0; d < 3; d++)
 					{
 						//relShift[d]-=clipCenter[d];
 						min[d] -= relShift[d];

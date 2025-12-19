@@ -233,7 +233,7 @@ public class TransformCenterPanel extends JPanel
 			newCenters[nAxis] = currVal + defcenter[nAxis];
 			
 			transformSetups.transformCenters.setCenters( obj, newCenters );
-			transformSetups.updateTransform( obj, null );
+			transformSetups.updateTransform( obj, null, Double.NaN );
 		}
 		blockUpdates = false;
 		updateGUI();
@@ -294,7 +294,7 @@ public class TransformCenterPanel extends JPanel
 			
 			final double [] centers = Misc.getIntervalCenter( interval );
 			transformSetups.transformCenters.setCenters( obj, centers );
-			transformSetups.updateTransform( obj, null );
+			transformSetups.updateTransform( obj, null, Double.NaN );
 		}
 		
 		blockUpdates = false;

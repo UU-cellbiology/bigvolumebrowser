@@ -234,7 +234,7 @@ public class TransformHandlerBVB
 							affineDragStart.applyInverse( newCenters, newCenters );
 							transformSetups.transformCenters.setCenters( obj, newCenters );					
 						}
-						transformSetups.updateTransform( obj, prevAngles );
+						transformSetups.updateTransform( obj, prevAngles, Double.NaN );
 					}
 					transformSetups.updateBVV();
 					bvb.bvbCards.transformPanel.updateGUI();
@@ -319,7 +319,7 @@ public class TransformHandlerBVB
 						//go back to the world coordinates
 						affineDragStart.applyInverse( newCenters, newCenters );						
 						transformSetups.transformCenters.setCenters( obj, newCenters );
-						transformSetups.updateTransform( obj, null );
+						transformSetups.updateTransform( obj, null, Double.NaN );
 					}
 					transformSetups.updateBVV();
 					bvb.bvbCards.transformPanel.updateGUI();

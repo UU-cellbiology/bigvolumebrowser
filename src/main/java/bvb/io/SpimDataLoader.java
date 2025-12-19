@@ -283,7 +283,7 @@ public class SpimDataLoader
 			double dAngle = Double.parseDouble( nfDeskewAngle.getText());
 			BVBSettings.dLLSAngle = dAngle;
 			Prefs.set("BVB.dLLSAngle",BVBSettings.dLLSAngle);
-			AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle * Math.PI / 180.0);
+			AffineTransform3D deskewTR = makeDeskewTransform(BVBSettings.dLLSAngle * Math.PI / 180.0);
 			ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
 			List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
 			for (final ViewRegistration viewRegistration : listVR )
@@ -293,15 +293,17 @@ public class SpimDataLoader
 		} 
 	}
 	
-	/** function generates new LLS7 transform (rotation/shear/z-scaling **/
-	public static AffineTransform3D makeLLS7Transform(double angle)
+	/** function generates new deskew transform (rotation/shear/z-scaling) 
+	 * in the "common" configuration, i.e. XY plane tilted with respect to Z.
+	 * angle is in radians **/
+	public static AffineTransform3D makeDeskewTransform(double angle)
 	{
 		AffineTransform3D afDataTransform = new AffineTransform3D();
 		AffineTransform3D tShear = new AffineTransform3D();
 		AffineTransform3D tRotate = new AffineTransform3D();
 			
 		//rotate 
-		tRotate.rotate(0, (-1.0)*angle);
+		tRotate.rotate(0, (-1.0) * angle);
 		tRotate.rotate(1,(-1.0)* Math.PI);
 		//shearing transform
 		tShear.set(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0/Math.tan( angle ), 0.0, 0.0, 0.0, 1.0, 0.0);

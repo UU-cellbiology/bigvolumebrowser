@@ -47,7 +47,7 @@ public class TransformRotationPanel extends JPanel
 {
 	final TransformSetups transformSetups;
 
-	private BoundedValuePanelPG [] trRotationPanels = new BoundedValuePanelPG[3];
+	private final BoundedValuePanelPG [] trRotationPanels = new BoundedValuePanelPG[3];
 
 	private boolean blockUpdates = false;
 	
@@ -196,7 +196,7 @@ public class TransformRotationPanel extends JPanel
 				transformSetups.transformCenters.setCenters( obj, newCenters );	
 			}			
 			
-			transformSetups.updateTransform( obj, prevAngles );
+			transformSetups.updateTransform( obj, prevAngles, Double.NaN);
 
 		}
 		
@@ -227,7 +227,7 @@ public class TransformRotationPanel extends JPanel
 				prevAngles[d] = eAngles [d];
 			}
 			transformSetups.transformRotation.setAngles( obj,  new double [3] );
-			transformSetups.updateTransform( obj, prevAngles );		
+			transformSetups.updateTransform( obj, prevAngles, Double.NaN );		
 		}
 		blockUpdates = false;
 		updateGUI();

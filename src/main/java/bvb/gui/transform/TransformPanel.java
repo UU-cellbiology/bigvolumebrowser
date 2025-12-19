@@ -60,6 +60,8 @@ public class TransformPanel extends JPanel
 	
 	final TransformRotationPanel transformRotationPanel;
 	
+	final TransformDeskewPanel transformDeskewPanel;
+	
 	final JCheckBox cbTransformClip;
 	
 	final JButton butResetCurrent;
@@ -90,6 +92,8 @@ public class TransformPanel extends JPanel
 		transformCentersPanel = new TransformCenterPanel(transformSetups);
 		
 		transformRotationPanel = new TransformRotationPanel(transformSetups);
+		
+		transformDeskewPanel = new TransformDeskewPanel(transformSetups);
 
 		
 		tabTrPane = new JTabbedPane(SwingConstants.TOP);
@@ -97,6 +101,7 @@ public class TransformPanel extends JPanel
 		tabTrPane.addTab( "Center", transformCentersPanel );
 		tabTrPane.addTab( "Rotate(L)", transformRotationPanel );
 		tabTrPane.addTab( "Scale", transformScalePanel );
+		tabTrPane.addTab( "Deskew", transformDeskewPanel );
 		
 		if(!transformSetups.bLocalCoordinates)
 		{
@@ -222,6 +227,7 @@ public class TransformPanel extends JPanel
 		transformScalePanel.updateGUI();
 		transformCentersPanel.updateGUI();
 		transformRotationPanel.updateGUI();
+		transformDeskewPanel.updateGUI();
 	}
 	
 	private void setPanelsEnabled(boolean bEnabled)
@@ -229,6 +235,7 @@ public class TransformPanel extends JPanel
 		transformScalePanel.setEnabled( bEnabled );
 		transformCentersPanel.setEnabled( bEnabled );
 		transformRotationPanel.setEnabled( bEnabled );
+		transformDeskewPanel.setEnabled(bEnabled);
 	}
 	
 	public void setupListeners()
@@ -258,6 +265,9 @@ public class TransformPanel extends JPanel
 		case 2:
 			transformScalePanel.resetScale();
 			break;
+		case 3:
+			transformDeskewPanel.resetDeskew();
+			break;
 		default:
 		}
 	}
@@ -269,7 +279,7 @@ public class TransformPanel extends JPanel
 		
 		final double [] unitScale = new double [3];
 		
-		for (int d=0; d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			unitScale [d] = 1.0;
 		}
@@ -280,13 +290,15 @@ public class TransformPanel extends JPanel
 		{
 			final double [] prevAngles =  new double[3];
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			for(int d=0;d<3;d++)
+			final double prevDeskew = transformSetups.transformDeskew.getAngle( obj );
+			for(int d = 0; d < 3; d++)
 			{
-				prevAngles[d] = eAngles [d];
+				prevAngles[d] = eAngles[d];
 			}
 			transformSetups.transformRotation.setAngles( obj,  new double [3] );
 			transformSetups.transformScale.setScale( obj, unitScale );
-			transformSetups.updateTransform( obj, prevAngles );
+			transformSetups.transformDeskew.setAngle( obj, Math.PI*0.5 );
+			transformSetups.updateTransform( obj, prevAngles, prevDeskew );
 		}
 		updateGUI();
 	}

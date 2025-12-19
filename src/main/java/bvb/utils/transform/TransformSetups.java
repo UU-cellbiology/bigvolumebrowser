@@ -60,6 +60,8 @@ public class TransformSetups
 	final public TransformCenterBounds transformCenterBounds;
 	
 	final public TransformRotation transformRotation;
+	
+	final public TransformDeskew transformDeskew;
 
 	public boolean bTransformClip = Prefs.get( "BVB.bTransformClip", true );
 	
@@ -77,6 +79,7 @@ public class TransformSetups
 		transformCenters = new TransformCenter(converterSetups);
 		transformCenterBounds = new TransformCenterBounds(converterSetups);
 		transformRotation = new TransformRotation(converterSetups);
+		transformDeskew = new TransformDeskew();
 		
 	}
 	
@@ -89,7 +92,7 @@ public class TransformSetups
 		if(LinAlgHelpers.length( eAngles )<0.0001)
 		{
 			qCurr[0] = 1.0;
-			for(int d=1;d<4;d++)
+			for(int d = 1; d < 4; d++)
 				qCurr[d] = 0.0;
 		}
 		else
@@ -99,7 +102,7 @@ public class TransformSetups
 				//add quaternion rotation
 				//calculate changes in angles
 				final double [] dChangeAngle = new double [3];
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 					dChangeAngle[d] = eAngles[d] - previousAngles[d];
 				}
@@ -116,65 +119,90 @@ public class TransformSetups
 		trRot.set( rotMatrix );	
 	}
 
-	public void updateTransform(final Object obj, final double [] previousAngles)
+	public void updateTransform(final Object obj, final double [] previousAngles, final double previousDeskewAngle)
 	{
 		
 		//rotation
 		final AffineTransform3D trRot = new AffineTransform3D();		
 		getRotation( trRot, obj, previousAngles );
 	
-		final AffineTransform3D newTransform = new AffineTransform3D();
+		final AffineTransform3D newTransformNoDeskew = new AffineTransform3D();
 		
 		RealInterval interval = null;
 		
-		final AffineTransform3D oldTr = new AffineTransform3D();
+		final AffineTransform3D oldTrNoDeskew = new AffineTransform3D();
 		if(obj instanceof ConverterSetup)
 		{		
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
-			(( TransformedSource< ? > )src).getFixedTransform( oldTr );
+			(( TransformedSource< ? > )src).getFixedTransform( oldTrNoDeskew );
 			//reset both transforms just in case
-			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
-			(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
+			(( TransformedSource< ? > )src).setFixedTransform( newTransformNoDeskew );
+			(( TransformedSource< ? > )src).setIncrementalTransform( newTransformNoDeskew );
 			
 			interval = Misc.getSourceBoundingBoxAllTP(src);
 		}
 		if(obj instanceof BasicShape)
 		{
-			((BasicShape)obj).getTransform( oldTr );
+			((BasicShape)obj).getTransform( oldTrNoDeskew );
 			//reset transform just in case
-			((BasicShape)obj).setTransform( newTransform );
+			((BasicShape)obj).setTransform( newTransformNoDeskew );
 			interval = ((BasicShape)obj).boundingBox();
 		}
 		final double [] center =  Misc.getIntervalCenterNegative( interval );
 		final double [] dCurrScale = transformScale.getScale(obj );		
 
 		//move to the origin
-		newTransform.translate( center );
+		newTransformNoDeskew.translate( center );
 
 		//scale
 		final AffineTransform3D scaleTr = new AffineTransform3D();
 		scaleTr.scale( dCurrScale[0],dCurrScale [1],dCurrScale[2] );
-		newTransform.preConcatenate( scaleTr );
+		newTransformNoDeskew.preConcatenate( scaleTr );
 		//rotate
-		newTransform.preConcatenate( trRot );
+		newTransformNoDeskew.preConcatenate( trRot );
 		
 		
 		//move things to the current volume's center
-		final double [] tr = transformCenters.getCenters( obj );		
+		final double [] tr = transformCenters.getCenters( obj );	
 		final AffineTransform3D translTr = new AffineTransform3D();
 		translTr.translate( tr );
-		newTransform.preConcatenate( translTr );
+		newTransformNoDeskew.preConcatenate( translTr );
 		
+		AffineTransform3D newTransformWithDeskew = new AffineTransform3D();
+		newTransformWithDeskew.set( newTransformNoDeskew );
+		double angle = transformDeskew.getAngle( obj );
+		AffineTransform3D deskewTr = makeDeskewTransform(angle) ;
+		//check how the centers will change
+		final double [] centerDeskew = new double[3];
+		deskewTr.apply( tr, centerDeskew );
+		for (int d = 0; d < 3; d++)
+		{
+			centerDeskew[d] = tr[d] - centerDeskew[d];
+		}
+		deskewTr.translate( centerDeskew );
+		newTransformWithDeskew.concatenate( deskewTr);
 		if(obj instanceof ConverterSetup)
 		{
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
-			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
+			(( TransformedSource< ? > )src).setFixedTransform( newTransformWithDeskew );
 		}
 		if(obj instanceof BasicShape)
 		{
-			((BasicShape)obj).setTransform( newTransform );
+			((BasicShape)obj).setTransform( newTransformWithDeskew );
 		}
-		
+		if(!Double.isNaN( previousDeskewAngle ))
+		{
+			AffineTransform3D deskewOld = makeDeskewTransform(previousDeskewAngle);
+			//shift to the centers
+			deskewOld.apply( tr, centerDeskew );
+			
+			for (int d = 0; d < 3; d++)
+			{
+				centerDeskew[d] = tr[d] - centerDeskew[d];
+			}
+			deskewOld.translate( centerDeskew );
+			oldTrNoDeskew.concatenate( deskewOld.inverse() );
+		}
 		/////   update clipping, if needed
 		if(bTransformClip)
 		{
@@ -185,9 +213,9 @@ public class TransformSetups
 				AffineTransform3D clipBake = new AffineTransform3D ();
 				
 				//go to absolute coordinates
-				clipBake.set( oldTr.inverse() );
+				clipBake.set( oldTrNoDeskew.inverse() );
 				//account for the new transform
-				clipBake.preConcatenate( newTransform );
+				clipBake.preConcatenate( newTransformNoDeskew );
 				AffineTransform3D clipUpdate = new AffineTransform3D ();
 				clipUpdate.set( clipBake );
 		
@@ -202,9 +230,9 @@ public class TransformSetups
 				final RealInterval clipInt = objCl.getClipInterval();
 				double [] min = clipInt.minAsDoubleArray();
 				double [] max = clipInt.maxAsDoubleArray();
-				for(int d=0;d<3;d++)
+				for(int d = 0; d < 3; d++)
 				{
-					shift[d] = clipCent[d]-clipCentOld[d];
+					shift[d] = clipCent[d] - clipCentOld[d];
 					min[d] += shift[d];
 					max[d] += shift[d];
 				}
@@ -240,5 +268,30 @@ public class TransformSetups
 	{
 		bvb.updateSceneRender();
 		
+	}
+	
+	/** function generates new deskew transform (rotation/shear/z-scaling) 
+	 * in the "common" configuration, i.e. XY plane tilted with respect to Z.
+	 * angle is in radians **/
+	public static AffineTransform3D makeDeskewTransform(final double angle)
+	{
+		AffineTransform3D afDataTransform = new AffineTransform3D();
+		AffineTransform3D tShear = new AffineTransform3D();
+		AffineTransform3D tRotate = new AffineTransform3D();
+			
+		//rotate 
+		//tRotate.rotate(0, angle);
+		//tRotate.rotate(1, (-1.0) * Math.PI);
+		//shearing transform
+		tShear.set(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0/Math.tan( angle ), 0.0, 0.0, 0.0, 1.0, 0.0);
+		//Z-step adjustment transform
+		afDataTransform.set(1.0, 0.0, 0.0, 0.0, 
+								0.0, 1.0, 0.0, 0.0, 
+								0.0, 0.0, Math.sin( angle  ), 0.0);
+		
+		afDataTransform = tShear.concatenate(afDataTransform);
+		afDataTransform = tRotate.concatenate(afDataTransform);
+
+		return afDataTransform;
 	}
 }

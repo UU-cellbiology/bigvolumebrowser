@@ -254,7 +254,7 @@ public class TransformScalePanel extends JPanel
 			}
 			newScale[nAxis] = currVal;
 			transformSetups.transformScale.setScale( obj, newScale );
-			transformSetups.updateTransform( obj, null );
+			transformSetups.updateTransform( obj, null, Double.NaN );
 			//let's update center bounds
 			transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.resetBounds( nAxis );
 		}
@@ -293,8 +293,8 @@ public class TransformScalePanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			transformSetups.transformScale.setScale( obj, unitScale );
-			transformSetups.updateTransform( obj, null );
-			for(int d=0;d<3;d++)
+			transformSetups.updateTransform( obj, null, Double.NaN );
+			for(int d = 0; d < 3; d++)
 			{
 				transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.resetBounds( d );
 			}
