@@ -193,11 +193,6 @@ public class ImagePlusToSpimDataBvv {
 		SpimDataMinimal spimData = new SpimDataMinimal(basePath, seq,
 				new ViewRegistrations(registrations));
 		
-		//check if it is LLS data
-		if(imp.getTitle().contains( "LLS" ))
-		{
-			SpimDataLoader.askAndDeskew(spimData);
-		}
 		return spimData;
 	}
 	
