@@ -259,7 +259,9 @@ public class TransformSetups
 	 * in the "common" configuration, i.e. XY plane tilted with respect to Z.
 	 * It adds translation, so the provided centers remain the same.
 	 * Does not perform rotation.
-	 * The angle is in radians. **/
+	 * @param angle deskew angle in radians
+	 * @param centers center coordinates of deskewed volume 
+	 * @return deskew transform **/
 	public static AffineTransform3D makeDeskewTransform(final double angle, final double [] centers)
 	{
 		AffineTransform3D afDataTransform = new AffineTransform3D();

@@ -87,10 +87,13 @@ public class Misc
 		return interval;
 	}
 	
-	/** depending on nAxis value, extracts Euler angle (rotation around nAxis)
-	 * value (in radians) from the quaternion q.
-	 * Follows the formula/code from wiki 
-	 * https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles **/
+	/** Depending on provided axes index, extracts Euler rotation angle
+	 * from the quaternion. Follows the formula/code from wikipedia.
+	 * @param nAxis axis index numbered from zero
+	 * @param q quaternion
+	 * @return rotation angle in radians 
+	 * @see <a href="https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles">correspodning wikipedia page</a> 
+	 * **/
 	public static double quaternionToAngle(int nAxis, double [] q)
 	{
 		double sin;
@@ -112,75 +115,6 @@ public class Misc
 		default:
 			return 0.0;
 		}
-	}
-	
-	/** https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/ **/
-	public static double quaternionToAngleSecond(int nAxis, double [] q)
-	{
-	    		//heading Y axis 
-				//attitude Z axis
-				//bank X asis
-			double test = q[1]*q[2] + q[3]*q[0];
-			// singularity at north pole
-			if (test > 0.4999) 
-			{ 
-				switch (nAxis)
-				{
-				case 0:
-					return 0.0;
-				case 1:
-					return 2.0 * Math.atan2(q[1],q[0]);
-				case 2:
-					return Math.PI/2;
-				default:
-					return 0.0;
-				}
-			}
-			// singularity at south pole
-			if (test < -0.4999) 
-			{ 
-				switch (nAxis)
-				{
-				case 0:
-					return 0.0;
-				case 1:
-					return -2.0 * Math.atan2(q[1],q[0]);
-				case 2:
-					return - Math.PI/2;
-				default:
-					return 0.0;
-				}
-
-			}
-//			double [] sq = new double[3];
-//			for(int d=0;d<3;d++)
-//			{
-//				sq[d] = q[d+1]*q[d+1];
-//			}
-			switch (nAxis)
-			{
-			case 0:
-				return Math.atan2(2.0*q[1]*q[0]-2.0*q[2]*q[3] , 1.0 );//- 2.0*sq[1] - 2.0*sq[3]);
-			case 1:
-				return Math.atan2(2.0*q[2]*q[0]-2.0*q[1]*q[3] , 1.0 );//- 2.0*sq[2] - 2.0*sq[3]);
-			case 2:
-				return Math.asin(2.0*test);
-			default:
-				return 0.0;
-			}	
-
-	}
-	
-	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/
-	public static double[]  quaternionToEulerAnglesSecond(double [] q)
-	{
-		final double [] eAngles = new double[3];
-		
-		for (int d=0;d<3;d++)
-		{
-			eAngles[d] = quaternionToAngleSecond(d,q);
-		}
-		return eAngles;
 	}
 	
 	/** converts the quaternion rotation to a Euler angles (with ambiguity!) **/
@@ -221,9 +155,9 @@ public class Misc
 
 		final double [] center = new double[3];
 		
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
-			center[d] = 0.5*(interval.realMax( d ) + interval.realMin( d ));
+			center[d] = 0.5 * (interval.realMax( d ) + interval.realMin( d ));
 		}
 		
 		return center;
@@ -238,9 +172,9 @@ public class Misc
 			return true;
 		if(af1 == null || af2 == null)
 			return false;
-		for(int i=0; i<3; i++)
+		for(int i = 0; i < 3; i++)
 		{
-			for(int j=0; j<4; j++)
+			for(int j = 0; j < 4; j++)
 			{
 				bOut &= Double.compare( af1.get( i, j ), af2.get( i, j ) ) == 0 ;
 			}
@@ -280,12 +214,12 @@ public class Misc
 		final double[] q = new double[4];
 
 		final double[] dAxis = new double[3];
-		dAxis[0] = 1.0;
+		dAxis[ 0 ] = 1.0;
 		LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[0], qRotation );
-		for (int d=1;d<3;d++)
+		for (int d = 1; d < 3; d++)
 		{
-			dAxis[d-1] = 0.0;
-			dAxis[d] = 1.0;
+			dAxis[ d - 1 ] = 0.0;
+			dAxis[ d ] = 1.0;
 			LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[d], q);
 			LinAlgHelpers.quaternionMultiply( q, qRotation, qRotation );
 			LinAlgHelpers.normalize( qRotation );
@@ -293,78 +227,6 @@ public class Misc
 		LinAlgHelpers.normalize( qRotation );
 		
 		return qRotation;
-	}
-	
-	/** produces gimbal lock **/
-	public static AffineTransform3D getRotationTransformQuaternion(final double [] eAngles)
-	{
-		final double[] qRotation = new double[4];
-		final double[] q = new double[4];
-
-		final double[] dAxis = new double[3];
-		dAxis[0] = 1.0;
-		LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[0], qRotation );
-		for (int d=1;d<3;d++)
-		{
-			dAxis[d-1] = 0.0;
-			dAxis[d] = 1.0;
-			LinAlgHelpers.quaternionFromAngleAxis( dAxis, eAngles[d], q);
-			LinAlgHelpers.quaternionMultiply( q, qRotation, qRotation );
-		}
-		
-		final double [][] rotMatrix = new double [3][4];  
-		LinAlgHelpers.quaternionToR( qRotation, rotMatrix );
-		final AffineTransform3D clipRot = new AffineTransform3D();
-		
-		clipRot.set( rotMatrix );
-		return clipRot;
-	}
-	
-	/** produces gimbal lock **/
-	public static AffineTransform3D getRotationTransformMatrix(final double [] eAngles)
-	{
-		
-		final double [] cos = new double[3];
-		final double [] sin = new double[3];
-		
-		for(int d=0;d<3;d++)
-		{
-			cos[d] = Math.cos( eAngles[d] );
-			sin[d] = Math.sin( eAngles[d] );
-		}
-		
-		final double [][] rotMatrix = new double [3][4];  
-
-		rotMatrix[0][0] = cos[1]*cos[2];
-		rotMatrix[1][0] = cos[1]*sin[2];
-		rotMatrix[2][0] = (-1)*sin[1];
-		
-		rotMatrix[0][1] = sin[0]*sin[1]*cos[2] - cos[0]*sin[2];
-		rotMatrix[1][1] = sin[0]*sin[1]*sin[2] + cos[0]*cos[2];
-		rotMatrix[2][1] = sin[0]*cos[1];
-		
-		rotMatrix[0][2] = cos[0]*sin[1]*cos[2] + sin[0]*sin[2];
-		rotMatrix[1][2] = cos[0]*sin[1]*sin[2] - sin[0]*cos[2];
-		rotMatrix[2][2] = cos[0]*cos[1];
-		
-		final AffineTransform3D clipRot = new AffineTransform3D();
-		
-		clipRot.set( rotMatrix );
-		return clipRot;
-	}
-	
-	/** gives gimbal lock **/
-	public static AffineTransform3D getRotationTransform(final double [] eAngles)
-	{
-			
-		final AffineTransform3D trRot = new AffineTransform3D();
-		
-		for(int d=0;d<3;d++)
-		{
-			trRot.rotate( d, eAngles[d]);
-		}
-
-		return trRot;
 	}
 	
 	public static boolean checkInterval(RealInterval interval)
@@ -397,6 +259,7 @@ public class Misc
 		}
 		return true;
 	}
+	
 	/** function analyzes a text file with at least 2 strings
 	 * and returns the number of new line characters used in the file **/
 	public static int getBytesPerNewLine(final File inFile) throws FileNotFoundException, IOException
