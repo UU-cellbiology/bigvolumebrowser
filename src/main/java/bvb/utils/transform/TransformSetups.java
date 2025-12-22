@@ -259,10 +259,9 @@ public class TransformSetups
 	
 	/** function generates new deskew transform (shear/z-scaling + translation) 
 	 * in the "common" configuration, i.e. XY plane tilted with respect to Z.
-	 * It adds translation, so the provided centers remain the same.
+	 * It adds translation, so the origin (zeros) remains the same.
 	 * Does not perform rotation.
 	 * @param angle deskew angle in radians
-	 * @param centers center coordinates of deskewed volume 
 	 * @return deskew transform **/
 	public static AffineTransform3D makeDeskewTransform(final double angle)
 	{
