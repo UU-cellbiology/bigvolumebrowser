@@ -28,29 +28,18 @@
  */
 package bvb.io;
 
-
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.List;
-
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.realtransform.AffineTransform3D;
 
 import bvb.core.BVBSettings;
-import bvb.gui.NumberField;
+
 import ch.epfl.biop.bdv.img.OpenersToSpimData;
 import ch.epfl.biop.bdv.img.opener.OpenerSettings;
 import ij.IJ;
-import ij.Prefs;
 import ij.gui.GenericDialog;
+
 import loci.common.DebugTools;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
@@ -62,13 +51,11 @@ import loci.formats.meta.MetadataRetrieve;
 import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
+
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.generic.AbstractSpimData;
-import mpicbg.spim.data.registration.ViewRegistration;
-import mpicbg.spim.data.registration.ViewTransformAffine;
-import mpicbg.spim.data.sequence.SequenceDescription;
 
 public class SpimDataLoader
 {
@@ -84,15 +71,7 @@ public class SpimDataLoader
 			exc.printStackTrace();
 			spimData = null;
 		}
-		//LLS could be in the filename
-		final File f = new File(xmlFileName);
-		
-		String justFileName = f.getName();
-		//could it be LLS?		
-		if(justFileName.contains( "LLS" ))
-		{
-			askAndDeskew(spimData);
-		}
+
 		return spimData;
 	}
 
@@ -198,7 +177,7 @@ public class SpimDataLoader
 		
 		SpimData spimData = null;
 
-		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8)
+		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8 || seriesBitDepth[nOpenSeries] == FormatTools.FLOAT)
 		{
 			OpenerSettings settings = OpenerSettings.BioFormats()
 					.location(new File(imageFileName))
@@ -210,109 +189,12 @@ public class SpimDataLoader
 		}
 		else
 		{
-			 IJ.error( "Sorry, only 8- and 16-bit BioFormats images are supported.");
+			 IJ.error( "Sorry, only 8-, 16- and 32-bit BioFormats images are supported.");
 			 return null;
-		}
-
-
-		final SequenceDescription seq = spimData.getSequenceDescription();
-
-		boolean bSuspectLLS = false;
-		
-		//see if data comes from LLS7
-		String sTestLLS = seq.getViewDescription(0, 0).getViewSetup().getName();
-		if(sTestLLS.length() > 3)
-		{
-			if(sTestLLS.contains("LLS") && imageFileName.endsWith(".czi"))
-			{
-				bSuspectLLS = true;
-			}
-		}
-		//LLS could be in the filename
-		final File f = new File(imageFileName);
-		
-		String justFileName = f.getName();
-		
-		if(justFileName.contains( "LLS" ))
-		{
-			bSuspectLLS = true;
-		}
-		//yeah, it could be LLS
-		if(bSuspectLLS)
-		{
-			askAndDeskew(spimData);
 		}
 		
 		return spimData;
 		
 	}
-	
-	public static void askAndDeskew(final AbstractSpimData<?> spimData)
-	{
-		
-		JPanel pDeskew = new JPanel(new GridBagLayout());
-		
-		GridBagConstraints gbc = new GridBagConstraints();
-		
-		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-		symbols.setDecimalSeparator('.');
-		final DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
-		
-		NumberField nfDeskewAngle = new NumberField(5);
-		nfDeskewAngle.setText( df3.format( BVBSettings.dLLSAngle ) );
 
-		JLabel jText = new JLabel("<html>It could be that the input is (lattice) light sheet data.<br>"
-				+ "Do you want to deskew it?<br>"
-				+ "If it is already deskewed, just click No.</html>");
-		
-		gbc.gridx = 0;
-		gbc.gridy = 0;	
-		gbc.gridwidth = 2;
-		pDeskew.add( jText, gbc );
-		gbc.gridx = 0;
-		gbc.gridy ++;	
-		gbc.gridwidth = 1;
-		pDeskew.add( new JLabel("Deskew angle (degrees):"), gbc );
-		gbc.gridx ++;
-		pDeskew.add( nfDeskewAngle, gbc );
-		
-		
-		if (JOptionPane.showConfirmDialog(null, pDeskew, "Loading option",
-		        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) 
-		{
-			double dAngle = Double.parseDouble( nfDeskewAngle.getText());
-			BVBSettings.dLLSAngle = dAngle;
-			Prefs.set("BVB.dLLSAngle",BVBSettings.dLLSAngle);
-			AffineTransform3D deskewTR = makeLLS7Transform(BVBSettings.dLLSAngle * Math.PI / 180.0);
-			ViewTransformAffine vtLLS = new ViewTransformAffine("LLS", deskewTR );
-			List< ViewRegistration > listVR = spimData.getViewRegistrations().getViewRegistrationsOrdered();
-			for (final ViewRegistration viewRegistration : listVR )
-			{
-				viewRegistration.preconcatenateTransform( vtLLS );
-			}
-		} 
-	}
-	
-	/** function generates new LLS7 transform (rotation/shear/z-scaling **/
-	public static AffineTransform3D makeLLS7Transform(double angle)
-	{
-		AffineTransform3D afDataTransform = new AffineTransform3D();
-		AffineTransform3D tShear = new AffineTransform3D();
-		AffineTransform3D tRotate = new AffineTransform3D();
-			
-		//rotate 
-		tRotate.rotate(0, (-1.0)*angle);
-		tRotate.rotate(1,(-1.0)* Math.PI);
-		//shearing transform
-		tShear.set(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0/Math.tan( angle ), 0.0, 0.0, 0.0, 1.0, 0.0);
-		//Z-step adjustment transform
-		afDataTransform.set(1.0, 0.0, 0.0, 0.0, 
-								0.0,1.0, 0.0, 0.0, 
-								0.0, 0.0,Math.sin( angle  ), 0.0);
-		
-		afDataTransform = tShear.concatenate(afDataTransform);
-		afDataTransform = tRotate.concatenate(afDataTransform);
-
-		return afDataTransform;
-	}
 }

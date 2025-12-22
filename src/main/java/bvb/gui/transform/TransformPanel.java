@@ -58,7 +58,9 @@ public class TransformPanel extends JPanel
 	
 	final TransformCenterPanel transformCentersPanel;
 	
-	final TransformRotationPanel transformRotationPanel;
+	final public TransformRotationPanel transformRotationPanel;
+	
+	final TransformDeskewPanel transformDeskewPanel;
 	
 	final JCheckBox cbTransformClip;
 	
@@ -90,6 +92,8 @@ public class TransformPanel extends JPanel
 		transformCentersPanel = new TransformCenterPanel(transformSetups);
 		
 		transformRotationPanel = new TransformRotationPanel(transformSetups);
+		
+		transformDeskewPanel = new TransformDeskewPanel(transformSetups);
 
 		
 		tabTrPane = new JTabbedPane(SwingConstants.TOP);
@@ -97,6 +101,7 @@ public class TransformPanel extends JPanel
 		tabTrPane.addTab( "Center", transformCentersPanel );
 		tabTrPane.addTab( "Rotate(L)", transformRotationPanel );
 		tabTrPane.addTab( "Scale", transformScalePanel );
+		tabTrPane.addTab( "Deskew", transformDeskewPanel );
 		
 		if(!transformSetups.bLocalCoordinates)
 		{
@@ -199,9 +204,9 @@ public class TransformPanel extends JPanel
 	    updateGUI();
 	    
 	    Color [] colors = new Color[3];
-	    colors[0] =  new Color(198,34,0);
-	    colors[1] =  new Color(67,154,0);
-	    colors[2] =  new Color(0,34,213);
+	    colors[0] =  new Color(198,  34,   0);
+	    colors[1] =  new Color( 67, 154,   0);
+	    colors[2] =  new Color(  0,  34, 213);
 
 	    this.setSliderColors( colors );
 	    
@@ -222,6 +227,7 @@ public class TransformPanel extends JPanel
 		transformScalePanel.updateGUI();
 		transformCentersPanel.updateGUI();
 		transformRotationPanel.updateGUI();
+		transformDeskewPanel.updateGUI();
 	}
 	
 	private void setPanelsEnabled(boolean bEnabled)
@@ -229,6 +235,7 @@ public class TransformPanel extends JPanel
 		transformScalePanel.setEnabled( bEnabled );
 		transformCentersPanel.setEnabled( bEnabled );
 		transformRotationPanel.setEnabled( bEnabled );
+		transformDeskewPanel.setEnabled(bEnabled);
 	}
 	
 	public void setupListeners()
@@ -258,6 +265,9 @@ public class TransformPanel extends JPanel
 		case 2:
 			transformScalePanel.resetScale();
 			break;
+		case 3:
+			transformDeskewPanel.resetDeskew();
+			break;
 		default:
 		}
 	}
@@ -269,23 +279,25 @@ public class TransformPanel extends JPanel
 		
 		final double [] unitScale = new double [3];
 		
-		for (int d=0; d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			unitScale [d] = 1.0;
 		}
 		
 		transformCentersPanel.resetCenters();
+		
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
 			final double [] prevAngles =  new double[3];
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
-				prevAngles[d] = eAngles [d];
+				prevAngles[d] = eAngles[d];
 			}
 			transformSetups.transformRotation.setAngles( obj,  new double [3] );
 			transformSetups.transformScale.setScale( obj, unitScale );
+			transformSetups.transformDeskew.setAngle( obj, 0.5 * Math.PI );
 			transformSetups.updateTransform( obj, prevAngles );
 		}
 		updateGUI();

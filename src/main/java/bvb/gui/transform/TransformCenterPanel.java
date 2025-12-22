@@ -179,7 +179,7 @@ public class TransformCenterPanel extends JPanel
 			synchronized ( TransformCenterPanel.this )
 			{
 				blockUpdates = true;
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 
 					centerPanels[d].setConsistent( isConsistent[d] );
@@ -305,9 +305,9 @@ public class TransformCenterPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			centerPanels[i].setEnabled( bEnabled );
+			centerPanels[ d ].setEnabled( bEnabled );
 		}
 	}
 	

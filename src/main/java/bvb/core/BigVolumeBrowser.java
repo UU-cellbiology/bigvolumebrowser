@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.imglib2.RandomAccessibleInterval;
@@ -241,6 +242,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			{
 				showNoise();
 			}
+			bvvFrame.getSplitPanel().setDividerLocation( 400 );
 		}
 	}
 	
@@ -701,6 +703,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		boolean focusStore = BVBSettings.bFocusOnSourcesOnLoad;
 		BVBSettings.bFocusOnSourcesOnLoad = false;
+		
+		final int dividerPos = bvvFrame.getSplitPanel().getDividerLocation();
 
 		//now restart	
 		closeBVV();
@@ -753,6 +757,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		//put back viewer transform
 		bvvViewer.state().setViewerTransform( viewTransform );
+		SwingUtilities.invokeLater(()->
+		{
+			bvvFrame.getSplitPanel().setDividerLocation( dividerPos );
+		});
 		
 		//notify listener that BVB finished restarting
 		for(Listener l : listeners)
