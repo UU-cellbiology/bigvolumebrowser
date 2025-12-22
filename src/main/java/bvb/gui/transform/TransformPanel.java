@@ -58,7 +58,7 @@ public class TransformPanel extends JPanel
 	
 	final TransformCenterPanel transformCentersPanel;
 	
-	final TransformRotationPanel transformRotationPanel;
+	final public TransformRotationPanel transformRotationPanel;
 	
 	final TransformDeskewPanel transformDeskewPanel;
 	
@@ -204,9 +204,9 @@ public class TransformPanel extends JPanel
 	    updateGUI();
 	    
 	    Color [] colors = new Color[3];
-	    colors[0] =  new Color(198,34,0);
-	    colors[1] =  new Color(67,154,0);
-	    colors[2] =  new Color(0,34,213);
+	    colors[0] =  new Color(198,  34,   0);
+	    colors[1] =  new Color( 67, 154,   0);
+	    colors[2] =  new Color(  0,  34, 213);
 
 	    this.setSliderColors( colors );
 	    
@@ -285,20 +285,20 @@ public class TransformPanel extends JPanel
 		}
 		
 		transformCentersPanel.resetCenters();
+		
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
 			final double [] prevAngles =  new double[3];
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			final double prevDeskew = transformSetups.transformDeskew.getAngle( obj );
 			for(int d = 0; d < 3; d++)
 			{
 				prevAngles[d] = eAngles[d];
 			}
 			transformSetups.transformRotation.setAngles( obj,  new double [3] );
 			transformSetups.transformScale.setScale( obj, unitScale );
-			transformSetups.transformDeskew.setAngle( obj, Math.PI*0.5 );
-			transformSetups.updateTransform( obj, prevAngles, prevDeskew );
+			transformSetups.transformDeskew.setAngle( obj, 0.5 * Math.PI );
+			transformSetups.updateTransform( obj, prevAngles );
 		}
 		updateGUI();
 	}

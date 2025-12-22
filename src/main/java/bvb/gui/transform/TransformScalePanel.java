@@ -102,11 +102,11 @@ public class TransformScalePanel extends JPanel
 		final JLabel vxLabel = new JLabel("Voxel");
 		vxLabel.setToolTipText( "Final voxel size" );
 		this.add( vxLabel , gbc );
-		gbc.insets = new Insets(0,4,0,4);
+		gbc.insets = new Insets(0, 4, 0, 4);
 		gbc.gridy = 1;
 		gbc.gridx = 0;
 		
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			gbc.fill = GridBagConstraints.NONE;
 			gbc.gridx = 0;
@@ -152,7 +152,7 @@ public class TransformScalePanel extends JPanel
 		boolean bFirstCS = true;
 		boolean [] allScalesEqual = new boolean [3];
 		boolean [] allVoxelsEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			allScalesEqual[d] = true;
 			allVoxelsEqual[d] = true;
@@ -181,7 +181,7 @@ public class TransformScalePanel extends JPanel
 					bOnlyShapes = false;
 				}
 
-				for (int d=0; d<3; d++)
+				for (int d = 0; d < 3; d++)
 				{
 					allScalesEqual[d] &= (Double.compare( scales[d], currScales[d] )==0);
 					if(obj instanceof ConverterSetup)
@@ -201,7 +201,7 @@ public class TransformScalePanel extends JPanel
 			synchronized ( TransformScalePanel.this )
 			{
 				blockUpdates = true;
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 					spinners[d].setValue( finalScales[d]);
 					
@@ -248,13 +248,13 @@ public class TransformScalePanel extends JPanel
 		{
 			final double [] oldScale = transformSetups.transformScale.getScale( obj);
 			final double [] newScale = new double [3];
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
 				newScale[d] = oldScale[d];
 			}
 			newScale[nAxis] = currVal;
 			transformSetups.transformScale.setScale( obj, newScale );
-			transformSetups.updateTransform( obj, null, Double.NaN );
+			transformSetups.updateTransform( obj, null );
 			//let's update center bounds
 			transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.resetBounds( nAxis );
 		}
@@ -269,7 +269,7 @@ public class TransformScalePanel extends JPanel
 		src.getSourceTransform( transformSetups.bvb.bvvViewer.state().getCurrentTimepoint(), 0, viewTr);
 
 		final double [] finScales = new double[3];
-		for(int d=0; d<3; d++)
+		for(int d = 0; d < 3; d++)
 		{
 			finScales[d] = Affine3DHelpers.extractScale( viewTr, d );
 		}
@@ -285,7 +285,7 @@ public class TransformScalePanel extends JPanel
 		
 		final double [] unitScale = new double [3];
 		
-		for (int d=0; d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			unitScale [d] = 1.0;
 		}
@@ -293,7 +293,7 @@ public class TransformScalePanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			transformSetups.transformScale.setScale( obj, unitScale );
-			transformSetups.updateTransform( obj, null, Double.NaN );
+			transformSetups.updateTransform( obj, null );
 			for(int d = 0; d < 3; d++)
 			{
 				transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.resetBounds( d );
@@ -306,7 +306,7 @@ public class TransformScalePanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i=0;i<3;i++)
+		for(int i = 0; i < 3; i++)
 		{
 			spinners[i].setEnabled( bEnabled );
 		}

@@ -242,7 +242,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			{
 				showNoise();
 			}
-			bvvFrame.getSplitPanel().setDividerLocation( 425 );
+			bvvFrame.getSplitPanel().setDividerLocation( 400 );
 		}
 	}
 	

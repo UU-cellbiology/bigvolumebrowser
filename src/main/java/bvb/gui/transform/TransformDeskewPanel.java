@@ -99,14 +99,11 @@ public class TransformDeskewPanel extends JPanel
 		
 		blockUpdates = true;
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		final double angle = trDeskewPanel.getValue().getCurrentValue()*Math.PI/180.;
+		final double angle = trDeskewPanel.getValue().getCurrentValue() * Math.PI / 180.;
 		for ( final Object obj: objList)
 		{	
-			final double prevAngle = transformSetups.transformDeskew.getAngle( obj );
-			
 			transformSetups.transformDeskew.setAngle( obj, angle);
-						
-			transformSetups.updateTransform( obj, null, prevAngle );
+			transformSetups.updateTransform( obj, null );
 
 		}
 		blockUpdates = false;
@@ -124,9 +121,8 @@ public class TransformDeskewPanel extends JPanel
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
 		for ( final Object obj: objList)
 		{
-			final double prevAngle =  transformSetups.transformDeskew.getAngle( obj );
-			transformSetups.transformDeskew.setAngle( obj, Math.PI * 0.5 );
-			transformSetups.updateTransform( obj, null, prevAngle );		
+			transformSetups.transformDeskew.setAngle( obj, 0.5 * Math.PI );
+			transformSetups.updateTransform( obj, null );		
 		}
 		blockUpdates = false;
 		updateGUI();

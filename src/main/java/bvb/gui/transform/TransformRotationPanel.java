@@ -76,7 +76,7 @@ public class TransformRotationPanel extends JPanel
 			gbc.gridy++;
 			trRotationPanels[d] = new BoundedValuePanelPG( new BoundedValueDouble( -dRange, dRange, 0.0 ));
 			trRotationPanels[d].setToolTipText( "Angle around " + sAxes[d] );
-			this.add(trRotationPanels[d],gbc);
+			this.add(trRotationPanels[d], gbc);
 		}
 		
 		trRotationPanels[0].changeListeners().add( () -> updateAxisRotation(0));
@@ -95,9 +95,9 @@ public class TransformRotationPanel extends JPanel
 		double [] angles = new double[3];
 		boolean bFirstObj = true;
 		boolean [] allAnglesEqual = new boolean [3];
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
-			allAnglesEqual[d] = true;
+			allAnglesEqual[ d ] = true;
 		}
 		
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
@@ -112,7 +112,7 @@ public class TransformRotationPanel extends JPanel
 			{
 				final double[] currAngles = transformSetups.transformRotation.getAngles( obj );
 
-				for (int d=0; d<3; d++)
+				for (int d = 0; d < 3; d++)
 				{
 					allAnglesEqual[d] &= (Math.abs( angles[d]-currAngles[d] )<0.00001);
 				}
@@ -196,7 +196,7 @@ public class TransformRotationPanel extends JPanel
 				transformSetups.transformCenters.setCenters( obj, newCenters );	
 			}			
 			
-			transformSetups.updateTransform( obj, prevAngles, Double.NaN);
+			transformSetups.updateTransform( obj, prevAngles);
 
 		}
 		
@@ -224,10 +224,10 @@ public class TransformRotationPanel extends JPanel
 			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
 			for(int d = 0; d < 3; d++)
 			{
-				prevAngles[d] = eAngles [d];
+				prevAngles[ d ] = eAngles [ d ];
 			}
 			transformSetups.transformRotation.setAngles( obj,  new double [3] );
-			transformSetups.updateTransform( obj, prevAngles, Double.NaN );		
+			transformSetups.updateTransform( obj, prevAngles );		
 		}
 		blockUpdates = false;
 		updateGUI();
@@ -236,17 +236,17 @@ public class TransformRotationPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			trRotationPanels[i].setEnabled( bEnabled );
+			trRotationPanels[ d ].setEnabled( bEnabled );
 		}
 	}
 	
 	void setSliderColors(Color [] colors)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			trRotationPanels[i].setSliderForeground( colors[i] );	
+			trRotationPanels[ d ].setSliderForeground( colors[ d ] );	
 		}
 	}
 }

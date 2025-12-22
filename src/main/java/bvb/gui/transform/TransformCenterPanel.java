@@ -179,7 +179,7 @@ public class TransformCenterPanel extends JPanel
 			synchronized ( TransformCenterPanel.this )
 			{
 				blockUpdates = true;
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 
 					centerPanels[d].setConsistent( isConsistent[d] );
@@ -233,7 +233,7 @@ public class TransformCenterPanel extends JPanel
 			newCenters[nAxis] = currVal + defcenter[nAxis];
 			
 			transformSetups.transformCenters.setCenters( obj, newCenters );
-			transformSetups.updateTransform( obj, null, Double.NaN );
+			transformSetups.updateTransform( obj, null );
 		}
 		blockUpdates = false;
 		updateGUI();
@@ -294,7 +294,7 @@ public class TransformCenterPanel extends JPanel
 			
 			final double [] centers = Misc.getIntervalCenter( interval );
 			transformSetups.transformCenters.setCenters( obj, centers );
-			transformSetups.updateTransform( obj, null, Double.NaN );
+			transformSetups.updateTransform( obj, null );
 		}
 		
 		blockUpdates = false;
@@ -305,9 +305,9 @@ public class TransformCenterPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			centerPanels[i].setEnabled( bEnabled );
+			centerPanels[ d ].setEnabled( bEnabled );
 		}
 	}
 	
