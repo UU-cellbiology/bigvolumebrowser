@@ -46,12 +46,6 @@
             </roles>
         </developer>
     </developers>
-    
-	<contributors>
-		<contributor>
-			<name>TODO</name>
-		</contributor>
-	</contributors>	
 	
 	<mailingLists>
 		<mailingList>
@@ -63,7 +57,7 @@
     <scm>
         <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
         <developerConnection>scm:git:git@github.com:UU-cellbiology/bigvolumebrowser</developerConnection>
-        <tag>bigvolumebrowser-0.0.6</tag>
+        <tag>bigvolumebrowser-0.0.7</tag>
         <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
