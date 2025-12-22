@@ -158,9 +158,13 @@ public class TransformSetups
 		final AffineTransform3D scaleTr = new AffineTransform3D();
 		scaleTr.scale( dCurrScale[0], dCurrScale [1], dCurrScale[2] );
 		newTransform.preConcatenate( scaleTr );
-
-		//deskew rotate
+		
+		//deskew shear/scale/translate
 		final double angleDeskew = transformDeskew.getAngle( obj );
+		final AffineTransform3D deskewTr = makeDeskewTransform(angleDeskew) ;
+		newTransform.preConcatenate( deskewTr );
+		//deskew rotate
+
 		final  AffineTransform3D deskewRot = new AffineTransform3D();
 		deskewRot.rotate( 0, 0.5 * Math.PI -  angleDeskew);
 		newTransform.preConcatenate( deskewRot );
@@ -174,9 +178,7 @@ public class TransformSetups
 		translTr.translate( tr );
 		newTransform.preConcatenate( translTr );
 			
-		//deskew shear/scale/translate
-		final AffineTransform3D deskewTr = makeDeskewTransform(angleDeskew, tr) ;
-		newTransform.concatenate( deskewTr );
+
 		
 		if(obj instanceof ConverterSetup)
 		{
@@ -262,7 +264,7 @@ public class TransformSetups
 	 * @param angle deskew angle in radians
 	 * @param centers center coordinates of deskewed volume 
 	 * @return deskew transform **/
-	public static AffineTransform3D makeDeskewTransform(final double angle, final double [] centers)
+	public static AffineTransform3D makeDeskewTransform(final double angle)
 	{
 		AffineTransform3D afDataTransform = new AffineTransform3D();
 		AffineTransform3D tShear = new AffineTransform3D();
@@ -279,11 +281,11 @@ public class TransformSetups
 		//check how the centers will change
 		final double [] centerDeskewNew = new double[3];
 		
-		afDataTransform.apply( centers, centerDeskewNew );
+		afDataTransform.apply( new double [] {0., 0., 0.}, centerDeskewNew );
 		
 		for (int d = 0; d < 3; d++)
 		{
-			centerDeskewNew[d] = centers[d] - centerDeskewNew[d];
+			centerDeskewNew[d] *= -1;
 		}
 		
 		afDataTransform.translate( centerDeskewNew );
