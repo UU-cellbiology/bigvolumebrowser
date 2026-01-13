@@ -1,4 +1,6 @@
-[![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml)  
+[![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml) 
+[![Maven Scijava Version](https://img.shields.io/github/v/tag/UU-cellbiology/bigvolumebrowser?label=Version-[Maven%20Scijava])](https://maven.scijava.org/#browse/browse:releases:nl%2Fuu%2Fscience%2Fcellbiology%2Fbigvolumebrowser)
+
 
 <picture>
 	<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/UU-cellbiology/bigvolumebrowser/main/logo/bvb_logo_dark_200.png">
