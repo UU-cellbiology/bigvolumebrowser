@@ -259,10 +259,16 @@ public class VisMesh extends AbstractClipTransformVis
 		{
 			tempMesh = mesh;
 		}
+		else if(nVal == 1)
+		{
+			//tempMesh = RemoveMeshDuplicateVertices.calculate( mesh, 1 );
+			tempMesh = OldRemoveDuplicateVertices.calculate( mesh, 1 );
+
+		}
 		else
 		{
-			tempMesh = RemoveMeshDuplicateVertices.calculate( mesh, 1 );
-			//tempMesh = Meshes.removeDuplicateVertices( tempMesh, 3 );
+			//tempMesh = RemoveMeshDuplicateVertices.calculate( mesh, 1 );
+			tempMesh = Meshes.removeDuplicateVertices( mesh, 1 );
 
 		}
 		if( tempMesh.vertices().size() == 0)
@@ -275,9 +281,15 @@ public class VisMesh extends AbstractClipTransformVis
 		System.out.println("after tri " + tempMesh.triangles().size()*3);
 
 		this.mesh = new BufferMesh( tempMesh.vertices().size(), tempMesh.triangles().size(), true );
-
-		calculateSmoothNormalsArea(tempMesh, this.mesh );
-//		Meshes.calculateNormals( tempMesh, this.mesh );
+		if(nVal < 3)
+		{
+			OldRemoveDuplicateVertices.oldCalculateNormals( tempMesh, this.mesh );
+		}
+		else
+		{
+		//calculateSmoothNormalsArea(tempMesh, this.mesh );
+			Meshes.calculateNormals( tempMesh, this.mesh );
+		}
 		nVal++;
 
 		
