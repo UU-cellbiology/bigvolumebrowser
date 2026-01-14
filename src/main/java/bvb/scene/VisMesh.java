@@ -45,7 +45,8 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
-
+import java.util.HashMap;
+import java.util.Map;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -68,6 +69,8 @@ import bvvpg.core.util.MatrixMath;
 
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Triangle;
+import net.imglib2.mesh.Vertex;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
@@ -123,6 +126,8 @@ public class VisMesh extends AbstractClipTransformVis
 	boolean bHasTexture = false;
 	
 	boolean bUseTexture = false;  
+	
+	static int nVal = 0;
 	
 	public VisMesh()
 	{
@@ -247,26 +252,319 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	public void setMesh(final Mesh mesh)
 	{
-		
-		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-		
-		if( mesh.vertices().size() == 0)
+		System.out.println("before vert " + mesh.vertices().size());
+		System.out.println("before tri " + mesh.triangles().size()*3);
+		Mesh tempMesh = null;
+		if(nVal == 0)
+		{
+			tempMesh = mesh;
+		}
+		else
+		{
+			tempMesh = RemoveMeshDuplicateVertices.calculate( mesh, 1 );
+			//tempMesh = Meshes.removeDuplicateVertices( tempMesh, 3 );
+
+		}
+		if( tempMesh.vertices().size() == 0)
 		{
 			System.err.println("Error loading mesh, zero vertices!");
 			return;
 		}
-		//see if normals were setup already
-		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ),mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
 		
-		if(Double.compare(  LinAlgHelpers.length( test_norm ),0.0) != 0)
-		{
-			Meshes.copy( mesh, this.mesh );
-		}
-		else
-		{
-			Meshes.calculateNormals( mesh, this.mesh );
-		}
+		System.out.println("after vert " + tempMesh.vertices().size());
+		System.out.println("after tri " + tempMesh.triangles().size()*3);
+
+		this.mesh = new BufferMesh( tempMesh.vertices().size(), tempMesh.triangles().size(), true );
+
+		calculateSmoothNormalsArea(tempMesh, this.mesh );
+//		Meshes.calculateNormals( tempMesh, this.mesh );
+		nVal++;
+
+		
+//		//see if normals were setup already
+//		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ),mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
+//		
+//		if(Double.compare(  LinAlgHelpers.length( test_norm ),0.0) != 0)
+//		{
+//			Meshes.copy( mesh, this.mesh );
+//		}
+//		else
+//		{
+//			Meshes.calculateNormals( mesh, this.mesh );
+//		}
 	}	
+	
+	public static void calculateSmoothNormalsAngle( final net.imglib2.mesh.Mesh src, final net.imglib2.mesh.Mesh dest )
+	{
+		
+		//make normals storage and fill with zeros
+		final HashMap< Long, float[] > vNormals = new HashMap<>();
+		
+		final HashMap< Long, float[] > triNormals = new HashMap<>();
+		for ( final Triangle tri : src.triangles() )
+		{
+			for ( final long idx : new long[] { tri.vertex0(), tri.vertex1(), tri.vertex2() } )
+			{
+
+				vNormals.put( idx, new float[] { 0, 0, 0 } );
+			}
+		}
+
+		// Compute the triangle normals.
+		for ( final Triangle tri : src.triangles() )
+		{
+			final int [] vInd = new int [3];
+			vInd[0] = ( int ) tri.vertex0();
+			vInd[1] = ( int ) tri.vertex1();
+			vInd[2] = ( int ) tri.vertex2();
+
+			final float [][] p = new float[3][3];
+			
+			for(int d = 0; d < 3; d++)
+			{
+				p[d][0] = src.vertices().xf( vInd[d] );
+				p[d][1] = src.vertices().yf( vInd[d] );
+				p[d][2] = src.vertices().zf( vInd[d] );
+			}
+			
+			final float [] e01 = new float[3];
+			for(int d = 0; d < 3; d++)
+			{
+				e01[d] = p[1][d] - p[0][d];
+			}
+
+			final float [] e02 = new float[3];
+			for(int d = 0; d < 3; d++)
+			{
+				e02[d] = p[2][d] - p[0][d];
+			}
+
+			final float [] e10 = new float[3];
+			for(int d = 0; d < 3; d++)
+			{
+				e10[d] = p[0][d] - p[1][d];
+			}
+			
+			final float [] e12 = new float[3];
+			for(int d = 0; d < 3; d++)
+			{
+				e12[d] = p[2][d] - p[1][d];
+			}
+			
+			final float [] e20 = new float[3];
+			for(int d = 0; d < 3; d++)
+			{
+				e20[d] = p[0][d] - p[2][d];
+			}
+			
+			final float [] e21 = new float[3];
+			for(int d = 0; d < 3; d++)
+			{
+				e21[d] = p[1][d] - p[2][d];
+			}
+
+			final float nx = e01[1] * e02[2] - e01[2] * e02[1];
+			final float ny = e01[2] * e02[0] - e01[0] * e02[2];
+			final float nz = e01[0] * e02[1] - e01[1] * e02[0];
+			
+			double [] a = new double [3];
+	        a[0] = angleBetween(e01[0], e01[1], e01[2], e02[0], e02[1], e02[2]);
+	        a[1] = angleBetween(e10[0], e10[1], e10[2], e12[0], e12[1], e12[2]);
+	        a[2] = angleBetween(e20[0], e20[1], e20[2], e21[0], e21[1], e21[2]);
+			
+	        int nCount = 0;
+			for ( final long idx : new long[] { tri.vertex0(), tri.vertex1(), tri.vertex2() } )
+			{
+				float[] n = vNormals.get( idx );
+				n[0] += nx * a[nCount];
+				n[1] += ny * a[nCount];
+				n[2] += nz * a[nCount];
+//				n[0] = nx;// * a[nCount];
+//				n[1] = ny;//* a[nCount];
+//				n[2] = nz; //* a[nCount];
+
+				nCount ++;
+			}
+			final float nmag = ( float ) Math.sqrt( Math.pow( nx, 2 ) + Math.pow( ny, 2 ) + Math.pow( nz, 2 ) );
+
+			triNormals.put( tri.index(), new float[] { nx / nmag, ny / nmag, nz / nmag } );
+
+		}
+		
+		// Now populate dest
+		final Map< Long, Long > vIndexMap = new HashMap<>();
+		float[] vNormal;
+		double vNormalMag;
+		// Copy the vertices, keeping track when indices change.
+		for ( final Vertex v : src.vertices() )
+		{
+			final long srcIndex = v.index();
+			vNormal = vNormals.get( v.index() );
+			vNormalMag = Math.sqrt( Math.pow( vNormal[ 0 ], 2 ) + Math.pow( vNormal[ 1 ], 2 ) + Math.pow( vNormal[ 2 ], 2 ) );
+			if(vNormalMag <= 0.0)
+			{
+				System.out.println("fdfdfdf");
+			}
+			final long destIndex = dest.vertices().add( //
+					v.x(), v.y(), v.z(), //
+					vNormal[ 0 ] / vNormalMag, vNormal[ 1 ] / vNormalMag, vNormal[ 2 ] / vNormalMag, //
+					v.u(), v.v() );
+			if ( srcIndex != destIndex )
+			{
+				/*
+				 * NB: If the destination vertex index matches the source, we
+				 * skip recording the entry, to save space in the map. Later, we
+				 * leave indexes unchanged which are absent from the map.
+				 * 
+				 * This scenario is actually quite common, because vertices are
+				 * often numbered in natural order, with the first vertex having
+				 * index 0, the second having index 1, etc., although it is not
+				 * guaranteed.
+				 */
+				vIndexMap.put( srcIndex, destIndex );
+			}
+		}
+		float[] triNormal;
+		// Copy the triangles, taking care to use destination indices.
+		for ( final Triangle tri : src.triangles() )
+		{
+			final long v0src = tri.vertex0();
+			final long v1src = tri.vertex1();
+			final long v2src = tri.vertex2();
+			final long v0 = vIndexMap.getOrDefault( v0src, v0src );
+			final long v1 = vIndexMap.getOrDefault( v1src, v1src );
+			final long v2 = vIndexMap.getOrDefault( v2src, v2src );
+			triNormal = triNormals.get( tri.index() );
+			dest.triangles().add( v0, v1, v2, triNormal[ 0 ], triNormal[ 1 ], triNormal[ 2 ] );
+		}
+	}
+	
+	
+	
+	public static void calculateSmoothNormalsArea( final net.imglib2.mesh.Mesh src, final net.imglib2.mesh.Mesh dest )
+	{
+		
+		//make normals storage and fill with zeros
+		final HashMap< Long, float[] > vNormals = new HashMap<>();
+		final HashMap< Long, float[] > triNormals = new HashMap<>();
+		for ( final Triangle tri : src.triangles() )
+		{
+			for ( final long idx : new long[] { tri.vertex0(), tri.vertex1(), tri.vertex2() } )
+			{
+
+				vNormals.put( idx, new float[] { 0, 0, 0 } );
+			}
+		}
+
+		// Compute the triangle normals.
+		for ( final Triangle tri : src.triangles() )
+		{
+			final int v0 = ( int ) tri.vertex0();
+			final int v1 = ( int ) tri.vertex1();
+			final int v2 = ( int ) tri.vertex2();
+
+			final float v0x = src.vertices().xf( v0 );
+			final float v0y = src.vertices().yf( v0 );
+			final float v0z = src.vertices().zf( v0 );
+			final float v1x = src.vertices().xf( v1 );
+			final float v1y = src.vertices().yf( v1 );
+			final float v1z = src.vertices().zf( v1 );
+			final float v2x = src.vertices().xf( v2 );
+			final float v2y = src.vertices().yf( v2 );
+			final float v2z = src.vertices().zf( v2 );
+
+
+			final float v10x = v1x - v0x;
+			final float v10y = v1y - v0y;
+			final float v10z = v1z - v0z;
+
+			final float v20x = v2x - v0x;
+			final float v20y = v2y - v0y;
+			final float v20z = v2z - v0z;
+
+			final float nx = v10y * v20z - v10z * v20y;
+			final float ny = v10z * v20x - v10x * v20z;
+			final float nz = v10x * v20y - v10y * v20x;
+			
+//	        double a0 = angleBetween(e01x, e01y, e01z, e02x, e02y, e02z);
+//	        double a1 = angleBetween(e10x, e10y, e10z, e12x, e12y, e12z);
+//	        double a2 = angleBetween(e20x, e20y, e20z, e21x, e21y, e21z);
+			for ( final long idx : new long[] { tri.vertex0(), tri.vertex1(), tri.vertex2() } )
+			{
+				final float[] n = vNormals.get( idx );
+				n[0] += nx;
+				n[1] += ny;
+				n[2] += nz;
+			}
+			
+			final float nmag = ( float ) Math.sqrt( Math.pow( nx, 2 ) + Math.pow( ny, 2 ) + Math.pow( nz, 2 ) );
+
+			triNormals.put( tri.index(), new float[] { nx / nmag, ny / nmag, nz / nmag } );
+
+		}
+		
+		// Now populate dest
+		final Map< Long, Long > vIndexMap = new HashMap<>();
+		float[] vNormal;
+		double vNormalMag;
+		// Copy the vertices, keeping track when indices change.
+		for ( final Vertex v : src.vertices() )
+		{
+			final long srcIndex = v.index();
+			vNormal = vNormals.get( v.index() );
+			vNormalMag = Math.sqrt( Math.pow( vNormal[ 0 ], 2 ) + Math.pow( vNormal[ 1 ], 2 ) + Math.pow( vNormal[ 2 ], 2 ) );
+			final long destIndex = dest.vertices().add( //
+					v.x(), v.y(), v.z(), //
+					vNormal[ 0 ] / vNormalMag, vNormal[ 1 ] / vNormalMag, vNormal[ 2 ] / vNormalMag, //
+					v.u(), v.v() );
+			if(vNormalMag <= 0.0)
+			{
+				System.out.println("fdfdfdf");
+			}
+			if ( srcIndex != destIndex )
+			{
+				/*
+				 * NB: If the destination vertex index matches the source, we
+				 * skip recording the entry, to save space in the map. Later, we
+				 * leave indexes unchanged which are absent from the map.
+				 * 
+				 * This scenario is actually quite common, because vertices are
+				 * often numbered in natural order, with the first vertex having
+				 * index 0, the second having index 1, etc., although it is not
+				 * guaranteed.
+				 */
+				vIndexMap.put( srcIndex, destIndex );
+			}
+		}
+		float[] triNormal;
+		// Copy the triangles, taking care to use destination indices.
+		for ( final Triangle tri : src.triangles() )
+		{
+			final long v0src = tri.vertex0();
+			final long v1src = tri.vertex1();
+			final long v2src = tri.vertex2();
+			final long v0 = vIndexMap.getOrDefault( v0src, v0src );
+			final long v1 = vIndexMap.getOrDefault( v1src, v1src );
+			final long v2 = vIndexMap.getOrDefault( v2src, v2src );
+			triNormal = triNormals.get( tri.index() );
+			//dest.triangles().add( v0, v1, v2, triNormal[ 0 ], triNormal[ 1 ], triNormal[ 2 ] );
+			dest.triangles().add( v0, v1, v2,  0 , 1 , 0 );
+
+		}
+	}
+	
+	static double angleBetween(
+	        double ax, double ay, double az,
+	        double bx, double by, double bz)
+	{
+	    double dot = ax*bx + ay*by + az*bz;
+	    double la = Math.sqrt(ax*ax + ay*ay + az*az);
+	    double lb = Math.sqrt(bx*bx + by*by + bz*bz);
+	    double cos = dot / (la * lb);
+	    cos = Math.max(-1.0, Math.min(1.0, cos));
+	    return Math.acos(cos);
+	}
+
 	
 	/** upload MeshData to GPU **/
 	private boolean initMeshGPU( final GL3 gl )
@@ -427,7 +725,7 @@ public class VisMesh extends AbstractClipTransformVis
 			progMesh.getUniform1i("silType").set(silhouetteRender);
 			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
 			progMesh.getUniform1i("clipactive").set(0);
-			if(clipState !=0 && clipInt != null)
+			if(clipState != 0 && clipInt != null)
 			{
 				progMesh.getUniform1i("clipactive").set(clipState);
 				progMesh.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);

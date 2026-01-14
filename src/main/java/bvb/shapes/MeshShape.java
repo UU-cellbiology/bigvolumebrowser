@@ -36,6 +36,8 @@ import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Vertex;
+import net.imglib2.mesh.Vertices;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -101,7 +103,9 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 		{
 			try
 			{
-				return STLMeshIO.open( sFilename );
+				Mesh in = STLMeshIO.open( sFilename );
+				
+				return in;
 			}
 			catch ( IOException exc )
 			{
