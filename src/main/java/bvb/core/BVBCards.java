@@ -31,6 +31,7 @@ package bvb.core;
 import java.awt.Dimension;
 import java.awt.Insets;
 
+import bvb.animation.AnimationPanel;
 import bvb.gui.SelectedObjects;
 import bvb.gui.SourcesRenderPanel;
 import bvb.gui.ViewPanel;
@@ -62,6 +63,8 @@ public class BVBCards
 	
 	final public SourcesRenderPanel sourcesRenderPanel;
 	
+	final public AnimationPanel animationPanel;
+	
 	public ClipPanel clipPanel;
 	
 	public TransformPanel transformPanel;
@@ -85,6 +88,8 @@ public class BVBCards
 	    viewPanel = new ViewPanel(bvb);
 	    
 	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), bvb.selectedObjects);
+	    
+	    animationPanel =  new AnimationPanel(bvb);
 	    
 	    clipPanel = new ClipPanel(bvb);		
 	    
@@ -116,7 +121,8 @@ public class BVBCards
 	    bvb.bvvFrame.getCardPanel().addCard("Shapes render", panelShapesProperties, false, zeroInsets );	     
 	    bvb.bvvFrame.getCardPanel().addCard("View", viewPanel, false, zeroInsets );
 	    bvb.bvvFrame.getCardPanel().addCard("Clipping", clipPanel, false, zeroInsets );
-	    bvb.bvvFrame.getCardPanel().addCard("Transform", transformPanel, false, zeroInsets );		   
+	    bvb.bvvFrame.getCardPanel().addCard("Transform", transformPanel, false, zeroInsets );	
+	    bvb.bvvFrame.getCardPanel().addCard("Animation", animationPanel, false, zeroInsets );
 	    bvb.bvvFrame.getCardPanel().addCard("Add volumes", panelAddSources, true, zeroInsets );		   
 	    bvb.bvvFrame.getCardPanel().addCard("Add shapes", panelAddShapes, true, zeroInsets );		   		    
 	   

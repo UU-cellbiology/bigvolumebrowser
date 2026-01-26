@@ -140,6 +140,8 @@ public class BVBActions
 
 	void runSettingsCommand()
 	{
+		if( bvb.getInputLock() )
+			return;
 		JPanel pViewSettings = new JPanel(new GridBagLayout());
 		
 		GridBagConstraints gbcL = new GridBagConstraints();
@@ -380,7 +382,7 @@ public class BVBActions
 	{
 		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//solution for now, to not interfere with typing
-		if(!bvb.bLocked && !(c instanceof JTextField))
+		if(!bvb.getInputLock() && !(c instanceof JTextField))
 		{
 			//final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
 			final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleObjectsBoundindBox(bvb);
@@ -393,7 +395,7 @@ public class BVBActions
 	
 	public void actionToggleVisibility()
 	{
-		if(!bvb.selectedObjects.isAnythingSelected() )
+		if(!bvb.selectedObjects.isAnythingSelected() || bvb.getInputLock())
 			return;
 		
 		if(bvb.selectedObjects.areSourcesSelected())
@@ -487,10 +489,10 @@ public class BVBActions
 	{
 		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//solution for now, to not interfere with typing
-		if(!bvb.bLocked && !(c instanceof JTextField))
+		if(!bvb.getInputLock() && !(c instanceof JTextField))
 		{
-
 			final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+			
 			final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
 
 			boolean bShouldNotBeSelected = false;
@@ -557,7 +559,10 @@ public class BVBActions
 	
 	void actionToggleManualTransform()
 	{
-		bvb.bManualTransformMode =  !bvb.bManualTransformMode;
+		if( bvb.getInputLock() )
+			return;
+		bvb.bManualTransformMode = !bvb.bManualTransformMode;
+		
 		if(bvb.bManualTransformMode)
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );

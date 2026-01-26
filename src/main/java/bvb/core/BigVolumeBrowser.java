@@ -129,7 +129,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public final VolumeBBoxes clipBoxes;
 
 	/** flag to lock BVB while it is busy **/
-	public boolean bLocked;
+	boolean bInputLock;
 	
 	/** status of curretly selected groups + listener **/
 	public ShapeSelectionState shapeSelection;
@@ -226,7 +226,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		if(bvv == null)
 		{
-			bLocked = true;
+			setInputLock( true );
 			
 			initBVV();		
 			
@@ -235,7 +235,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			
 			bvbCards.installCards();
 			
-			bLocked = false;
+			setInputLock( false );
+
 			bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "No data loaded", 5000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
 
 			if(bShowBGShader)
@@ -292,6 +293,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	{
 		bvvViewer.stop();
 		bvvFrame.dispose();		
+	}
+	
+	public synchronized void setInputLock(boolean bLockMode)
+	{
+		bInputLock = bLockMode;
+	}
+	
+	public boolean getInputLock()
+	{
+		return bInputLock;
 	}
 	
 	public void repaintBVV()
