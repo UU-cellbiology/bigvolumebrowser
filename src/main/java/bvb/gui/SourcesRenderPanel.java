@@ -89,44 +89,43 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		
 		selectedSources = selectedSources_;
 		
-	
-		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "max_int.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "max_int.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
 		butRender[0] = new JToggleButton(tabIcon);
 		butRender[0].setToolTipText("Maximum intensity");
 		
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "volumetric.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "volumetric.png");
 		tabIcon = new ImageIcon(icon_path);
 		butRender[1] = new JToggleButton(tabIcon);
 		butRender[1].setToolTipText("Volumetric");
 		
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "surface.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "surface.png");
 		tabIcon = new ImageIcon(icon_path);
 		butRender[2] = new JToggleButton(tabIcon);
 		butRender[2].setToolTipText("Surface");
 
 		
-		icon_path = this.getClass().getResource("/icons/light_plain.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath +"light_plain.png");
 		tabIcon = new ImageIcon(icon_path);
 		butLight[0] = new JToggleButton(tabIcon);
 		butLight[0].setToolTipText("Plain");
 		
-		icon_path = this.getClass().getResource("/icons/light_shaded.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath +"light_shaded.png");
 		tabIcon = new ImageIcon(icon_path);
 		butLight[1] = new JToggleButton(tabIcon);
 		butLight[1].setToolTipText("Shaded");
 		
-		icon_path = this.getClass().getResource("/icons/light_shiny.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath +"light_shiny.png");
 		tabIcon = new ImageIcon(icon_path);
 		butLight[2] = new JToggleButton(tabIcon);
 		butLight[2].setToolTipText("Shiny");
 		
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "nearest.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "nearest.png");
 		tabIcon = new ImageIcon(icon_path);
 		butInter[0] = new JToggleButton(tabIcon);
 		butInter[0].setToolTipText("Nearest neighbor");
 		
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "linear.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "linear.png");
 		tabIcon = new ImageIcon(icon_path);
 		butInter[1] = new JToggleButton(tabIcon);
 		butInter[1].setToolTipText("Trilinear");

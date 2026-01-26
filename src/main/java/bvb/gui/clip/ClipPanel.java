@@ -156,9 +156,9 @@ public class ClipPanel extends JPanel
 	    //PROJECTION MATRIX
 	    coordToolTip[0] = "Global world coordinates";
 	    coordToolTip[1] = "Local volume coordinates";
-		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "frame_global.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "frame_global.png");
 		coordIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "frame_local.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "frame_local.png");
 		coordIcon[1] = new ImageIcon(icon_path);
 		
 		butCoordSystem = new JButton(coordIcon[clipSetups.bLocalCoordinates?1:0]);
@@ -215,7 +215,7 @@ public class ClipPanel extends JPanel
 		
 		gbc.weightx = 0.1;
 		//gbc.anchor = GridBagConstraints.EAST;
-		icon_path = this.getClass().getResource("/icons/red_cross.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetClipCurrent = new JButton(icon);
 		butResetClipCurrent.setToolTipText( "Reset current panel" );
@@ -223,7 +223,7 @@ public class ClipPanel extends JPanel
 		gbc.gridx ++;
 		this.add(butResetClipCurrent,gbc);	
 		
-		icon_path = this.getClass().getResource("/icons/red_crossx2.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_crossx2.png");
 		icon = new ImageIcon(icon_path);
 		butResetClipAll = new JButton(icon);
 		butResetClipAll.setToolTipText( "Reset all clip" );
@@ -277,7 +277,7 @@ public class ClipPanel extends JPanel
 			}
 			else
 			{
-				bClipConsistent &= (nClipState== objCl.getClipState());
+				bClipConsistent &= (nClipState == objCl.getClipState());
 			}
 		}
 		

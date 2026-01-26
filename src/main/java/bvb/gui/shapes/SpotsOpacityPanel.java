@@ -50,6 +50,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.util.BoundedRange;
 import bdv.util.BoundedValueDouble;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
@@ -149,7 +150,7 @@ public class SpotsOpacityPanel extends JPanel
 		cbInverted.addItemListener( (e)-> updateAlphaInversion());
 		
 				
-		URL icon_path = this.getClass().getResource("/icons/red_cross.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetToDefault = new JButton(icon);
 		butResetToDefault.setToolTipText( "Reset to default" );

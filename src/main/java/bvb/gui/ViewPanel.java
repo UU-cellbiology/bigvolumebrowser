@@ -76,7 +76,7 @@ public class ViewPanel extends JPanel
 		//this.setBorder(new PanelTitle(" View "));
 	    
 	    //BOX AROUND
-		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "boxvolume.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "boxvolume.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butVBox = new JToggleButton(tabIcon);
 	    //butVBox.setSelected(btdata.bVolumeBox);
@@ -102,9 +102,9 @@ public class ViewPanel extends JPanel
 	    //PROJECTION MATRIX
 	    projToolTip[0] = "Perspective";
 	    projToolTip[1] = "Orthographic";
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "proj_persp.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "proj_persp.png");
 		projIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "proj_ortho.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "proj_ortho.png");
 		projIcon[1] = new ImageIcon(icon_path);
 
 	    butProjType = new JButton( projIcon[ bvb.bvvViewer.getProjectionType() ] );
@@ -128,7 +128,7 @@ public class ViewPanel extends JPanel
 		});  
 	    
 		//SETTINGS
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "settings.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butSettings = new JButton(tabIcon);
 	    butSettings.setToolTipText("Settings");

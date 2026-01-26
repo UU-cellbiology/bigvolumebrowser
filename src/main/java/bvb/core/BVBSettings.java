@@ -84,6 +84,10 @@ public class BVBSettings
 	
 	public static boolean bWeightedOIT = Prefs.get( "BVB.bWeightedOIT", true );
 	
+	public static String sIconPath = "/bvb/icons/";
+	
+	public static String sShaderPath = "/bvb/scene/";
+	
 	public static String sUITheme = "";
 	
 	public static Color getInvertedColor(Color color_in)

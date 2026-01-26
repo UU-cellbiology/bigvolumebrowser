@@ -53,6 +53,7 @@ import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 
 import com.jogamp.opengl.GL;
@@ -131,12 +132,12 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisMesh.class, "/scene/scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisMesh.class, "/scene/scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 			
-		final Segment meshVp = new SegmentTemplate( VisMesh.class, "/scene/mesh.vp" ).instantiate();
-		final Segment meshFp = new SegmentTemplate( VisMesh.class, "/scene/mesh.fp" ).instantiate();
+		final Segment meshVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh.vp" ).instantiate();
+		final Segment meshFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh.fp" ).instantiate();
 		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	

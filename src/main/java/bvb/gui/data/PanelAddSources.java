@@ -66,7 +66,7 @@ public class PanelAddSources extends JPanel
 		//this.setBorder(new PanelTitle(" Add data "));
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
-		URL icon_path = this.getClass().getResource("/icons/bioformats.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "bioformats.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butBioFormats = new JButton(tabIcon);
 	    butBioFormats.setToolTipText("Load TIF/BioFormats");
@@ -81,7 +81,7 @@ public class PanelAddSources extends JPanel
 	    	
 	    } );
 
-		icon_path = this.getClass().getResource("/icons/fiji-logo.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "fiji-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butFIJI = new JButton(tabIcon);
 	    butFIJI.setToolTipText("Load Current Image");
@@ -96,7 +96,7 @@ public class PanelAddSources extends JPanel
 	    	
 	    } );
 	    
-		icon_path = this.getClass().getResource("/icons/bdv-logo.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "bdv-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butBDVXML = new JButton(tabIcon);
 	    butBDVXML.setToolTipText("Load BDV XML/HDF5");

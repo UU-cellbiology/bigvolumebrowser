@@ -49,6 +49,7 @@ import net.imglib2.type.numeric.ARGBType;
 
 import bdv.util.BoundedRange;
 import bdv.util.BoundedValueDouble;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
@@ -122,7 +123,7 @@ public class SpotsColorCodePanel extends JPanel
 		panelLUT.cbInverted.addItemListener( (e)-> updateLUTInversion());
 		
 		
-		URL icon_path = this.getClass().getResource("/icons/red_cross.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetToDefault = new JButton(icon);
 		butResetToDefault.setToolTipText( "Reset to default" );

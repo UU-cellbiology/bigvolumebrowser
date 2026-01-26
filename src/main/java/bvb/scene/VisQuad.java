@@ -34,6 +34,8 @@ import com.jogamp.opengl.GL3;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import bvb.core.BVBSettings;
+
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
@@ -65,21 +67,21 @@ public class VisQuad
 	}
 	private void initShader()
 	{
-		final Segment quadvp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg.vp" ).instantiate();
+		final Segment quadvp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg.vp" ).instantiate();
 		Segment quadfp = null;
 		switch(nBGShader)
 		{
 		case 2:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg2.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg2.fp" ).instantiate();
 			break;
 		case 3:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg3.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg3.fp" ).instantiate();
 			break;
 		case 4:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg4.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg4.fp" ).instantiate();
 			break;
 		default:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg1.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg1.fp" ).instantiate();
 		}
 		progQuad = new DefaultShader( quadvp.getCode(), quadfp.getCode() );
 	}

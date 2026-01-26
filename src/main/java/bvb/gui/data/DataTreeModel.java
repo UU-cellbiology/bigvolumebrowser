@@ -88,15 +88,15 @@ public class DataTreeModel implements TreeModel
 		rootNode = new DataTreeNode(this);
 		listeners = new ArrayList<>();
 
-		iconBDV = new ImageIcon(this.getClass().getResource("/icons/bdv-small.png"));
-		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
-		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
-		iconMoBIE = new ImageIcon(this.getClass().getResource("/icons/mobie-logo-small.png"));		
-		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "data-small-default.png"));
-		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "source-small.png"));
-		iconShapeGroup = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "shapes-small.png"));
-		iconMeshColor = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "mesh-small.png"));
-		iconSpots = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "spots-small.png"));
+		iconBDV = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bdv-small.png"));
+		iconBioFormats = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bioformats-small.png"));
+		iconFIJI = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "fiji-logo-small.png"));
+		iconMoBIE = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "mobie-logo-small.png"));		
+		iconDefaultData = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "data-small-default.png"));
+		iconOneSource = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "source-small.png"));
+		iconShapeGroup = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "shapes-small.png"));
+		iconMeshColor = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "mesh-small.png"));
+		iconSpots = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "spots-small.png"));
 
 	}
 	

@@ -89,13 +89,13 @@ public class PanelAddShapes extends JPanel
 		bvb = bvb_;
 
 	    GridBagConstraints gbc = new GridBagConstraints();
-		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "spots.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "spots.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butSpots = new JButton(tabIcon);
 	    butSpots.setToolTipText("Import spots/point cloud\n from text file");
 	    butSpots.addActionListener( (e)->loadSpotsDialog());				
 	    
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "mesh.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "mesh.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butMesh = new JButton(tabIcon);
 	    butMesh.setToolTipText("Import meshes");

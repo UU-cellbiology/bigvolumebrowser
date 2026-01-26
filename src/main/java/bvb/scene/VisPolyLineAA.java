@@ -43,6 +43,7 @@ import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import bvb.core.BVBSettings;
 import bvvpg.core.backend.jogl.JoglGpuContext;
 import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
@@ -97,8 +98,8 @@ public class VisPolyLineAA
 	
 	void initShader()
 	{
-		final Segment lineVp = new SegmentTemplate( VisPolyLineAA.class, "/scene/aa_line.vp" ).instantiate();
-		final Segment lineFp = new SegmentTemplate( VisPolyLineAA.class, "/scene/aa_line.fp" ).instantiate();
+		final Segment lineVp = new SegmentTemplate( VisPolyLineAA.class, BVBSettings.sShaderPath + "aa_line.vp" ).instantiate();
+		final Segment lineFp = new SegmentTemplate( VisPolyLineAA.class, BVBSettings.sShaderPath + "aa_line.fp" ).instantiate();
 		
 		prog = new DefaultShader( lineVp.getCode(), lineFp.getCode() );
 	}
