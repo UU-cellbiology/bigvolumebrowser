@@ -309,7 +309,7 @@ public class CenterZoomBVV
 		
 		final AffineTransform3D transform_scale = getCenteredViewTransform(bvb, inInterval,zoomFraction);
 		
-		final AnisotropicTransformAnimator3D anim = new AnisotropicTransformAnimator3D(transform,transform_scale,0,0, BVBSettings.nTransformAnimationDuration);			
+		final AnisotropicTransformAnimator3D anim = new AnisotropicTransformAnimator3D(transform,transform_scale, BVBSettings.nTransformAnimationDuration);			
 		
 		return anim;
 	}
