@@ -42,8 +42,6 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
 import ij.IJ;
 import ij.Prefs;
-import ij.io.OpenDialog;
-import ij.io.SaveDialog;
 
 public class AnimationPanel extends JPanel implements ListSelectionListener,
 													  NumberField.Listener, 
@@ -87,7 +85,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 	int tsSpan = 100;
 	
 	/** play preview **/
-	//AnimationPlayer player;
+	AnimationPlayer player;
 	
 	ImageIcon tabIconRecord;
 	
@@ -133,7 +131,8 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		
 		kfAnim = new KeyFrameAnimation(listModel);
 		kfAnim.setTotalTime( nInitialTotalTime );
-		//this.player = null;
+	
+		this.player = null;
 		
 		JPanel panAnimTools = new JPanel(new GridBagLayout());  
 		//panAnimTools.setBorder(new PanelTitle(" Animation "));
@@ -174,7 +173,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		butSettings.setPreferredSize(new Dimension(nButtonSize, nButtonSize));
 		
 		butRecord.addActionListener( this );
-		butPlayStop.addActionListener( this );
+		butPlayStop.addActionListener( (e) -> playStopButtonAction() );
 		butSettings.addActionListener( this );
 				
 		cr.gridx = 0;
@@ -230,7 +229,6 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 	    keyMarks.setPreferredSize( new Dimension(30,250));
 		//keyMarks.setBorder(new PanelTitle(" Keys"));
 		
-		//cr.weightx=0.4;
 		panAnimPlot.add( keyMarks,cr );
 		cr.gridx++;
 		panAnimPlot.add( sliderPanel,cr );
@@ -332,8 +330,8 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		JPanel panTotTime = new JPanel(new GridBagLayout());
 		//panTotTime.setBorder(new PanelTitle(""));
 		cr = new GridBagConstraints();
-		cr.gridx=0;
-		cr.gridy=0;
+		cr.gridx = 0;
+		cr.gridy = 0;
 		panTotTime.add(new JLabel("Total time (s)"),cr);
 		cr.gridx++;
 		nfTotalTime = new NumberField(4);
@@ -343,8 +341,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		nfTotalTime.addListener(this);
 		
 		panTotTime.add(nfTotalTime,cr);
-		
-		
+			
 		//put all panels together
 		cr = new GridBagConstraints();
 		setLayout(new GridBagLayout());
@@ -392,17 +389,38 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 	
 	void runPlayer()
 	{
-//		player = new AnimationPlayer< >(bt, this);
-//		bt.bInputLock = true;
-//		bt.setLockMode(true);
-//		player.addPropertyChangeListener( bt.btPanel );
-//		
-//		butPlayStop.setEnabled( true );
-//		butPlayStop.setIcon( tabIconStop );
-//		butPlayStop.setToolTipText( "Stop playing" );
-//		player.butPlayStop = butPlayStop;
-//		player.tabIconPlay = tabIconPlay; 
-//		player.execute();
+		player = new AnimationPlayer(bvb, this);
+		bvb.setInputLock( true );		
+		butPlayStop.setEnabled( true );
+		butPlayStop.setIcon( tabIconStop );
+		butPlayStop.setToolTipText( "Stop playing" );
+		player.butPlayStop = butPlayStop;
+		player.tabIconPlay = tabIconPlay; 
+		player.execute();
+	}
+	
+	/** run or stop player **/
+	void playStopButtonAction()
+	{
+		if(listModel.size() > 0)
+		{
+			if( !bvb.getInputLock() )
+			{
+				runPlayer();
+			}
+			else
+			{
+				if(bvb.getInputLock() && butPlayStop.isEnabled() && player != null 
+						&& !player.isCancelled() && !player.isDone())
+				{
+					player.cancel( false );
+				}
+			}
+		}
+		else
+		{
+			IJ.showStatus( "cannot play: add at least one key frame." );
+		}
 	}
 	
 	@Override
@@ -438,7 +456,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		//run player
 		if(e.getSource() == butPlayStop)
 		{
-			if(listModel.size()>0)
+			if(listModel.size() > 0)
 			{
 				if( !bvb.getInputLock() )
 				{

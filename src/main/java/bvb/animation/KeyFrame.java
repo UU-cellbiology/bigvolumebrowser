@@ -23,7 +23,7 @@ public class KeyFrame
 	@Override
 	public String toString()
 	{
-		return "[" + Integer.toString( nIndex )+" ] " + name;
+		return "[" + Integer.toString( nIndex )+"] " + name;
 	}
 	
 	public int getIndex()
