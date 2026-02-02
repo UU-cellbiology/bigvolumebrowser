@@ -11,12 +11,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import javax.swing.DefaultListModel;
@@ -34,8 +33,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
@@ -43,10 +40,8 @@ import bvb.gui.NumberField;
 import ij.IJ;
 import ij.Prefs;
 
-public class AnimationPanel extends JPanel implements ListSelectionListener,
-													  NumberField.Listener, 
-													  ChangeListener, 
-													  ActionListener
+public class AnimationPanel extends JPanel implements ChangeListener
+													
 {
 	final BigVolumeBrowser bvb;
 	
@@ -116,13 +111,13 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 	
 	String sRenderSavePath = null;
 	
-	//final AnimationPanelDialogs<T> dialogsAnim;
+	final AnimationPanelDialogs dialogsAnim;
 
 	public AnimationPanel(final BigVolumeBrowser bvb_)
 	{
 		this.bvb = bvb_;
 		
-		//dialogsAnim = new AnimationPanelDialogs<>(bt, this);
+		dialogsAnim = new AnimationPanelDialogs(bvb, this);
 		
 		int nInitialTotalTime = 5;
 		
@@ -155,26 +150,22 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		tabIconStop = new ImageIcon(icon_path);		
 		butPlayStop.setToolTipText("Play");
 		butPlayStop.setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
-		
-		butPlayStop.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent evt) {
-				if (SwingUtilities.isRightMouseButton(evt))
-				{
-					//dialogsAnim.dialPlayerSettings();
-				} 
-			}
-		});	
-		
+				
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
 		ImageIcon tabIcon = new ImageIcon(icon_path);
 		butSettings = new JButton(tabIcon);
 		butSettings.setToolTipText("Settings");
 		butSettings.setPreferredSize(new Dimension(nButtonSize, nButtonSize));
 		
-		butRecord.addActionListener( this );
-		butPlayStop.addActionListener( (e) -> playStopButtonAction() );
-		butSettings.addActionListener( this );
+		butPlayStop.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				if (SwingUtilities.isRightMouseButton(evt))
+				{
+					dialogsAnim.dialPlayerSettings();
+				} 
+			}
+		});	
 				
 		cr.gridx = 0;
 		cr.gridy = 0;
@@ -239,7 +230,6 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jlist.setLayoutOrientation(JList.VERTICAL);
 		jlist.setVisibleRowCount(-1);
-		jlist.addListSelectionListener(this);
 		jlist.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent evt) {
@@ -268,42 +258,53 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		cr.gridy = 0;
 		cr.gridx = 3;
 		cr.fill = GridBagConstraints.NONE;
-
 		
 		butAdd = new JButton("Add");
-		butAdd.addActionListener(this);
 		panAnimPlot.add( butAdd, cr );
 		
 		cr.gridy++;
 		butReplace = new JButton("Replace");
-		butReplace.addActionListener(this);
 		panAnimPlot.add( butReplace, cr );
 
 		cr.gridy++;
 		butEdit = new JButton("Edit");
-		butEdit.addActionListener(this);
 		panAnimPlot.add( butEdit, cr );		
 		
 		cr.gridy++;
 		butDelete = new JButton("Delete");
-		butDelete.addActionListener(this);
 		panAnimPlot.add( butDelete, cr );
 
 		cr.gridy++;
 		butSave = new JButton("Save");
-		butSave.addActionListener(this);
 		panAnimPlot.add( butSave, cr );
 		
 		cr.gridy++;
 		butLoad = new JButton("Load");
-		butLoad.addActionListener(this);
 		panAnimPlot.add( butLoad, cr );
 		
 		cr.gridy++;
 		butUpdateSlider = new JToggleButton("<html><center>Slider<br>update</center></html>");
 		butUpdateSlider.setSelected( true );
-		butUpdateSlider.addActionListener(this);
+
 		panAnimPlot.add( butUpdateSlider, cr );
+		
+		// Blank/filler component
+		cr.gridy++;
+		cr.weightx = 0.01;
+		cr.weighty = 0.05;
+		panAnimPlot.add(new JLabel(), cr);	
+		
+		// LISTENERS ASSIGNMENT
+		butRecord.addActionListener( (e) -> recordRenderButtonAction() );
+		butPlayStop.addActionListener( (e) -> playStopButtonAction() );
+		butSettings.addActionListener( (e) -> dialogsAnim.dialPanelSettings());
+		butAdd.addActionListener((e) -> addCurrentKeyFrame());
+		butReplace.addActionListener((e) -> replaceSelectedKeyFrame());
+		butEdit.addActionListener((e) -> editSelectedKeyFrame());
+		butDelete.addActionListener( (e)-> deleteSelectedKeyFrame());
+		butSave.addActionListener((e) -> dialStorylineSave());
+		butLoad.addActionListener((e) -> dialStorylineLoad());
+		butUpdateSlider.addActionListener((e)-> {bUpdateSlider = butUpdateSlider.isSelected();});
 		
 		// a solution for now
 		final Dimension butDim = butReplace.getPreferredSize();
@@ -319,13 +320,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		butSave.setPreferredSize(butDim); 		
 		butLoad.setMinimumSize(butDim);
 		butLoad.setPreferredSize(butDim); 
-		
-		// Blank/filler component
-		cr.gridy++;
-		cr.weightx = 0.01;
-		cr.weighty = 0.05;
-		panAnimPlot.add(new JLabel(), cr);	
-		
+
 		
 		JPanel panTotTime = new JPanel(new GridBagLayout());
 		//panTotTime.setBorder(new PanelTitle(""));
@@ -338,7 +333,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		nfTotalTime.setIntegersOnly( true );
 		nfTotalTime.setText(Integer.toString( (int)Math.ceil( kfAnim.getTotalTime())));
 		nfTotalTime.setMinimumSize(nfTotalTime.getPreferredSize());
-		nfTotalTime.addListener(this);
+		nfTotalTime.addListener((t) -> setNewTotalTime(t) );
 		
 		panTotTime.add(nfTotalTime,cr);
 			
@@ -423,108 +418,31 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		}
 	}
 	
-	@Override
-	public void actionPerformed( ActionEvent e )
+	void recordRenderButtonAction()
 	{
-		
-		//run render
-		if(e.getSource() == butRecord)
+		if(listModel.size() > 0)
 		{
-			if(listModel.size() > 0)
+			if(!bvb.getInputLock() )
 			{
-				if(!bvb.getInputLock() )
-				{
-//					if(dialogsAnim.dialRenderSettings())
-//					{
-//						runRender();
-//					}
-				}
-				else
-				{
-//					if(bt.bInputLock && butRecord.isEnabled() && render!=null && !render.isCancelled() && !render.isDone())
-//					{
-//						render.cancel( false );
-//					}
-				}
+//				if(dialogsAnim.dialRenderSettings())
+//				{
+//					runRender();
+//				}
 			}
 			else
 			{
-				IJ.showStatus( "cannot render: add at least one key frame." );
+//				if(bt.bInputLock && butRecord.isEnabled() && render!=null && !render.isCancelled() && !render.isDone())
+//				{
+//					render.cancel( false );
+//				}
 			}
 		}
-		
-		//run player
-		if(e.getSource() == butPlayStop)
+		else
 		{
-			if(listModel.size() > 0)
-			{
-				if( !bvb.getInputLock() )
-				{
-					runPlayer();
-				}
-				else
-				{
-//					if(bt.bInputLock && butPlayStop.isEnabled() && player!=null && !player.isCancelled() && !player.isDone())
-//					{
-//						player.cancel( false );
-//					}
-				}
-			}
+			IJ.showStatus( "cannot render: add at least one key frame." );
 		}
-		
-		//settings
-		if(e.getSource() == butSettings)
-		{		
-			//dialogsAnim.dialPanelSettings();
-		}
-		//add keyframe
-		if(e.getSource() == butAdd)
-		{
-			addCurrentKeyFrame();
-		}
-		//replace keyframe
-		if(e.getSource() == butReplace)
-		{
-			replaceSelectedKeyFrame();
-		}
-		//edit keyframe
-		if(e.getSource() == butEdit)
-		{
-			editSelectedKeyFrame();
-		}
-		//delete keyframe
-		if(e.getSource() == butDelete)
-		{
-			deleteSelectedKeyFrame();
-		}
-		//save storyline
-		if(e.getSource() == butSave)
-		{
-			//dialStorylineSave();
-		}	
-		//load storyline
-		if(e.getSource() == butLoad)
-		{
-			//dialStorylineLoad();
-		}	
-		
-	
-		//toggle update slider
-		if(e.getSource() == butUpdateSlider)
-		{
-			bUpdateSlider = butUpdateSlider.isSelected();
-		}
-	
-	}
-
-	@Override
-	public void valueChanged( ListSelectionEvent arg0 )
-	{
-
-		
 	}
 	
-
 	void addCurrentKeyFrame()
 	{
 		float nTimeMovie =  ((float)timeSlider.getValue() / (float)(tsSpan)) * kfAnim.getTotalTime();
@@ -574,47 +492,40 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 	
 	void editSelectedKeyFrame()
 	{
-		int nInd = jlist.getSelectedIndex();
+		final int nInd = jlist.getSelectedIndex();
 		if(nInd >= 0)
 		{
-//			if(dialogsAnim.dialEditKeyFrame(nInd))
-//			{
-//				updateKeyIndices();
-//				updateKeyMarks();
-//				kfAnim.updateTransitionTimeline();			
-//			}
+			if(dialogsAnim.dialEditKeyFrame(nInd))
+			{
+				updateKeyIndices();
+				updateKeyMarks();
+				kfAnim.updateTransitionTimeline();
+			}
 		}
 	}
 	
 	void deleteSelectedKeyFrame()
 	{
-		int nInd = jlist.getSelectedIndex();
+		final int nInd = jlist.getSelectedIndex();
 		if(nInd >= 0)
 		{
 			listModel.remove( nInd );
 			updateKeyIndices();
 			updateKeyMarks();
 			kfAnim.updateTransitionTimeline();
-			//updateScene();
 		}
 	}
 
 	/** total time of the animation changed **/
-	@Override
-	public void valueChanged( double v )
-	{		
-		setNewTotalTime(( int ) Math.round( Math.abs( v ) ));
-	}
-	
-	public void setNewTotalTime(int nNewTime)
+	public void setNewTotalTime(final double nNewTime_)
 	{
+		final int nNewTime = ( int ) Math.round( Math.abs( nNewTime_ ) );
 		int nOldTime = kfAnim.nTotalTime;
 				
 		if(listModel.size() > 0)
-		{
-		
-//			if(!dialogsAnim.dialChangeTotalTime(nNewTime>=nOldTime))
-//				return;
+		{		
+			if(!dialogsAnim.dialChangeTotalTime(nNewTime>=nOldTime))
+				return;
 			
 			kfAnim.setTotalTime(nNewTime);			
 			
@@ -757,7 +668,9 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 				}
 			}	
 			bLocked = true;
+			
 			keyPoints = keyPoints_;
+			
 			bLocked = false;
 		}
 
@@ -812,7 +725,7 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 	{			
 		if(listModel.size() > 1)
 		{
-			float fTimePoint = (kfAnim.getTotalTime())*(timeSlider.getValue()/(float)tsSpan);
+			float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
 		}
 	}
@@ -831,8 +744,33 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 		
 	}
 	
-//	void dialStorylineSave()
-//	{
+	void sortListModel()
+	{
+		if(listModel.size() > 0)
+		{
+			final float [][] timeNindex = new float [listModel.size()][2];
+			for(int i = 0; i < listModel.size(); i++)
+			{
+				timeNindex [i][0] = listModel.get( i ).fMovieTimePoint;
+				timeNindex [i][1] = i;
+			}
+    		Arrays.sort(timeNindex, (a, b) -> Float.compare(a[0], b[0]));
+    		final ArrayList<KeyFrame> storeKF = new ArrayList<>(listModel.size());
+    		for(int i = 0; i < listModel.size(); i++)
+    		{
+    			storeKF.add( listModel.get( (int)timeNindex[i][1] ) );
+    		}
+    		
+    		listModel.clear();
+    		for(int i = 0; i < storeKF.size(); i++)
+    		{
+    			listModel.addElement( storeKF.get( i ) );
+    		}
+		}
+	}
+	
+	void dialStorylineSave()
+	{
 //		if(listModel.size() > 0)
 //		{
 //			String filename;
@@ -852,9 +790,9 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 //	        bt.bInputLock = false;
 //	        
 //		}
-//	}
-//	void dialStorylineLoad()
-//	{
+	}
+	void dialStorylineLoad()
+	{
 //		String filename;
 //		
 //		OpenDialog openDial = new OpenDialog("Load BigTrace storyline",bt.btData.lastDir, "*.csv");
@@ -872,6 +810,6 @@ public class AnimationPanel extends JPanel implements ListSelectionListener,
 //        stLoad.loadAnimation( filename );
 //        bt.setLockMode(false);
 //        bt.bInputLock = false;
-//	}
+	}
 
 }

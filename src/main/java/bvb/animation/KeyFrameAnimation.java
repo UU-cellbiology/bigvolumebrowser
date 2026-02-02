@@ -25,14 +25,6 @@ public class KeyFrameAnimation
 		keyFrames = keyFrames_;
 	}
 	
-	public void setListModel(final DefaultListModel<KeyFrame> keyFrames_)
-	{
-		keyFrames.clear(); 
-		for(int i = 0; i < keyFrames_.size(); i++)
-		{
-			keyFrames.addElement( keyFrames_.get( i ));
-		}
-	}
 	public void setTotalTime(int t)
 	{
 		nTotalTime = t;
@@ -120,10 +112,10 @@ public class KeyFrameAnimation
 		//time frame
 		int nIniFrame = fullList.get(nIndex-1).getSceneView().getTimeFrame();
 		int nNextFrame = fullList.get(nIndex).getSceneView().getTimeFrame();
-		int nTimeFrame = ( int ) ( nIniFrame + Math.round( fraction* (nNextFrame-nIniFrame)) );
-		// transform
-		final AffineTransform3D finalAT = viewAnimate.get(nIndex-1).get( fraction );
+		int nTimeFrame = ( int ) ( nIniFrame + Math.round( fraction * (nNextFrame - nIniFrame)) );
+		// transform camera view
+		final AffineTransform3D finalAT = viewAnimate.get( nIndex - 1 ).get( fraction );
 	
-		return new SceneView(finalAT, nTimeFrame );
+		return new SceneView( finalAT, nTimeFrame );
 	}
 }

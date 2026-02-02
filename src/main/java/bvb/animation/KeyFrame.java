@@ -3,9 +3,14 @@ package bvb.animation;
 
 public class KeyFrame
 {
+	/** position in the movie timeline **/
 	float fMovieTimePoint;
+	/** camera scene view + timepoint **/
 	SceneView scene;
+	
 	String name;
+	
+	/** ordered index in the animation list **/
 	int nIndex = 0;
 	
 	public KeyFrame(final SceneView scene_, float fMovieTimePoint_)
