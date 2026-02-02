@@ -1,26 +1,32 @@
 package bvb.animation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.DefaultListModel;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
+import animation.utils.Timeline;
 import bvb.gui.AnisotropicTransformAnimator3D;
 
 public class KeyFrameAnimation
 {
 	int nTotalTime;
 	
-	final public DefaultListModel<KeyFrame> keyFrames;
+	final public DefaultListModel<KeyFrameScene> keyFrames;
 	
 	final ArrayList<AnisotropicTransformAnimator3D> viewAnimate = new ArrayList<>(); 
 	
 	final ArrayList<Float> timeIntervals = new ArrayList<>();
 	
-	final ArrayList<KeyFrame> fullList = new ArrayList<>();
+	final ArrayList<KeyFrameScene> keyFrameList = new ArrayList<>();
 	
-	public KeyFrameAnimation( final DefaultListModel<KeyFrame> keyFrames_)
+	public final Timeline timeline = new Timeline();
+	
+	final public HashMap<Object, ArrayList<AnimationTransformObject>> objectToTransform = new HashMap<>();
+	
+	public KeyFrameAnimation( final DefaultListModel<KeyFrameScene> keyFrames_)
 	{
 		keyFrames = keyFrames_;
 	}
@@ -39,24 +45,24 @@ public class KeyFrameAnimation
 	{
 		timeIntervals.clear();
 		viewAnimate.clear();
-		fullList.clear();
+		keyFrameList.clear();
 		if(keyFrames.size() == 0)
 			return;
 		
-		fullList.add( keyFrames.get( 0 ) );
+		keyFrameList.add( keyFrames.get( 0 ) );
 		timeIntervals.add( new Float(0.0f) );
 		for (int i = 0; i < keyFrames.size(); i++)
 		{
-			fullList.add( keyFrames.get( i ) );
+			keyFrameList.add( keyFrames.get( i ) );
 			timeIntervals.add(keyFrames.get( i ).fMovieTimePoint);
 		}
-		fullList.add( keyFrames.get( keyFrames.size() - 1 ) );
+		keyFrameList.add( keyFrames.get( keyFrames.size() - 1 ) );
 		timeIntervals.add((float)nTotalTime);
 		for(int i = 0; i < keyFrames.size() + 1; i++)
 		{
 			viewAnimate.add( new AnisotropicTransformAnimator3D(
-					fullList.get(i).getSceneView().getViewerTransform(),
-					fullList.get(i+1).getSceneView().getViewerTransform(),5) );
+					keyFrameList.get(i).getSceneView().getViewerTransform(),
+					keyFrameList.get(i+1).getSceneView().getViewerTransform(),5) );
 		}
 	}
 	
@@ -110,8 +116,8 @@ public class KeyFrameAnimation
 		}
 		
 		//time frame
-		int nIniFrame = fullList.get(nIndex-1).getSceneView().getTimeFrame();
-		int nNextFrame = fullList.get(nIndex).getSceneView().getTimeFrame();
+		int nIniFrame = keyFrameList.get(nIndex-1).getSceneView().getTimeFrame();
+		int nNextFrame = keyFrameList.get(nIndex).getSceneView().getTimeFrame();
 		int nTimeFrame = ( int ) ( nIniFrame + Math.round( fraction * (nNextFrame - nIniFrame)) );
 		// transform camera view
 		final AffineTransform3D finalAT = viewAnimate.get( nIndex - 1 ).get( fraction );

@@ -34,9 +34,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import animation.utils.Easing;
+import animation.utils.Interpolator;
+import animation.utils.Keyframe;
+import animation.utils.Property;
+import animation.utils.Track;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
+import bvb.shapes.BasicMeshShape;
+import bvb.shapes.BasicShape;
 import ij.IJ;
 import ij.Prefs;
 
@@ -58,9 +65,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	final JButton butLoad;
 	
 	//keyFrame list
-	final public DefaultListModel<KeyFrame> listModel; 
+	final public DefaultListModel<KeyFrameScene> listModel; 
 	
-	final public JList<KeyFrame> jlist;
+	final public JList<KeyFrameScene> jlist;
 	
 	final JScrollPane listScroller;
 	
@@ -445,8 +452,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	void addCurrentKeyFrame()
 	{
-		float nTimeMovie =  ((float)timeSlider.getValue() / (float)(tsSpan)) * kfAnim.getTotalTime();
-		KeyFrame newKeyFrame = new KeyFrame(SceneView.getCurrentSceneView( bvb.bvvViewer ), nTimeMovie);
+		float fTimeMovie =  ((float)timeSlider.getValue() / (float)(tsSpan)) * kfAnim.getTotalTime();
+		KeyFrameScene newKeyFrame = new KeyFrameScene(SceneView.getCurrentSceneView( bvb.bvvViewer ), fTimeMovie);
 		
 		if(listModel.size() == 0)
 		{
@@ -457,7 +464,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			boolean bAdded = false;
 			for(int i = 0; i < listModel.size(); i++)
 			{
-				if(listModel.get( i ).fMovieTimePoint > nTimeMovie)
+				if(listModel.get( i ).fMovieTimePoint > fTimeMovie)
 				{
 					listModel.add(i,newKeyFrame);
 					bAdded = true;
@@ -473,6 +480,16 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		updateKeyMarks();
 		kfAnim.updateTransitionTimeline();
 		
+		BasicMeshShape mesh = (BasicMeshShape) bvb.shapes.get( 0 );
+		Property<Float> xProp = new Property<Float>() {
+		    public Float get() { return mesh.getPointSize(); }
+		    public void set(Float v) { mesh.setPointSize( v ); }
+		};
+		
+		Interpolator<Float> floatLerp =
+			    (a, b, t) -> a + (b - a) * t;
+	     kfAnim.timeline.addKeyframe( "mesh", xProp, floatLerp, Easing.LINEAR, fTimeMovie, mesh.getPointSize() );
+
 	}
 	
 	void replaceSelectedKeyFrame()
@@ -480,12 +497,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		int nInd = jlist.getSelectedIndex();
 		if(nInd >= 0)
 		{
-			float nTimeMovie = listModel.get( nInd ).fMovieTimePoint;
-			String sName = listModel.get( nInd ).name;
-			KeyFrame newKeyFrame = new KeyFrame(SceneView.getCurrentSceneView( bvb.bvvViewer ), nTimeMovie);
-			newKeyFrame.nIndex = nInd;
-			newKeyFrame.name = sName;
-			listModel.set( nInd, newKeyFrame );
+			final KeyFrameScene keyFrameScene = listModel.get( nInd );
+			keyFrameScene.setScene( SceneView.getCurrentSceneView( bvb.bvvViewer ) );
 			kfAnim.updateTransitionTimeline();
 		}
 	}
@@ -568,8 +581,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		}
 		else
 		{
-			kfAnim.setTotalTime(nNewTime);			
-			
+			kfAnim.setTotalTime(nNewTime);						
 			setSliderTotalTime();
 		}
 	}
@@ -624,7 +636,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			keyPoints.add( listModel.get( i ).fMovieTimePoint/ kfAnim.getTotalTime());
 		}
-		keyMarks.setkeyPoints( keyPoints );
+		keyMarks.setKeyPoints( keyPoints );
 		keyMarks.repaint();
 	}
 	
@@ -651,7 +663,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			super();
 		}
 		
-		public void setkeyPoints(ArrayList<Float> keyPoints_)
+		public void setKeyPoints(ArrayList<Float> keyPoints_)
 		{
 			if(bLocked)
 			{
@@ -726,7 +738,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		if(listModel.size() > 1)
 		{
 			float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
+			kfAnim.timeline.apply( fTimePoint );
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
+			
 		}
 	}
 	
@@ -755,7 +769,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				timeNindex [i][1] = i;
 			}
     		Arrays.sort(timeNindex, (a, b) -> Float.compare(a[0], b[0]));
-    		final ArrayList<KeyFrame> storeKF = new ArrayList<>(listModel.size());
+    		final ArrayList<KeyFrameScene> storeKF = new ArrayList<>(listModel.size());
     		for(int i = 0; i < listModel.size(); i++)
     		{
     			storeKF.add( listModel.get( (int)timeNindex[i][1] ) );

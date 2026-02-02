@@ -172,7 +172,7 @@ public class AnimationPanelDialogs
 	
 	boolean dialEditKeyFrame(final int nInd)
 	{
-		final DefaultListModel< KeyFrame > listModel = aPanel.listModel;
+		final DefaultListModel< KeyFrameScene > listModel = aPanel.listModel;
 		final KeyFrameAnimation kfAnim = aPanel.kfAnim;
 		
 		DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
@@ -208,7 +208,7 @@ public class AnimationPanelDialogs
 				
 		if (reply == JOptionPane.OK_OPTION) 
 		{
-			final KeyFrame keyFrame = listModel.get( nInd );
+			final KeyFrameScene keyFrame = listModel.get( nInd );
 			if(tfName.getText().length() > 0)
 			{
 				keyFrame.name = tfName.getText();

@@ -1,7 +1,7 @@
 package bvb.animation;
 
 
-public class KeyFrame
+public class KeyFrameScene
 {
 	/** position in the movie timeline **/
 	float fMovieTimePoint;
@@ -13,14 +13,14 @@ public class KeyFrame
 	/** ordered index in the animation list **/
 	int nIndex = 0;
 	
-	public KeyFrame(final SceneView scene_, float fMovieTimePoint_)
+	public KeyFrameScene(final SceneView scene_, float fMovieTimePoint_)
 	{
 		scene = new SceneView(scene_.getViewerTransform(), scene_.getTimeFrame());
 		name = "key" + Integer.toString(this.hashCode());
 		fMovieTimePoint = fMovieTimePoint_;	
 	}
 	
-	public KeyFrame (String kfName)
+	public KeyFrameScene (String kfName)
 	{
 		name = kfName;
 	}
@@ -68,9 +68,9 @@ public class KeyFrame
 		return fMovieTimePoint;
 	}
 	
-	public KeyFrame duplicate()
+	public KeyFrameScene duplicate()
 	{
-		final KeyFrame out = new KeyFrame(scene, fMovieTimePoint);
+		final KeyFrameScene out = new KeyFrameScene(scene, fMovieTimePoint);
 		out.name = this.name;
 		return out;
 	}
