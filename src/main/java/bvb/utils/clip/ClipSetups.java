@@ -120,7 +120,7 @@ public class ClipSetups
 		if(LinAlgHelpers.length( eAngles )<0.0001)
 		{
 			qCurr[0] = 1.0;
-			for(int d=1;d<4;d++)
+			for(int d = 1; d < 4; d++)
 				qCurr[d] = 0.0;
 		}
 		else
@@ -130,7 +130,7 @@ public class ClipSetups
 				//add quaternion rotation
 				//calculate changes in angles
 				final double [] dChangeAngle = new double [3];
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 					dChangeAngle[d] = eAngles[d] - previousAngles[d];
 				}

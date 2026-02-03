@@ -61,7 +61,7 @@ public class BVVSourceSettings
 	public BVVSourceSettings(BvvStackSource<?> bvvS)
 	{
 		GammaConverterSetup convS = ( GammaConverterSetup ) bvvS.getConverterSetups().get( 0 );
-		if(convS.getLUTSize()>0)
+		if(convS.getLUTSize() > 0)
 		{
 			bLUT = true;
 			lutICM = convS.getLutICM();

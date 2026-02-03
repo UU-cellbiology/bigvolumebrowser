@@ -280,11 +280,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
 		cr.gridy++;
 		butSave = new JButton("Save");
-		panAnimPlot.add( butSave, cr );
+		//panAnimPlot.add( butSave, cr );
 		
 		cr.gridy++;
 		butLoad = new JButton("Load");
-		panAnimPlot.add( butLoad, cr );
+		//panAnimPlot.add( butLoad, cr );
 		
 		cr.gridy++;
 		butUpdateSlider = new JToggleButton("<html><center>Slider<br>update</center></html>");
@@ -475,18 +475,10 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		}
 		updateKeyIndices();
 		updateKeyMarks();
+	
 		kfAnim.updateTransitionTimeline();
-		
-		BasicMeshShape mesh = (BasicMeshShape) bvb.shapes.get( 0 );
-		Property<Float> xProp = new Property<Float>() {
-		    @Override
-			public Float get() { return mesh.getPointSize(); }
-		    @Override
-			public void set(Float v) { mesh.setPointSize( v ); }
-		};
-		
-	     kfAnim.timeline.addKeyframe( "mesh", xProp, Interpolator.floatLerp, Easing.LINEAR, newKeyFrame, mesh.getPointSize() );
-
+	
+	    kfAnim.timeline.addKeyframeBVB(bvb, newKeyFrame, Easing.LINEAR);
 	}
 	
 	void replaceSelectedKeyFrame()

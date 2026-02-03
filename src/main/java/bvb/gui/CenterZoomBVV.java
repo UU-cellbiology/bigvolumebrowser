@@ -246,7 +246,7 @@ public class CenterZoomBVV
 	{
 		RealInterval allInt = null;
 		//just in case
-		if(sacList.size()>0)
+		if(sacList.size() > 0)
 		{
 			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			for(SourceAndConverter< ? > sac : sacList)
