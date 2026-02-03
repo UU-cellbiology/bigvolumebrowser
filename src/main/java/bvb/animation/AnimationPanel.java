@@ -35,12 +35,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import bvb.animation.utils.Easing;
-import bvb.animation.utils.Interpolator;
-import bvb.animation.utils.Property;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
-import bvb.shapes.BasicMeshShape;
 import ij.IJ;
 import ij.Prefs;
 

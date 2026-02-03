@@ -63,7 +63,7 @@ public class BVBSettings
 	
 	public static double dFocusScreenFraction =  Prefs.get("BVB.dFocusScreenFraction", 0.95);
 	
-	public static boolean bPyramidize = true;//Prefs.get( "BVB.bPyramidize", false );
+	public static boolean bPyramidize = false;//Prefs.get( "BVB.bPyramidize", false );
 	
 	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", true ); 
 	

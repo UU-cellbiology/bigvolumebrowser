@@ -21,6 +21,11 @@ public class Timeline
     
     private final Map <KeyFrameScene, Set<Track<?>>> keyFramesToTracks = new HashMap<>();
         
+    String tempName (final Object obj)
+    {
+    	return obj.toString();
+    }
+    
     public void addTrack(final Track<?> track)
     {
     	tracks.add( track );
@@ -131,18 +136,19 @@ public class Timeline
     	}
     	
     }
+    
     public void addKeyframeConverterSetup(final RealARGBColorGammaConverterSetup cs, final KeyFrameScene keyFrameScene, final Easing easing)
     {
     	
-    	String csName = cs.toString();
+    	String csName = tempName(cs);
+    	
     	//display range
     	final Property<double[]> pDisplayRange = new Property<double[]>() {
 		    @Override
 			public double[] get() { return new double[] {cs.getDisplayRangeMin(), cs.getDisplayRangeMax()}; }
 		    @Override
 			public void set(double[] v) { cs.setDisplayRange( v[0], v[1] ); }
-		};
-    	
+		};   	
 		addKeyframe(csName + "_displayRange", pDisplayRange, Interpolator.doubleArrayLerp, easing, keyFrameScene );
     	
 		// alpha    	
@@ -160,12 +166,10 @@ public class Timeline
 			public double[] get() { return new double[] {cs.getAlphaRangeMin(), cs.getAlphaRangeMax()}; }
 		    @Override
 			public void set(double[] v) { cs.setAlphaRange( v[0], v[1] ); }
-		};
+		};   	
+		addKeyframe(csName + "_alphaRange", pAlphaRange, Interpolator.doubleArrayLerp, easing, keyFrameScene ); 	
     	
-		addKeyframe(csName + "_alphaRange", pAlphaRange, Interpolator.doubleArrayLerp, easing, keyFrameScene );
-
-    	
-    	// alpha gamma    	
+		// alpha gamma    	
     	final Property<Double> pAlphaGamma = new Property<Double>() {
 		    @Override
 			public Double get() { return cs.getAlphaGamma(); }
@@ -177,7 +181,7 @@ public class Timeline
     }
     public void addKeyframeBasicShape(final BasicShape shape, final KeyFrameScene keyFrameScene, final Easing easing)
     {
-    	String shapeName = shape.toString();
+    	String shapeName = tempName (shape);
     	// visibility
     	final Property<Boolean> pVisible = new Property<Boolean>() {
 		    @Override
