@@ -170,7 +170,7 @@ public class AnimationPanelDialogs
 		
 	}
 	
-	boolean dialEditKeyFrame(final int nInd)
+	KeyFrameScene dialEditKeyFrame(final int nInd)
 	{
 		final DefaultListModel< KeyFrameScene > listModel = aPanel.listModel;
 		final KeyFrameAnimation kfAnim = aPanel.kfAnim;
@@ -222,11 +222,11 @@ public class AnimationPanelDialogs
 				keyFrame.fMovieTimePoint = fNewTime;
 				listModel.setElementAt( keyFrame, nInd );
 				aPanel.sortListModel();
-				return true;
+				return keyFrame;
 			}
-			return false;
+			return null;
 		}
-		return false;
+		return null;
 	}
 	
 	void dialPanelSettings()

@@ -94,4 +94,9 @@ public class Track< T >
     	}
     	System.err.println("Cannot find keyframe in the track");
     }
+    
+    public void sortKeyFrames()
+    {
+    	  keyframes.sort(Comparator.comparingDouble(k -> k.getTime()));
+    }
 }

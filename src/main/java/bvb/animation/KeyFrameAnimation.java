@@ -95,8 +95,9 @@ public class KeyFrameAnimation
 			
 		}
 		
-		double fraction;
+		double fraction;		
 		double dNorm;
+		
 		if(nIndex >= timeIntervals.size() - 1)
 		{
 			nIndex = timeIntervals.size() - 1;

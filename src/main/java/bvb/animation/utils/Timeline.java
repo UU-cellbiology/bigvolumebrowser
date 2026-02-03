@@ -59,6 +59,7 @@ public class Timeline
         	keyFramesToTracks.put( keyFrameScene, setT );
         }
         setT.add( track );
+        
         //add keyframe to the track
         track.addKeyframe(new Keyframe<>(value, keyFrameScene));
     }
@@ -75,6 +76,22 @@ public class Timeline
 	    	 for(final Track<?> track : setT)
 	    	 {
 	    		 track.deleteKeyFrameScene( keyFrameScene );
+	    	 }
+    	 }
+    }
+    
+    public <T> void updateKeyframe(final KeyFrameScene keyFrameScene)
+    {
+    	 Set< Track<?> > setT = keyFramesToTracks.get( keyFrameScene );
+    	 if(setT == null)
+    	 {
+    		 System.err.println("updating keyframe without associated tracks!");
+    	 }
+    	 else
+    	 {
+	    	 for(final Track<?> track : setT)
+	    	 {
+	    		 track.sortKeyFrames();
 	    	 }
     	 }
     }

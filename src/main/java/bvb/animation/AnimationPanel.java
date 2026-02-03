@@ -36,14 +36,11 @@ import javax.swing.event.ChangeListener;
 
 import bvb.animation.utils.Easing;
 import bvb.animation.utils.Interpolator;
-import bvb.animation.utils.Keyframe;
 import bvb.animation.utils.Property;
-import bvb.animation.utils.Track;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
 import bvb.shapes.BasicMeshShape;
-import bvb.shapes.BasicShape;
 import ij.IJ;
 import ij.Prefs;
 
@@ -508,11 +505,15 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		final int nInd = jlist.getSelectedIndex();
 		if(nInd >= 0)
 		{
-			if(dialogsAnim.dialEditKeyFrame(nInd))
+			final KeyFrameScene editedKeyFrameScene = dialogsAnim.dialEditKeyFrame(nInd);
+			
+			//timepoint changed
+			if(editedKeyFrameScene != null)
 			{
 				updateKeyIndices();
 				updateKeyMarks();
 				kfAnim.updateTransitionTimeline();
+				kfAnim.timeline.updateKeyframe( editedKeyFrameScene );
 			}
 		}
 	}
@@ -629,7 +630,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		
 	}
 	
-	/** updates timeline display **/
+	/** updates scene timeline display **/
 	public void updateKeyMarks()
 	{
 		ArrayList<Float> keyPoints = new ArrayList<>();
