@@ -1,4 +1,4 @@
-package animation.utils;
+package bvb.animation.utils;
 
 @FunctionalInterface
 public interface Easing {

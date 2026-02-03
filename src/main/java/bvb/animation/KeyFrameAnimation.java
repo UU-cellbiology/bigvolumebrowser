@@ -7,7 +7,7 @@ import javax.swing.DefaultListModel;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
-import animation.utils.Timeline;
+import bvb.animation.utils.Timeline;
 import bvb.gui.AnisotropicTransformAnimator3D;
 
 public class KeyFrameAnimation

@@ -34,11 +34,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import animation.utils.Easing;
-import animation.utils.Interpolator;
-import animation.utils.Keyframe;
-import animation.utils.Property;
-import animation.utils.Track;
+import bvb.animation.utils.Easing;
+import bvb.animation.utils.Interpolator;
+import bvb.animation.utils.Keyframe;
+import bvb.animation.utils.Property;
+import bvb.animation.utils.Track;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
@@ -482,13 +482,13 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		
 		BasicMeshShape mesh = (BasicMeshShape) bvb.shapes.get( 0 );
 		Property<Float> xProp = new Property<Float>() {
-		    public Float get() { return mesh.getPointSize(); }
-		    public void set(Float v) { mesh.setPointSize( v ); }
+		    @Override
+			public Float get() { return mesh.getPointSize(); }
+		    @Override
+			public void set(Float v) { mesh.setPointSize( v ); }
 		};
 		
-		Interpolator<Float> floatLerp =
-			    (a, b, t) -> a + (b - a) * t;
-	     kfAnim.timeline.addKeyframe( "mesh", xProp, floatLerp, Easing.LINEAR, fTimeMovie, mesh.getPointSize() );
+	     kfAnim.timeline.addKeyframe( "mesh", xProp, Interpolator.floatLerp, Easing.LINEAR, newKeyFrame, mesh.getPointSize() );
 
 	}
 	
@@ -522,6 +522,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		final int nInd = jlist.getSelectedIndex();
 		if(nInd >= 0)
 		{
+			kfAnim.timeline.deleteKeyframe( listModel.get( nInd ) );
 			listModel.remove( nInd );
 			updateKeyIndices();
 			updateKeyMarks();
@@ -619,11 +620,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		int firstDigit = Integer.parseInt(Integer.toString(nTickTime).substring(0, 1));
 		
 		if(firstDigit == 1)
-			return ( int ) ( Math.pow( 10, nDigits-1 ) );
+			return ( int ) ( Math.pow( 10, nDigits - 1 ) );
 		if(firstDigit < 4)
-			return ( int ) ( 2 * Math.pow( 10, nDigits-1 ) );
+			return ( int ) ( 2 * Math.pow( 10, nDigits - 1 ) );
 		if(firstDigit <= 5)
-			return ( int ) ( 5 * Math.pow( 10, nDigits-1 ) );
+			return ( int ) ( 5 * Math.pow( 10, nDigits - 1 ) );
 		return ( int ) ( Math.pow( 10, nDigits ) );
 		
 	}
@@ -652,7 +653,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	class DrawKeyPoints extends JPanel
 	{
-		
 		boolean bLocked = false;
 		
 		/** values as fraction of total time **/
@@ -740,7 +740,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
 			kfAnim.timeline.apply( fTimePoint );
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
-			
+			bvb.bvbCards.panelShapesProperties.updateGUI();
+			bvb.updateSceneRender();
 		}
 	}
 	

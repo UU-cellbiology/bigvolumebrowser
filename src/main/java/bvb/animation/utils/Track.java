@@ -1,8 +1,10 @@
-package animation.utils;
+package bvb.animation.utils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import bvb.animation.KeyFrameScene;
 
 public class Track< T >
 {
@@ -14,6 +16,7 @@ public class Track< T >
     private final List<Keyframe<T>> keyframes = new ArrayList<>();
     
     private final Interpolator<T> interpolator;
+    
     private final Easing easing;
     
     public Track(String id,
@@ -27,42 +30,46 @@ public class Track< T >
         this.easing = easing != null ? easing : Easing.LINEAR;
     }
     
-    public void addKeyframe(Keyframe<T> key) {
+    public void addKeyframe(Keyframe<T> key) 
+    {
         keyframes.add(key);
-        keyframes.sort(Comparator.comparingDouble(k -> k.time));
+        keyframes.sort(Comparator.comparingDouble(k -> k.getTime()));
     }
     
-    public void apply(float time) 
+    @SuppressWarnings( "null" )
+	public void apply(float time) 
     {
-    	if (keyframes.isEmpty())
+    	if (keyframes.size() < 2)
               return;
     	// Before first key
-        if (time <= keyframes.get(0).time) 
+        if (time <= keyframes.get(0).getTime()) 
         {
-            //property.set(keyframes.get(0).value);
+        	if(Math.abs(time - keyframes.get(0).getTime())<0.000001)
+        		property.set(keyframes.get(0).value);
             return;
         }
         // After last key
-        int last = keyframes.size() - 1;
-        if (time >= keyframes.get(last).time) 
+        final int last = keyframes.size() - 1;
+        if (time >= keyframes.get(last).getTime()) 
         {
-            //property.set(keyframes.get(last).value);
+        	if(Math.abs(time - keyframes.get(last).getTime())<0.000001)
+        		property.set(keyframes.get(last).value);
             return;
         }
     	
         // Find surrounding keys
         Keyframe<T> a = null, b = null;
-
-        for (int i = 0; i < keyframes.size() - 1; i++) 
+        
+        for (int i = 0; i < last; i++) 
         {
             a = keyframes.get(i);
             b = keyframes.get(i + 1);
-            if (time >= a.time && time <= b.time)
+            if (time >= a.getTime() && time <= b.getTime())
                 break;
         }
 
         float localT =
-            (time - a.time) / (b.time - a.time);
+            (time - a.getTime()) / (b.getTime() - a.getTime());
 
         localT = easing.apply(localT);
 
@@ -73,5 +80,18 @@ public class Track< T >
     
     public String getId() {
         return id;
+    }
+    
+    public void deleteKeyFrameScene(final KeyFrameScene keyFrameScene)
+    {
+    	for(final Keyframe<T> keyframe : keyframes)
+    	{
+    		if(keyframe.parentKF == keyFrameScene)
+    		{
+    			keyframes.remove(keyframe);
+    			return;
+    		}
+    	}
+    	System.err.println("Cannot find keyframe in the track");
     }
 }
