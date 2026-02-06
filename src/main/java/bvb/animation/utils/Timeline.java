@@ -14,12 +14,15 @@ import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
 import bvb.utils.clip.ClipSetups;
+import bvb.utils.transform.TransformSetups;
 import bvvpg.source.converters.Clippable3D;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class Timeline 
 {
 	public final ClipSetups clipSetups;
+	
+	public final TransformSetups transformSetups;
 	
     private final List<Track<?>> tracks = new ArrayList<>();
     
@@ -30,6 +33,7 @@ public class Timeline
     public Timeline (final BigVolumeBrowser bvb_)
     {
     	clipSetups = bvb_.bvbCards.clipPanel.clipSetups;
+    	transformSetups = bvb_.bvbCards.transformPanel.transformSetups;
     }
     
     String tempName (final Object obj)
@@ -137,12 +141,12 @@ public class Timeline
     	}
     	
     	//clipping
-    	for(final Object obj :allObjects)
+    	for(final Object obj : allObjects)
 		{
     		if(obj instanceof Clippable3D)
     		{
-    			addKeyframeClippable3D((Clippable3D)obj, keyFrameScene, easing);
-
+    			addKeyframeTransform(obj, keyFrameScene, easing);
+    			addKeyframeClippable3D((Clippable3D)obj, keyFrameScene, easing);    		
     		}
 		}    	
     	
@@ -158,6 +162,74 @@ public class Timeline
     		addKeyframeBasicShape( shape, keyFrameScene, easing);
     	}
     	
+    }
+    public void addKeyframeTransform(final Object obj, final KeyFrameScene keyFrameScene, final Easing easing)
+    {
+    	String clName = tempName (obj);
+		//it is both BasicShape and GammaConverterSetup
+    	if(obj instanceof Clippable3D )
+    	{	      	
+	    	// transform centers
+	    	final Property<double []> pTrCenter = new Property<double []>() {
+			    @Override
+				public double [] get() { 
+			    	{
+			    		double [] out = new double [3];
+			    		System.arraycopy( transformSetups.transformCenters.getCenters( obj ), 0, out, 0, 3 );
+			    		return out;
+			    	}}
+			    @Override
+				public void set(double [] v) 
+			    	{ transformSetups.transformCenters.setCenters( obj, v );  
+			    	  transformSetups.updateTransform( obj, null, false ); }
+			};
+	    	addKeyframe(clName + "_transform_center", pTrCenter, Interpolator.doubleArrayLerp, easing, keyFrameScene );
+	    	
+	    	// transform rotation
+	    	final Property<double []> pTrRotation = new Property<double []>() {
+			    @Override
+				public double [] get() { 
+			    	{
+			    		double [] out = new double [4];
+			    		System.arraycopy( transformSetups.transformRotation.getQuaternion( obj ), 0, out, 0, 4 );
+			    		return out;
+			    	}}
+			    @Override
+				public void set(double [] v) {
+			    	transformSetups.transformRotation.setQuaternion( obj, v );
+			    	 transformSetups.updateTransform( obj, null, false );
+			    	}
+			};
+	    	addKeyframe(clName + "_transform_rotation", pTrRotation, Interpolator.quatSLerp, easing, keyFrameScene );
+	    	
+	    	// transform scale
+	    	final Property<double []> pTrScale = new Property<double []>() {
+			    @Override
+				public double [] get() { 
+			    	{
+			    		double [] out = new double [3];
+			    		System.arraycopy( transformSetups.transformScale.getScale( obj ), 0, out, 0, 3 );
+			    		return out;
+			    	}}
+			    @Override
+				public void set(double [] v) 
+			    	{ transformSetups.transformScale.setScale( obj, v );  
+			    	  transformSetups.updateTransform( obj, null, false ); }
+			};
+	    	addKeyframe(clName + "_transform_scale", pTrScale, Interpolator.doubleArrayLerp, easing, keyFrameScene );
+
+	    	// transform deskew
+	    	final Property<Double> pTrDeskew = new Property<Double>() {
+			    @Override
+				public Double get() { return transformSetups.transformDeskew.getAngle( obj ); }
+			    @Override
+				public void set(Double v) { 
+			    	transformSetups.transformDeskew.setAngle( obj, v ); 
+			    	transformSetups.updateTransform( obj, null, false );}
+			};
+	    	addKeyframe(clName + "_transform_deskew", pTrDeskew, Interpolator.doubleLerp, easing, keyFrameScene );
+
+    	}
     }
     
     public void addKeyframeClippable3D(final Clippable3D clippable, final KeyFrameScene keyFrameScene, final Easing easing)
@@ -178,7 +250,9 @@ public class Timeline
 		    @Override
 			public RealInterval get() { return clippable.getClipInterval(); }
 		    @Override
-			public void set(RealInterval v) { if(clippable.getClipState() > 0) { clippable.setClipInterval( v );} }
+			public void set(RealInterval v) { 
+		    	if(clippable.getClipState() > 0) 
+		    	{ clippable.setClipInterval( v );} }
 		};
     	addKeyframe(clName + "_clip_range", pClipRange, Interpolator.realInterval, easing, keyFrameScene );
     	
@@ -192,7 +266,9 @@ public class Timeline
 		    		return out;
 		    	}}
 		    @Override
-			public void set(double [] v) { clipSetups.clipCenters.setCenters( clippable, v ); clipSetups.updateClipTransform( clippable, null );}
+			public void set(double [] v) { 
+		    	clipSetups.clipCenters.setCenters( clippable, v ); 
+		    	clipSetups.updateClipTransform( clippable, null );}
 		};
     	addKeyframe(clName + "_clip_center", pClipCenter, Interpolator.doubleArrayLerp, easing, keyFrameScene );
     	

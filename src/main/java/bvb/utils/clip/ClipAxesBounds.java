@@ -76,12 +76,12 @@ public class ClipAxesBounds
 		final double [] max = clipInterval.maxAsDoubleArray( );
 
 		final BoundedRange [] range = new BoundedRange[3];
-		for (int d=0; d<3; d++)
+		for (int d = 0; d < 3; d++)
 		{
 			range[d] = new BoundedRange( min[d], max[d], min[d], max[d] ).withMinBound( bounds.getMinBound()[d] ).withMaxBound( bounds.getMaxBound()[d] );
 		}
 		boolean bUpdate = false;
-		for(int d=0;d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			if ( range[d].getMin() != min[d] || range[d].getMax() != max[d] )
 			{

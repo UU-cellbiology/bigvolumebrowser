@@ -118,8 +118,13 @@ public class TransformSetups
 		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
 		trRot.set( rotMatrix );	
 	}
-
+	
 	public void updateTransform(final Object obj, final double [] previousAngles)
+	{
+		updateTransform(obj, previousAngles, bTransformClip);
+	}
+	
+	public void updateTransform(final Object obj, final double [] previousAngles, final boolean bUpdateClip)
 	{
 		
 		//rotation
@@ -190,8 +195,8 @@ public class TransformSetups
 			((BasicShape)obj).setTransform( newTransform );
 		}
 
-		/////   update clipping, if needed
-		if(bTransformClip)
+		///// update clipping, if needed
+		if(bUpdateClip)
 		{
 			
 			final Clippable3D objCl = (Clippable3D)obj;

@@ -87,6 +87,7 @@ public class TransformRotation
 	public void setQuaternion( final Object obj, final double[] quat)
 	{
 		objToQuaternion.put( obj, quat );
+		objToAngles.put( obj, Misc.quaternionToEulerAngles(quat) );
 	}
 		
 	public double [] getCurrentEulerAngles(final Object obj)
