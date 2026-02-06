@@ -35,6 +35,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import bvb.animation.utils.Easing;
+import bvb.animation.utils.Timeline;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
@@ -113,10 +114,14 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	String sRenderSavePath = null;
 	
 	final AnimationPanelDialogs dialogsAnim;
+	
+	public Timeline timeline;
 
 	public AnimationPanel(final BigVolumeBrowser bvb_)
 	{
 		this.bvb = bvb_;
+		
+		
 		
 		dialogsAnim = new AnimationPanelDialogs(bvb, this);
 		
@@ -368,6 +373,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		add(new JLabel(), cr);    
 	}
 	
+	public void initTimeline()
+	{
+		timeline = new Timeline(bvb);
+	}
+	
 	void runRender()
 	{
 //		render = new AnimationRender< >(bt, this);
@@ -475,7 +485,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 		kfAnim.updateTransitionTimeline();
 	
-	    kfAnim.timeline.addKeyframeBVB(bvb, newKeyFrame, Easing.LINEAR);
+	    timeline.addKeyframeBVB(bvb, newKeyFrame, Easing.LINEAR);
 	}
 	
 	void replaceSelectedKeyFrame()
@@ -502,7 +512,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				updateKeyIndices();
 				updateKeyMarks();
 				kfAnim.updateTransitionTimeline();
-				kfAnim.timeline.updateKeyframe( editedKeyFrameScene );
+				timeline.updateKeyframe( editedKeyFrameScene );
 			}
 		}
 	}
@@ -512,7 +522,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		final int nInd = jlist.getSelectedIndex();
 		if(nInd >= 0)
 		{
-			kfAnim.timeline.deleteKeyframe( listModel.get( nInd ) );
+			timeline.deleteKeyframe( listModel.get( nInd ) );
 			listModel.remove( nInd );
 			updateKeyIndices();
 			updateKeyMarks();
@@ -728,7 +738,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		if(listModel.size() > 1)
 		{
 			float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
-			kfAnim.timeline.apply( fTimePoint );
+			timeline.apply( fTimePoint );
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
 			bvb.bvbCards.panelShapesProperties.updateGUI();
 			bvb.updateSceneRender();

@@ -89,11 +89,11 @@ public class BVBCards
 	    
 	    sourcesRenderPanel = new SourcesRenderPanel(bvb.bvv.getBvvHandle().getConverterSetups(), bvb.selectedObjects);
 	    
-	    animationPanel =  new AnimationPanel(bvb);
-	    
 	    clipPanel = new ClipPanel(bvb);		
 	    
 	    transformPanel = new TransformPanel(bvb);
+	    
+	    animationPanel =  new AnimationPanel(bvb);
 	}
 	
 	public void setupListeners()
@@ -106,6 +106,8 @@ public class BVBCards
 	}
 	public void installCards()
 	{
+		
+		animationPanel.initTimeline();
 		final Dimension tableViewPrefSize = new Dimension( 340, 285 );
 		//bvvFrame.getSplitPanel().setCollapsed( false );
 	    bvb.bvvFrame.getCardPanel().removeCard( BVVPGDefaultCards.DEFAULT_VIEWERMODES_CARD );
@@ -128,6 +130,7 @@ public class BVBCards
 	   
 	    bvb.bvvFrame.getSplitPanel().setCollapsed( false );
 	    bvb.bvvHandle.getConverterSetups().listeners().add( s -> bvb.clipBoxes.updateClipBoxes() );
+	    
 	}
 	
 	public void resetClipTransformPanels()

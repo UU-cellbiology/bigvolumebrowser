@@ -123,7 +123,7 @@ public class ClipRotationPanel extends JPanel
 					if(clipSetups.bLocalCoordinates)
 					{
 						final double[] trAngles = clipSetups.bvb.bvbCards.transformPanel.transformSetups.transformRotation.getAngles( obj );
-						for(int d=0;d<3;d++)
+						for(int d = 0; d < 3; d++)
 						{
 							angles[d] = tempAngles[d] - trAngles[d];
 						}

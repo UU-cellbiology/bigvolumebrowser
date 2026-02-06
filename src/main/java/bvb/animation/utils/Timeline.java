@@ -7,20 +7,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.imglib2.RealInterval;
+
 import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
-import bvvpg.source.converters.RealARGBColorGammaConverterSetup;
+import bvb.utils.clip.ClipSetups;
+import bvvpg.source.converters.Clippable3D;
+import bvvpg.source.converters.GammaConverterSetup;
 
 public class Timeline 
 {
+	public final ClipSetups clipSetups;
+	
     private final List<Track<?>> tracks = new ArrayList<>();
     
     private final Map<String, Track<?>> trackIndex = new HashMap<>();
     
     private final Map <KeyFrameScene, Set<Track<?>>> keyFramesToTracks = new HashMap<>();
-        
+       
+    public Timeline (final BigVolumeBrowser bvb_)
+    {
+    	clipSetups = bvb_.bvbCards.clipPanel.clipSetups;
+    }
+    
     String tempName (final Object obj)
     {
     	return obj.toString();
@@ -106,13 +117,13 @@ public class Timeline
     public void addKeyframeBVB(final BigVolumeBrowser bvb, final KeyFrameScene keyFrameScene, final Easing easing)
     {
     	final ArrayList<Object> allObjects = new ArrayList<>();
-    	final ArrayList<RealARGBColorGammaConverterSetup> converterSetups = new ArrayList<>();
+    	final ArrayList<GammaConverterSetup> converterSetups = new ArrayList<>();
     	// add all converter setups
     	final Set< SourceAndConverter< ? > > allSources = bvb.bvvViewer.state().getVisibleAndPresentSources();
     	
     	for(final SourceAndConverter< ? > sac :allSources)
 		{
-    		converterSetups.add( ( RealARGBColorGammaConverterSetup ) bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
+    		converterSetups.add( ( GammaConverterSetup ) bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
     		allObjects.add( bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
 		}
     	
@@ -124,11 +135,23 @@ public class Timeline
     		allObjects.add( shape );
     		shapes.add( shape );
     	}
+    	
+    	//clipping
+    	for(final Object obj :allObjects)
+		{
+    		if(obj instanceof Clippable3D)
+    		{
+    			addKeyframeClippable3D((Clippable3D)obj, keyFrameScene, easing);
+
+    		}
+		}    	
+    	
     	//cs specific routine
-    	for(final RealARGBColorGammaConverterSetup cs :converterSetups)
+    	for(final GammaConverterSetup cs :converterSetups)
 		{
     		addKeyframeConverterSetup(cs, keyFrameScene, easing);
 		}
+    	
     	//shape specific routine
     	for (final BasicShape shape : shapes)
     	{
@@ -137,7 +160,59 @@ public class Timeline
     	
     }
     
-    public void addKeyframeConverterSetup(final RealARGBColorGammaConverterSetup cs, final KeyFrameScene keyFrameScene, final Easing easing)
+    public void addKeyframeClippable3D(final Clippable3D clippable, final KeyFrameScene keyFrameScene, final Easing easing)
+    {
+    	String clName = tempName (clippable);
+		
+    	// clip type    	
+    	final Property<Integer> pClipType = new Property<Integer>() {
+		    @Override
+			public Integer get() { return clippable.getClipState(); }
+		    @Override
+			public void set(Integer v) { clippable.setClipState( v );}
+		};
+    	addKeyframe(clName + "_clip_type", pClipType, Interpolator.integerStep, easing, keyFrameScene );
+
+    	// clip range
+    	final Property<RealInterval> pClipRange = new Property<RealInterval>() {
+		    @Override
+			public RealInterval get() { return clippable.getClipInterval(); }
+		    @Override
+			public void set(RealInterval v) { if(clippable.getClipState() > 0) { clippable.setClipInterval( v );} }
+		};
+    	addKeyframe(clName + "_clip_range", pClipRange, Interpolator.realInterval, easing, keyFrameScene );
+    	
+    	// clip centers
+    	final Property<double []> pClipCenter = new Property<double []>() {
+		    @Override
+			public double [] get() { 
+		    	{
+		    		double [] out = new double [3];
+		    		System.arraycopy( clipSetups.clipCenters.getCenters( clippable ), 0, out, 0, 3 );
+		    		return out;
+		    	}}
+		    @Override
+			public void set(double [] v) { clipSetups.clipCenters.setCenters( clippable, v ); clipSetups.updateClipTransform( clippable, null );}
+		};
+    	addKeyframe(clName + "_clip_center", pClipCenter, Interpolator.doubleArrayLerp, easing, keyFrameScene );
+    	
+    	// clip rotation
+    	final Property<double []> pClipRotation = new Property<double []>() {
+		    @Override
+			public double [] get() { 
+		    	{
+		    		double [] out = new double [4];
+		    		System.arraycopy( clipSetups.clipRotation.getQuaternion( clippable ) , 0, out, 0, 4 );
+		    		return out;
+		    	}}
+		    @Override
+			public void set(double [] v) { clipSetups.clipRotation.setQuaternion( clippable, v ); clipSetups.updateClipTransform( clippable, null );}
+		};
+    	addKeyframe(clName + "_clip_rotation", pClipRotation, Interpolator.quatSLerp, easing, keyFrameScene );
+
+    }
+    
+    public void addKeyframeConverterSetup(final GammaConverterSetup cs, final KeyFrameScene keyFrameScene, final Easing easing)
     {
     	
     	String csName = tempName(cs);
@@ -177,8 +252,36 @@ public class Timeline
 			public void set(Double v) { cs.setAlphaGamma( v );}
 		};
     	addKeyframe(csName + "_alpha_gamma", pAlphaGamma, Interpolator.doubleLerp, easing, keyFrameScene );
-    	
+
+		// render type    	
+    	final Property<Integer> pRenderType = new Property<Integer>() {
+		    @Override
+			public Integer get() { return cs.getRenderType(); }
+		    @Override
+			public void set(Integer v) { cs.setRenderType( v );}
+		};
+    	addKeyframe(csName + "_render_type", pRenderType, Interpolator.integerStep, easing, keyFrameScene );
+
+		// render lighting type
+    	final Property<Integer> pRenderLight = new Property<Integer>() {
+		    @Override
+			public Integer get() { return cs.getLightingType(); }
+		    @Override
+			public void set(Integer v) { cs.setLightingType( v );}
+		};
+    	addKeyframe(csName + "_lighting_type", pRenderLight, Interpolator.integerStep, easing, keyFrameScene );
+
+		// render voxel interpolation
+    	final Property<Integer> pVoxelInterpolation = new Property<Integer>() {
+		    @Override
+			public Integer get() { return cs.getVoxelRenderInterpolation(); }
+		    @Override
+			public void set(Integer v) { cs.setVoxelRenderInterpolation( v ); }
+		};
+    	addKeyframe(csName + "_voxel_interpolation", pVoxelInterpolation, Interpolator.integerStep, easing, keyFrameScene );
+
     }
+    
     public void addKeyframeBasicShape(final BasicShape shape, final KeyFrameScene keyFrameScene, final Easing easing)
     {
     	String shapeName = tempName (shape);

@@ -117,7 +117,7 @@ public class ClipSetups
 		final double [] eAngles = clipRotation.getAngles( obj );
 		
 		//reset rotation
-		if(LinAlgHelpers.length( eAngles )<0.0001)
+		if(LinAlgHelpers.length( eAngles ) < 0.0001)
 		{
 			qCurr[0] = 1.0;
 			for(int d = 1; d < 4; d++)

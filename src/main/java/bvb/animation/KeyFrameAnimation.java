@@ -7,7 +7,6 @@ import javax.swing.DefaultListModel;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
-import bvb.animation.utils.Timeline;
 import bvb.gui.AnisotropicTransformAnimator3D;
 
 public class KeyFrameAnimation
@@ -21,8 +20,6 @@ public class KeyFrameAnimation
 	final ArrayList<Float> timeIntervals = new ArrayList<>();
 	
 	final ArrayList<KeyFrameScene> keyFrameList = new ArrayList<>();
-	
-	public final Timeline timeline = new Timeline();
 	
 	final public HashMap<Object, ArrayList<AnimationTransformObject>> objectToTransform = new HashMap<>();
 	

@@ -60,6 +60,7 @@ public class ClipRotation
 		
 		return out;
 	}
+
 	public double[] getQuaternion( final Clippable3D obj )
 	{
 		double [] out =  objToQuaternion.get( obj );
@@ -71,8 +72,6 @@ public class ClipRotation
 		out = objToQuaternion.get( obj );
 		return out;
 	}
-
-
 	
 	public void setAngles( final Clippable3D obj, final double[] eAngles)
 	{
@@ -82,6 +81,7 @@ public class ClipRotation
 	public void setQuaternion( final Clippable3D obj, final double[] quat)
 	{
 		objToQuaternion.put( obj, quat );
+		objToAngles.put( obj, Misc.quaternionToEulerAngles(quat) );
 	}
 	
 	
