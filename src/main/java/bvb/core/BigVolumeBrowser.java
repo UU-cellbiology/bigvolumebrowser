@@ -120,7 +120,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public BVBActions bvbActions;
 	
 	/** boxes around volume **/	
-	final VolumeBBoxes volumeBoxes;
+	final public VolumeBBoxes volumeBoxes;
 	
 	/** separate framebuffer for the transparent rendering **/
 	OffScreenFrameBufferWithDepth sceneBufTransparent = null;
@@ -855,7 +855,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/whitecube_2ch.xml" );
 
-		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/trace1514947168.xml" );

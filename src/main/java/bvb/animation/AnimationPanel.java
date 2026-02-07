@@ -496,6 +496,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			final KeyFrameScene keyFrameScene = listModel.get( nInd );
 			keyFrameScene.setScene( SceneView.getCurrentSceneView( bvb.bvvViewer ) );
 			kfAnim.updateTransitionTimeline();
+			timeline.deleteKeyframe( keyFrameScene );
+			timeline.addKeyframeBVB(bvb, keyFrameScene, Easing.LINEAR);
 		}
 	}
 	
@@ -741,7 +743,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			timeline.apply( fTimePoint );
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
 			bvb.bvbCards.panelShapesProperties.updateGUI();
-			bvb.updateSceneRender();
+			bvb.repaintBVV();
 		}
 	}
 	

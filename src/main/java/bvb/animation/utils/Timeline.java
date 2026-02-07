@@ -15,6 +15,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
 import bvb.utils.clip.ClipSetups;
 import bvb.utils.transform.TransformSetups;
+import bvvpg.core.VolumeViewerPanel;
 import bvvpg.source.converters.Clippable3D;
 import bvvpg.source.converters.GammaConverterSetup;
 
@@ -23,6 +24,8 @@ public class Timeline
 	public final ClipSetups clipSetups;
 	
 	public final TransformSetups transformSetups;
+	
+	public final VolumeViewerPanel bvvViewer;
 	
     private final List<Track<?>> tracks = new ArrayList<>();
     
@@ -34,6 +37,7 @@ public class Timeline
     {
     	clipSetups = bvb_.bvbCards.clipPanel.clipSetups;
     	transformSetups = bvb_.bvbCards.transformPanel.transformSetups;
+    	bvvViewer = bvb_.bvvViewer;
     }
     
     String tempName (final Object obj)
@@ -123,7 +127,7 @@ public class Timeline
     	final ArrayList<Object> allObjects = new ArrayList<>();
     	final ArrayList<GammaConverterSetup> converterSetups = new ArrayList<>();
     	// add all converter setups
-    	final Set< SourceAndConverter< ? > > allSources = bvb.bvvViewer.state().getVisibleAndPresentSources();
+    	final List< SourceAndConverter< ? > > allSources = bvb.bvvViewer.state().getSources();
     	
     	for(final SourceAndConverter< ? > sac :allSources)
 		{
@@ -251,7 +255,7 @@ public class Timeline
 			public RealInterval get() { return clippable.getClipInterval(); }
 		    @Override
 			public void set(RealInterval v) { 
-		    	if(clippable.getClipState() > 0) 
+		    	if(clippable.getClipState() > 0 && v != null) 
 		    	{ clippable.setClipInterval( v );} }
 		};
     	addKeyframe(clName + "_clip_range", pClipRange, Interpolator.realInterval, easing, keyFrameScene );
@@ -292,6 +296,16 @@ public class Timeline
     {
     	
     	String csName = tempName(cs);
+    	final SourceAndConverter< ? > sac = transformSetups.converterSetups.getSource( cs );
+    	
+    	//visibility
+    	final Property<Boolean> pDisplayVisible = new Property<Boolean>() {
+		    @Override
+			public Boolean get() { return bvvViewer.state().isSourceVisible(sac);  }
+		    @Override
+			public void set(Boolean v) { bvvViewer.state().setSourceActive( sac, v);}
+		};   	
+		addKeyframe(csName + "_visibility", pDisplayVisible, Interpolator.booleanStep, easing, keyFrameScene );
     	
     	//display range
     	final Property<double[]> pDisplayRange = new Property<double[]>() {

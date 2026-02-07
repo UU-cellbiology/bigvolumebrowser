@@ -164,7 +164,7 @@ public class Misc
 		
 	}
 	
-	public static boolean compareAffineTransforms(AffineTransform3D af1,AffineTransform3D af2 )
+	public static boolean compareAffineTransforms(AffineTransform3D af1, AffineTransform3D af2 )
 	{
 		boolean bOut = true;
 		

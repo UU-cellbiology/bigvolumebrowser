@@ -188,6 +188,7 @@ public class TransformSetups
 		if(obj instanceof ConverterSetup)
 		{
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
+			bvb.volumeBoxes.updateVolumeBoxSC(converterSetups.getSource((ConverterSetup)obj ));
 			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
 		}
 		if(obj instanceof BasicShape)
