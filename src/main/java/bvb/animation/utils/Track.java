@@ -44,7 +44,7 @@ public class Track< T >
     	// Before first key
         if (time <= keyframes.get(0).getTime()) 
         {
-        	if(Math.abs(time - keyframes.get(0).getTime())<0.000001)
+        	//if(Math.abs(time - keyframes.get(0).getTime())<0.000001)
         		property.set(keyframes.get(0).value);
             return;
         }
@@ -52,7 +52,7 @@ public class Track< T >
         final int last = keyframes.size() - 1;
         if (time >= keyframes.get(last).getTime()) 
         {
-        	if(Math.abs(time - keyframes.get(last).getTime())<0.000001)
+        	//if(Math.abs(time - keyframes.get(last).getTime())<0.000001)
         		property.set(keyframes.get(last).value);
             return;
         }

@@ -107,7 +107,7 @@ public class Misc
 		case 1:
 			sin = Math.sqrt(1.0 + 2.0 * (q[0] * q[2] - q[1] * q[3]));
 			cos = Math.sqrt(1.0 - 2.0 * (q[0] * q[2] - q[1] * q[3]));
-			return 2.0*Math.atan2(sin, cos) - Math.PI*0.5;
+			return 2.0 * Math.atan2(sin, cos) - Math.PI * 0.5;
 		case 2:
 			sin = 2 * (q[0] * q[3] + q[1] * q[2]);
 			cos = 1 - 2 * (q[2] * q[2] + q[3] * q[3]);
@@ -122,7 +122,7 @@ public class Misc
 	{
 		final double [] eAngles = new double[3];
 		
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			eAngles[d] = quaternionToAngle(d,q);
 		}

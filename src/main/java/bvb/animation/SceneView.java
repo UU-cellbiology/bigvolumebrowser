@@ -61,7 +61,7 @@ public class SceneView
 			writer.write("ViewTransform");
 			final double [] transform = new double [12];
 			viewerTransform.toArray(transform);
-			for (int m = 0; m<12; m++)
+			for (int m = 0; m < 12; m++)
 			{
 				writer.write("," + df3.format(transform[m]));
 			}
