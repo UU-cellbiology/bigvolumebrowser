@@ -47,6 +47,7 @@ import bdv.viewer.Source;
 
 public class Misc
 {
+	
 	public static RealInterval getSourceBoundingBox(final Source<?> source, int nTimePoint, int baseLevel)
 	{
 		final AffineTransform3D transformSource = new AffineTransform3D();
@@ -54,7 +55,28 @@ public class Misc
 		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
 		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
 		//extend to include all range
-		for(int d=0; d<3; d++)
+		for(int d = 0; d < 3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		final FinalRealInterval interval = new FinalRealInterval(min, max);
+		return transformSource.estimateBounds( interval );
+	}
+	
+	public static RealInterval getSourceBoundingBoxNoFixed(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformSource = new AffineTransform3D();
+		final AffineTransform3D transformFixed = new AffineTransform3D();
+
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
+		(( TransformedSource< ? > ) source).getFixedTransform( transformFixed );
+		transformSource.preConcatenate( transformFixed.inverse() );
+
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d = 0; d < 3; d++)
 		{
 			min[d] -= 0.5;
 			max[d] += 0.5;
@@ -79,6 +101,30 @@ public class Misc
 				else
 				{
 					interval = Intervals.union( interval, Misc.getSourceBoundingBox(source,t,0));
+				}
+					
+				t++;
+			}
+		}
+		return interval;
+	}
+	
+	public static RealInterval getSourceBoundingBoxAllTPNoFixed(final Source<?> source)
+	{
+		RealInterval interval = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(interval == null)
+				{
+					interval = Misc.getSourceBoundingBoxNoFixed(source,t,0);
+				}
+				else
+				{
+					interval = Intervals.union( interval, Misc.getSourceBoundingBoxNoFixed(source,t,0));
 				}
 					
 				t++;

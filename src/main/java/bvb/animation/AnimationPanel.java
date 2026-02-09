@@ -25,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
@@ -82,13 +81,13 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	int tsSpan = 100;
 	
 	/** play preview **/
-	AnimationPlayer player;
+	final AnimationPlayer player;
 	
 	ImageIcon tabIconRecord;
 	
-	ImageIcon tabIconPlay;
+	public ImageIcon tabIconPlay;
 	
-	ImageIcon tabIconStop;
+	public ImageIcon tabIconStop;
 	
 	float fPlaySpeedFactor  = 1.0f ;
 	
@@ -120,9 +119,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	public AnimationPanel(final BigVolumeBrowser bvb_)
 	{
 		this.bvb = bvb_;
-		
-		
-		
+	
 		dialogsAnim = new AnimationPanelDialogs(bvb, this);
 		
 		int nInitialTotalTime = 5;
@@ -133,14 +130,13 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		kfAnim = new KeyFrameAnimation(listModel);
 		kfAnim.setTotalTime( nInitialTotalTime );
 	
-		this.player = null;
+		this.player = new AnimationPlayer(bvb, this);
 		
 		JPanel panAnimTools = new JPanel(new GridBagLayout());  
 		//panAnimTools.setBorder(new PanelTitle(" Animation "));
 		
 		int nButtonSize = 40;		
-		GridBagConstraints cr = new GridBagConstraints();
-
+		GridBagConstraints gbc = new GridBagConstraints();
 		
 		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "render.png");
 		tabIconRecord = new ImageIcon(icon_path);
@@ -173,25 +169,44 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			}
 		});	
 				
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		panAnimTools.add(butRecord,gbc);
+		
+		gbc.gridx++;
+		panAnimTools.add(butPlayStop,gbc);
+		
+		
+		JPanel panTotTime = new JPanel(new GridBagLayout());
+		//panTotTime.setBorder(new PanelTitle(""));
+		GridBagConstraints cr = new GridBagConstraints();
 		cr.gridx = 0;
 		cr.gridy = 0;
-		panAnimTools.add(butRecord,cr);
+		panTotTime.add(new JLabel("Total time (s)"),cr);
+		cr.gridx++;
+		nfTotalTime = new NumberField(4);
+		nfTotalTime.setIntegersOnly( true );
+		nfTotalTime.setText(Integer.toString( (int)Math.ceil( kfAnim.getTotalTime())));
+		nfTotalTime.setMinimumSize(nfTotalTime.getPreferredSize());
+		nfTotalTime.addListener((t) -> setNewTotalTime(t) );
 		
-		cr.gridx++;
-		panAnimTools.add(butPlayStop,cr);
+		panTotTime.add(nfTotalTime, cr);
+				
+		gbc.gridx++;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.insets = new Insets(0,10,0,10);
+
+		panAnimTools.add(panTotTime,gbc);
 		
-		cr.gridx++;
-		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
-		sp.setPreferredSize(new Dimension((int) (nButtonSize*0.5),nButtonSize));
-		panAnimTools.add(sp,cr);
+		gbc.insets = new Insets(0,0,0,0);
 		
-		//filler
-		cr.gridx++;
-		cr.weightx = 0.01;
-		panAnimTools.add(new JLabel(), cr);
-		cr.gridx++;
-		cr.weightx = 0.0;
-		panAnimTools.add(butSettings,cr);
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.anchor = GridBagConstraints.EAST;
+
+		gbc.gridx++;
+		gbc.weightx = 0.0;
+		panAnimTools.add(butSettings,gbc);
 		
 		
 		JPanel panAnimPlot = new JPanel(new GridBagLayout());
@@ -212,13 +227,13 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
 		sliderPanel.add(timeSlider);
 		
-		cr = new GridBagConstraints();
-		cr.gridx = 0;
-		cr.gridy = 0;
-		cr.gridheight = 7;
+		gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.gridheight = 7;
 
-		cr.fill  = GridBagConstraints.BOTH;
-		cr.weighty = 0.99;
+		gbc.fill  = GridBagConstraints.BOTH;
+		gbc.weighty = 0.99;
 		
 
 		keyMarks = new DrawKeyPoints();
@@ -226,11 +241,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	    keyMarks.setPreferredSize( new Dimension(30,250));
 		//keyMarks.setBorder(new PanelTitle(" Keys"));
 		
-		panAnimPlot.add( keyMarks,cr );
-		cr.gridx++;
-		panAnimPlot.add( sliderPanel,cr );
+		panAnimPlot.add( keyMarks,gbc );
+		gbc.gridx++;
+		panAnimPlot.add( sliderPanel,gbc );
 		
-		cr.gridx++;
+		gbc.gridx++;
 		///RoiLIST and buttons
 
 		jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -256,61 +271,72 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		listScroller = new JScrollPane(jlist);
 		listScroller.setPreferredSize(new Dimension(170, 250));	
 	
-		cr.weightx = 0.5;
-		panAnimPlot.add(listScroller,cr);
+		gbc.weightx = 0.5;
+		panAnimPlot.add(listScroller,gbc);
 		
 		//BUTTONS
-		cr = new GridBagConstraints();
-		cr.gridy = 0;
-		cr.gridx = 3;
-		cr.fill = GridBagConstraints.NONE;
+		gbc = new GridBagConstraints();
+		gbc.gridy = 0;
+		gbc.gridx = 3;
+		gbc.fill = GridBagConstraints.NONE;
 		
 		butAdd = new JButton("Add");
-		panAnimPlot.add( butAdd, cr );
+		panAnimPlot.add( butAdd, gbc );
 		
-		cr.gridy++;
+		gbc.gridy++;
 		butReplace = new JButton("Replace");
-		panAnimPlot.add( butReplace, cr );
+		panAnimPlot.add( butReplace, gbc );
 
-		cr.gridy++;
+		gbc.gridy++;
 		butEdit = new JButton("Edit");
-		panAnimPlot.add( butEdit, cr );		
+		panAnimPlot.add( butEdit, gbc );		
 		
-		cr.gridy++;
+		gbc.gridy++;
 		butDelete = new JButton("Delete");
-		panAnimPlot.add( butDelete, cr );
+		panAnimPlot.add( butDelete, gbc );
 
-		cr.gridy++;
+		gbc.gridy++;
 		butSave = new JButton("Save");
 		//panAnimPlot.add( butSave, cr );
 		
-		cr.gridy++;
+		gbc.gridy++;
 		butLoad = new JButton("Load");
 		//panAnimPlot.add( butLoad, cr );
 		
-		cr.gridy++;
+		gbc.gridy++;
 		butUpdateSlider = new JToggleButton("<html><center>Slider<br>update</center></html>");
 		butUpdateSlider.setSelected( true );
 
-		panAnimPlot.add( butUpdateSlider, cr );
+		panAnimPlot.add( butUpdateSlider, gbc );
 		
 		// Blank/filler component
-		cr.gridy++;
-		cr.weightx = 0.01;
-		cr.weighty = 0.05;
-		panAnimPlot.add(new JLabel(), cr);	
+		gbc.gridy++;
+		gbc.weightx = 0.01;
+		gbc.weighty = 0.05;
+		panAnimPlot.add(new JLabel(), gbc);	
 		
-		// LISTENERS ASSIGNMENT
-		butRecord.addActionListener( (e) -> recordRenderButtonAction() );
-		butPlayStop.addActionListener( (e) -> playStopButtonAction() );
-		butSettings.addActionListener( (e) -> dialogsAnim.dialPanelSettings());
-		butAdd.addActionListener((e) -> addCurrentKeyFrame());
-		butReplace.addActionListener((e) -> replaceSelectedKeyFrame());
-		butEdit.addActionListener((e) -> editSelectedKeyFrame());
-		butDelete.addActionListener( (e)-> deleteSelectedKeyFrame());
-		butSave.addActionListener((e) -> dialStorylineSave());
-		butLoad.addActionListener((e) -> dialStorylineLoad());
-		butUpdateSlider.addActionListener((e)-> {bUpdateSlider = butUpdateSlider.isSelected();});
+		//put all panels together
+		gbc = new GridBagConstraints();
+		setLayout(new GridBagLayout());
+		gbc.insets = new Insets(4,4,2,2);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+
+		//TOP BUTTONS MENU 
+		add(panAnimTools,gbc);
+		
+		//KEYFRAMES list
+		gbc.gridy++;
+		gbc.weighty = 0.99;
+		gbc.fill = GridBagConstraints.BOTH;
+		add(panAnimPlot,gbc);		
+		
+		// Blank/filler component
+		gbc.gridy++;
+		gbc.weightx = 0.01;
+		gbc.weighty = 0.01;
+		add(new JLabel(), gbc);    
 		
 		// a solution for now
 		final Dimension butDim = butReplace.getPreferredSize();
@@ -326,51 +352,19 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		butSave.setPreferredSize(butDim); 		
 		butLoad.setMinimumSize(butDim);
 		butLoad.setPreferredSize(butDim); 
-
 		
-		JPanel panTotTime = new JPanel(new GridBagLayout());
-		//panTotTime.setBorder(new PanelTitle(""));
-		cr = new GridBagConstraints();
-		cr.gridx = 0;
-		cr.gridy = 0;
-		panTotTime.add(new JLabel("Total time (s)"),cr);
-		cr.gridx++;
-		nfTotalTime = new NumberField(4);
-		nfTotalTime.setIntegersOnly( true );
-		nfTotalTime.setText(Integer.toString( (int)Math.ceil( kfAnim.getTotalTime())));
-		nfTotalTime.setMinimumSize(nfTotalTime.getPreferredSize());
-		nfTotalTime.addListener((t) -> setNewTotalTime(t) );
+		// LISTENERS ASSIGNMENT
+		butRecord.addActionListener( (e) -> recordRenderButtonAction() );
+		butPlayStop.addActionListener( (e) -> playStopButtonAction() );
+		butSettings.addActionListener( (e) -> dialogsAnim.dialPanelSettings());
+		butAdd.addActionListener((e) -> addCurrentKeyFrame());
+		butReplace.addActionListener((e) -> replaceSelectedKeyFrame());
+		butEdit.addActionListener((e) -> editSelectedKeyFrame());
+		butDelete.addActionListener( (e)-> deleteSelectedKeyFrame());
+		butSave.addActionListener((e) -> dialStorylineSave());
+		butLoad.addActionListener((e) -> dialStorylineLoad());
+		butUpdateSlider.addActionListener((e)-> {bUpdateSlider = butUpdateSlider.isSelected();});
 		
-		panTotTime.add(nfTotalTime,cr);
-			
-		//put all panels together
-		cr = new GridBagConstraints();
-		setLayout(new GridBagLayout());
-		cr.insets = new Insets(4,4,2,2);
-		cr.gridx = 0;
-		cr.gridy = 0;
-		cr.fill = GridBagConstraints.HORIZONTAL;
-
-		//TOP BUTTONS MENU 
-		add(panAnimTools,cr);
-		
-		//KEYFRAMES list
-		cr.gridy++;
-		cr.weighty = 0.99;
-		cr.fill = GridBagConstraints.BOTH;
-		add(panAnimPlot,cr);
-
-		cr.gridy++;
-		cr.weighty = 0.0;
-		cr.fill = GridBagConstraints.BOTH;
-		add(panTotTime,cr);
-		
-		
-		// Blank/filler component
-		cr.gridy++;
-		cr.weightx = 0.01;
-		cr.weighty = 0.01;
-		add(new JLabel(), cr);    
 	}
 	
 	public void initTimeline()
@@ -395,14 +389,15 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	void runPlayer()
 	{
-		player = new AnimationPlayer(bvb, this);
-		bvb.setInputLock( true );		
-		butPlayStop.setEnabled( true );
-		butPlayStop.setIcon( tabIconStop );
-		butPlayStop.setToolTipText( "Stop playing" );
-		player.butPlayStop = butPlayStop;
-		player.tabIconPlay = tabIconPlay; 
-		player.execute();
+		//player = new AationPlayer(bvb, this);
+		//bvb.setInputLock( true );		
+		//butPlayStop.setEnabled( true );
+		//butPlayStop.setIcon( tabIconStop );
+		//butPlayStop.setToolTipText( "Stop playing" );
+		//player.butPlayStop = butPlayStop;
+		//player.tabIconPlay = tabIconPlay; 
+//		player.execute();
+		player.play();
 	}
 	
 	/** run or stop player **/
@@ -410,18 +405,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	{
 		if(listModel.size() > 0)
 		{
-			if( !bvb.getInputLock() )
-			{
-				runPlayer();
-			}
+
+			if(!player.isPlaying())
+				player.play();
 			else
-			{
-				if(bvb.getInputLock() && butPlayStop.isEnabled() && player != null 
-						&& !player.isCancelled() && !player.isDone())
-				{
-					player.cancel( false );
-				}
-			}
+				player.stop();
 		}
 		else
 		{
@@ -735,14 +723,16 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	    }
 	}
 
-	public void updateScene()
+	public synchronized void updateScene(final float fTimePoint)
 	{			
 		if(listModel.size() > 1)
-		{
-			float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
-			timeline.apply( fTimePoint );
+		{		
+			
+			//bvb.bvvViewer.stopUpdates( true );
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
+			timeline.apply( fTimePoint );			
 			bvb.bvbCards.panelShapesProperties.updateGUI();
+			//bvb.bvvViewer.stopUpdates( false );
 			bvb.repaintBVV();
 		}
 	}
@@ -755,7 +745,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			if(bUpdateSlider)
 			{
-				updateScene();
+				float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
+				updateScene(fTimePoint);
 			}
 		}
 		

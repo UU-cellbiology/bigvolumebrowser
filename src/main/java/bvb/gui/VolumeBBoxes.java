@@ -41,6 +41,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import org.joml.Matrix4fc;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BVBSettings;
@@ -62,7 +63,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	
 	private boolean bVisible = false;
 	
-	private boolean bLocked = false;
+	private volatile boolean bLocked = false;
 
 	public static final float NOT_SELECTED_WIDTH = 1.5f, SELECTED_WIDTH = 4.0f;
 	
@@ -114,7 +115,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 								final Color origColor = vbox.getLineColor();
 								vbox.setLineColor( BVBSettings.boxHighlightColor );
 								vbox.setLineThickness( SELECTED_WIDTH );
-								vbox.setAntiAlias(  SELECTED_WIDTH);
+								vbox.setAntiAlias( SELECTED_WIDTH );
 								vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
 								vbox.setAntiAlias(1.5f);
 								vbox.setLineColor(origColor );
@@ -123,6 +124,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 						}
 
 						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+						
 					}
 				}
 			});
@@ -208,7 +210,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		
 		for(final SourceAndConverter< ? > sac : sacList )
 		{
-			updateVolumeBoxSC(sac);
+			updateVolumeBoxSC(sac, null, nTimePoint);
 		}
 		
 		for(final BasicShape sh:bvb.shapes)
@@ -244,10 +246,10 @@ public class VolumeBBoxes extends AbstractBasicShape
 		bLocked = false;
 	}
 	
-	public void updateVolumeBoxSC(final SourceAndConverter< ? > sac)
+	public void updateVolumeBoxSC(final SourceAndConverter< ? > sac, final AffineTransform3D transform_in, final int nTimePoint)
 	{
-		final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 		final Source< ? > src = sac.getSpimSource();
+		bLocked = true;
 		if(src.isPresent( nTimePoint ))
 		{
 			final double [] min = src.getSource( nTimePoint, 0 ).minAsDoubleArray();
@@ -260,7 +262,15 @@ public class VolumeBBoxes extends AbstractBasicShape
 			}
 			final FinalRealInterval interval = new FinalRealInterval(min, max, false);
 			final AffineTransform3D transform = new AffineTransform3D();
+
 			src.getSourceTransform( nTimePoint, 0, transform );
+			if(transform_in != null)
+			{
+				final AffineTransform3D transformFixed = new AffineTransform3D();
+				(( TransformedSource< ? > ) src).getFixedTransform( transformFixed );
+				transform.preConcatenate( transformFixed.inverse() );
+				transform.preConcatenate( transform_in );
+			}
 			final VolumeBox currBox = bvvSourceToBox.get( sac );
 			if(currBox == null)
 			{		
@@ -280,6 +290,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		{
 			bvvSourceToBox.remove( sac );					
 		}
+		bLocked = false;
 	}
 	
 	

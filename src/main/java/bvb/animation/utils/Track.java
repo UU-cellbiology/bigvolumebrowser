@@ -7,8 +7,7 @@ import java.util.List;
 import bvb.animation.KeyFrameScene;
 
 public class Track< T >
-{
-	
+{	
 	private final String id;
 	
     private final Property<T> property;
@@ -44,16 +43,14 @@ public class Track< T >
     	// Before first key
         if (time <= keyframes.get(0).getTime()) 
         {
-        	//if(Math.abs(time - keyframes.get(0).getTime())<0.000001)
-        		property.set(keyframes.get(0).value);
+        	property.set(keyframes.get(0).value);
             return;
         }
         // After last key
         final int last = keyframes.size() - 1;
         if (time >= keyframes.get(last).getTime()) 
         {
-        	//if(Math.abs(time - keyframes.get(last).getTime())<0.000001)
-        		property.set(keyframes.get(last).value);
+       		property.set(keyframes.get(last).value);
             return;
         }
     	

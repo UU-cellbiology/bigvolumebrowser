@@ -47,7 +47,7 @@ public class ClipSetups
 {
 	final public ClipRotation clipRotation = new ClipRotation();
 	
-	final public ClipAxesBounds clipAxesBounds;
+	final public ClipRangeBounds clipRangeBounds;
 	
 	final public ClipCenters clipCenters;
 	
@@ -66,7 +66,7 @@ public class ClipSetups
 		bvb = bvb_;
 		converterSetups = bvb.bvvViewer.getConverterSetups();
 		selectedObjects = bvb.selectedObjects;
-		clipAxesBounds = new ClipAxesBounds(converterSetups);
+		clipRangeBounds = new ClipRangeBounds(converterSetups);
 		clipCenters = new ClipCenters(converterSetups);
 		clipCenterBounds = new ClipCenterBounds(converterSetups);
 	}

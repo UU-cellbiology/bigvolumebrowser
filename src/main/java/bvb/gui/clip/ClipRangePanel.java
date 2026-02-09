@@ -139,7 +139,7 @@ public class ClipRangePanel extends JPanel
 			final Clippable3D objCl = (Clippable3D)obj;
 			if(objCl.getClipState() != 0)
 			{
-				final Bounds3D bounds = new Bounds3D(clipSetups.clipAxesBounds.getBounds( objCl ));
+				final Bounds3D bounds = new Bounds3D(clipSetups.clipRangeBounds.getBounds( objCl ));
 				final double [] minBound = bounds.getMinBound();
 				final double [] maxBound = bounds.getMaxBound();
 				final RealInterval clipInterval = objCl.getClipInterval();
@@ -157,31 +157,19 @@ public class ClipRangePanel extends JPanel
 					clipInterval.realMin( min );
 					clipInterval.realMax( max );
 				}
-//				final AffineTransform3D clipTr = new AffineTransform3D();
-//				objCl.getClipTransform( clipTr );
-//				clipTr.apply( min, min );
-//				clipTr.apply( max, max );
-//				clipTr.apply( minBound, minBound );
-//				clipTr.apply( maxBound, maxBound );
+
 				if(clipSetups.bLocalCoordinates)
 				{
 					//convert to relative			
-					//double [] relShift = clipSetups.getSourceMinWithScaleTranslation( obj );
-					//double [] clipCenter = clipSetups.clipCenters.getCenters( objCl );
+
 					double [] relShift = clipSetups.getCurrentObjectCenter( obj );
 					for(int d = 0; d < 3; d++)
 					{
-						//relShift[d]-=clipCenter[d];
 						min[d] -= relShift[d];
 						max[d] -= relShift[d];
 						
 						minBound[d] -= relShift[d];
 						maxBound[d] -= relShift[d];	
-//						min[d] -= clipCenter[d];
-//						max[d] -= clipCenter[d];
-//						
-//						minBound[d] -= clipCenter[d];
-//						maxBound[d] -= clipCenter[d];	
 					}
 				}
 				if(bFirstCS)
@@ -252,7 +240,7 @@ public class ClipRangePanel extends JPanel
 			}
 			//convert range to absolute
 			RealInterval clipInt = objCl.getClipInterval();
-			final Bounds3D bounds = clipSetups.clipAxesBounds.getBounds( objCl );
+			final Bounds3D bounds = clipSetups.clipRangeBounds.getBounds( objCl );
 			if(clipInt == null)
 			{
 				clipInt  = new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound());
@@ -261,7 +249,7 @@ public class ClipRangePanel extends JPanel
 			{
 				bounds.getMinBound()[nAxis] = range.getMinBound();
 				bounds.getMaxBound()[nAxis] = range.getMaxBound();
-				clipSetups.clipAxesBounds.setBounds( objCl, bounds );
+				clipSetups.clipRangeBounds.setBounds( objCl, bounds );
 			}
 			
 			final double [] min = clipInt.minAsDoubleArray();
@@ -298,9 +286,9 @@ public class ClipRangePanel extends JPanel
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
 			if(range3D == null)
-				range3D = clipSetups.clipAxesBounds.getDefaultBounds( objCl );
+				range3D = clipSetups.clipRangeBounds.getDefaultBounds( objCl );
 			else
-				range3D = range3D.join( clipSetups.clipAxesBounds.getDefaultBounds( objCl ) );			
+				range3D = range3D.join( clipSetups.clipRangeBounds.getDefaultBounds( objCl ) );			
 		}
 
 		if(range3D != null)
@@ -330,10 +318,10 @@ public class ClipRangePanel extends JPanel
 			final Clippable3D objCl = (Clippable3D)obj;
 			if(objCl.getClipState() != 0)
 			{
-				Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( objCl );
+				Bounds3D range3D = clipSetups.clipRangeBounds.getDefaultBounds( objCl );
 				if(range3D != null)
 				{
-					clipSetups.clipAxesBounds.setBounds( objCl, range3D );
+					clipSetups.clipRangeBounds.setBounds( objCl, range3D );
 					objCl.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
 					clipSetups.clipCenters.setCenters(objCl, clipSetups.clipCenters.getDefaultCenters( objCl ));
 					clipSetups.clipCenterBounds.setBounds( objCl, clipSetups.clipCenterBounds.getDefaultBounds( objCl ) );

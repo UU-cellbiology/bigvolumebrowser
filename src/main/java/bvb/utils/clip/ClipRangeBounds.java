@@ -45,13 +45,13 @@ import bvb.utils.Misc;
 import bvvpg.source.converters.Clippable3D;
 
 /** a set of 3D bounds defining clipping volumes **/
-public class ClipAxesBounds
+public class ClipRangeBounds
 {
 	private final SourceToConverterSetupBimap bimap;
 
 	private final Map< Clippable3D, Bounds3D > objToBounds = new HashMap<>();	
 	
-	public ClipAxesBounds( final SourceToConverterSetupBimap bimap )
+	public ClipRangeBounds( final SourceToConverterSetupBimap bimap )
 	{
 		this.bimap = bimap;
 	}

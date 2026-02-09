@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 
 import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
+import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.core.VolumeViewerPanel;
@@ -167,6 +169,7 @@ public class Timeline
     	}
     	
     }
+    
     public void addKeyframeTransform(final Object obj, final KeyFrameScene keyFrameScene, final Easing easing)
     {
     	String clName = tempName (obj);
@@ -252,7 +255,16 @@ public class Timeline
     	// clip range
     	final Property<RealInterval> pClipRange = new Property<RealInterval>() {
 		    @Override
-			public RealInterval get() { return clippable.getClipInterval(); }
+			public RealInterval get() { 
+			    	RealInterval interval = clippable.getClipInterval();
+			    	//not sure this is the best, but let's keep it for now
+			    	if(interval != null)
+			    	{
+			    		return interval;
+			    	}
+			    	final Bounds3D bounds = new Bounds3D(clipSetups.clipRangeBounds.getBounds( clippable ));
+			    	return new FinalRealInterval(bounds.getMinBound(),bounds.getMaxBound(), true);
+		    	}
 		    @Override
 			public void set(RealInterval v) { 
 		    	if(clippable.getClipState() > 0 && v != null) 

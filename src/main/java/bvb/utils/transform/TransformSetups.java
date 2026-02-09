@@ -141,10 +141,11 @@ public class TransformSetups
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
 			(( TransformedSource< ? > )src).getFixedTransform( oldTransform );
 			// reset both transforms just in case
-			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
-			(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
+			//(( TransformedSource< ? > )src).setFixedTransform( newTransform );
+			//(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
 			
-			interval = Misc.getSourceBoundingBoxAllTP(src);
+			//interval = Misc.getSourceBoundingBoxAllTP(src);
+			interval = Misc.getSourceBoundingBoxAllTPNoFixed( src );
 		}
 		if(obj instanceof BasicShape)
 		{
@@ -182,14 +183,14 @@ public class TransformSetups
 		final AffineTransform3D translTr = new AffineTransform3D();
 		translTr.translate( tr );
 		newTransform.preConcatenate( translTr );
-			
-
 		
 		if(obj instanceof ConverterSetup)
 		{
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
-			bvb.volumeBoxes.updateVolumeBoxSC(converterSetups.getSource((ConverterSetup)obj ));
+			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
+			bvb.volumeBoxes.updateVolumeBoxSC(converterSetups.getSource((ConverterSetup)obj ), newTransform, nTimePoint);
+
 		}
 		if(obj instanceof BasicShape)
 		{
@@ -231,7 +232,7 @@ public class TransformSetups
 					max[d] += shift[d];
 				}
 				objCl.setClipInterval( FinalRealInterval.wrap( min, max));
-				final Bounds3D bounds = bvb.bvbCards.clipPanel.clipSetups.clipAxesBounds.getBounds( objCl );
+				final Bounds3D bounds = bvb.bvbCards.clipPanel.clipSetups.clipRangeBounds.getBounds( objCl );
 				
 				bounds.translate( shift );
 				
@@ -253,7 +254,8 @@ public class TransformSetups
 			}
 			bvb.bvbCards.clipPanel.updateGUI();
 		}
-		bvb.updateSceneRender();		
+		//bvb.updateSceneRender();	
+		bvb.repaintBVV();
 				
 	}	
 

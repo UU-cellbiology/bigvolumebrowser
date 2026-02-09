@@ -372,11 +372,11 @@ public class ClipPanel extends JPanel
 		for ( final Object obj: objList)
 		{
 			final Clippable3D objCl = (Clippable3D)obj;
-			Bounds3D range3D = clipSetups.clipAxesBounds.getDefaultBounds( objCl );
+			Bounds3D range3D = clipSetups.clipRangeBounds.getDefaultBounds( objCl );
 			
 			if(range3D != null)
 			{
-				clipSetups.clipAxesBounds.setBounds( objCl, range3D );
+				clipSetups.clipRangeBounds.setBounds( objCl, range3D );
 				clipSetups.clipRotation.setAngles(objCl, new double [3]);
 				objCl.setClipInterval(new FinalRealInterval(range3D.getMinBound(),range3D.getMaxBound()));
 				objCl.setClipTransform( new AffineTransform3D() );
