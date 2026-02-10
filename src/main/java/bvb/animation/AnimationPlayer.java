@@ -13,6 +13,7 @@ public class AnimationPlayer
     private float playbackSpeed = 1.0f;
     private float currentTime = 0f;
     private long lastTickNanos;
+    private float fIncSign = 1;
     
     private boolean bSliderUpdateState;
     
@@ -20,7 +21,6 @@ public class AnimationPlayer
 	{
 		this.bvb = bvb_;
 		this.aPanel = aPanel_;
-		//this.timeSlider =  aPanel.timeSlider;
 		timer = new Timer(1000 / 60, e -> tick());
 	}
 	
@@ -28,12 +28,14 @@ public class AnimationPlayer
     {
         if (playing) 
         	return;
+        
         bSliderUpdateState = aPanel.bUpdateSlider;
         aPanel.bUpdateSlider = false;
 		aPanel.butPlayStop.setIcon( aPanel.tabIconStop );
 		aPanel.butPlayStop.setToolTipText( "Stop playing" );
         playing = true;
         lastTickNanos = System.nanoTime();
+        fIncSign = 1;
         currentTime = aPanel.timeSlider.getValue() * (float) aPanel.kfAnim.nTotalTime / aPanel.tsSpan ;
         timer.start();
     }
@@ -56,7 +58,7 @@ public class AnimationPlayer
 
     	lastTickNanos = now;
 
-    	currentTime += deltaSeconds * playbackSpeed;
+    	currentTime += fIncSign * deltaSeconds * playbackSpeed;
 
         if (!playing) 
         {
@@ -66,17 +68,27 @@ public class AnimationPlayer
 
         if (currentTime > aPanel.kfAnim.nTotalTime) 
         {
-            //stop();
-            //t = aPanel.kfAnim.nTotalTime;
-            //loop
-        	currentTime = 0;
+        	if(!aPanel.bPlayerBackForth)
+			{
+        		currentTime = 0;
+			}
+        	else 
+        	{
+        		fIncSign = -1;
+        		currentTime = aPanel.kfAnim.nTotalTime;
+        	}
         }
-        aPanel.updateScene( currentTime );
-        //float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
+		if(currentTime < 0)
+		{
+			fIncSign = 1;
+			currentTime = 0;
+		}	
+        aPanel.updateScene( currentTime );	
+        
+        // update slider
         int nSliderPosition = ( int ) ( currentTime * aPanel.tsSpan/aPanel.kfAnim.getTotalTime() );
         aPanel.timeSlider.setValue( nSliderPosition );
-        //timeline.apply(t);
-        // component.repaint();
+
     }
     
     public boolean isPlaying()
