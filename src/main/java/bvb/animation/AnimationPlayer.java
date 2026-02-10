@@ -21,7 +21,7 @@ public class AnimationPlayer
 	{
 		this.bvb = bvb_;
 		this.aPanel = aPanel_;
-		timer = new Timer(1000 / 60, e -> tick());
+		timer = new Timer(1000 / 30, e -> tick());
 	}
 	
     public void play() 

@@ -89,6 +89,7 @@ import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
 import bvb.io.ImagePlusToSpimDataBvv;
 import bvb.io.LUTNameFIJI;
+import bvb.io.ObjectHashStorage;
 import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataLoader;
@@ -149,6 +150,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** data sources panel tree model **/
 	public DataTreeModel dataTreeModel;
 	
+	/** hash map of loaded objects **/
+	final public ObjectHashStorage objectHashStorage;
+	
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
 	final private ArrayList<Listener> listeners = new ArrayList<>();
@@ -180,6 +184,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		volumeBoxes = new VolumeBBoxes(this, false);
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		clipBoxes = new VolumeBBoxes(this, true);
+		objectHashStorage = new ObjectHashStorage();
 		
 	}
 	
@@ -282,6 +287,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
 		//listen to timepoint change
 		bvvViewer.addTimePointListener(this);
+		
+		objectHashStorage.clear();
 	}
 	
 	public void shutDownAll()
@@ -322,7 +329,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		return loadFromDiskBDVorBF(imageFileName, 1);
 	}
 	
-	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src)
+	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addSource(final Source<?> src)
 	{		
 		return addSource(src, src.getName(), dataTreeModel.getIconDataDefault());
 	}
@@ -335,20 +342,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, String sourceName, final ImageIcon icon)
 	{
 		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
-		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(sourceName, icon);
-		spimDataToInfo.put( spimData, info );
-		dataTreeModel.addData( spimData, out.getB(), info);
-		return out;
+		return addSpimData(spimData, info);
 	}
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai, String raiName, final ImageIcon icon)
 	{
 		final AbstractSpimData<?> spimData = RAIToSpimDataBvv.getSpimData( rai );
-		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(raiName, icon);
-		spimDataToInfo.put( spimData, info );
-		dataTreeModel.addData( spimData, out.getB(), info);
+		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData, info);
+		
 		if(rai.getType() instanceof UnsignedByteType)
 		{
 			for(BvvStackSource< ? > bvvSrc : out.getB())
@@ -370,12 +373,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
 		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBvv.getSpimData( imp );
-		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(), dataTreeModel.getIconFIJI());
-		spimDataToInfo.put( spimData, info );
-		dataTreeModel.addData( spimData, out.getB(), info);
-
-		return out;
+		return addSpimData(spimData, info);
 	}
 
 	
@@ -386,15 +385,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			spimDataToInfo.put( spimData, info );
 			dataTreeModel.addData( spimData, out.getB(), info);
-			if(info.sourceSettings.size()!=0)
+			if(info.sourceSettings.size() != 0)
 			{
 				info.applySourceSettings( out.getB() );
 			}
+			objectHashStorage.addBVVSources( out.getB(), info );
 		}
 		return out;
 	}
 	
-	ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData)
+	ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData)
 	{
 	
 		if(spimData == null)
@@ -470,6 +470,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	{
 		AbstractSpimData<?> spimData;
 		final ImageIcon spimDataIcon;
+		
 		if(nType == 0 )
 		{
 			spimData = SpimDataLoader.loadHDF5( sFilename );
@@ -480,15 +481,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			spimData = SpimDataLoader.loadBioFormats( sFilename );
 			spimDataIcon = dataTreeModel.getIconBioformats();
 		}
-		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
-		
-		if(out != null)
-		{
-			final BVBSpimDataInfo info = new BVBSpimDataInfo(Misc.getSourceStyleName(sFilename),spimDataIcon);
-			spimDataToInfo.put( spimData, info );
-			dataTreeModel.addData( spimData, out.getB(), info);
-		}
-		return out;
+
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(Misc.getSourceStyleName(sFilename),spimDataIcon);
+		return addSpimData(spimData, info);
+
 	}
 	
 	public synchronized void addShape(final BasicShape shape)
@@ -509,6 +505,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		bvbCards.panelShapes.updateShapesTableUI();
 		dataTreeModel.addData( shapes_in, shapeGroupName, dataTreeModel.getIconGroupShape() );
+		objectHashStorage.addShapes( shapes_in, shapeGroupName );
 		updateSceneRender();
 		bShowBGShader = false;
 		if(BVBSettings.bFocusOnSourcesOnLoad)
@@ -767,10 +764,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		
 		//put back viewer transform
-		bvvViewer.state().setViewerTransform( viewTransform );
 		SwingUtilities.invokeLater(()->
 		{
 			bvvFrame.getSplitPanel().setDividerLocation( dividerPos );
+			bvvViewer.state().setViewerTransform( viewTransform );
+
 		});
 		
 		//notify listener that BVB finished restarting

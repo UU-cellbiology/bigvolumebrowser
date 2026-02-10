@@ -39,6 +39,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import bvb.core.BVBSettings;
+import bvb.io.ObjectHashStorage;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
@@ -50,6 +51,8 @@ public class DataTreeModel implements TreeModel
 	public final ConcurrentHashMap < DataTreeNode, List< DataTreeNode> > dataParentChildren;
 
 	public final ConcurrentHashMap < DataTreeNode, DataTreeNode > dataChildParent;
+	
+	public final ObjectHashStorage objectHashStorage = new ObjectHashStorage();
 	
 	final DataTreeNode rootNode;
 	
@@ -85,6 +88,8 @@ public class DataTreeModel implements TreeModel
 	{
 		dataParentChildren =  new ConcurrentHashMap<>();
 		dataChildParent =  new ConcurrentHashMap<>();
+
+		
 		rootNode = new DataTreeNode(this);
 		listeners = new ArrayList<>();
 
@@ -117,7 +122,7 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( rootNode, spim );
 		dataChildParent.put( spimNode, rootNode );
 		ArrayList<DataTreeNode> sourcesTN = new ArrayList<>(); 
-		for(BvvStackSource<?> src :bvvList)
+		for(BvvStackSource<?> src : bvvList)
 		{
 			final DataTreeNode srcNode = new DataTreeNode(this, src);
 			srcNode.setDescription( src.getSources().get( 0 ).getSpimSource().getName() );
@@ -149,7 +154,7 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( rootNode, listNodes );
 		dataChildParent.put( shapesNode, rootNode );
 		ArrayList<DataTreeNode> shapesTN = new ArrayList<>(); 
-		for(BasicShape sh :shapes_)
+		for(final BasicShape sh : shapes_)
 		{
 			final DataTreeNode shNode = new DataTreeNode(this, sh);
 			shNode.setDescription( sh.toString() );

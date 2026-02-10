@@ -13,6 +13,7 @@ import net.imglib2.RealInterval;
 import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
+import bvb.io.ObjectHashStorage;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
@@ -29,6 +30,8 @@ public class Timeline
 	
 	public final VolumeViewerPanel bvvViewer;
 	
+	public final ObjectHashStorage objectHashStorage;
+	
     private final List<Track<?>> tracks = new ArrayList<>();
     
     private final Map<String, Track<?>> trackIndex = new HashMap<>();
@@ -40,11 +43,12 @@ public class Timeline
     	clipSetups = bvb_.bvbCards.clipPanel.clipSetups;
     	transformSetups = bvb_.bvbCards.transformPanel.transformSetups;
     	bvvViewer = bvb_.bvvViewer;
+    	objectHashStorage = bvb_.objectHashStorage;
     }
     
-    String tempName (final Object obj)
+    String getObjectName (final Object obj)
     {
-    	return obj.toString();
+    	return objectHashStorage.getBVBHashString( obj );
     }
     
     public void addTrack(final Track<?> track)
@@ -172,7 +176,11 @@ public class Timeline
     
     public void addKeyframeTransform(final Object obj, final KeyFrameScene keyFrameScene, final Easing easing)
     {
-    	String clName = tempName (obj);
+    	String clName = getObjectName (obj);
+    	if(clName == null)
+    	{
+    		return;
+    	}
 		//it is both BasicShape and GammaConverterSetup
     	if(obj instanceof Clippable3D )
     	{	      	
@@ -241,8 +249,11 @@ public class Timeline
     
     public void addKeyframeClippable3D(final Clippable3D clippable, final KeyFrameScene keyFrameScene, final Easing easing)
     {
-    	String clName = tempName (clippable);
-		
+    	String clName = getObjectName (clippable);
+    	if(clName == null)
+    	{
+    		return;
+    	}
     	// clip type    	
     	final Property<Integer> pClipType = new Property<Integer>() {
 		    @Override
@@ -307,7 +318,11 @@ public class Timeline
     public void addKeyframeConverterSetup(final GammaConverterSetup cs, final KeyFrameScene keyFrameScene, final Easing easing)
     {
     	
-    	String csName = tempName(cs);
+    	String csName = getObjectName(cs);
+    	if(csName == null)
+    	{
+    		return;
+    	}
     	final SourceAndConverter< ? > sac = transformSetups.converterSetups.getSource( cs );
     	
     	//visibility
@@ -386,7 +401,11 @@ public class Timeline
     
     public void addKeyframeBasicShape(final BasicShape shape, final KeyFrameScene keyFrameScene, final Easing easing)
     {
-    	String shapeName = tempName (shape);
+    	String shapeName = getObjectName (shape);
+    	if(shapeName == null)
+    	{
+    		return;
+    	}
     	// visibility
     	final Property<Boolean> pVisible = new Property<Boolean>() {
 		    @Override

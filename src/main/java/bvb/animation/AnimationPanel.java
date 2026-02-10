@@ -385,25 +385,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 //		render.execute();
 	}
 	
-	void runPlayer()
-	{
-		//player = new AationPlayer(bvb, this);
-		//bvb.setInputLock( true );		
-		//butPlayStop.setEnabled( true );
-		//butPlayStop.setIcon( tabIconStop );
-		//butPlayStop.setToolTipText( "Stop playing" );
-		//player.butPlayStop = butPlayStop;
-		//player.tabIconPlay = tabIconPlay; 
-//		player.execute();
-		player.play();
-	}
-	
 	/** run or stop player **/
 	void playStopButtonAction()
 	{
 		if(listModel.size() > 0)
 		{
-
 			if(!player.isPlaying())
 				player.play();
 			else

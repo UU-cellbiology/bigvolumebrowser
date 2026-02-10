@@ -42,10 +42,13 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 public class DataTreeNode implements TreeNode
 {
 	DataTreeNode root = null;
+	
 	public AbstractSpimData< ? > spimData = null;
+	
 	public BvvStackSource<?> bvvSource = null;
 	
 	public List<BasicShape> shapesArr = null;
+	
 	public BasicShape shape = null;
 	
 	final DataTreeModel dataModel;
