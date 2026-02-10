@@ -10,7 +10,9 @@ public class AnimationPlayer
 	final AnimationPanel aPanel;
 	private boolean playing = false;
     private final Timer timer;
-    private long startTime;
+    private float playbackSpeed = 1.0f;
+    private float currentTime = 0f;
+    private long lastTickNanos;
     
     private boolean bSliderUpdateState;
     
@@ -31,7 +33,8 @@ public class AnimationPlayer
 		aPanel.butPlayStop.setIcon( aPanel.tabIconStop );
 		aPanel.butPlayStop.setToolTipText( "Stop playing" );
         playing = true;
-        startTime = System.nanoTime();
+        lastTickNanos = System.nanoTime();
+        currentTime = aPanel.timeSlider.getValue() * (float) aPanel.kfAnim.nTotalTime / aPanel.tsSpan ;
         timer.start();
     }
     
@@ -46,8 +49,14 @@ public class AnimationPlayer
     
     private void tick() 
     {
-        float t =
-            (System.nanoTime() - startTime) / 1_000_000_000f;
+    	
+    	long now = System.nanoTime();
+    	float deltaSeconds =
+    			(now - lastTickNanos) / 1_000_000_000f;
+
+    	lastTickNanos = now;
+
+    	currentTime += deltaSeconds * playbackSpeed;
 
         if (!playing) 
         {
@@ -55,17 +64,16 @@ public class AnimationPlayer
             return;
         }
 
-        if (t > aPanel.kfAnim.nTotalTime) 
+        if (currentTime > aPanel.kfAnim.nTotalTime) 
         {
             //stop();
             //t = aPanel.kfAnim.nTotalTime;
             //loop
-        	t = 0;
-            startTime = System.nanoTime();
+        	currentTime = 0;
         }
-        aPanel.updateScene( t );
+        aPanel.updateScene( currentTime );
         //float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
-        int nSliderPosition = ( int ) ( t*aPanel.tsSpan/aPanel.kfAnim.getTotalTime() );
+        int nSliderPosition = ( int ) ( currentTime * aPanel.tsSpan/aPanel.kfAnim.getTotalTime() );
         aPanel.timeSlider.setValue( nSliderPosition );
         //timeline.apply(t);
         // component.repaint();
@@ -74,5 +82,14 @@ public class AnimationPlayer
     public boolean isPlaying()
     {
     	return playing;
+    }
+    
+    public void setPlaybackSpeed (final float fSpeed)
+    {
+    	playbackSpeed = fSpeed;
+    }
+    public float getPlaybackSpeed ()
+    {
+    	return playbackSpeed;
     }
 }

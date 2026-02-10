@@ -48,8 +48,8 @@ public class AationPlayer extends SwingWorker<Void, String>
 		}
 		while(true)
 		{
-			dWait = Math.round( dWaitPure / aPanel.fPlaySpeedFactor);
-
+			//dWait = Math.round( dWaitPure / aPanel.fPlaySpeedFactor);
+			dWait = 1;
 			Thread.sleep(Math.round( dWait ));
 			currVal += dInc;
 			if(currVal > timeSlider.getMaximum())

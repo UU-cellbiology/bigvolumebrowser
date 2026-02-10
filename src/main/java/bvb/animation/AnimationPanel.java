@@ -89,8 +89,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	public ImageIcon tabIconStop;
 	
-	float fPlaySpeedFactor  = 1.0f ;
-	
 	boolean bPlayerBackForth = Prefs.get("BVB.bPlayerBackForth", false);
 	
 	boolean bUpdateSlider = true;

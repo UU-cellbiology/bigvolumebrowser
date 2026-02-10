@@ -106,7 +106,7 @@ public class AnimationPanelDialogs
 		DecimalFormat df = new DecimalFormat("0.000", decimalFormatSymbols);
 		
 		final NumberField nfSpeedFactor = new NumberField(4);
-		nfSpeedFactor.setText(df.format(aPanel.fPlaySpeedFactor));
+		nfSpeedFactor.setText(df.format(aPanel.player.getPlaybackSpeed()));
 		
 		cd.gridx = 0;
 		cd.gridy = 0;	
@@ -127,7 +127,8 @@ public class AnimationPanelDialogs
 		if (reply == JOptionPane.OK_OPTION) 
 		{
 			
-			aPanel.fPlaySpeedFactor = ( float ) Math.min(Math.max( 0.01,Math.abs( Float.parseFloat( nfSpeedFactor.getText()))),100);
+			aPanel.player.setPlaybackSpeed( ( float ) Math.min(Math.max( 0.01,
+											Math.abs( Float.parseFloat( nfSpeedFactor.getText()))),100));
 			
 			aPanel.bPlayerBackForth = cbBackForth.isSelected();
 			Prefs.set("BVB.bPlayerBackForth", aPanel.bPlayerBackForth);
