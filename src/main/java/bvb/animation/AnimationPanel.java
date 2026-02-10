@@ -215,11 +215,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		JPanel sliderPanel = new JPanel(new BorderLayout());
 		//sliderPanel.setPreferredSize(new Dimension(50, 1250));
 		
-		timeSlider = new JSlider(SwingConstants.VERTICAL,0,tsSpan,1);
+		timeSlider = new JSlider(SwingConstants.VERTICAL, 0, tsSpan, 1);
 		
 		timeSlider.setInverted( true );
 		setSliderTotalTime();
-		timeSlider.setValue(0);
+		timeSlider.setValue( 0 );
 		
 		timeSlider.setPaintTicks(true);
 		timeSlider.setPaintLabels(true);

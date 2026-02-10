@@ -12,6 +12,8 @@ public class AnimationPlayer
     private final Timer timer;
     private long startTime;
     
+    private boolean bSliderUpdateState;
+    
 	public AnimationPlayer(final BigVolumeBrowser bvb_, AnimationPanel aPanel_)
 	{
 		this.bvb = bvb_;
@@ -22,7 +24,10 @@ public class AnimationPlayer
 	
     public void play() 
     {
-        if (playing) return;
+        if (playing) 
+        	return;
+        bSliderUpdateState = aPanel.bUpdateSlider;
+        aPanel.bUpdateSlider = false;
 		aPanel.butPlayStop.setIcon( aPanel.tabIconStop );
 		aPanel.butPlayStop.setToolTipText( "Stop playing" );
         playing = true;
@@ -33,9 +38,10 @@ public class AnimationPlayer
     public void stop() 
     {
         playing = false;
+        aPanel.bUpdateSlider = bSliderUpdateState;
         timer.stop();
         aPanel.butPlayStop.setIcon( aPanel.tabIconPlay );
-		aPanel.butPlayStop.setToolTipText( "Play" );
+		aPanel.butPlayStop.setToolTipText( "Play Preview" );
     }
     
     private void tick() 
@@ -49,12 +55,18 @@ public class AnimationPlayer
             return;
         }
 
-        if (t >= aPanel.kfAnim.nTotalTime) 
+        if (t > aPanel.kfAnim.nTotalTime) 
         {
-            stop();
-            t = aPanel.kfAnim.nTotalTime;
+            //stop();
+            //t = aPanel.kfAnim.nTotalTime;
+            //loop
+        	t = 0;
+            startTime = System.nanoTime();
         }
         aPanel.updateScene( t );
+        //float fTimePoint = (kfAnim.getTotalTime()) * (timeSlider.getValue() / (float)tsSpan);
+        int nSliderPosition = ( int ) ( t*aPanel.tsSpan/aPanel.kfAnim.getTotalTime() );
+        aPanel.timeSlider.setValue( nSliderPosition );
         //timeline.apply(t);
         // component.repaint();
     }
