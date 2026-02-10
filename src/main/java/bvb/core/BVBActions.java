@@ -76,7 +76,7 @@ import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
-
+import bvvpg.source.converters.GammaConverterSetup;
 import ij.Prefs;
 
 public class BVBActions
@@ -116,6 +116,8 @@ public class BVBActions
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
 		actions.runnableAction(() -> actionSelectClosestObject(2), "toggle object selection", "ctrl E" );
+		actions.runnableAction(() -> actionSelectAll(), "select all objects", "ctrl A" );
+
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
@@ -555,6 +557,26 @@ public class BVBActions
 			bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
 			bvb.updateSceneRender();
 		}
+	}
+	
+	void actionSelectAll()
+	{
+		ArrayList< Object > focusSet = CenterZoomBVV.getAllVisibleObjects( bvb );
+		if(focusSet.size() == 0)
+			return;
+		final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+		final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
+		for(final Object obj : focusSet)
+		{
+			if(obj instanceof SourceAndConverter)
+				selectedSAC.add( ( SourceAndConverter< ? > ) obj );
+			if(obj instanceof BasicShape)
+				selectedShapes.add( ( BasicShape ) obj );
+		}
+		bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
+		bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
+		bvb.updateSceneRender();
+
 	}
 	
 	void actionToggleManualTransform()

@@ -62,7 +62,7 @@ public class CenterZoomBVV
 	
 	public static RealInterval getAllSelectedVisibleObjectsBoundindBox(final BigVolumeBrowser bvb)
 	{
-		final ArrayList< Object > focusSet = new ArrayList<>();
+		ArrayList< Object > focusSet = new ArrayList<>();
 		
 		if(bvb.selectedObjects.isAnythingSelected())
 		{
@@ -86,20 +86,9 @@ public class CenterZoomBVV
 			}
 		}
 		//nothing is selected, let's focus on everything visible
-		if(focusSet.size() == 0)
+		else
 		{
-			final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
-			for(final SourceAndConverter< ? > sac :visibleSet)
-			{
-				focusSet.add( bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
-			}
-			for(final BasicShape sh : bvb.shapes)
-			{
-				if(sh.isVisible())
-				{
-					focusSet.add( sh );
-				}
-			}
+			focusSet = getAllVisibleObjects(bvb);
 		}
 		
 		if(focusSet.size() == 0)
@@ -107,6 +96,24 @@ public class CenterZoomBVV
 		
 		return getIntervalFromObjectsList(bvb, focusSet );
 		
+	}
+	
+	public static ArrayList< Object > getAllVisibleObjects(final BigVolumeBrowser bvb)
+	{
+		ArrayList< Object > focusSet = new ArrayList<>();
+		final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
+		for(final SourceAndConverter< ? > sac :visibleSet)
+		{
+			focusSet.add( sac );
+		}
+		for(final BasicShape sh : bvb.shapes)
+		{
+			if(sh.isVisible())
+			{
+				focusSet.add( sh );
+			}
+		}
+		return focusSet;
 	}
 	
 	public static RealInterval getIntervalFromObjectsList(final BigVolumeBrowser bvb, final List<Object> objList)
@@ -119,9 +126,9 @@ public class CenterZoomBVV
 			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			for(final Object obj : objList)
 			{
-				if(obj instanceof ConverterSetup)
+				if(obj instanceof SourceAndConverter)
 				{
-					final SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( (ConverterSetup)obj );
+					final SourceAndConverter< ? > sac = ( SourceAndConverter< ? > ) obj;
 					if(sac.getSpimSource().isPresent( nTimePoint ))
 					{
 						final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
