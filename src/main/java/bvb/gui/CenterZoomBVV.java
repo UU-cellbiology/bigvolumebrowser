@@ -80,7 +80,7 @@ public class CenterZoomBVV
 					final SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( (ConverterSetup)obj );
 					if(bvb.bvvViewer.state().isSourceVisible( sac ))
 					{
-						focusSet.add( obj );	
+						focusSet.add( sac );	
 					}
 				}
 			}
@@ -116,7 +116,7 @@ public class CenterZoomBVV
 		return focusSet;
 	}
 	
-	public static RealInterval getIntervalFromObjectsList(final BigVolumeBrowser bvb, final List<Object> objList)
+	public static RealInterval getIntervalFromObjectsList(final BigVolumeBrowser bvb, final List<?> objList)
 	{
 		RealInterval allInt = null;
 

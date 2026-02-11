@@ -141,11 +141,9 @@ public class TransformSetups
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
 			(( TransformedSource< ? > )src).getFixedTransform( oldTransform );
 			// reset both transforms just in case
-			//(( TransformedSource< ? > )src).setFixedTransform( newTransform );
-			//(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
-			
-			//interval = Misc.getSourceBoundingBoxAllTP(src);
-			interval = Misc.getSourceBoundingBoxAllTPNoFixed( src );
+			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
+			(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
+			interval = Misc.getSourceBoundingBoxAllTP( src );
 		}
 		if(obj instanceof BasicShape)
 		{
@@ -187,10 +185,7 @@ public class TransformSetups
 		if(obj instanceof ConverterSetup)
 		{
 			final Source< ? > src = converterSetups.getSource((ConverterSetup)obj ).getSpimSource();
-			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
-			bvb.volumeBoxes.updateVolumeBoxSC(converterSetups.getSource((ConverterSetup)obj ), newTransform, nTimePoint);
-
 		}
 		if(obj instanceof BasicShape)
 		{
@@ -254,8 +249,8 @@ public class TransformSetups
 			}
 			bvb.bvbCards.clipPanel.updateGUI();
 		}
-		//bvb.updateSceneRender();	
-		bvb.repaintBVV();
+		bvb.updateSceneRender();	
+		
 				
 	}	
 

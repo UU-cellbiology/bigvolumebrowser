@@ -138,6 +138,11 @@ public class PanelData extends JPanel
     	bvb.selectedObjects.addObjectSelectionListener( () -> updateObjectsSelection() );
 	}
 	
+	public synchronized void selectDataNode(final DataTreeNode node)
+	{
+		treeData.setSelectionPath( new TreePath(new Object[] {bvb.dataTreeModel.getRoot(), node} ));
+	}
+	
 	/** updates Sources and Shapes tables selections **/
 	synchronized void selectObjects()
 	{
@@ -147,7 +152,7 @@ public class PanelData extends JPanel
 		bLocked = true;
 		final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
 		final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
-		TreePath[] selPaths = treeData.getSelectionPaths();
+		TreePath [] selPaths = treeData.getSelectionPaths();
 		if(selPaths == null)
 		{
 			bLocked = false;
@@ -156,14 +161,15 @@ public class PanelData extends JPanel
 			return;
 		}
 		
-		for(int i=0;i<selPaths.length; i++)
+		for(int i = 0; i < selPaths.length; i++)
 		{
-
 			DataTreeNode node = (DataTreeNode) selPaths[i].getLastPathComponent(  );
+			
 			if(node.bvvSource != null)
 			{
 				selectedSAC.add( getSAC(node.bvvSource) );
 			}
+			
 			if(node.shape != null)
 			{
 				selectedShapes.add( node.shape );

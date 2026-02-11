@@ -56,7 +56,7 @@ public class ObjectHashStorage
 			
 			hash = Integer.toString( ind ) + "_" + hash;
 			objectHash.put(bvvStack.getBvvHandle().getConverterSetups().getConverterSetup( sac ), hash);
-			System.out.println(hash);
+			//System.out.println(hash);
 
 		}
 		
@@ -72,7 +72,7 @@ public class ObjectHashStorage
 			int ind = getHashIndex(hash);			
 			hash = Integer.toString( ind ) + "_" + hash;
 			objectHash.put(sh, hash);
-			System.out.println(hash);
+			//System.out.println(hash);
 		}
 	}
 	

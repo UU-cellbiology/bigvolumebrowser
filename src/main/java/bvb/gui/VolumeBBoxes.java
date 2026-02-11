@@ -41,7 +41,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import org.joml.Matrix4fc;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BVBSettings;
@@ -210,7 +209,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		
 		for(final SourceAndConverter< ? > sac : sacList )
 		{
-			updateVolumeBoxSC(sac, null, nTimePoint);
+			updateVolumeBoxSaC(sac, nTimePoint);
 		}
 		
 		for(final BasicShape sh:bvb.shapes)
@@ -246,7 +245,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		bLocked = false;
 	}
 	
-	public void updateVolumeBoxSC(final SourceAndConverter< ? > sac, final AffineTransform3D transform_in, final int nTimePoint)
+	public void updateVolumeBoxSaC(final SourceAndConverter< ? > sac, final int nTimePoint)
 	{
 		final Source< ? > src = sac.getSpimSource();
 		bLocked = true;
@@ -264,13 +263,6 @@ public class VolumeBBoxes extends AbstractBasicShape
 			final AffineTransform3D transform = new AffineTransform3D();
 
 			src.getSourceTransform( nTimePoint, 0, transform );
-			if(transform_in != null)
-			{
-				final AffineTransform3D transformFixed = new AffineTransform3D();
-				(( TransformedSource< ? > ) src).getFixedTransform( transformFixed );
-				transform.preConcatenate( transformFixed.inverse() );
-				transform.preConcatenate( transform_in );
-			}
 			final VolumeBox currBox = bvvSourceToBox.get( sac );
 			if(currBox == null)
 			{		

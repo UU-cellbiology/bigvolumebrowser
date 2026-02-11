@@ -76,7 +76,6 @@ import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
-import bvvpg.source.converters.GammaConverterSetup;
 import ij.Prefs;
 
 public class BVBActions

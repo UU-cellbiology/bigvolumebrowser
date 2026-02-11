@@ -81,12 +81,15 @@ import bvvpg.vistools.BvvStackSource;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
+import bvb.gui.SelectLoadedSource;
 import bvb.gui.SelectedObjects;
+import bvb.gui.SetTransformAfterResize;
 import bvb.gui.ShapeSelectionState;
 import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.BVBShapeCollectionInfo;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
+import bvb.gui.data.DataTreeNode;
 import bvb.io.ImagePlusToSpimDataBvv;
 import bvb.io.LUTNameFIJI;
 import bvb.io.ObjectHashStorage;
@@ -249,6 +252,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				showNoise();
 			}
 			bvvFrame.getSplitPanel().setDividerLocation( 400 );
+			bvvViewer.addTimePointListener(this);
 		}
 	}
 	
@@ -285,8 +289,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		setCanvasBGColor(BVBSettings.canvasBGColor);
 		Prefs.showMultibox( BVBSettings.bShowMultiBox);
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
-		//listen to timepoint change
-		bvvViewer.addTimePointListener(this);
 		
 		objectHashStorage.clear();
 	}
@@ -376,7 +378,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(), dataTreeModel.getIconFIJI());
 		return addSpimData(spimData, info);
 	}
-
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData, final BVBSpimDataInfo info)
 	{
@@ -384,12 +385,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		if(out != null)
 		{
 			spimDataToInfo.put( spimData, info );
-			dataTreeModel.addData( spimData, out.getB(), info);
+			final DataTreeNode dataNode = dataTreeModel.addData( spimData, out.getB(), info);
 			if(info.sourceSettings.size() != 0)
 			{
 				info.applySourceSettings( out.getB() );
 			}
 			objectHashStorage.addBVVSources( out.getB(), info );
+			SelectLoadedSource selector = new SelectLoadedSource(this, dataNode, out.getB());
+			selector.start();
+			//this.bvbCards.panelData.selectDataNode( dataNode );
 		}
 		return out;
 	}
@@ -406,7 +410,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		//let's check it we have some timepoints already (if only shapes are loaded)
 		final int nPrevTPN = bvvViewer.state().getNumTimepoints();
-		
 		//add data to BVV
 		List< BvvStackSource< ? > > bvvSources = BvvFunctions.show(spimData, Bvv.options().addTo( bvv ));
 		
@@ -459,7 +462,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		if(BVBSettings.bFocusOnSourcesOnLoad)
 		{
-			this.focusOnSources( bvvSources );
+			this.focusOnSources( bvvSources );			
 		}
 
 		return new ValuePair< >( spimData, bvvSources);
@@ -497,20 +500,21 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	public synchronized void addShapes(final List<BasicShape> shapes_in, String shapeGroupName)
 	{
-		final ArrayList<Object> objList = new ArrayList<>();
 		for(final BasicShape sh:shapes_in)
 		{
 			shapes.add( sh );
-			objList.add( sh );
 		}
 		bvbCards.panelShapes.updateShapesTableUI();
-		dataTreeModel.addData( shapes_in, shapeGroupName, dataTreeModel.getIconGroupShape() );
+		DataTreeNode shapeNode = dataTreeModel.addData( shapes_in, shapeGroupName, dataTreeModel.getIconGroupShape() );
 		objectHashStorage.addShapes( shapes_in, shapeGroupName );
 		updateSceneRender();
+		
 		bShowBGShader = false;
+		
 		if(BVBSettings.bFocusOnSourcesOnLoad)
 		{						
-			this.focusOnRealInterval( CenterZoomBVV.getIntervalFromObjectsList( this, objList ) );
+			this.focusOnRealInterval( CenterZoomBVV.getIntervalFromObjectsList( this, shapes_in ) );
+			this.bvbCards.panelData.selectDataNode( shapeNode );
 		}
 		
 	}
@@ -762,14 +766,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			this.addShapes( shInf.shapes, shInf.collectionDescription );
 			
 		}
-		
+		bvvViewer.addTimePointListener(this);
 		//put back viewer transform
 		SwingUtilities.invokeLater(()->
 		{
 			bvvFrame.getSplitPanel().setDividerLocation( dividerPos );
-			bvvViewer.state().setViewerTransform( viewTransform );
-
 		});
+		SetTransformAfterResize.run( bvvViewer, viewTransform );
+		//bvvViewer.state().setViewerTransform( viewTransform );
+
 		
 		//notify listener that BVB finished restarting
 		for(Listener l : listeners)

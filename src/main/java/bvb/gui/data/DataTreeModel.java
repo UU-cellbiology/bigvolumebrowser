@@ -105,12 +105,12 @@ public class DataTreeModel implements TreeModel
 
 	}
 	
-	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, BVBSpimDataInfo info)
+	public DataTreeNode addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, BVBSpimDataInfo info)
 	{
-		addData(spimData, bvvList, info.sourceDescription, info.icon);
+		return addData(spimData, bvvList, info.sourceDescription, info.icon);
 	}
 	
-	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, String dataName, final ImageIcon spimDataIcon)
+	public DataTreeNode addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, String dataName, final ImageIcon spimDataIcon)
 	{
 		List<DataTreeNode> spim =  dataParentChildren.get( rootNode );
 		if(spim == null)
@@ -133,16 +133,17 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( spimNode, sourcesTN );
 		
 		fireTreeStructureChanged();
+		return spimNode;
 	}
 	
-	public void addData(BasicShape shape_, String dataName, final ImageIcon shapeIcon)
+	public DataTreeNode addData(BasicShape shape_, String dataName, final ImageIcon shapeIcon)
 	{
 		final ArrayList<BasicShape> shList = new ArrayList<>();
 		shList.add( shape_ );
-		addData(shList, dataName, shapeIcon);
+		return addData(shList, dataName, shapeIcon);
 	}
 	
-	public void addData(final List<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
+	public DataTreeNode addData(final List<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
 	{
 		List<DataTreeNode> listNodes =  dataParentChildren.get( rootNode );
 		if(listNodes == null)
@@ -173,6 +174,7 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( shapesNode, shapesTN );
 		
 		fireTreeStructureChanged();
+		return shapesNode;
 	}
 	
 	@Override
@@ -202,7 +204,7 @@ public class DataTreeModel implements TreeModel
 	@Override
 	public Object getChild( Object parent, int index )
 	{
-		if(parent==null || !(parent instanceof DataTreeNode) )
+		if(parent == null || !(parent instanceof DataTreeNode) )
 			return null;
 		final List< DataTreeNode > list = dataParentChildren.get((DataTreeNode)parent );
 		if(list == null)
@@ -232,7 +234,7 @@ public class DataTreeModel implements TreeModel
 	@Override
 	public int getIndexOfChild( Object parent, Object child )
 	{
-		if(parent==null || child == null )
+		if(parent == null || child == null )
 			return 0;
 		if(!(parent instanceof DataTreeNode))
 			return 0;
@@ -242,7 +244,7 @@ public class DataTreeModel implements TreeModel
 		final List< DataTreeNode > list = dataParentChildren.get((DataTreeNode)parent );
 		if(list == null)
 			return 0;
-		for(int i=0; i<list.size();i++)
+		for(int i = 0; i < list.size(); i++)
 		{
 			if(list.get( i ).equals( child ))
 				return i;
