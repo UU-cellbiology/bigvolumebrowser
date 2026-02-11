@@ -374,6 +374,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	void runRender()
 	{
+		if(player.isPlaying())
+			player.stop();
+		
 		render = new AnimationRender(bvb, this);
 		
 		render.addPropertyChangeListener( (evt) ->
