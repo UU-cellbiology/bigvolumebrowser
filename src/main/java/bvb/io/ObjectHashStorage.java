@@ -1,5 +1,6 @@
 package bvb.io;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,6 +11,7 @@ import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.shapes.BasicShape;
+import bvb.utils.Misc;
 import bvvpg.vistools.BvvStackSource;
 
 public class ObjectHashStorage
@@ -31,16 +33,23 @@ public class ObjectHashStorage
 	}
 	
 	public void addBVVSources(final List<BvvStackSource<?>> bvvList, BVBSpimDataInfo info)
-	{				
-		for(final BvvStackSource<?> bvvStack : bvvList)
+	{		
+		if(bvvList == null)
+			return;
+		
+		if(bvvList.size() == 0)
+			return;
+		
+		final ArrayList< SourceAndConverter< ? > > sacList = Misc.bvvSourcesToSaCList(bvvList);
+		
+		for(final SourceAndConverter< ? > sac : sacList)
 		{
-			final SourceAndConverter< ? > sac = bvvStack.getSources().get( 0 );
 			String hash = info.sourceDescription + sac.getSpimSource().getName();
-			Source< ? > src = sac.getSpimSource();
-			RandomAccessibleInterval< ? > rai0 = src.getSource( 0, 0 );
+			final Source< ? > src = sac.getSpimSource();
+			final RandomAccessibleInterval< ? > rai0 = src.getSource( 0, 0 );
 			if(rai0 != null)
 			{
-				long[] dim = rai0.dimensionsAsLongArray();
+				final long[] dim = rai0.dimensionsAsLongArray();
 				hash = hash + "[";
 				for (int d = 0; d < 3; d++)
 				{
@@ -52,10 +61,10 @@ public class ObjectHashStorage
 				}
 				hash = hash + "]";
 			}							
-			int ind = getHashIndex(hash);
+			final int ind = getHashIndex(hash);
 			
 			hash = Integer.toString( ind ) + "_" + hash;
-			objectHash.put(bvvStack.getBvvHandle().getConverterSetups().getConverterSetup( sac ), hash);
+			objectHash.put(bvvList.get(0).getBvvHandle().getConverterSetups().getConverterSetup( sac ), hash);
 			//System.out.println(hash);
 
 		}
@@ -69,7 +78,7 @@ public class ObjectHashStorage
 			String hash = "";
 			hash = hash  + sh.getClass().getName();
 			hash = hash + sh.toString() + shapeGroupName;
-			int ind = getHashIndex(hash);			
+			final int ind = getHashIndex(hash);			
 			hash = Integer.toString( ind ) + "_" + hash;
 			objectHash.put(sh, hash);
 			//System.out.println(hash);

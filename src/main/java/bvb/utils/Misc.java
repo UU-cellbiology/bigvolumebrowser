@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -44,6 +46,8 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.util.Affine3DHelpers;
 import bdv.util.BoundedRange;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
+import bvvpg.vistools.BvvStackSource;
 
 public class Misc
 {
@@ -407,6 +411,22 @@ public class Misc
 		}
 		return out;
 	}
-	
+	public static ArrayList<SourceAndConverter< ? >> bvvSourcesToSaCList (final List< BvvStackSource< ? > > bvvSources)
+	{
+		if(bvvSources == null)
+		{
+			return null;
+		}
+		
+		final ArrayList<SourceAndConverter< ? >> sacList = new ArrayList<>();
+		for (BvvStackSource< ? > bvvS : bvvSources)
+		{
+			for(SourceAndConverter< ? > sac : bvvS.getSources())
+			{
+				sacList.add( sac );
+			}
+		}
+		return sacList;
+	}
 	
 }

@@ -1,6 +1,5 @@
 package bvb.gui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Timer;
@@ -8,6 +7,7 @@ import javax.swing.Timer;
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.data.DataTreeNode;
+import bvb.utils.Misc;
 import bvvpg.vistools.BvvStackSource;
 
 /** workaround selection of sources in BVB **/
@@ -25,11 +25,7 @@ public class SelectLoadedSource
 		this.bvb = bvb;
 		this.dataNode = dataNode;
 		timer = new Timer(1000 / 10, e -> tick());
-		sourcesToSelect = new ArrayList<>();
-		for(final BvvStackSource< ? > bvvSource : bvvStackList)
-		{
-			sourcesToSelect.add( bvvSource.getSources().get( 0 ));
-		}
+		sourcesToSelect = Misc.bvvSourcesToSaCList (bvvStackList);
 		nSources = sourcesToSelect.size();
 	}
 	public void start() 

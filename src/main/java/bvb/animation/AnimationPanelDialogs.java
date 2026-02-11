@@ -16,7 +16,9 @@ import javax.swing.JTextField;
 import bvb.core.BVVSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
+import bvb.gui.GetFolderDialog;
 import bvb.gui.NumberField;
+import ij.IJ;
 import ij.Prefs;
 
 public class AnimationPanelDialogs
@@ -33,62 +35,62 @@ public class AnimationPanelDialogs
 
 	boolean dialRenderSettings()
 	{
-//		final JPanel panRenderSettings = new JPanel();
-//		panRenderSettings.setLayout(new GridBagLayout());
-//		
-//		GridBagConstraints cd = new GridBagConstraints();
-//		GBCHelper.alighLeft(cd);
-//		
-//		final NumberField nfFPS = new NumberField(4);
-//		nfFPS.setIntegersOnly( true );
-//		nfFPS.setText(Integer.toString( aPanel.nRenderFPS ));
-//		final NumberField nfWidth = new NumberField(4);
-//		nfWidth.setIntegersOnly( true );
-//		nfWidth.setText(Integer.toString( aPanel.nRenderWidth ));
-//		final NumberField nfHeight = new NumberField(4);
-//		nfHeight.setIntegersOnly( true );
-//		nfHeight.setText(Integer.toString( aPanel.nRenderHeight));
-//		
-//		cd.gridx = 0;
-//		cd.gridy = 0;	
-//		panRenderSettings.add(new JLabel("Render FPS:"),cd);
-//		cd.gridx++;
-//		panRenderSettings.add(nfFPS, cd);	
-//		
-//		cd.gridx = 0;
-//		cd.gridy++;	
-//		panRenderSettings.add(new JLabel("Render width (px):"),cd);
-//		cd.gridx++;
-//		panRenderSettings.add(nfWidth, cd);			
-//		
-//		cd.gridx = 0;
-//		cd.gridy++;	
-//		panRenderSettings.add(new JLabel("Render height (px):"),cd);
-//		cd.gridx++;
-//		panRenderSettings.add(nfHeight, cd);			
-//		
-//		int reply = JOptionPane.showConfirmDialog(null, panRenderSettings, "Render settings", 
-//				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-//		if (reply == JOptionPane.OK_OPTION) 
-//		{
-//			aPanel.nRenderFPS = Integer.parseInt( nfFPS.getText());
-//			Prefs.set("BigTrace.nRenderFPS", (double)aPanel.nRenderFPS);
-//			
-//			aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
-//			Prefs.set("BigTrace.nRenderWidth", (double)aPanel.nRenderWidth);
-//			
-//			aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
-//			Prefs.set("BigTrace.nRenderHeight", (double)aPanel.nRenderHeight);
-//			
-//			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( bt, "Save animation frames to folder.." );
-//			
-//			if(aPanel.sRenderSavePath == null)
-//			{
-//				bt.btPanel.progressBar.setString("animation aborted.");
-//				return false;
-//			}
-//			return true;
-//		}
+		final JPanel panRenderSettings = new JPanel();
+		panRenderSettings.setLayout(new GridBagLayout());
+		
+		GridBagConstraints cd = new GridBagConstraints();
+		GBCHelper.alighLeft(cd);
+		
+		final NumberField nfFPS = new NumberField(4);
+		nfFPS.setIntegersOnly( true );
+		nfFPS.setText(Integer.toString( aPanel.nRenderFPS ));
+		final NumberField nfWidth = new NumberField(4);
+		nfWidth.setIntegersOnly( true );
+		nfWidth.setText(Integer.toString( aPanel.nRenderWidth ));
+		final NumberField nfHeight = new NumberField(4);
+		nfHeight.setIntegersOnly( true );
+		nfHeight.setText(Integer.toString( aPanel.nRenderHeight));
+		
+		cd.gridx = 0;
+		cd.gridy = 0;	
+		panRenderSettings.add(new JLabel("Render FPS:"),cd);
+		cd.gridx++;
+		panRenderSettings.add(nfFPS, cd);	
+		
+		cd.gridx = 0;
+		cd.gridy++;	
+		panRenderSettings.add(new JLabel("Render width (px):"),cd);
+		cd.gridx++;
+		panRenderSettings.add(nfWidth, cd);			
+		
+		cd.gridx = 0;
+		cd.gridy++;	
+		panRenderSettings.add(new JLabel("Render height (px):"),cd);
+		cd.gridx++;
+		panRenderSettings.add(nfHeight, cd);			
+		
+		int reply = JOptionPane.showConfirmDialog(null, panRenderSettings, "Render settings", 
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		if (reply == JOptionPane.OK_OPTION) 
+		{
+			aPanel.nRenderFPS = Integer.parseInt( nfFPS.getText());
+			Prefs.set("BVB.nRenderFPS", (double)aPanel.nRenderFPS);
+			
+			aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
+			Prefs.set("BVB.nRenderWidth", (double)aPanel.nRenderWidth);
+			
+			aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
+			Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
+			
+			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder.." );
+			
+			if(aPanel.sRenderSavePath == null)
+			{
+				IJ.showStatus( "animation aborted.");
+				return false;
+			}
+			return true;
+		}
 		return false;
 		
 	}

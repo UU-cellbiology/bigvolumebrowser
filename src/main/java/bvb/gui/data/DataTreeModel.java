@@ -122,10 +122,10 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( rootNode, spim );
 		dataChildParent.put( spimNode, rootNode );
 		ArrayList<DataTreeNode> sourcesTN = new ArrayList<>(); 
-		for(BvvStackSource<?> src : bvvList)
+		for(final BvvStackSource<?> bvvSource : bvvList)
 		{
-			final DataTreeNode srcNode = new DataTreeNode(this, src);
-			srcNode.setDescription( src.getSources().get( 0 ).getSpimSource().getName() );
+			final DataTreeNode srcNode = new DataTreeNode(this, bvvSource);
+			srcNode.setDescription( bvvSource.getSources().get( 0 ).getSpimSource().getName() );
 			sourcesTN.add( srcNode );
 			dataChildParent.put( srcNode, spimNode );
 			

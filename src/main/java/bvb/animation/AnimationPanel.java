@@ -11,6 +11,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
@@ -94,7 +96,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	boolean bUpdateSlider = true;
 	
 	/** keyframe render **/
-	//AnimationRender render;
+	AnimationRender render;
 	
 	int nRenderFPS = (int)Prefs.get("BVB.nRenderFPS", 24.0);
 	
@@ -372,7 +374,35 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	void runRender()
 	{
-//		render = new AnimationRender< >(bt, this);
+		render = new AnimationRender(bvb, this);
+		final JPanel glass = new JPanel();
+		glass.setOpaque(false);
+		glass.addMouseListener(new MouseAdapter() {});
+		glass.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyPressed( KeyEvent e )
+			{
+				
+				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				{
+					render.cancel( true );
+					IJ.log( "Animation rendering was interrupted." );
+                }	
+			}
+
+			@Override
+			public void keyReleased( KeyEvent e )
+			{			
+			}
+
+			@Override
+			public void keyTyped( KeyEvent e )
+			{
+				
+			}});
+		render.glass = glass;
+		
 //		bt.bInputLock = true;
 //		bt.setLockMode(true);
 //		render.addPropertyChangeListener( bt.btPanel );
@@ -382,7 +412,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 //		butRecord.setToolTipText( "Stop render" );
 //		render.butRecord = butRecord;
 //		render.tabIconRecord = tabIconRecord; 
-//		render.execute();
+		render.execute();
 	}
 	
 	/** run or stop player **/
@@ -407,17 +437,21 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			if(!bvb.getInputLock() )
 			{
-//				if(dialogsAnim.dialRenderSettings())
-//				{
-//					runRender();
-//				}
+				if(dialogsAnim.dialRenderSettings())
+				{
+					runRender();
+				}
 			}
 			else
 			{
-//				if(bt.bInputLock && butRecord.isEnabled() && render!=null && !render.isCancelled() && !render.isDone())
-//				{
-//					render.cancel( false );
-//				}
+				//bt.bInputLock
+				if(render != null && butRecord.isEnabled())
+				{
+					if( !render.isCancelled() && !render.isDone())
+					{
+						render.cancel( false );
+					}
+				}
 			}
 		}
 		else

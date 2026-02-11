@@ -667,16 +667,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		this.bvbActions.runSettingsCommand();
 	}
 	
-	public void focusOnSources(List< BvvStackSource< ? > > bvvSources)
+	public void focusOnSources(final List< BvvStackSource< ? > > bvvSources)
 	{
-		final ArrayList<SourceAndConverter< ? >> sacList = new ArrayList<>();
-		for (BvvStackSource< ? > bvvS : bvvSources)
-		{
-			for(SourceAndConverter< ? > sac : bvvS.getSources())
-			{
-				sacList.add( sac );
-			}
-		}
+		final ArrayList<SourceAndConverter< ? >> sacList = Misc.bvvSourcesToSaCList(bvvSources);
 		
 		final RealInterval interval = CenterZoomBVV.getIntervalFromSourcesList(this,sacList);
 
@@ -689,7 +682,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			if(Misc.checkInterval(interval))
 			{
-				CenterZoomBVV.focusAnimateOnInterval(this, interval,BVBSettings.dFocusScreenFraction);
+				CenterZoomBVV.focusAnimateOnInterval(this, interval, BVBSettings.dFocusScreenFraction);
 			}
 		}
 	}
@@ -766,15 +759,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			this.addShapes( shInf.shapes, shInf.collectionDescription );
 			
 		}
+		
 		bvvViewer.addTimePointListener(this);
-		//put back viewer transform
+		
 		SwingUtilities.invokeLater(()->
 		{
 			bvvFrame.getSplitPanel().setDividerLocation( dividerPos );
 		});
+		
+		//put back viewer transform after window resizing is finished
 		SetTransformAfterResize.run( bvvViewer, viewTransform );
-		//bvvViewer.state().setViewerTransform( viewTransform );
-
 		
 		//notify listener that BVB finished restarting
 		for(Listener l : listeners)
