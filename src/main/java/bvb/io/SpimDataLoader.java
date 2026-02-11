@@ -180,7 +180,7 @@ public class SpimDataLoader
 		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8 || seriesBitDepth[nOpenSeries] == FormatTools.FLOAT)
 		{
 			OpenerSettings settings = OpenerSettings.BioFormats()
-					.location(new File(imageFileName))
+					.location(imageFileName)
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
 					.positionConvention("TOP LEFT")
