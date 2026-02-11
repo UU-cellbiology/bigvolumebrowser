@@ -375,6 +375,14 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	void runRender()
 	{
 		render = new AnimationRender(bvb, this);
+		
+		render.addPropertyChangeListener( (evt) ->
+		{
+			if ("progress".equals(evt.getPropertyName())) {
+                IJ.showProgress( (Integer)evt.getNewValue(), 100);
+            }
+		});
+		
 		final JPanel glass = new JPanel();
 		glass.setOpaque(false);
 		glass.addMouseListener(new MouseAdapter() {});
@@ -402,16 +410,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				
 			}});
 		render.glass = glass;
+		IJ.log( "BVB: starting rendering to " + sRenderSavePath);
+		IJ.log( "BVB: press Esc to interrupt");
 		
-//		bt.bInputLock = true;
-//		bt.setLockMode(true);
-//		render.addPropertyChangeListener( bt.btPanel );
-//		
-//		butRecord.setEnabled( true );
-//		butRecord.setIcon( tabIconStop );
-//		butRecord.setToolTipText( "Stop render" );
-//		render.butRecord = butRecord;
-//		render.tabIconRecord = tabIconRecord; 
 		render.execute();
 	}
 	
@@ -445,7 +446,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			else
 			{
 				//bt.bInputLock
-				if(render != null && butRecord.isEnabled())
+				if(render != null )
 				{
 					if( !render.isCancelled() && !render.isDone())
 					{

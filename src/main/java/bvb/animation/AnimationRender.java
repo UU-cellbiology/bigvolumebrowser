@@ -3,10 +3,9 @@ package bvb.animation;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.KeyAdapter;
-import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
@@ -17,6 +16,7 @@ import javax.swing.SwingWorker;
 import bdv.ui.splitpanel.SplitPanel;
 import bdv.util.Prefs;
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.BVVWindowState;
 import bvvpg.core.render.VolumeRenderer.RepaintType;
 import ij.IJ;
 
@@ -24,14 +24,32 @@ public class AnimationRender extends SwingWorker<Void, String>
 {
 	final BigVolumeBrowser bvb;
 	final AnimationPanel aPanel;
-	Dimension dimsIni = null;
 	public JPanel glass = null;
+	
+	public final BVVWindowState bvvWindowState;
 	
 	public AnimationRender(final BigVolumeBrowser bvb_, AnimationPanel aPanel_)
 	{
 		this.bvb = bvb_;
 		this.aPanel = aPanel_;
+		bvvWindowState = new BVVWindowState(bvb);
+		bvvWindowState.saveBvvWindowState();	
 	}
+	
+	@Override
+    protected void process(List<String> chunks) 
+	{
+		String message = chunks.get( chunks.size() -1 );
+		if(message.startsWith( "Notice" ))
+		{
+			IJ.log( message );	
+		}
+		else
+		{
+			IJ.showStatus( message );
+		}
+    }
+
 	@Override
 	protected Void doInBackground() throws Exception
 	{
@@ -56,8 +74,6 @@ public class AnimationRender extends SwingWorker<Void, String>
 		Prefs.showTextOverlay(false);
 		final float dT = aPanel.kfAnim.nTotalTime / (float)( nTotFrames - 1 );		
 		
-		dimsIni = new Dimension(bvb.bvvFrame.getContentPane().getSize());
-		
 		bvb.bvvViewer.setRenderMode( true );
 		
 		SplitPanel splitPanel =  bvb.bvvFrame.getSplitPanel();
@@ -70,6 +86,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 		Component component = bvb.bvvViewer;	
 		
 		int nHeight = aPanel.nRenderHeight;
+		
 		//check if there is time slider => +25 in height
 		if(bvb.bvvViewer.state().getNumTimepoints() > 1)
 		{
@@ -100,10 +117,13 @@ public class AnimationRender extends SwingWorker<Void, String>
 		{
 			bvb.repaintBVV();
 		});
+		
 		for(int nFr = 0; nFr < nTotFrames; nFr++)
 		{
-			//setProgress(nFr * 100/ (nTotFrames - 1));
-			//setProgressState("rendering frames ("+Integer.toString( nFr+1 )+"/"+Integer.toString(nTotFrames)+")");
+			setProgress(Math.round(  nFr * 100 / (nTotFrames - 1)));
+
+			publish("rendering frame ("+Integer.toString( nFr+1 )+"/"+Integer.toString(nTotFrames)+")");
+			
 			final float fTimePoint = nFr * dT;
 
 			SwingUtilities.invokeAndWait( ()->
@@ -127,7 +147,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 				if (nTotalTime > nTimeLimitmS)
 				{
 					bWait = false;
-					IJ.log( "Rendering of frame " + Integer.toString( nFr + 1 ) + " took more than a minute, proceeding with current result." );
+					publish( "Notice: rendering of frame " + Integer.toString( nFr + 1 ) + " took more than a minute, proceeding with current result." );
 				}
 				if(isCancelled())
 				{
@@ -161,38 +181,29 @@ public class AnimationRender extends SwingWorker<Void, String>
     		String msg = String.format("Unexpected error during animation render: %s", 
     				e.getCause().toString());
     		System.out.println(msg);
-    		bvb.bvvViewer.setRenderMode( false );
     	} 
     	catch (InterruptedException e) 
     	{
-    		// Process e here
+    		e.getCause().printStackTrace();
+    		String msg = String.format("Unexpected error during animation render: %s", 
+    				e.getCause().toString());
+    		System.out.println(msg);
     	}
     	catch (Exception e)
     	{
-
     		System.out.println("Animation render interrupted by user.");
-    		bvb.bvvViewer.setRenderMode( false );
-        	//setProgress(100);	
-        	//setProgressState("Render interrupted by user.");
-    	}	
-    	
-    	bvb.bvvViewer.setRenderMode( false );
-    	if(dimsIni != null)
-    		bvb.bvvFrame.getContentPane().setPreferredSize( dimsIni );
 
-		bvb.bvvFrame.pack();
-        
+    	}	
+    	setProgress(100);    	
+    	bvb.bvvViewer.setRenderMode( false );
 		bvb.bvvFrame.setResizable( true );
         if(glass != null)
         {
         	glass.setVisible(false);
         }
+        
+        bvvWindowState.restoreBvvWindowState();
     	
-		if(aPanel.butRecord != null && aPanel.tabIconRecord!= null)
-    	{
-			aPanel.butRecord.setIcon( aPanel.tabIconRecord );
-			aPanel.butRecord.setToolTipText( "Render" );
-    	}
 		if(!aPanel.bRenderMultiBox)
 		{
 			Prefs.showMultibox(true);

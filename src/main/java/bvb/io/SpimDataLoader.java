@@ -28,7 +28,6 @@
  */
 package bvb.io;
 
-import java.io.File;
 import java.io.IOException;
 
 import net.imglib2.RandomAccessibleInterval;

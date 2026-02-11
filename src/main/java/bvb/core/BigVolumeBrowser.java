@@ -43,12 +43,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
-import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.ValuePair;
@@ -83,7 +81,7 @@ import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.gui.SelectLoadedSource;
 import bvb.gui.SelectedObjects;
-import bvb.gui.SetTransformAfterResize;
+import bvb.gui.BVVWindowState;
 import bvb.gui.ShapeSelectionState;
 import bvb.gui.VolumeBBoxes;
 import bvb.gui.data.BVBShapeCollectionInfo;
@@ -691,15 +689,13 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void restartBVV()
 	{
 		
+		//save Bvv window location and view
+		final BVVWindowState bvvWindowState = new BVVWindowState(this);
+		bvvWindowState.saveBvvWindowState();
+		
 		//gather all the spimdata
 		ArrayList<AbstractSpimData<?>> spimDataAll = Collections.list( spimDataToBVVSourceList.keys() );
-		//save window position and size on the screen
-	    final java.awt.Point bvv_p = bvvFrame.getLocation();
-	    final java.awt.Dimension bvv_d = bvvFrame.getContentPane().getSize();
-		
-	    //let's save viewer transform
-		AffineTransform3D viewTransform = bvvViewer.state().getViewerTransform();
-		
+
 		//save settings
 		updateSpimDataInfo();
 		
@@ -708,8 +704,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		boolean focusStore = BVBSettings.bFocusOnSourcesOnLoad;
 		BVBSettings.bFocusOnSourcesOnLoad = false;
-		
-		final int dividerPos = bvvFrame.getSplitPanel().getDividerLocation();
 
 		//now restart	
 		closeBVV();
@@ -731,23 +725,19 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		bvbCards.resetClipTransformPanels();
 	    bvbCards.installCards();
+
+		//sync GUI	
+		this.selectedObjects = new SelectedObjects(this);
 		
-		//restore window position		
-		bvvFrame.setLocation( bvv_p );	
-		bvvFrame.getContentPane().setPreferredSize( bvv_d );	
-		bvvFrame.pack();
-		
+		BVBSettings.bFocusOnSourcesOnLoad = focusStore;		
+
 		//put back spimdata
 		for(AbstractSpimData<?> spimData:spimDataAll)
 		{
 			addSpimData(spimData, spimDataToInfo.get( spimData ));
 		}
 		
-		//sync GUI	
-		this.selectedObjects = new SelectedObjects(this);
-		
-		BVBSettings.bFocusOnSourcesOnLoad = focusStore;		
-
+		//put back shapes
 		for(final BVBShapeCollectionInfo shInf: shapesInfo)
 		{
 			//reload shapes
@@ -759,16 +749,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			this.addShapes( shInf.shapes, shInf.collectionDescription );
 			
 		}
-		
+		//restore window location
+		bvvWindowState.restoreBvvWindowState();
 		bvvViewer.addTimePointListener(this);
-		
-		SwingUtilities.invokeLater(()->
-		{
-			bvvFrame.getSplitPanel().setDividerLocation( dividerPos );
-		});
-		
-		//put back viewer transform after window resizing is finished
-		SetTransformAfterResize.run( bvvViewer, viewTransform );
 		
 		//notify listener that BVB finished restarting
 		for(Listener l : listeners)
