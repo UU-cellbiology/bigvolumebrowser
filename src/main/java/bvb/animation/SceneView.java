@@ -103,7 +103,7 @@ public class SceneView
 		int canvasH = viewer.getHeight();
 		transform.set( transform.get( 0, 3 ) - canvasW * 0.5, 0, 3 );
 		transform.set( transform.get( 1, 3 ) - canvasH * 0.5, 1, 3 );
-		transform.scale( 1.0/ canvasW );
+		transform.scale( 1.0/ canvasH );
 		return new SceneView(transform, viewer.state().getCurrentTimepoint());
 	}
 	
@@ -113,8 +113,8 @@ public class SceneView
 		affine.set( scene.getViewerTransform());
 		final int width = viewer.getWidth();
 		final int height = viewer.getHeight();
-		affine.scale( width );
-		affine.set( affine.get( 0, 3 ) + width  * 0.5 , 0, 3 );
+		affine.scale( height );
+		affine.set( affine.get( 0, 3 ) + width  * 0.5, 0, 3 );
 		affine.set( affine.get( 1, 3 ) + height * 0.5, 1, 3 );
 		viewer.state().setViewerTransform( affine );
 		final int nTimePoint = scene.getTimeFrame();

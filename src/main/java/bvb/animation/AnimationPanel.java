@@ -398,7 +398,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
 				{
 					render.cancel( true );
-					IJ.log( "Animation rendering was interrupted." );
+					IJ.log( "BVB: Animation rendering was interrupted." );
                 }	
 			}
 

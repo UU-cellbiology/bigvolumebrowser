@@ -2,6 +2,8 @@ package bvb.animation;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -12,7 +14,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-
 import bdv.ui.splitpanel.SplitPanel;
 import bdv.util.Prefs;
 import bvb.core.BigVolumeBrowser;
@@ -42,11 +43,11 @@ public class AnimationRender extends SwingWorker<Void, String>
 		String message = chunks.get( chunks.size() -1 );
 		if(message.startsWith( "Notice" ))
 		{
-			IJ.log( message );	
+			IJ.log( "BVB:" + message );	
 		}
 		else
 		{
-			IJ.showStatus( message );
+			IJ.showStatus( "BVB:" + message );
 		}
     }
 
@@ -73,7 +74,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 
 		Prefs.showTextOverlay(false);
 		final float dT = aPanel.kfAnim.nTotalTime / (float)( nTotFrames - 1 );		
-		
+		bvb.bvvFrame.setExtendedState(Frame.NORMAL);
 		bvb.bvvViewer.setRenderMode( true );
 		
 		SplitPanel splitPanel =  bvb.bvvFrame.getSplitPanel();
@@ -100,15 +101,17 @@ public class AnimationRender extends SwingWorker<Void, String>
 			glass.setVisible(true);
 			glass.requestFocusInWindow();
 		}
-       // bt.bvvFrame.setEnabled( false );	
-		bvb.bvvFrame.getContentPane().setPreferredSize( nRenderDim );
-		bvb.bvvFrame.pack();	
+
+		bvb.bvvFrame.getContentPane().setPreferredSize( null );
+		final Point bvv_p = bvb.bvvFrame.getLocation();
+		bvb.bvvFrame.setBounds( new Rectangle(bvv_p.x, bvv_p.y, nRenderDim.width, nRenderDim.height) );
+		
 		SwingUtilities.invokeAndWait( ()->
 		{
 			bvb.bvvFrame.setResizable( false );
 		});
 		Rectangle rect = bvb.bvvViewer.getDisplayComponent().getBounds();
-		BufferedImage bi =
+		final BufferedImage bi =
                 new BufferedImage(rect.width, rect.height,
                                     BufferedImage.TYPE_INT_ARGB);
 		RepaintType status;
@@ -155,8 +158,10 @@ public class AnimationRender extends SwingWorker<Void, String>
 				}	
 			}
 	        component.paint(bi.getGraphics());
+	        //Img< FloatType > img = bvb.bvvViewer.getOffscreenIMG();
+	        //ImageJFunctions.show( Views.hyperSlice( img, 0, 2 ));
 			ImageIO.write( bi, "png", new File( aPanel.sRenderSavePath + 
-			String.format("%0"+String.valueOf(nTotFrames).length() + "d", nFr + 1) + ".png") );
+			String.format("%0" + String.valueOf(nTotFrames).length() + "d", nFr + 1) + ".png") );
 			if(isCancelled())
 			{
 				return null;	
