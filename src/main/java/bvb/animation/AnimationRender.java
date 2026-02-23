@@ -40,7 +40,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 	@Override
     protected void process(List<String> chunks) 
 	{
-		String message = chunks.get( chunks.size() -1 );
+		String message = chunks.get( chunks.size() - 1 );
 		if(message.startsWith( "Notice" ))
 		{
 			IJ.log( "BVB:" + message );	
@@ -54,12 +54,13 @@ public class AnimationRender extends SwingWorker<Void, String>
 	@Override
 	protected Void doInBackground() throws Exception
 	{
+		final int nTotFrames = aPanel.kfAnim.nTotalTime * aPanel.nRenderFPS;
+		final float dT = aPanel.kfAnim.nTotalTime / (float)( nTotFrames - 1 );		
+
 		if(aPanel.sRenderSavePath == null)
 		{
 			return null;
 		}
-
-		final int nTotFrames = aPanel.kfAnim.nTotalTime * aPanel.nRenderFPS;
 		
 		if(!aPanel.bRenderMultiBox)
 		{
@@ -73,7 +74,6 @@ public class AnimationRender extends SwingWorker<Void, String>
 		}
 
 		Prefs.showTextOverlay(false);
-		final float dT = aPanel.kfAnim.nTotalTime / (float)( nTotFrames - 1 );		
 		bvb.bvvFrame.setExtendedState(Frame.NORMAL);
 		bvb.bvvViewer.setRenderMode( true );
 		
@@ -110,6 +110,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 		{
 			bvb.bvvFrame.setResizable( false );
 		});
+		
 		Rectangle rect = bvb.bvvViewer.getDisplayComponent().getBounds();
 		final BufferedImage bi =
                 new BufferedImage(rect.width, rect.height,
@@ -138,7 +139,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 			final long nWaitTime = 30;
 			final long nTimeLimitmS = aPanel.nRenderFrameTimeLimit * 1000;
 			boolean bWait = (bvb.bvvViewer.getRepaintStatus() != RepaintType.NONE);
-			//while(bt.viewer.getRepaintStatus() != RepaintType.NONE)
+
 			while(bWait)
 			{			
 				Thread.sleep( nWaitTime );
@@ -146,7 +147,9 @@ public class AnimationRender extends SwingWorker<Void, String>
 				//System.out.println(status);
 				nTotalTime += nWaitTime;
 				if(status == RepaintType.NONE)
-					{bWait = false;}
+				{
+					bWait = false;
+				}
 				if (nTotalTime > nTimeLimitmS)
 				{
 					bWait = false;
@@ -208,7 +211,7 @@ public class AnimationRender extends SwingWorker<Void, String>
         }
         
         bvvWindowState.restoreBvvWindowState();
-    	
+    	IJ.log( "BVB: rendering is finished." );
 		if(!aPanel.bRenderMultiBox)
 		{
 			Prefs.showMultibox(true);
