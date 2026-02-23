@@ -18,17 +18,20 @@ public class ObjectHashStorage
 {
 
 	public final ConcurrentHashMap < Object, String > objectHash;
+	public final ConcurrentHashMap < String, Object > hashObject;
 	public final ConcurrentHashMap < String, Integer > stringIndex;
 	
 	public ObjectHashStorage()
 	{	
 		objectHash = new ConcurrentHashMap<>();	
+		hashObject = new ConcurrentHashMap<>();	
 		stringIndex = new ConcurrentHashMap<>();	
 	}
 	
 	public void clear()
 	{
 		objectHash.clear();
+		hashObject.clear();
 		stringIndex.clear();
 	}
 	
@@ -65,6 +68,7 @@ public class ObjectHashStorage
 			
 			hash = Integer.toString( ind ) + "_" + hash;
 			objectHash.put(bvvList.get(0).getBvvHandle().getConverterSetups().getConverterSetup( sac ), hash);
+			hashObject.put( hash, bvvList.get(0).getBvvHandle().getConverterSetups().getConverterSetup( sac ) );
 			//System.out.println(hash);
 
 		}
@@ -81,6 +85,7 @@ public class ObjectHashStorage
 			final int ind = getHashIndex(hash);			
 			hash = Integer.toString( ind ) + "_" + hash;
 			objectHash.put(sh, hash);
+			hashObject.put( hash, sh );
 			//System.out.println(hash);
 		}
 	}
@@ -115,5 +120,9 @@ public class ObjectHashStorage
 		System.err.println("Error! Requesting hash of unknown BVB object.");
 		return null;
 
+	}
+	public Object getObjectFromHash(final String hash)
+	{
+		return hashObject.get( hash );
 	}
 }

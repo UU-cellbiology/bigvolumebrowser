@@ -22,17 +22,21 @@ public class Timeline
     private final Map<String, Track<?>> trackIndex = new HashMap<>();
     
     private final Map <KeyFrameScene, Set<Track<?>>> keyFramesToTracks = new HashMap<>();
+   
     final TimeLineHandler timeLineHandler;
+    
+    final PropertyRegistry propertyRegistry;
        
     public Timeline (final BigVolumeBrowser bvb)
     {
     	timeLineHandler = new TimeLineHandler(bvb, this);
+    	propertyRegistry = new PropertyRegistry(bvb);
     }
     
     public void addTrack(final Track<?> track)
     {
     	tracks.add( track );
-    	trackIndex.put(track.getId(), track);
+    	trackIndex.put(track.getTrackId(), track);
     }
     
     public Track<?> getTrack(String id) 
@@ -48,20 +52,21 @@ public class Timeline
     }
     
     public <T> void addKeyframe(
-            String trackId,
+            String objectId,
+            String propertyName,
             final Property<T> property,
             final Interpolator<T> interpolator,
             final Easing easing,
             final KeyFrameScene keyFrameScene)
     {
         @SuppressWarnings("unchecked")
-        Track<T> track = (Track<T>) trackIndex.get(trackId);
+        Track<T> track = (Track<T>) trackIndex.get(objectId + propertyName);
 
         if (track == null) 
         {
-            track = new Track<>(trackId, property, interpolator, easing); 
+            track = new Track<>(objectId, propertyName, property, interpolator, easing); 
             tracks.add( track );
-            trackIndex.put(trackId, track);
+            trackIndex.put(objectId + propertyName, track);
         }
         //store the parent scene key frame
         Set< Track<?> > setT = keyFramesToTracks.get( keyFrameScene );
@@ -74,6 +79,43 @@ public class Timeline
         
         //add keyframe to the track
         track.addKeyframe(new Keyframe<>(property.get(), keyFrameScene));
+    }
+    
+    public <T> void addKeyframe(
+            String objectId,
+            String propertyName,
+            final Easing easing,
+            final KeyFrameScene keyFrameScene)
+    {
+        final PropertyBinding< T > binding = propertyRegistry.get( objectId, propertyName );
+        
+        if(binding == null)
+        {
+        	System.err.println("Cannot find binding between " + objectId + "and " + propertyName);
+        	return;
+        }
+        @SuppressWarnings("unchecked")
+        Track<T> track = (Track<T>) trackIndex.get(objectId + propertyName);
+    	
+
+        if (track == null) 
+        {
+            track = new Track<>(objectId, propertyName, easing);
+            track.bind( binding.property, binding.interpolator );
+            tracks.add( track );
+            trackIndex.put(objectId + propertyName, track);
+        }
+        //store the parent scene key frame
+        Set< Track<?> > setT = keyFramesToTracks.get( keyFrameScene );
+        if(setT == null)
+        {
+        	setT = new HashSet<>();
+        	keyFramesToTracks.put( keyFrameScene, setT );
+        }
+        setT.add( track );
+        
+        //add keyframe to the track
+        track.addKeyframe(new Keyframe<>(binding.property.get(), keyFrameScene));
     }
     
     public void deleteKeyframe(final KeyFrameScene keyFrameScene)

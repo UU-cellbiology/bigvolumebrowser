@@ -294,10 +294,13 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	@Override
 	public void setLUT(String sLUTName)
 	{
-		this.sLUTName = sLUTName;
-		lutGPU = new LUTUploaderGPU();
-		lutGPU.setLUT( sLUTName );
-		((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+		if(!sLUTName.equals( "" ))
+		{
+			this.sLUTName = sLUTName;
+			lutGPU = new LUTUploaderGPU();
+			lutGPU.setLUT( sLUTName );
+			((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+		}
 	}
 	
 	@Override
@@ -315,8 +318,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 	{
 		return sLUTName;
 	}
-	
-	
+		
 	@Override
 	public void setRenderType(int nRenderType)
 	{
