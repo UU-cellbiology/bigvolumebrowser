@@ -87,7 +87,6 @@ public interface BasicSpots
 	public String getLUTName();
 	
 	public void setInvertedLUT(boolean bInv);
-	
 	public boolean isInvertedLUT();
 	
 	public void setMapLUTRange(final float fMin, final float fMax);

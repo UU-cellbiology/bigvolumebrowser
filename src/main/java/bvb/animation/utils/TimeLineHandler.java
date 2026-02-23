@@ -172,10 +172,17 @@ public class TimeLineHandler
     	//spots shade
 		timeline.addKeyframe(shapeName, "spots_shade", easing, keyFrameScene );
 		
+		// LUT mapping mode
+		timeline.addKeyframe(shapeName, "spots_mapLUTMode", easing, keyFrameScene );
+		
 		//LUT
-		if(!shape.getLUTName().equals( "" ))
-		{
-			timeline.addKeyframe(shapeName, "spots_LUT", easing, keyFrameScene );
-		}
+		timeline.addKeyframe(shapeName, "spots_LUT", easing, keyFrameScene );
+
+		// LUT inversion
+		timeline.addKeyframe(shapeName, "spots_LUTInverse", easing, keyFrameScene );
+
+		//LUT Range
+		timeline.addKeyframe(shapeName, "spots_LUTRange", easing, keyFrameScene );
+
     }
 }

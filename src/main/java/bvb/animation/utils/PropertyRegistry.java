@@ -600,6 +600,20 @@ public class PropertyRegistry
 			return ( PropertyBinding< T > ) binding;
 		}
 		
+		if (propertyName.equals( "spots_mapLUTMode" ))
+		{
+	    	final Property<Integer> pLUTMapMode = new Property<Integer>() {
+			    @Override
+				public Integer get() { return shape.getMapLUTMode(); }
+			    @Override
+				public void set(Integer v) { shape.setMapLUTMode( v );  }
+			};
+			final PropertyBinding<Integer> binding = new PropertyBinding<>();
+			binding.property = pLUTMapMode;
+			binding.interpolator = Interpolator.integerStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
 		if (propertyName.equals( "spots_LUT" ))
 		{
 	    	final Property<String> pLUT = new Property<String>() {
@@ -613,6 +627,35 @@ public class PropertyRegistry
 			binding.interpolator = Interpolator.stringStep;
 			return ( PropertyBinding< T > ) binding;
 		}
+		
+		if (propertyName.equals( "spots_LUTInverse" ))
+		{
+	    	final Property<Boolean> pLUTInv = new Property<Boolean>() {
+			    @Override
+				public Boolean get() { return shape.isInvertedLUT(); }
+			    @Override
+				public void set(Boolean v) { shape.setInvertedLUT( v );  }
+			};
+			final PropertyBinding<Boolean> binding = new PropertyBinding<>();
+			binding.property = pLUTInv;
+			binding.interpolator = Interpolator.booleanStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "spots_LUTRange" ))
+		{
+	    	final Property<Boolean> pLUTInv = new Property<Boolean>() {
+			    @Override
+				public Boolean get() { return shape.isInvertedLUT(); }
+			    @Override
+				public void set(Boolean v) { shape.setInvertedLUT( v );  }
+			};
+			final PropertyBinding<Boolean> binding = new PropertyBinding<>();
+			binding.property = pLUTInv;
+			binding.interpolator = Interpolator.booleanStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
 		return null;
 	}
 }

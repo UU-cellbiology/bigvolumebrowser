@@ -9,6 +9,7 @@ public interface Interpolator <T>
 	T interpolate(T a, T b, float t);
 	public static Interpolator<Float> floatLerp = (a, b, t) -> a + (b - a) * t;
 	public static Interpolator<Double> doubleLerp = (a, b, t) -> a + (b - a) * t;
+	public static Interpolator<float []> floatArrayLerp = (a, b, t) -> floatArrayLerp( a, b, t );
 	public static Interpolator<double []> doubleArrayLerp = (a, b, t) -> doubleArrayLerp( a, b, t );
 	public static final Interpolator<Boolean> booleanStep =  (a, b, t) -> t < 1.0f ? a : b;
 	public static final Interpolator<Integer> integerStep = (a, b, t) -> t < 1.0f ? a : b;
@@ -32,6 +33,16 @@ public interface Interpolator <T>
 
 	};
 
+	static float[] floatArrayLerp( float[] a, float[] b, float t )
+	{
+		final float [] out = new float[a.length];
+		for (int i = 0; i < a.length; i++)
+		{
+			out[ i ] = a[i] + (b[i] - a[i]) * t;
+		}
+		return out;
+	}
+	
 	static double[] doubleArrayLerp( double[] a, double[] b, float t )
 	{
 		final double [] out = new double[a.length];
@@ -41,6 +52,7 @@ public interface Interpolator <T>
 		}
 		return out;
 	}
+
 	
 	static double [] slerp (final double [] a, final double [] b, final double t)
 	{
