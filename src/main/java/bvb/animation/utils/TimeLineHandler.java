@@ -1,5 +1,7 @@
 package bvb.animation.utils;
 
+import java.awt.Color;
+
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 
@@ -7,6 +9,7 @@ import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
 import bvb.io.ObjectHashStorage;
+import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
@@ -282,5 +285,96 @@ public class TimeLineHandler
 		};
 
 		timeline.addKeyframe(shapeName + "_visible", pVisible, Interpolator.booleanStep, easing, keyFrameScene );
+		if(shape instanceof BasicMeshShape)
+		{
+			addKeyframeBasicMeshShape((BasicMeshShape)shape, keyFrameScene, easing);
+		}
+    }
+    
+    public void addKeyframeBasicMeshShape(final BasicMeshShape shape, final KeyFrameScene keyFrameScene, final Easing easing)
+    {
+    	String shapeName = getObjectName (shape);
+    	if(shapeName == null)
+    	{
+    		return;
+    	}
+    	// mesh color
+    	final Property<Color> pColor = new Property<Color>() {
+		    @Override
+			public Color get() { return shape.getColor(); }
+		    @Override
+			public void set(Color v) { shape.setColor( v ); }
+		};
+		timeline.addKeyframe(shapeName + "_mesh_color", pColor, new HSBColorInterpolator(), easing, keyFrameScene );
+		
+		//use of texture
+		if(shape.hasTexture())
+		{
+	    	// texture
+	    	final Property<Boolean> pTexture = new Property<Boolean>() {
+			    @Override
+				public Boolean get() { return shape.isTextureUsed(); }
+			    @Override
+				public void set(Boolean v) { shape.useTexture( v ); }
+			};
+			timeline.addKeyframe(shapeName + "_use_texture", pTexture, Interpolator.booleanStep, easing, keyFrameScene );			
+		}
+		
+		//render type
+    	final Property<Integer> pRenderType = new Property<Integer>() {
+		    @Override
+			public Integer get() { return shape.getRenderType(); }
+		    @Override
+			public void set(Integer v) { shape.setRenderType( v ); }
+		};
+		timeline.addKeyframe(shapeName + "_render_type", pRenderType, Interpolator.integerStep, easing, keyFrameScene );			
+    	
+		// point size
+    	final Property<Float> pPointSize = new Property<Float>() {
+		    @Override
+			public Float get() { return shape.getPointSize(); }
+		    @Override
+			public void set(Float v) { shape.setPointSize( v );}
+		};
+		timeline.addKeyframe(shapeName + "_point_size", pPointSize, Interpolator.floatLerp, easing, keyFrameScene );			
+
+		//surface render type
+    	final Property<Integer> pSurfaceRenderType = new Property<Integer>() {
+		    @Override
+			public Integer get() { return shape.getSurfaceRender(); }
+		    @Override
+			public void set(Integer v) { shape.setSurfaceRender( v ); }
+		};
+		timeline.addKeyframe(shapeName + "_surface_render_type", pSurfaceRenderType, Interpolator.integerStep, easing, keyFrameScene );			
+
+		
+		//surface grid type
+    	final Property<Integer> pSurfaceGrid = new Property<Integer>() {
+		    @Override
+			public Integer get() { return shape.getSurfaceGrid(); }
+		    @Override
+			public void set(Integer v) { shape.setSurfaceGrid( v ); }
+		};
+		timeline.addKeyframe(shapeName + "_surface_grid", pSurfaceGrid, Interpolator.integerStep, easing, keyFrameScene );			
+
+		// wire width 
+    	final Property<Float> pWireWidth = new Property<Float>() {
+		    @Override
+			public Float get() { return shape.getWireLineWidth(); }
+		    @Override
+			public void set(Float v) { shape.setWireLineWidth( v );}
+		};
+		timeline.addKeyframe(shapeName + "_wire_width", pWireWidth, Interpolator.floatLerp, easing, keyFrameScene );			
+
+		// wire width 
+    	final Property<Float> pSilhouetteDecay = new Property<Float>() {
+		    @Override
+			public Float get() { return shape.getSilhouetteDecay(); }
+		    @Override
+			public void set(Float v) { shape.setSilhouetteDecay( v );}
+		};
+		timeline.addKeyframe(shapeName + "_sil_decay", pSilhouetteDecay, Interpolator.floatLerp, easing, keyFrameScene );			
+
+		
     }
 }

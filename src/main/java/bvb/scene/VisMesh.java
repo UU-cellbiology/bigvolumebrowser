@@ -225,6 +225,11 @@ public class VisMesh extends AbstractClipTransformVis
 		fWireLineWidth = fIn;
 	}
 	
+	public float getWireLineWidth()
+	{
+		return fWireLineWidth;
+	}
+	
 	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
 	{
 		cartesianGridStep = cartesianGridStep_;		
@@ -244,6 +249,11 @@ public class VisMesh extends AbstractClipTransformVis
 	public void setSilhouetteDecay(final float silhouetteDecay_)
 	{
 		silhouetteDecay = silhouetteDecay_;
+	}
+	
+	public float getSilhouetteDecay()
+	{
+		return silhouetteDecay;
 	}
 	
 	public void setMesh(final Mesh mesh)

@@ -47,7 +47,7 @@ public interface BasicMeshShape
 	
 	public int getRenderType();
 	
-	public void setPointSize (final float fPointSize);
+	public void setPointSize(final float fPointSize);
 	
 	public float getPointSize();
 		
@@ -61,10 +61,12 @@ public interface BasicMeshShape
 
 	public void setWireLineWidth(final float fThickness);
 	
+	public float getWireLineWidth();
+	
 	public void setCartesianGrid(final float cartesianGridStep, final float cartesianFraction);
 	
 	public void setSilhouetteDecay(final float silhouetteDecay);
 	
-	
+	public float getSilhouetteDecay();
 	
 }
