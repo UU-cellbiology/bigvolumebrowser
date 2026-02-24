@@ -752,7 +752,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			
 			//bvb.bvvViewer.stopUpdates( true );
 			SceneView.setSceneView( bvb.bvvViewer, kfAnim.getSceneView( fTimePoint ) );
-			timeline.apply( fTimePoint );			
+			timeline.apply( fTimePoint );	
+			bvb.bvbCards.clipPanel.updateGUI();
+			bvb.bvbCards.transformPanel.updateGUI();
 			bvb.bvbCards.panelShapesProperties.updateGUI();
 			//bvb.bvvViewer.stopUpdates( false );
 			bvb.repaintBVV();
