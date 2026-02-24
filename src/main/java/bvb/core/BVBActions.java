@@ -71,9 +71,11 @@ import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import bdv.tools.brightness.ConverterSetup;
+import bdv.util.Affine3DHelpers;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.AbstractViewerPanel.AlignPlane;
 import bdv.viewer.animate.RotationAnimator;
+import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
@@ -97,6 +99,15 @@ public class BVBActions
 	public static final String[] ALIGN_XY_PLANE_KEYS = new String[] { "shift Z" };
 	public static final String[] ALIGN_ZY_PLANE_KEYS = new String[] { "shift X" };
 	public static final String[] ALIGN_XZ_PLANE_KEYS = new String[] { "shift Y", "shift A" };
+
+	public static final String[] ROTATE_X_AXIS_VIEW = new String[] { "ctrl X" };
+	public static final String[] ROTATE_Z_AXIS_VIEW  = new String[] { "ctrl Z" };
+	public static final String[] ROTATE_Y_AXIS_VIEW   = new String[] { "ctrl Y", "ctrl A" };
+
+	public static final String[] ROTATE_X_AXIS_WORLD = new String[] { "alt X" };
+	public static final String[] ROTATE_Z_AXIS_WORLD  = new String[] { "alt Z" };
+	public static final String[] ROTATE_Y_AXIS_WORLD   = new String[] { "alt Y", "alt A" };
+
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
@@ -132,6 +143,13 @@ public class BVBActions
 		actions.runnableAction(() -> alignBVB( AlignPlane.XY ), ALIGN_XY_PLANE, ALIGN_XY_PLANE_KEYS );
 		actions.runnableAction(() -> alignBVB( AlignPlane.ZY ), ALIGN_ZY_PLANE, ALIGN_ZY_PLANE_KEYS );
 		actions.runnableAction(() -> alignBVB( AlignPlane.XZ ), ALIGN_XZ_PLANE, ALIGN_XZ_PLANE_KEYS );
+		actions.runnableAction(() -> rotate(0, true), "rotate 90 x axis", ROTATE_X_AXIS_VIEW);
+		actions.runnableAction(() -> rotate(1, true), "rotate 90 y axis", ROTATE_Y_AXIS_VIEW);
+		actions.runnableAction(() -> rotate(2, true), "rotate 90 z axis", ROTATE_Z_AXIS_VIEW);
+		actions.runnableAction(() -> rotate(0, false), "rotate 90 x axis wrld", ROTATE_X_AXIS_WORLD);
+		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
+		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
+
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
@@ -609,7 +627,7 @@ public class BVBActions
 		}
 	}
 	
-	void alignBVB (final AlignPlane plane)
+	void alignBVB(final AlignPlane plane)
 	{
 		final double[] qTarget = new double[ 4 ];
 		LinAlgHelpers.quaternionInvert( plane.qAlign, qTarget );
@@ -617,6 +635,41 @@ public class BVBActions
 		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
 		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
 		bvb.bvvViewer.setTransformAnimator( new RotationAnimator( transform, centerX, centerY, qTarget, 300 ) );
+	}
+	
+	void rotate(final int nAxis, boolean bViewCoords)
+	{
+		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
+		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
+		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
+		
+		if(bViewCoords)
+		{
+			final AffineTransform3D transformNew = new  AffineTransform3D();
+			transformNew.set( transform );
+			// center shift
+			transformNew.set( transformNew.get( 0, 3 ) - centerX, 0, 3 );
+			transformNew.set( transformNew.get( 1, 3 ) - centerY, 1, 3 );	
+			//rotate
+			transformNew.rotate( nAxis, 0.5 * Math.PI );
+			// center un-shift
+			transformNew.set( transformNew.get( 0, 3 ) + centerX, 0, 3 );
+			transformNew.set( transformNew.get( 1, 3 ) + centerY, 1, 3 );
+			bvb.bvvViewer.setTransformAnimator( new AnisotropicTransformAnimator3D(transform, transformNew, 30));
+		}
+		else
+		{
+			final double[] qTarget = new double[ 4 ];
+			Affine3DHelpers.extractRotationAnisotropic( transform, qTarget );
+			final double[] dAxis = new double[3];
+			dAxis[nAxis] = 1.0;
+			final double[] qRot = new double[ 4 ];
+			LinAlgHelpers.quaternionFromAngleAxis(dAxis, 0.5 * Math.PI, qRot);
+			LinAlgHelpers.quaternionMultiply( qTarget, qRot, qTarget );
+			//LinAlgHelpers.quaternionInvert( qTarget, qTarget );			
+			bvb.bvvViewer.setTransformAnimator( new RotationAnimator(transform, centerX, centerY, qTarget, 30));
+
+		}
 	}
 	
 }
