@@ -108,7 +108,7 @@ public class SpimDataLoader
 	    	seriesBitDepth = new int[nSeriesCount];
 
 	    	MetadataRetrieve retrieve = (MetadataRetrieve) r.getMetadataStore();
-	    	for (int nS=0;nS<nSeriesCount;nS++)
+	    	for (int nS = 0; nS < nSeriesCount; nS++)
 	    	{
 	    		r.setSeries(nS);
 	    		seriesZsize[nS] = r.getSizeZ();

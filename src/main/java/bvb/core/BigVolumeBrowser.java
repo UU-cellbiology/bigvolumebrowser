@@ -88,12 +88,11 @@ import bvb.gui.data.BVBShapeCollectionInfo;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
 import bvb.gui.data.DataTreeNode;
-import bvb.io.ImagePlusToSpimDataBvv;
 import bvb.io.LUTNameFIJI;
 import bvb.io.ObjectHashStorage;
 import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
-import bvb.io.SpimDataLoader;
+import bvb.io.SpimDataWrapper;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
@@ -147,6 +146,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 	/** info about input data (icon, description) **/
 	private final ConcurrentHashMap < AbstractSpimData<?>, BVBSpimDataInfo> spimDataToInfo;
+	
+	public SpimDataWrapper spimDataWrapper;
 
 	/** data sources panel tree model **/
 	public DataTreeModel dataTreeModel;
@@ -229,6 +230,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		
 		dataTreeModel = new DataTreeModel();
+		
+		spimDataWrapper = new SpimDataWrapper(this);
 		
 		if(bvv == null)
 		{
@@ -363,7 +366,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		return out;
 	}
 	
-	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai)
+	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai)
 	{
 		String raiName = "RAI_"+Integer.toString(BVBSettings.nAddedRAINumber);
 		BVBSettings.nAddedRAINumber++;
@@ -372,14 +375,13 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addImagePlus(final ImagePlus imp)
 	{
-		final AbstractSpimData<?> spimData = ImagePlusToSpimDataBvv.getSpimData( imp );
-		final BVBSpimDataInfo info = new BVBSpimDataInfo(imp.getTitle(), dataTreeModel.getIconFIJI());
-		return addSpimData(spimData, info);
+		final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = spimDataWrapper.createSpimDataImagePlus(imp);
+		return addSpimData(spimDataInfo.getA(), spimDataInfo.getB());
 	}
 	
-	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData, final BVBSpimDataInfo info)
+	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData, final BVBSpimDataInfo info)
 	{
-		final ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> out = addSpimData(spimData);
+		final ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> out = addSpimData(spimData);
 		if(out != null)
 		{
 			spimDataToInfo.put( spimData, info );
@@ -396,6 +398,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		return out;
 	}
 	
+	/** main method adding spimdata to BVV **/	
 	ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addSpimData(final AbstractSpimData<?> spimData)
 	{
 	
@@ -448,9 +451,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			}
 			nSetup ++;
 		}
-
 		
 		spimDataToBVVSourceList.put( spimData, bvvSources );
+		
 		for (BvvStackSource< ? > bvvSource : bvvSources) 
 		{
 			bvvSourceToSpimData.put( bvvSource, spimData );
@@ -458,7 +461,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bShowBGShader = false;
 		updateSceneRender();
 		
-		if(BVBSettings.bFocusOnSourcesOnLoad)
+		if( BVBSettings.bFocusOnSourcesOnLoad )
 		{
 			this.focusOnSources( bvvSources );			
 		}
@@ -467,26 +470,14 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	}
 
 	/** nType 0 - BDV, nType 1 - BioFormats/TIF **/
-	ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> loadFromDiskBDVorBF(String sFilename, int nType)
-	{
-		AbstractSpimData<?> spimData;
-		final ImageIcon spimDataIcon;
-		
-		if(nType == 0 )
-		{
-			spimData = SpimDataLoader.loadHDF5( sFilename );
-			spimDataIcon = dataTreeModel.getIconBDV();
-		}
-		else
-		{
-			spimData = SpimDataLoader.loadBioFormats( sFilename );
-			spimDataIcon = dataTreeModel.getIconBioformats();
-		}
-
-		final BVBSpimDataInfo info = new BVBSpimDataInfo(Misc.getSourceStyleName(sFilename),spimDataIcon);
-		return addSpimData(spimData, info);
+	ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> loadFromDiskBDVorBF(String sFilename, final int nType)
+	{		
+		final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = 
+				spimDataWrapper.createSpimDataBDVorBF(sFilename, nType);
+		return addSpimData(spimDataInfo.getA(), spimDataInfo.getB());
 
 	}
+
 	
 	public synchronized void addShape(final BasicShape shape)
 	{
@@ -509,7 +500,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bShowBGShader = false;
 		
-		if(BVBSettings.bFocusOnSourcesOnLoad)
+		if( BVBSettings.bFocusOnSourcesOnLoad )
 		{						
 			this.focusOnRealInterval( CenterZoomBVV.getIntervalFromObjectsList( this, shapes_in ) );
 			this.bvbCards.panelData.selectDataNode( shapeNode );
