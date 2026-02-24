@@ -17,9 +17,11 @@ This speeds up render and allows exploration of datasets larger than GPU memory.
 
 
 **Users**: please check full description/tutorials in the **[project's wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.   
+There is a **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary)).   
 For questions, tag me (<a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a>) at <a href="https://forum.image.sc/">image.sc</a> forum.   
 
-**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out, since the code comments are not in the best shape. 
+**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).  
+Feel free to reach out, since the code description/comments are not always in the best shape. 
 
 ----------
 **Questions with answers:**  
