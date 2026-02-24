@@ -1,12 +1,14 @@
 package bvb.animation.utils;
 
 import java.awt.Color;
+import java.util.Arrays;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.shapes.SpotsMapSetups;
 import bvb.io.ObjectHashStorage;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
@@ -28,12 +30,20 @@ public class PropertyRegistry
 	
 	final VolumeViewerPanel bvvViewer;
 	
+	final SpotsMapSetups spotsMapSetups;
+	
+	final SpotsMapSetups spotsAlphaSetup;
+	
 	public PropertyRegistry(final BigVolumeBrowser bvb)
 	{
+    	objectHashStorage = bvb.objectHashStorage;
+
     	clipSetups = bvb.bvbCards.clipPanel.clipSetups;
     	transformSetups = bvb.bvbCards.transformPanel.transformSetups;
     	bvvViewer = bvb.bvvViewer;
-    	objectHashStorage = bvb.objectHashStorage;
+    	
+    	spotsMapSetups = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.colorCodePanel.spotsLUTSetup;
+    	spotsAlphaSetup = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.opacityPanel.spotsAlphaSetup;
 	
 	}
 	
@@ -644,15 +654,83 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUTRange" ))
 		{
-	    	final Property<Boolean> pLUTInv = new Property<Boolean>() {
+	    	final Property<float[][]> pLUTRange = new Property<float[][]>() {
 			    @Override
-				public Boolean get() { return shape.isInvertedLUT(); }
+				public float[][] get() { 
+			    	final float [][] range = spotsMapSetups.getMapAllFloat( shape );
+			    	final float [][] copy = Arrays.stream(range).map(float[]::clone).toArray(float[][]::new);
+			    	return copy; }
 			    @Override
-				public void set(Boolean v) { shape.setInvertedLUT( v );  }
+				public void set(float[][] v) { 
+			    	final int nMode = shape.getMapLUTMode() - 1;
+			    	if(nMode >= 0)
+			    	{
+				    	final float [][] copy = Arrays.stream(v).map(float[]::clone).toArray(float[][]::new);
+
+			    		spotsMapSetups.setRanges( shape, copy );
+			    		shape.setMapLUTRange( v[nMode][0], v[nMode][1] ); 
+			    		shape.setMapLUTGamma( v[nMode][4] );
+			    	}
+			    	}
+			};
+			final PropertyBinding<float[][]> binding = new PropertyBinding<>();
+			binding.property = pLUTRange;
+			binding.interpolator = Interpolator.floatIndexArrayLerp;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "spots_alphaMapMode" ))
+		{
+	    	final Property<Integer> pAlphaMapMode = new Property<Integer>() {
+			    @Override
+				public Integer get() { return shape.getMapAlphaMode(); }
+			    @Override
+				public void set(Integer v) { shape.setMapAlphaMode( v );}
+			};
+			final PropertyBinding<Integer> binding = new PropertyBinding<>();
+			binding.property = pAlphaMapMode;
+			binding.interpolator = Interpolator.integerStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "spots_alphaInverse" ))
+		{
+	    	final Property<Boolean> pAlphaInv = new Property<Boolean>() {
+			    @Override
+				public Boolean get() { return shape.isInvertedAlpha(); }
+			    @Override
+				public void set(Boolean v) { shape.setInvertedAlpha( v );  }
 			};
 			final PropertyBinding<Boolean> binding = new PropertyBinding<>();
-			binding.property = pLUTInv;
+			binding.property = pAlphaInv;
 			binding.interpolator = Interpolator.booleanStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "spots_alphaRange" ))
+		{
+	    	final Property<float[][]> pLUTRange = new Property<float[][]>() {
+			    @Override
+				public float[][] get() { 
+			    	final float [][] range = spotsAlphaSetup.getMapAllFloat( shape );
+			    	final float [][] copy = Arrays.stream(range).map(float[]::clone).toArray(float[][]::new);
+			    	return copy; }
+			    @Override
+				public void set(float[][] v) { 
+			    	final int nMode = shape.getMapAlphaMode() - 1;
+			    	if(nMode >= 0)
+			    	{
+				    	final float [][] copy = Arrays.stream(v).map(float[]::clone).toArray(float[][]::new);
+
+				    	spotsAlphaSetup.setRanges( shape, copy );
+			    		shape.setMapAlphaRange( v[nMode][0], v[nMode][1] ); 
+			    		shape.setMapAlphaGamma( v[nMode][4] );
+			    	}
+			    	}
+			};
+			final PropertyBinding<float[][]> binding = new PropertyBinding<>();
+			binding.property = pLUTRange;
+			binding.interpolator = Interpolator.floatIndexArrayLerp;
 			return ( PropertyBinding< T > ) binding;
 		}
 		

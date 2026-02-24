@@ -123,8 +123,8 @@ public class SpotsMapSetups
 			final float [] propRange = spots.getPropertyRange();
 			for(int i = 0; i < 2; i++)
 			{
-				ranges[4][i*2] = propRange[0];
-				ranges[4][i*2+1] = propRange[1];
+				ranges[ 4 ][ i * 2 ] = propRange[0];
+				ranges[ 4 ][ i * 2 + 1 ] = propRange[1];
 			}
 		}
 		//gamma and its ranges

@@ -76,7 +76,7 @@ public class SpotsOpacityPanel extends JPanel
 	
 	final JComboBox<String> cbMapAlpha;
 	
-	final SpotsMapSetups spotsAlphaSetup = new SpotsMapSetups();
+	final public SpotsMapSetups spotsAlphaSetup = new SpotsMapSetups();
 	
 	final JButton butResetToDefault;
 		
@@ -264,6 +264,7 @@ public class SpotsOpacityPanel extends JPanel
 		final int nMapAlphaFin = nMapAlpha;
 		final boolean bMapAlphaSameFin = bMapAlphaSame;
 		final boolean bAlphaInvertedSameFin = bAlphaInvertedSame;
+		final boolean bAlphaInvertedFin = bAlphaInverted;
 		
 		final BoundedRange finalRange = range;
 		final BoundedValueDoubleBVB finalGamma = gamma;
@@ -287,6 +288,7 @@ public class SpotsOpacityPanel extends JPanel
 				pMapInverted.setConsistent( bAlphaInvertedSameFin );
 				
 				cbInverted.setEnabled( true );
+				cbInverted.setSelected( bAlphaInvertedFin );
 				alphaRangePanel.setEnabled( true );
 				alphaRangePanel.setConsistent( allRangesEqualFin );
 

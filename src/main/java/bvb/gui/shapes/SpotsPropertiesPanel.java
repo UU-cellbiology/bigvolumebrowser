@@ -79,8 +79,10 @@ public class SpotsPropertiesPanel extends JPanel
 	final JTabbedPane spotsTabPane;
 		
 	final JPanel shapePanel;
-	final SpotsColorCodePanel colorCodePanel;
-	final SpotsOpacityPanel opacityPanel;
+	
+	final public SpotsColorCodePanel colorCodePanel;
+	
+	final public SpotsOpacityPanel opacityPanel;
 	
 	public final JCheckBox cbShaded = new JCheckBox();
 	

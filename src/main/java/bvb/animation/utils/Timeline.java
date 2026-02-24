@@ -15,8 +15,7 @@ import bvvpg.source.converters.Clippable3D;
 import bvvpg.source.converters.GammaConverterSetup;
 
 public class Timeline 
-{
-	
+{	
     private final List<Track<?>> tracks = new ArrayList<>();
     
     private final Map<String, Track<?>> trackIndex = new HashMap<>();
@@ -51,7 +50,7 @@ public class Timeline
         }
     }
     
-    public <T> void addKeyframe(
+    public <T> void addCurrentKeyframe(
             String objectId,
             String propertyName,
             final Property<T> property,
@@ -81,7 +80,7 @@ public class Timeline
         track.addKeyframe(new Keyframe<>(property.get(), keyFrameScene));
     }
     
-    public <T> void addKeyframe(
+    public <T> void addCurrentKeyframe(
             String objectId,
             String propertyName,
             final Easing easing,

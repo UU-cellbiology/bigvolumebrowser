@@ -17,6 +17,8 @@ public interface Interpolator <T>
 	public static final Interpolator<double []> quatSLerp  =  (a, b, t) -> slerp( a, b, t);
 	public static final Interpolator<String> stringStep = (a, b, t) -> t < 1.0f ? a : b;
 
+	public static Interpolator<float [][]> floatIndexArrayLerp = (a, b, t) -> floatIndexArrayLerp( a, b, t );
+
 	public static final Interpolator<RealInterval> realInterval  =  (a, b, t) -> 
 	{
 		if(a == null || b == null)
@@ -33,12 +35,13 @@ public interface Interpolator <T>
 
 	};
 
-	static float[] floatArrayLerp( float[] a, float[] b, float t )
+	static float[][] floatIndexArrayLerp( float[][] a, float[][] b, float t )
 	{
-		final float [] out = new float[a.length];
-		for (int i = 0; i < a.length; i++)
+		final int indL = a.length;
+		final float [][] out = new float[indL][a[0].length];
+		for (int i = 0; i < indL; i++)
 		{
-			out[ i ] = a[i] + (b[i] - a[i]) * t;
+			out[ i ] = floatArrayLerp(a[i], b[i], t);
 		}
 		return out;
 	}
@@ -46,6 +49,16 @@ public interface Interpolator <T>
 	static double[] doubleArrayLerp( double[] a, double[] b, float t )
 	{
 		final double [] out = new double[a.length];
+		for (int i = 0; i < a.length; i++)
+		{
+			out[ i ] = a[i] + (b[i] - a[i]) * t;
+		}
+		return out;
+	}
+	
+	static float[] floatArrayLerp( float[] a, float[] b, float t )
+	{
+		final float [] out = new float[a.length];
 		for (int i = 0; i < a.length; i++)
 		{
 			out[ i ] = a[i] + (b[i] - a[i]) * t;

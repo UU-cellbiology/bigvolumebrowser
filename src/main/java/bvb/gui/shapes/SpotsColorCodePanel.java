@@ -70,7 +70,7 @@ public class SpotsColorCodePanel extends JPanel
 	
 	final JComboBox<String> cbMapLUT;
 	
-	final SpotsMapSetups spotsLUTSetup = new SpotsMapSetups();
+	final public SpotsMapSetups spotsLUTSetup = new SpotsMapSetups();
 	
 	final JButton butResetToDefault;
 		
@@ -79,6 +79,7 @@ public class SpotsColorCodePanel extends JPanel
 	private boolean blockUpdates = false;
 	
 	private final BoundedRangePanelPG lutRangePanel;
+	
 	private final BoundedValuePanelPG lutGammaPanel;
 	
 	public SpotsColorCodePanel(final BigVolumeBrowser bvb_)
@@ -255,6 +256,7 @@ public class SpotsColorCodePanel extends JPanel
 		final boolean bColorSameFin = bColorSame;
 		final boolean bMapLUTSameFin = bMapLUTSame;
 		final boolean bLUTSameFin = (bLUTSame && bLUTInvertedSame);
+		final boolean bLUTInvertedFin = bLUTInverted;
 		
 		final BoundedRange finalRange = range;
 		final BoundedValueDoubleBVB finalGamma = gamma;
@@ -269,6 +271,7 @@ public class SpotsColorCodePanel extends JPanel
 				pMapLUT.setConsistent( bMapLUTSameFin );
 				panelLUT.setConsistent( bLUTSameFin );
 				panelLUT.setEnabled( true );
+				panelLUT.cbInverted.setSelected( bLUTInvertedFin );
 				
 				lutRangePanel.setEnabled( true );
 				lutRangePanel.setConsistent( allRangesEqualFin );
