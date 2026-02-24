@@ -63,6 +63,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerModel;
 
 import net.imglib2.RealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
@@ -70,6 +72,8 @@ import org.scijava.ui.behaviour.util.Behaviours;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.AbstractViewerPanel.AlignPlane;
+import bdv.viewer.animate.RotationAnimator;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
@@ -80,10 +84,19 @@ import ij.Prefs;
 
 public class BVBActions
 {
+	
 	final BigVolumeBrowser bvb;
 	
 	final Actions actions;
 	final Behaviours behaviours;
+	
+	public static final String ALIGN_XY_PLANE = "align XY plane";
+	public static final String ALIGN_ZY_PLANE = "align ZY plane";
+	public static final String ALIGN_XZ_PLANE = "align XZ plane";
+	
+	public static final String[] ALIGN_XY_PLANE_KEYS = new String[] { "shift Z" };
+	public static final String[] ALIGN_ZY_PLANE_KEYS = new String[] { "shift X" };
+	public static final String[] ALIGN_XZ_PLANE_KEYS = new String[] { "shift Y", "shift A" };
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
@@ -116,7 +129,9 @@ public class BVBActions
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
 		actions.runnableAction(() -> actionSelectClosestObject(2), "toggle object selection", "ctrl E" );
 		actions.runnableAction(() -> actionSelectAll(), "select all objects", "ctrl A" );
-
+		actions.runnableAction(() -> alignBVB( AlignPlane.XY ), ALIGN_XY_PLANE, ALIGN_XY_PLANE_KEYS );
+		actions.runnableAction(() -> alignBVB( AlignPlane.ZY ), ALIGN_ZY_PLANE, ALIGN_ZY_PLANE_KEYS );
+		actions.runnableAction(() -> alignBVB( AlignPlane.XZ ), ALIGN_XZ_PLANE, ALIGN_XZ_PLANE_KEYS );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
@@ -592,6 +607,16 @@ public class BVBActions
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
+	}
+	
+	void alignBVB (final AlignPlane plane)
+	{
+		final double[] qTarget = new double[ 4 ];
+		LinAlgHelpers.quaternionInvert( plane.qAlign, qTarget );
+		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
+		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
+		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
+		bvb.bvvViewer.setTransformAnimator( new RotationAnimator( transform, centerX, centerY, qTarget, 300 ) );
 	}
 	
 }

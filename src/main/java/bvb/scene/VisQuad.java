@@ -51,7 +51,7 @@ public class VisQuad
 {
 	private DefaultShader progQuad = null;
 	
-	private int nBGShader;
+	private final int nBGShader;
 	
 	private int vaoQuad;
 	
@@ -59,7 +59,7 @@ public class VisQuad
 	
 	long fTimeIni  = 0;
 
-	public VisQuad(int nShaderN )
+	public VisQuad(final int nShaderN )
 	{
 		nBGShader = nShaderN;
 	
@@ -148,14 +148,11 @@ public class VisQuad
 			fTimeIni = System.currentTimeMillis();
 		}
 
-		//fTime = fTime/10;
 		gl.glDepthFunc( GL.GL_ALWAYS);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
 		
-//		float fTime = ( float ) ( System.currentTimeMillis()%100.5453 );//-fTimeIni;
-		//fTime /= 10.5453;
-		//fTime += 43758.5453;
+
 		progQuad.getUniform1f("fTime").set(fTime);
 		
 		progQuad.setUniforms( context );
