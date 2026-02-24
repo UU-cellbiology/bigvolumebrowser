@@ -183,7 +183,7 @@ public class SpimDataLoader
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
 					.positionConvention("TOP LEFT")
-					.pyramidize( BVBSettings.bPyramidize );
+					.pyramidize( BVBSettings.bLoadPyramidize );
 			spimData = (SpimData)OpenersToSpimData.getSpimData(settings);	
 		}
 		else

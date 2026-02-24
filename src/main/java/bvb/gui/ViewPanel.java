@@ -85,7 +85,6 @@ public class ViewPanel extends JPanel
 		butCenter = new JButton( tabIcon );
 		butCenter.setToolTipText("Center view on selected objects\n(shortcut C)");
 		butCenter.addActionListener((e) -> bvb.bvbActions.actionCenterView());
-
 		
 		//TOGGLE VISIBILITY
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "toggle_visibility.png");
@@ -209,7 +208,7 @@ public class ViewPanel extends JPanel
 		});
 		
 		JCheckBox cbPyramidize = new JCheckBox();
-		cbPyramidize.setSelected(BVBSettings.bPyramidize);
+		cbPyramidize.setSelected(BVBSettings.bLoadPyramidize);
 		
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
@@ -265,11 +264,11 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(cbZoomLoad, gbc);
 
 		// not sure if we need it, skip for now
-//		gbc.gridx=0;
-//		gbc.gridy++;
-//		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
-//		gbc.gridx++;
-//		pViewSettings.add(cbPyramidize, gbc);
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbPyramidize, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -321,8 +320,8 @@ public class ViewPanel extends JPanel
 			BVBSettings.dFocusScreenFraction = Double.parseDouble(nfFocusScreenFraction.getText());
 			Prefs.set("BVB.dFocusScreenFraction",BVBSettings.dFocusScreenFraction);
 					
-			BVBSettings.bPyramidize = cbPyramidize.isSelected();
-			Prefs.set("BVB.bPyramidize", BVBSettings.bPyramidize);
+			BVBSettings.bLoadPyramidize = cbPyramidize.isSelected();
+			Prefs.set("BVB.bLoadPyramidize", BVBSettings.bLoadPyramidize);
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
