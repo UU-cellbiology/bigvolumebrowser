@@ -31,10 +31,7 @@ package bvb.gui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -57,11 +54,15 @@ public class ViewPanel extends JPanel
 {	
 	final BigVolumeBrowser bvb;
 
-	JToggleButton butVBox;
+	final JButton butCenter;
 	
-	JButton butProjType;
+	final JButton butToggleVisibility;
 
-	JButton butSettings;
+	final JToggleButton butVBox;
+	
+	final JButton butProjType;
+
+	final JButton butSettings;
 	
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];
@@ -72,32 +73,37 @@ public class ViewPanel extends JPanel
 	{
 		super();
 		setLayout(new GridBagLayout());
+
+		URL icon_path;
+		ImageIcon tabIcon;
 		bvb = bvb_;
-		//this.setBorder(new PanelTitle(" View "));
-	    
-	    //BOX AROUND
-		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "boxvolume.png");
-		ImageIcon tabIcon = new ImageIcon(icon_path);
+		//Center selected
+		
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "center.png");
+		tabIcon = new ImageIcon(icon_path);
+
+		butCenter = new JButton( tabIcon );
+		butCenter.setToolTipText("Center view on selected objects\n(shortcut C)");
+		butCenter.addActionListener((e) -> bvb.bvbActions.actionCenterView());
+
+		
+		//TOGGLE VISIBILITY
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "toggle_visibility.png");
+		tabIcon = new ImageIcon(icon_path);
+
+		butToggleVisibility = new JButton( tabIcon );
+		butToggleVisibility.setToolTipText("Toggle visibility of selected objects\n(shortcut V)");
+		butToggleVisibility.addActionListener((e) -> bvb.bvbActions.actionToggleVisibility());
+		
+		//BOX AROUND
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "boxvolume.png");
+		tabIcon = new ImageIcon(icon_path);
 	    butVBox = new JToggleButton(tabIcon);
 	    //butVBox.setSelected(btdata.bVolumeBox);
 	    butVBox.setToolTipText("Volume Box");
 	    butVBox.setSelected( BVBSettings.bShowVolumeBoxes  );
-	    butVBox.addItemListener(new ItemListener() {
-
-	    	@Override
-	    	public void itemStateChanged(ItemEvent e) 
-	    	{
-	    		if(e.getStateChange() == ItemEvent.SELECTED)
-	    		{
-	    			bvb.showVolumeBoxes( true );
-
-	    		} 
-	    		else 
-	    		{
-	    			bvb.showVolumeBoxes( false );
-	    		}
-	    	}
-	    });
+	    butVBox.addItemListener((e)->
+	    		bvb.showVolumeBoxes( e.getStateChange() == ItemEvent.SELECTED ));
 	    
 	    //PROJECTION MATRIX
 	    projToolTip[0] = "Perspective";
@@ -110,34 +116,35 @@ public class ViewPanel extends JPanel
 	    butProjType = new JButton( projIcon[ bvb.bvvViewer.getProjectionType() ] );
 	    butProjType.setToolTipText( projToolTip[ bvb.bvvViewer.getProjectionType() ]);
 	    
-	    butProjType.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent arg0 )
-			{
-				int newProj = 0; 
-				if(bvb.bvvViewer.getProjectionType() == 0)
-				{
-					newProj = 1;
-				}
-				butProjType.setIcon( projIcon[newProj] );
-				butProjType.setToolTipText( projToolTip[newProj]);
-				bvb.bvvViewer.setProjectionType(newProj);
-			}
-	
-		});  
+	    butProjType.addActionListener((e)->
+	    {
+	    	int newProj = 0; 
+	    	if(bvb.bvvViewer.getProjectionType() == 0)
+	    	{
+	    		newProj = 1;
+	    	}
+	    	butProjType.setIcon( projIcon[newProj] );
+	    	butProjType.setToolTipText( projToolTip[newProj]);
+	    	bvb.bvvViewer.setProjectionType(newProj);
+	    });  
 	    
 		//SETTINGS
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butSettings = new JButton(tabIcon);
 	    butSettings.setToolTipText("Settings");
-	    butSettings.addActionListener((e)->dialSettings());
+	    butSettings.addActionListener((e) -> dialSettings());
 	    
 	    GridBagConstraints gbc = new GridBagConstraints();
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
+    	this.add(butCenter,gbc);
+	    
+		gbc.gridx++;
+    	this.add(butToggleVisibility,gbc);
+		
+		gbc.gridx++;
     	this.add(butVBox,gbc);
 		
 		gbc.gridx++;	    
