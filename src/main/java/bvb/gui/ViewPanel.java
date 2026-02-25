@@ -312,7 +312,7 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowMultiBox = cbShowMultiBox.isSelected();
 			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
-			bdv.util.Prefs.showMultibox( BVBSettings.bShowMultiBox );
+			bvb.multiBoxOverlayBVB.setEnabled(  BVBSettings.bShowMultiBox );
 			
 			BVBSettings.bHighlightSelectedBoxes = cbHighLightBox.isSelected();
 			Prefs.set("BVB.bHighlightSelectedBoxes", BVBSettings.bHighlightSelectedBoxes);

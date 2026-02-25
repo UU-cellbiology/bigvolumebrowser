@@ -88,6 +88,8 @@ import bvb.gui.data.BVBShapeCollectionInfo;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
 import bvb.gui.data.DataTreeNode;
+import bvb.gui.overlays.AxisOverlayRenderer;
+import bvb.gui.overlays.MultiBoxOverlayRendererBVB;
 import bvb.io.LUTNameFIJI;
 import bvb.io.ObjectHashStorage;
 import bvb.io.RAIToSpimDataBvv;
@@ -155,9 +157,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** hash map of loaded objects **/
 	final public ObjectHashStorage objectHashStorage;
 	
+	/** XYZ axis rotation gizmo **/
+	final public AxisOverlayRenderer axisOverlay = new AxisOverlayRenderer();
+	
+	/** multibox that includes shapes instead of default**/
+	public MultiBoxOverlayRendererBVB multiBoxOverlayBVB;
+	
 	String BVVFrameTitle = "BigVolumeBrowser";
 	
-	final private ArrayList<Listener> listeners = new ArrayList<>();
+	final private ArrayList< Listener > listeners = new ArrayList<>();
 	
 	boolean bShowBGShader = BVBSettings.bShowRandomShader;
 	
@@ -288,9 +296,16 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bvbActions = new BVBActions(this);
 		setCanvasBGColor(BVBSettings.canvasBGColor);
-		Prefs.showMultibox( BVBSettings.bShowMultiBox);
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
 		
+		axisOverlay.bindViewer( bvvViewer );
+		bvvViewer.getDisplay().overlays().add( axisOverlay );
+		axisOverlay.setEnabled( BVBSettings.bShowAxisOverlay );
+		
+		Prefs.showMultibox( false );
+		multiBoxOverlayBVB = new MultiBoxOverlayRendererBVB(this);
+		bvvViewer.getDisplay().overlays().add( multiBoxOverlayBVB );
+		multiBoxOverlayBVB.setEnabled( BVBSettings.bShowMultiBox );
 		objectHashStorage.clear();
 	}
 	

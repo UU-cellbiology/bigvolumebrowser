@@ -61,6 +61,8 @@ public class BVBSettings
 	
 	public static boolean bShowScaleBar = Prefs.get( "BVB.bShowScaleBar", true );
 	
+	public static boolean bShowAxisOverlay = Prefs.get( "BVB.bShowAxisOverlay", true );
+	
 	public static double dFocusScreenFraction =  Prefs.get("BVB.dFocusScreenFraction", 0.95);
 	
 	public static boolean bLoadPyramidize = Prefs.get( "BVB.bLoadPyramidize", true );

@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import bdv.ui.splitpanel.SplitPanel;
 import bdv.util.Prefs;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.BVVWindowState;
 import bvvpg.core.render.VolumeRenderer.RepaintType;
@@ -60,18 +61,14 @@ public class AnimationRender extends SwingWorker<Void, String>
 		if(aPanel.sRenderSavePath == null)
 		{
 			return null;
-		}
+		}		
+
+		bvb.multiBoxOverlayBVB.setEnabled( aPanel.bRenderMultiBox );
 		
-		if(!aPanel.bRenderMultiBox)
-		{
-			Prefs.showMultibox(false);
-		}
+		Prefs.showScaleBar(aPanel.bRenderScaleBar);
+		Prefs.showScaleBarInMovie( aPanel.bRenderScaleBar );
 		
-		if(aPanel.bRenderScaleBar)
-		{
-			Prefs.showScaleBar(true);
-			Prefs.showScaleBarInMovie( true );
-		}
+		bvb.axisOverlay.setEnabled( false );
 
 		Prefs.showTextOverlay(false);
 		bvb.bvvFrame.setExtendedState(Frame.NORMAL);
@@ -212,15 +209,12 @@ public class AnimationRender extends SwingWorker<Void, String>
         
         bvvWindowState.restoreBvvWindowState();
     	IJ.log( "BVB: rendering is finished." );
-		if(!aPanel.bRenderMultiBox)
-		{
-			Prefs.showMultibox(true);
-		}
-		if(aPanel.bRenderScaleBar)
-		{
-			Prefs.showScaleBar(false);
-			Prefs.showScaleBarInMovie( false);
-		}
+
+    	bvb.axisOverlay.setEnabled( BVBSettings.bShowAxisOverlay );
+
+    	bvb.multiBoxOverlayBVB.setEnabled( BVBSettings.bShowMultiBox );	
+		Prefs.showScaleBar( BVBSettings.bShowScaleBar );
+		Prefs.showScaleBarInMovie( BVBSettings.bShowScaleBar );
 		Prefs.showTextOverlay(true);
 		
     	//unlock user interaction

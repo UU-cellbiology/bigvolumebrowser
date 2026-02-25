@@ -151,61 +151,74 @@ public class GltfImporter
 				}	
 				
 				final MaterialModelV2 material = ( MaterialModelV2 ) meshPrimitiveModel.getMaterialModel();
-
-				final TextureModel baseColorTexture = material.getBaseColorTexture();
-				//see if there is a texture
-				if(baseColorTexture != null && uvmap != null)
+				boolean bTextureLoaded = false;
+				if(material != null)
 				{
-					// 3. Get the image model
-					final ImageModel imageModel = baseColorTexture.getImageModel();
-					final BufferViewModel bufferViewModel = imageModel.getBufferViewModel();
-					ByteBuffer byteBuffer = null;
-
-					int nByteLength = 0 ;
-					if(bufferViewModel != null)
+					final TextureModel baseColorTexture = material.getBaseColorTexture();
+					//see if there is a texture
+					if(baseColorTexture != null && uvmap != null)
 					{
-						byteBuffer = bufferViewModel.getBufferModel().getBufferData();
-						nByteLength = bufferViewModel.getByteLength();				        
-						byteBuffer.position(bufferViewModel.getByteOffset());
-
+						bTextureLoaded = true;
+						// 3. Get the image model
+						final ImageModel imageModel = baseColorTexture.getImageModel();
+						final BufferViewModel bufferViewModel = imageModel.getBufferViewModel();
+						ByteBuffer byteBuffer = null;
+	
+						int nByteLength = 0 ;
+						if(bufferViewModel != null)
+						{
+							byteBuffer = bufferViewModel.getBufferModel().getBufferData();
+							nByteLength = bufferViewModel.getByteLength();				        
+							byteBuffer.position(bufferViewModel.getByteOffset());
+	
+						}
+						else
+						{
+							byteBuffer = imageModel.getImageData();
+							nByteLength = byteBuffer.remaining();
+						}
+	
+						final byte[] imageBytes = new byte[nByteLength];
+						byteBuffer.get(imageBytes);
+	
+						BufferedImage image = null;		
+	
+						try
+						{
+							image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+						}
+						catch ( IOException exc )
+						{
+							exc.printStackTrace();
+							break;
+						}
+						final MeshShape meshTexture = new MeshShape(currMesh, image);
+						meshTexture.setTransform( nodeTransform );
+						meshTexture.setName( meshName );
+						shapesOut.add( meshTexture );
+						
+					}
+				}
+				//no texture, only color
+				if(!bTextureLoaded)
+				{
+					Color colorMesh;
+					if(material != null)
+					{
+						final float[] rgba = material.getBaseColorFactor();
+						final float[] rgbaEM = material.getEmissiveFactor();
+						//for now, we are going to add them
+						for(int d = 0; d < 3; d++)
+						{
+							rgba[d] += rgbaEM[d];
+							rgba[d] = ( float ) Math.min(rgba[d], 1.0);
+						}
+						colorMesh = new Color(rgba[0], rgba[1], rgba[2], rgba[3]);
 					}
 					else
 					{
-						byteBuffer = imageModel.getImageData();
-						nByteLength = byteBuffer.remaining();
+						colorMesh = Color.WHITE;
 					}
-
-					final byte[] imageBytes = new byte[nByteLength];
-					byteBuffer.get(imageBytes);
-
-					BufferedImage image = null;		
-
-					try
-					{
-						image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-					}
-					catch ( IOException exc )
-					{
-						exc.printStackTrace();
-						break;
-					}
-					final MeshShape meshTexture = new MeshShape(currMesh, image);
-					meshTexture.setTransform( nodeTransform );
-					meshTexture.setName( meshName );
-					shapesOut.add( meshTexture );
-				}
-				//no texture, only color
-				else
-				{
-					final float[] rgba = material.getBaseColorFactor();
-					final float[] rgbaEM = material.getEmissiveFactor();
-					//for now, we are going to add them
-					for(int d=0; d<3; d++)
-					{
-						rgba[d] += rgbaEM[d];
-						rgba[d] = ( float ) Math.min(rgba[d], 1.0);
-					}
-					final Color colorMesh = new Color(rgba[0], rgba[1], rgba[2], rgba[3]);
 					final MeshShape meshShape = new MeshShape(currMesh);
 					meshShape.setColor( colorMesh );
 					meshShape.setName( meshName );
