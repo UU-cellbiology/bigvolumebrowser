@@ -62,8 +62,8 @@ public class MultiBoxOverlayBVB
 	private final Color activeBackColor = new Color( 0x00994499 );// Color.MAGENTA;
 
 	private final Color activeFrontColor = Color.GREEN;
-	
-	private final Color activeFrontColorShape = new Color(29, 79, 255); // kind of blue
+
+	private final Color activeFrontColorShape = Color.GREEN.darker();
 
 	private final Color inactiveBackColor = Color.DARK_GRAY;
 

@@ -24,6 +24,9 @@ public class AxisOverlayRenderer implements OverlayRenderer
 			{new Color(255,54,83), new Color(118,178,23), new Color(48,121,204)};
 	final String [] axisTitle = new String [] {"X","Y","Z"};
 	
+	final BasicStroke vectorStroke = new BasicStroke(2);
+	final BasicStroke letterStroke = new BasicStroke(1.3f);
+	
 	boolean isEnabled = false;
 	
 	public void bindViewer(final AbstractViewerPanel viewer_)
@@ -59,7 +62,7 @@ public class AxisOverlayRenderer implements OverlayRenderer
 			}
 			//sort by depth (z-coord)
 			Arrays.sort(axisOrder, (a, b) -> (-1) * Double.compare(a[0], b[0]));
-			graphics.setStroke(new BasicStroke(2));
+			graphics.setStroke(vectorStroke);
 			graphics.setFont( UIUtils.getFont( "mini.font" ) );
 			for( int d = 0; d < 3; d++)
 			{
@@ -69,10 +72,36 @@ public class AxisOverlayRenderer implements OverlayRenderer
 				int x = (int)Math.round( xPos + dAxis[index][0]);
 				int y = (int) Math.round( yPos +  dAxis[index][1]);
 				graphics.drawLine( xPos, yPos, x, y);
-				graphics.fillOval( x - 10, y - 10, 20, 20);
-				graphics.setPaint( Color.BLACK );
-				graphics.drawString( axisTitle[index], x - 4, y + 5);
+				graphics.fillOval( x - 10, y - 10, 21, 21);
+				drawLetter(graphics, x, y, index);
 			}
+
+		}
+	}
+	
+	void drawLetter(final Graphics2D graphics, final int x, final int y, final int index)
+	{
+		graphics.setPaint( Color.BLACK );
+		graphics.setStroke(letterStroke);
+		switch (index)
+		{
+		//x
+		case 0:
+			graphics.drawLine( x - 3, y - 5, x + 3, y + 5);
+			graphics.drawLine( x - 3, y + 5, x + 3, y - 5);
+			break;
+		//y
+		case 1:
+			graphics.drawLine( x - 3, y - 5, x, y + 1 );
+			graphics.drawLine( x + 3, y - 5, x, y + 1);
+			graphics.drawLine( x, y + 1, x, y + 5);
+			break;
+		//z
+		case 2:
+			graphics.drawLine( x - 3, y - 5, x + 3, y - 5);
+			graphics.drawLine( x - 3, y + 5, x + 3, y - 5);
+			graphics.drawLine( x - 3, y + 5, x + 3, y + 5);
+			break;
 
 		}
 	}
