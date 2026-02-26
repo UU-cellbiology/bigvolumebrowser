@@ -21,11 +21,15 @@ public class AxisOverlayRenderer implements OverlayRenderer
 	private AbstractViewerPanel viewer = null;
 	
 	final Color [] axisColors = new Color[] 
-			{new Color(255,54,83), new Color(118,178,23), new Color(48,121,204)};
+//			{new Color(255,54,83,255), new Color(118,178,23,255), new Color(48,121,204,255)};
+			{new Color(255,54,83,255), new Color(118,178,23,255), new Color(48,121,204,255),
+			new Color(255,54,83,128), new Color(118,178,23,128), new Color(48,121,204,128)};
+
 	//final String [] axisTitle = new String [] {"X","Y","Z"};
 	
 	final Color hoverBGColor = new Color( 0xb0bbbbbb, true );
-	final BasicStroke vectorStroke = new BasicStroke(2);
+	final BasicStroke vectorStroke = new BasicStroke(2.5f);
+	final BasicStroke ovalStroke = new BasicStroke(1);
 	final BasicStroke letterStroke = new BasicStroke(1.3f);
 	
 	boolean isEnabled = false;
@@ -35,10 +39,13 @@ public class AxisOverlayRenderer implements OverlayRenderer
 	final Point center = new Point();
 	
 	final int vectRadius = 40;
-	final int circleAxisRadius = 10;	
+	final int circleAxisRadius = 9;	
 	final int fullRadiusSquared = (vectRadius + circleAxisRadius) * (vectRadius + circleAxisRadius);
 	
 	int nHighlightedAxis = -1;
+	
+	private final static int xLetterHalf = 3;
+	private final static int yLetterHalf = 4;
 	
 	public void bindViewer(final AbstractViewerPanel viewer_)
     {
@@ -77,11 +84,14 @@ public class AxisOverlayRenderer implements OverlayRenderer
 			viewer.state().getViewerTransform(transform);
 			final double [] qRotation = new double[4];
 			Affine3DHelpers.extractRotationAnisotropic( transform, qRotation );
-			final double [][] dAxis = new double [3][3];
-			final double [][] axisOrder = new double [3][2];
-			for(int d = 0; d < 3; d++)
+			final double [][] dAxis = new double [6][3];
+			final double [][] axisOrder = new double [6][2];
+			for(int d = 0; d < 6; d++)
 			{
-				dAxis[d][d] = vectRadius;
+				if(d < 3)
+					dAxis[d][d] = vectRadius;
+				else
+					dAxis[d][d - 3] = -vectRadius;
 				LinAlgHelpers.quaternionApply( qRotation, dAxis[d], dAxis[d] );
 				//z-coordinate
 				axisOrder[d][0] = dAxis[d][2]; 
@@ -117,17 +127,31 @@ public class AxisOverlayRenderer implements OverlayRenderer
 			}
 			//sort by depth (z-coord)
 			Arrays.sort(axisOrder, (a, b) -> (-1) * Double.compare(a[0], b[0]));
-			graphics.setStroke(vectorStroke);
-			for( int d = 0; d < 3; d++)
+			
+			for( int d = 0; d < 6; d++)
 			{
+				graphics.setStroke(vectorStroke);
 				// Example: draw fixed screen-space text
 				final int index = (int)axisOrder[d][1];
-				graphics.setColor(axisColors[index]);
+				
 				int x = (int) Math.round( dAxis[index][0]);
 				int y = (int) Math.round( dAxis[index][1]);
-				graphics.drawLine( center.x, center.y, x, y);
-				graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius +1 , 2 * circleAxisRadius +1);
-				drawLetter(graphics, x, y, index);
+				if(index < 3)
+				{
+					graphics.setColor(axisColors[index]);					 
+					graphics.drawLine(center.x, center.y, x, y);
+					graphics.setStroke(ovalStroke);
+					graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
+					drawLetter(graphics, x + 1 , y + 1, index);
+				}
+				else
+				{
+					graphics.setColor(axisColors[index].darker());
+					graphics.setStroke(ovalStroke);
+					graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
+					graphics.setColor(axisColors[index - 3]);
+					graphics.drawOval(x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);					
+				}
 			}
 
 		}
@@ -146,20 +170,20 @@ public class AxisOverlayRenderer implements OverlayRenderer
 		{
 		//x
 		case 0:
-			graphics.drawLine( x - 3, y - 5, x + 3, y + 5);
-			graphics.drawLine( x - 3, y + 5, x + 3, y - 5);
+			graphics.drawLine( x - xLetterHalf, y - yLetterHalf, x + xLetterHalf, y + yLetterHalf);
+			graphics.drawLine( x - xLetterHalf, y + yLetterHalf, x + xLetterHalf, y - yLetterHalf);
 			break;
 		//y
 		case 1:
-			graphics.drawLine( x - 3, y - 5, x, y + 1 );
-			graphics.drawLine( x + 3, y - 5, x, y + 1);
-			graphics.drawLine( x, y + 1, x, y + 5);
+			graphics.drawLine( x - xLetterHalf, y - yLetterHalf, x, y + 1 );
+			graphics.drawLine( x + xLetterHalf, y - yLetterHalf, x, y + 1);
+			graphics.drawLine( x, y + 1, x, y + yLetterHalf);
 			break;
 		//z
 		case 2:
-			graphics.drawLine( x - 3, y - 5, x + 3, y - 5);
-			graphics.drawLine( x - 3, y + 5, x + 3, y - 5);
-			graphics.drawLine( x - 3, y + 5, x + 3, y + 5);
+			graphics.drawLine( x - xLetterHalf, y - yLetterHalf, x + xLetterHalf, y - yLetterHalf);
+			graphics.drawLine( x - xLetterHalf, y + yLetterHalf, x + xLetterHalf, y - yLetterHalf);
+			graphics.drawLine( x - xLetterHalf, y + yLetterHalf, x + xLetterHalf, y + yLetterHalf);
 			break;
 
 		}
