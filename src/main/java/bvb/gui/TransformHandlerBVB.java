@@ -119,6 +119,8 @@ public class TransformHandlerBVB
 	{
 		@SuppressWarnings( "hiding" )
 		private final double speed;
+		
+		private boolean isDrag;
 
 		public Rotate( final double speed )
 		{
@@ -156,13 +158,14 @@ public class TransformHandlerBVB
 				viewTransform.applyInverse( vXY[i], vXY[i]);
 				LinAlgHelpers.normalize( vXY[i] );
 			}
+			isDrag = false;
 			
 		}
 
 		@Override
 		public void drag( final int x, final int y )
 		{
-			
+			isDrag = true;
 			rotationXY[0]  = (y - oY) *  step * speed;
 			rotationXY[1]  = (oX - x) * step * speed;
 
@@ -244,7 +247,16 @@ public class TransformHandlerBVB
 
 		@Override
 		public void end( final int x, final int y )
-		{}
+		{
+			if(!isDrag)
+			{
+				final int nAxis = bvb.axisOverlay.getHighlightedAxis();
+				if( nAxis >= 0 )
+				{
+					bvb.bvbActions.alignToAxis(nAxis);
+				}
+			}
+		}
 
 	}
 	

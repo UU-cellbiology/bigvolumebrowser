@@ -154,6 +154,7 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(0, false), "rotate 90 x axis wrld", ROTATE_X_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
+		actions.runnableAction(() -> System.out.println("ffdfs"), "zfsdfsd", "button1");
 
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
@@ -641,6 +642,21 @@ public class BVBActions
 		else
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual full transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+		}
+	}
+	
+	public void alignToAxis( final int nAxis )
+	{
+		switch (nAxis)
+		{
+		case 0:
+			alignToPlane(AlignPlaneBVB.ZY);
+			break;
+		case 1:
+			alignToPlane(AlignPlaneBVB.XZ);
+			break;
+		case 2:
+			alignToPlane(AlignPlaneBVB.XY);
 		}
 	}
 	
