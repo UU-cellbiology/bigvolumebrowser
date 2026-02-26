@@ -89,13 +89,14 @@ public class BVBActions
 	final BigVolumeBrowser bvb;
 	
 	final Actions actions;
+	
 	final Behaviours behaviours;
 	
 	public static final String ALIGN_XY_PLANE = "align XY plane";
 	public static final String ALIGN_ZY_PLANE = "align ZY plane";
 	public static final String ALIGN_XZ_PLANE = "align XZ plane";
 	
-	private final static double c = Math.cos( Math.PI / 4 );
+	private final static double cQuat = Math.cos( Math.PI / 4 );
 	
 	public static final String[] ALIGN_XY_PLANE_KEYS = new String[] { "shift Z" };
 	public static final String[] ALIGN_ZY_PLANE_KEYS = new String[] { "shift X" };
@@ -138,6 +139,7 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "toggle manual transformation", "T" );
 
 		actions.runnableAction(() -> actionToggleManualTransform(), "toggle manual transformation (BVB)", "T" );
+		actions.runnableAction(() -> turnOffManualTransform(), "off manual transform mode(BVB)", "ESCAPE" );		
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
@@ -614,6 +616,18 @@ public class BVBActions
 
 	}
 	
+	void turnOffManualTransform()
+	{
+		if( bvb.getInputLock() )
+			return;
+		bvb.bManualTransformMode = !bvb.bManualTransformMode;
+		
+		if(!bvb.bManualTransformMode)
+		{
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+		}
+	}
+	
 	void actionToggleManualTransform()
 	{
 		if( bvb.getInputLock() )
@@ -622,11 +636,11 @@ public class BVBActions
 		
 		if(bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual full transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
 		else
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual full transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
 	}
 	
@@ -645,11 +659,7 @@ public class BVBActions
 		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
 		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
 		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
-		final AffineTransform3D transformTest = new AffineTransform3D();
-		transformTest.rotate( 0, Math.PI );
-		transformTest.rotate( 2, Math.PI);
-		double [] ew = new double [4];
-		Affine3DHelpers.extractRotationAnisotropic( transformTest, ew );
+
 		if(bViewCoords)
 		{
 			final AffineTransform3D transformNew = new  AffineTransform3D();
@@ -691,12 +701,12 @@ public class BVBActions
 	{
 		XY( 2, new double[] { 0, 0, 1, 0 } ),
 		ZY( 0, new double[] { 0.5, -0.5, -0.5, 0.5 } ),
-		XZ( 1, new double[] { 0, 0, c, -c } );
+		XZ( 1, new double[] { 0, 0, cQuat, -cQuat } );
 
 		/**
 		 * rotation from the xy-plane aligned coordinate system to this plane.
 		 */
-		public final double[] qAlign; // TODO: should be private/package private
+		public final double[] qAlign; 
 
 		/**
 		 * Axis index. The plane spanned by the remaining two axes will be
@@ -704,7 +714,7 @@ public class BVBActions
 		 * "rotation part" of the affine source transform.
 		 * @see Affine3DHelpers#extractApproximateRotationAffine(AffineTransform3D, double[], int)
 		 */
-		public final int coerceAffineDimension; // TODO: should be private/package private
+		public final int coerceAffineDimension;
 
 		private AlignPlaneBVB( final int coerceAffineDimension, final double[] qAlign )
 		{
