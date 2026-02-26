@@ -73,7 +73,6 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.SourceAndConverter;
-import bdv.viewer.AbstractViewerPanel.AlignPlane;
 import bdv.viewer.animate.RotationAnimator;
 import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.CanvasSelection;
@@ -95,6 +94,8 @@ public class BVBActions
 	public static final String ALIGN_XY_PLANE = "align XY plane";
 	public static final String ALIGN_ZY_PLANE = "align ZY plane";
 	public static final String ALIGN_XZ_PLANE = "align XZ plane";
+	
+	private final static double c = Math.cos( Math.PI / 4 );
 	
 	public static final String[] ALIGN_XY_PLANE_KEYS = new String[] { "shift Z" };
 	public static final String[] ALIGN_ZY_PLANE_KEYS = new String[] { "shift X" };
@@ -142,9 +143,9 @@ public class BVBActions
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
 		actions.runnableAction(() -> actionSelectClosestObject(2), "toggle object selection", "ctrl E" );
 		actions.runnableAction(() -> actionSelectAll(), "select all objects", "ctrl A" );
-		actions.runnableAction(() -> alignToPlane( AlignPlane.XY ), ALIGN_XY_PLANE, ALIGN_XY_PLANE_KEYS );
-		actions.runnableAction(() -> alignToPlane( AlignPlane.ZY ), ALIGN_ZY_PLANE, ALIGN_ZY_PLANE_KEYS );
-		actions.runnableAction(() -> alignToPlane( AlignPlane.XZ ), ALIGN_XZ_PLANE, ALIGN_XZ_PLANE_KEYS );
+		actions.runnableAction(() -> alignToPlane( AlignPlaneBVB.XY ), ALIGN_XY_PLANE, ALIGN_XY_PLANE_KEYS );
+		actions.runnableAction(() -> alignToPlane( AlignPlaneBVB.ZY ), ALIGN_ZY_PLANE, ALIGN_ZY_PLANE_KEYS );
+		actions.runnableAction(() -> alignToPlane( AlignPlaneBVB.XZ ), ALIGN_XZ_PLANE, ALIGN_XZ_PLANE_KEYS );
 		actions.runnableAction(() -> rotate(0, true), "rotate 90 x axis", ROTATE_X_AXIS_VIEW);
 		actions.runnableAction(() -> rotate(1, true), "rotate 90 y axis", ROTATE_Y_AXIS_VIEW);
 		actions.runnableAction(() -> rotate(2, true), "rotate 90 z axis", ROTATE_Z_AXIS_VIEW);
@@ -629,7 +630,7 @@ public class BVBActions
 		}
 	}
 	
-	void alignToPlane(final AlignPlane plane)
+	void alignToPlane(final AlignPlaneBVB plane)
 	{
 		final double[] qTarget = new double[ 4 ];
 		LinAlgHelpers.quaternionInvert( plane.qAlign, qTarget );
@@ -644,7 +645,11 @@ public class BVBActions
 		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
 		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
 		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
-		
+		final AffineTransform3D transformTest = new AffineTransform3D();
+		transformTest.rotate( 0, Math.PI );
+		transformTest.rotate( 2, Math.PI);
+		double [] ew = new double [4];
+		Affine3DHelpers.extractRotationAnisotropic( transformTest, ew );
 		if(bViewCoords)
 		{
 			final AffineTransform3D transformNew = new  AffineTransform3D();
@@ -672,6 +677,39 @@ public class BVBActions
 			//LinAlgHelpers.quaternionInvert( qTarget, qTarget );			
 			bvb.bvvViewer.setTransformAnimator( new RotationAnimator(transform, centerX, centerY, qTarget, lRotationDuration ));
 
+		}
+	}
+	
+	/**
+	 * The planes which can be aligned with the viewer coordinate system: XY,
+	 * ZY, and XZ plane.
+	 * Diffenrent from BDV, since 
+	 * in XY plain align Z looks towards viewer (and X, Y oriented as in ImageJ) 
+	 * and Z looks up for two other (like in Blender)
+	 */
+	public enum AlignPlaneBVB
+	{
+		XY( 2, new double[] { 0, 0, 1, 0 } ),
+		ZY( 0, new double[] { 0.5, -0.5, -0.5, 0.5 } ),
+		XZ( 1, new double[] { 0, 0, c, -c } );
+
+		/**
+		 * rotation from the xy-plane aligned coordinate system to this plane.
+		 */
+		public final double[] qAlign; // TODO: should be private/package private
+
+		/**
+		 * Axis index. The plane spanned by the remaining two axes will be
+		 * transformed to the same plane by the computed rotation and the
+		 * "rotation part" of the affine source transform.
+		 * @see Affine3DHelpers#extractApproximateRotationAffine(AffineTransform3D, double[], int)
+		 */
+		public final int coerceAffineDimension; // TODO: should be private/package private
+
+		private AlignPlaneBVB( final int coerceAffineDimension, final double[] qAlign )
+		{
+			this.coerceAffineDimension = coerceAffineDimension;
+			this.qAlign = qAlign;
 		}
 	}
 	
