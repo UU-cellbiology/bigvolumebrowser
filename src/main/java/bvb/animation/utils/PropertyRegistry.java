@@ -9,8 +9,8 @@ import net.imglib2.type.numeric.ARGBType;
 
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
+import bvb.core.ObjectHashStorage;
 import bvb.gui.shapes.SpotsMapSetups;
-import bvb.io.ObjectHashStorage;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;

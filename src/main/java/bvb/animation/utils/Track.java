@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import bvb.animation.KeyFrameScene;
-import bvb.animation.dto.KeyframeDTO;
-import bvb.animation.dto.TrackDTO;
+import bvb.io.dto.KeyframeDTO;
+import bvb.io.dto.TrackDTO;
 
 public class Track< T >
 {	

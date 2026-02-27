@@ -2,7 +2,7 @@ package bvb.animation.utils;
 
 import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
-import bvb.io.ObjectHashStorage;
+import bvb.core.ObjectHashStorage;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;

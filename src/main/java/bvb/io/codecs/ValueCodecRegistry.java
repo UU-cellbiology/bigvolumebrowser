@@ -1,4 +1,4 @@
-package bvb.animation.io;
+package bvb.io.codecs;
 
 import java.util.HashMap;
 import java.util.Map;

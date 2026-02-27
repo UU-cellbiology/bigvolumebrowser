@@ -43,13 +43,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import bvb.animation.dto.BVBObjectsDTO;
-import bvb.animation.dto.StoryDTO;
-import bvb.animation.io.ValueCodecRegistry;
 import bvb.animation.utils.Timeline;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
+import bvb.io.codecs.ValueCodecRegistry;
+import bvb.io.dto.BVBObjectsDTO;
+import bvb.io.dto.StoryDTO;
 import ij.IJ;
 import ij.Prefs;
 import ij.io.SaveDialog;

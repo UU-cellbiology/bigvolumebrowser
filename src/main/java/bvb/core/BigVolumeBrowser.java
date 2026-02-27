@@ -91,7 +91,6 @@ import bvb.gui.data.DataTreeNode;
 import bvb.gui.overlays.AxisOverlayRenderer;
 import bvb.gui.overlays.MultiBoxOverlayRendererBVB;
 import bvb.io.LUTNameFIJI;
-import bvb.io.ObjectHashStorage;
 import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataWrapper;

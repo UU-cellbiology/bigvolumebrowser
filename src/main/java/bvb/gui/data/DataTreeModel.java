@@ -39,7 +39,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import bvb.core.BVBSettings;
-import bvb.io.ObjectHashStorage;
+import bvb.core.ObjectHashStorage;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;

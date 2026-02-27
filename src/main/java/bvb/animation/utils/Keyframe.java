@@ -2,8 +2,8 @@ package bvb.animation.utils;
 
 import bvb.animation.AnimationPanel;
 import bvb.animation.KeyFrameScene;
-import bvb.animation.dto.KeyframeDTO;
-import bvb.animation.io.ValueCodec;
+import bvb.io.codecs.ValueCodec;
+import bvb.io.dto.KeyframeDTO;
 
 public class Keyframe< T >
 {

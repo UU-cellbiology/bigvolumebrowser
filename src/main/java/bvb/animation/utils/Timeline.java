@@ -9,8 +9,8 @@ import java.util.Set;
 
 import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
-import bvb.animation.dto.TimeLineDTO;
 import bvb.core.BigVolumeBrowser;
+import bvb.io.dto.TimeLineDTO;
 import bvb.shapes.BasicShape;
 import bvvpg.source.converters.Clippable3D;
 import bvvpg.source.converters.GammaConverterSetup;

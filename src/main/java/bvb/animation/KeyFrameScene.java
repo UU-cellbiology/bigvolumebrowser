@@ -2,9 +2,9 @@ package bvb.animation;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
-import bvb.animation.dto.KeyFrameSceneDTO;
 import bvb.animation.utils.Easing;
 import bvb.animation.utils.Timeline;
+import bvb.io.dto.KeyFrameSceneDTO;
 
 public class KeyFrameScene
 {

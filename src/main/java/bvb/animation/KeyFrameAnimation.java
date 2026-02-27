@@ -8,8 +8,8 @@ import javax.swing.DefaultListModel;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
-import bvb.animation.dto.KeyFrameAnimationDTO;
 import bvb.gui.AnisotropicTransformAnimator3D;
+import bvb.io.dto.KeyFrameAnimationDTO;
 
 public class KeyFrameAnimation
 {

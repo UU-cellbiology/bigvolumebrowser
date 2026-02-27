@@ -1,4 +1,4 @@
-package bvb.animation.io;
+package bvb.io.codecs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

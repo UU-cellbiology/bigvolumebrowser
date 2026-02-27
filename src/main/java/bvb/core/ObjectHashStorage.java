@@ -1,4 +1,4 @@
-package bvb.io;
+package bvb.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,8 @@ import net.imglib2.RandomAccessibleInterval;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
-import bvb.animation.dto.BVBObjectsDTO;
 import bvb.gui.data.BVBSpimDataInfo;
+import bvb.io.dto.BVBObjectsDTO;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
 import bvvpg.vistools.BvvStackSource;

@@ -1,4 +1,4 @@
-package bvb.animation.io;
+package bvb.io.codecs;
 
 public class FloatCodec implements ValueCodec<Float> {
 

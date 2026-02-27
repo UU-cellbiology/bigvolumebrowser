@@ -1,4 +1,4 @@
-package bvb.animation.io;
+package bvb.io.codecs;
 
 public class IntegerCodec implements ValueCodec<Integer> {
 

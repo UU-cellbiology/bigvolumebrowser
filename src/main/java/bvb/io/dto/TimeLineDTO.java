@@ -1,4 +1,4 @@
-package bvb.animation.dto;
+package bvb.io.dto;
 
 import java.util.ArrayList;
 import java.util.List;
