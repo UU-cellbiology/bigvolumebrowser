@@ -43,6 +43,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import bvb.animation.dto.BVBObjectsDTO;
 import bvb.animation.dto.StoryDTO;
 import bvb.animation.io.ValueCodecRegistry;
 import bvb.animation.utils.Easing;
@@ -842,7 +843,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			}
 			catch ( IOException exc )
 			{
-				// TODO Auto-generated catch block
 				exc.printStackTrace();
 			}
 	        
@@ -879,15 +879,34 @@ public class AnimationPanel extends JPanel implements ChangeListener
  
             if(storyDTO != null)
             {
+            	if(!storyDTO.BVBVersion.equals( BVBSettings.sVersion ))
+            	{
+            		IJ.log( "BVB animation timeline was made in version " + storyDTO.BVBVersion
+            				+ ", but current plugin version is " +BVBSettings.sVersion + ".");
+            		IJ.log( "Trying to load timeline anyway.");
+
+            	}
+            	
             	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
         		updateKeyIndices();
         		updateKeyMarks();        	
         		kfAnim.updateTransitionTimeline();
+        		checkObjectsPresence(storyDTO.bvbObjects);
         		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
             }
 
         }
 	}
-	
+	void checkObjectsPresence(final BVBObjectsDTO dto)
+	{
+		for(String hash:dto.presentObjectsNames)
+		{
+			if(bvb.objectHashStorage.getObjectFromHash( hash ) == null)
+			{
+				IJ.log( "WARNING: BVB animation timeline loading. Cannot find object " + hash  );
+				IJ.log( "It was not loaded or moved/renamed? Can be ignored? Skipping for now."  );
+			}
+		}
+	}
 
 }

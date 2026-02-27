@@ -38,7 +38,7 @@ public class Timeline
     	final PropertyBinding< T > binding = propertyRegistry.get( track.getObjectId(), track.getPropertyName());
         if(binding == null)
         {
-        	System.err.println("Cannot find binding between " + track.getObjectId() + "and " + track.getPropertyName());
+        	//System.err.println("Cannot find binding between " + track.getObjectId() + "and " + track.getPropertyName());
         	return;
         }
         track.bind( binding.property, binding.interpolator );
