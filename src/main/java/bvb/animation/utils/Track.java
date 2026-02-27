@@ -3,8 +3,11 @@ package bvb.animation.utils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import bvb.animation.KeyFrameScene;
+import bvb.animation.dto.KeyframeDTO;
+import bvb.animation.dto.TrackDTO;
 
 public class Track< T >
 {	
@@ -17,29 +20,23 @@ public class Track< T >
     private transient Interpolator<T> interpolator;
     
     private final List<Keyframe<T>> keyframes = new ArrayList<>();
-    
-    private final Easing easing;
-    
+     
     public Track(String objectId,
     		String propertyName,
             Property<T> property,
-            Interpolator<T> interpolator,
-            Easing easing)
+            Interpolator<T> interpolator)
     {
     	this.objectId = objectId;
     	this.propertyName = propertyName;
         this.property = property;
         this.interpolator = interpolator;
-        this.easing = easing != null ? easing : Easing.LINEAR;
     }
     
     public Track(String objectId,
-    		String propertyName,
-            Easing easing)
+    		String propertyName)
     {
     	this.objectId = objectId;
     	this.propertyName = propertyName;
-        this.easing = easing != null ? easing : Easing.LINEAR;
     }
     
 
@@ -88,7 +85,7 @@ public class Track< T >
         float localT =
             (time - a.getTime()) / (b.getTime() - a.getTime());
 
-        localT = easing.apply(localT);
+        localT = a.easing.apply(localT);
 
         T value = interpolator.interpolate(a.value, b.value, localT);
 
@@ -123,5 +120,40 @@ public class Track< T >
     public void sortKeyFrames()
     {
     	  keyframes.sort(Comparator.comparingDouble(k -> k.getTime()));
+    }
+    
+    public TrackDTO toDTO()
+    {
+    	TrackDTO out = new TrackDTO();
+    	out.objectId = objectId;
+    	out.property = propertyName;
+    	for(int i = 0; i < keyframes.size(); i++)
+    		out.keyframes.add( keyframes.get( i ).toGTO() );
+    	return out;
+    }
+    
+    public static<T> Track<T> fromDTO( final TrackDTO dto, final Map<String, KeyFrameScene > kfMap )
+    {
+    	Track<T> out = new Track<>(dto.objectId, dto.property);
+    	for (int i = 0; i < dto.keyframes.size(); i++)
+    	{
+    		final KeyframeDTO kfDTO = dto.keyframes.get( i );
+    		final KeyFrameScene kfScene = kfMap.get( kfDTO.kfsId );
+    		if( kfScene != null)
+    		{
+    			out.addKeyframe(Keyframe.fromDTO( kfDTO, kfScene ));
+    		}
+    		else
+    		{
+    			System.err.println("BVB: error finding scene keyframe.");
+    		}
+    	}
+    	
+    	return out;
+    }
+    
+    public List<Keyframe<T>> getKeyFrames()
+    {
+    	return keyframes;
     }
 }

@@ -1,5 +1,8 @@
 package bvb.animation;
 
+import net.imglib2.realtransform.AffineTransform3D;
+
+import bvb.animation.dto.KeyFrameSceneDTO;
 
 public class KeyFrameScene
 {
@@ -18,6 +21,16 @@ public class KeyFrameScene
 		scene = new SceneView(scene_.getViewerTransform(), scene_.getTimeFrame());
 		name = "key" + Integer.toString(this.hashCode());
 		fMovieTimePoint = fMovieTimePoint_;	
+	}
+	
+	public KeyFrameScene(final KeyFrameSceneDTO dto)
+	{
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		viewerTransform.set( dto.transformMatrix );
+		scene = new SceneView(viewerTransform, dto.nTimeFrame);
+		name = dto.name;
+		nIndex = dto.nIndex;
+		fMovieTimePoint = dto.fMovieTimePoint;
 	}
 	
 	public KeyFrameScene (String kfName)
@@ -73,5 +86,22 @@ public class KeyFrameScene
 		final KeyFrameScene out = new KeyFrameScene(scene, fMovieTimePoint);
 		out.name = this.name;
 		return out;
+	}
+	
+	public String getCurrentID()
+	{
+		return Integer.toString( nIndex ) + name;
+	}
+	
+	public KeyFrameSceneDTO toDTO()
+	{
+		final KeyFrameSceneDTO out = new KeyFrameSceneDTO();
+		out.fMovieTimePoint = fMovieTimePoint;
+		out.name = name;
+		out.nIndex = nIndex;
+		out.nTimeFrame = scene.nTimeFrame;
+		out.id = getCurrentID();
+		scene.getViewerTransform().toArray( out.transformMatrix );
+		return out;		
 	}
 }

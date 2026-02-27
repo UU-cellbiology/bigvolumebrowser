@@ -9,6 +9,7 @@ import java.util.Set;
 
 import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
+import bvb.animation.dto.TimeLineDTO;
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicShape;
 import bvvpg.source.converters.Clippable3D;
@@ -32,15 +33,29 @@ public class Timeline
     	propertyRegistry = new PropertyRegistry(bvb);
     }
     
-    public void addTrack(final Track<?> track)
-    {
+    public <T> void addTrackAndBind(final Track<T> track)
+    {   	
+    	final PropertyBinding< T > binding = propertyRegistry.get( track.getObjectId(), track.getPropertyName());
+        if(binding == null)
+        {
+        	System.err.println("Cannot find binding between " + track.getObjectId() + "and " + track.getPropertyName());
+        	return;
+        }
+        track.bind( binding.property, binding.interpolator );
     	tracks.add( track );
     	trackIndex.put(track.getTrackId(), track);
-    }
-    
-    public Track<?> getTrack(String id) 
-    {
-        return trackIndex.get(id);
+    	for (final Keyframe<T> kf : track.getKeyFrames())
+    	{
+    		final KeyFrameScene keyFrameScene = kf.parentKF;
+    		Set< Track<?> > setT = keyFramesToTracks.get( keyFrameScene );
+    		if(setT == null)
+    		{
+    			setT = new HashSet<>();
+    			keyFramesToTracks.put( keyFrameScene, setT );
+    		}
+    		setT.add( track );
+    	}
+
     }
     
     public void apply(float time) 
@@ -63,7 +78,7 @@ public class Timeline
 
         if (track == null) 
         {
-            track = new Track<>(objectId, propertyName, property, interpolator, easing); 
+            track = new Track<>(objectId, propertyName, property, interpolator); 
             tracks.add( track );
             trackIndex.put(objectId + propertyName, track);
         }
@@ -77,7 +92,7 @@ public class Timeline
         setT.add( track );
         
         //add keyframe to the track
-        track.addKeyframe(new Keyframe<>(property.get(), keyFrameScene));
+        track.addKeyframe(new Keyframe<>(property.get(), keyFrameScene, easing));
     }
     
     public <T> void addCurrentKeyframe(
@@ -99,10 +114,10 @@ public class Timeline
 
         if (track == null) 
         {
-            track = new Track<>(objectId, propertyName, easing);
+            track = new Track<>(objectId, propertyName);
             track.bind( binding.property, binding.interpolator );
             tracks.add( track );
-            trackIndex.put(objectId + propertyName, track);
+            trackIndex.put(track.getTrackId(), track);
         }
         //store the parent scene key frame
         Set< Track<?> > setT = keyFramesToTracks.get( keyFrameScene );
@@ -114,7 +129,7 @@ public class Timeline
         setT.add( track );
         
         //add keyframe to the track
-        track.addKeyframe(new Keyframe<>(binding.property.get(), keyFrameScene));
+        track.addKeyframe(new Keyframe<>(binding.property.get(), keyFrameScene, easing));
     }
     
     public void deleteKeyframe(final KeyFrameScene keyFrameScene)
@@ -193,5 +208,28 @@ public class Timeline
     		timeLineHandler.addKeyframeBasicShape( shape, keyFrameScene, easing);
     	}
     	
+    }
+    
+    public TimeLineDTO toDTO()
+    {
+    	TimeLineDTO out = new TimeLineDTO();
+    	for (int i = 0; i < tracks.size(); i++)
+    	{
+    		out.tracks.add( tracks.get( i ).toDTO() );
+    	}
+    	return out;
+    }
+    
+    public void restoreFromDTO(final TimeLineDTO dto, final Map<String, KeyFrameScene > mapKF)
+    {
+    	tracks.clear();
+        trackIndex.clear();        
+        keyFramesToTracks.clear();
+        
+        for(int i = 0; i < dto.tracks.size(); i++)
+        {
+        	final Track< ? > track = Track.fromDTO( dto.tracks.get( i ), mapKF );
+        	addTrackAndBind(track);
+        }
     }
 }

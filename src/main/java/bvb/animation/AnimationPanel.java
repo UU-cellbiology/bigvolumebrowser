@@ -1,5 +1,8 @@
 package bvb.animation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -15,14 +18,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -34,7 +41,10 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import bvb.animation.dto.StoryDTO;
+import bvb.animation.io.ValueCodecRegistry;
 import bvb.animation.utils.Easing;
 import bvb.animation.utils.Timeline;
 import bvb.core.BVBSettings;
@@ -42,9 +52,9 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
 import ij.IJ;
 import ij.Prefs;
+import ij.io.SaveDialog;
 
-public class AnimationPanel extends JPanel implements ChangeListener
-													
+public class AnimationPanel extends JPanel implements ChangeListener												
 {
 	final BigVolumeBrowser bvb;
 	
@@ -70,7 +80,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	final DrawKeyPoints keyMarks;
 	
 	final public NumberField nfTotalTime;
-	
+		
 	public static final int ANIMTIME_START = 0, ANIMTIME_END = 1, ANIMTIME_STRETCH = 2;
 	
 	int nChangeTotalTimeMode = (int)Prefs.get("BVB.nChangeTotalTimeMode", ANIMTIME_END);
@@ -112,6 +122,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	String sRenderSavePath = null;
 	
+	private static final ObjectMapper MAPPER = new ObjectMapper()
+	        .enable(SerializationFeature.INDENT_OUTPUT);
+
+	final public static ValueCodecRegistry registry = new ValueCodecRegistry();
+	
 	final AnimationPanelDialogs dialogsAnim;
 	
 	public Timeline timeline;
@@ -121,6 +136,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		this.bvb = bvb_;
 	
 		dialogsAnim = new AnimationPanelDialogs(bvb, this);
+		
+		registry.initializeAll();
 		
 		int nInitialTotalTime = 5;
 		
@@ -246,7 +263,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		panAnimPlot.add( sliderPanel,gbc );
 		
 		gbc.gridx++;
-		///RoiLIST and buttons
+		///keyframes list and buttons
 
 		jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jlist.setLayoutOrientation(JList.VERTICAL);
@@ -297,11 +314,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
 		gbc.gridy++;
 		butSave = new JButton("Save");
-		//panAnimPlot.add( butSave, cr );
+		panAnimPlot.add( butSave, gbc );
 		
 		gbc.gridy++;
 		butLoad = new JButton("Load");
-		//panAnimPlot.add( butLoad, cr );
+		panAnimPlot.add( butLoad, gbc );
 		
 		gbc.gridy++;
 		butUpdateSlider = new JToggleButton("<html><center>Slider<br>update</center></html>");
@@ -363,6 +380,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		butDelete.addActionListener( (e)-> deleteSelectedKeyFrame());
 		butSave.addActionListener((e) -> dialStorylineSave());
 		butLoad.addActionListener((e) -> dialStorylineLoad());
+
 		butUpdateSlider.addActionListener((e)-> {bUpdateSlider = butUpdateSlider.isSelected();});
 		
 	}
@@ -800,45 +818,76 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	void dialStorylineSave()
 	{
-//		if(listModel.size() > 0)
-//		{
-//			String filename;
-//			
-//			filename = bt.btData.sFileNameFullImg + "_btstory";
-//			SaveDialog sd = new SaveDialog("Save storyline ", filename, ".csv");
-//	        String path = sd.getDirectory();
-//	        if (path == null)
-//	        	return;
-//	        filename = path + sd.getFileName();
-//	        
-//	        bt.setLockMode(true);
-//	        bt.bInputLock = true;
-//	        StorylineSave<T> stSave  = new StorylineSave<>(bt, this);
-//	        stSave.saveAnimation( filename );
-//	        bt.setLockMode(false);
-//	        bt.bInputLock = false;
-//	        
-//		}
+		if(listModel.size() > 0)
+		{
+			String filename;
+			
+			filename = BVBSettings.lastDir + "/animation_bvbstory";
+			SaveDialog sd = new SaveDialog("Save storyline ", filename, ".json");
+	        String path = sd.getDirectory();
+	        if (path == null)
+	        	return;
+	        BVBSettings.lastDir = path;
+	        Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+	        filename = path + sd.getFileName();
+	        StoryDTO story = new StoryDTO();
+	        story.BVBVersion = BVBSettings.sVersion;
+	        story.keyFrameAnimation = kfAnim.toDTO();
+	        story.bvbObjects = bvb.objectHashStorage.toDTO();
+	        story.timeline = timeline.toDTO();
+
+	        try
+			{
+				MAPPER.writeValue( new File(filename), story );
+			}
+			catch ( IOException exc )
+			{
+				// TODO Auto-generated catch block
+				exc.printStackTrace();
+			}
+	        
+		}
 	}
+	
 	void dialStorylineLoad()
 	{
-//		String filename;
-//		
-//		OpenDialog openDial = new OpenDialog("Load BigTrace storyline",bt.btData.lastDir, "*.csv");
-//		
-//        String path = openDial.getDirectory();
-//        if (path==null)
-//        	return;
-//        bt.btData.lastDir = path;
-//        Prefs.set( "BigTrace.lastDir", bt.btData.lastDir );
-//        
-//        filename = path + openDial.getFileName();	
-//        bt.setLockMode(true);
-//        bt.bInputLock = true;
-//        StorylineLoad<T> stLoad  = new StorylineLoad<>(bt, this);
-//        stLoad.loadAnimation( filename );
-//        bt.setLockMode(false);
-//        bt.bInputLock = false;
+		String filename;
+		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
+		chooser.setDialogTitle( "Load BVB animation timeline" );
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "BVB animation timeline", "json");
+        chooser.setFileFilter(filter);
+        
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            filename =  chooser.getSelectedFile().getPath();
+            StoryDTO storyDTO = null;
+    
+            try
+            {
+            	storyDTO = MAPPER.readValue(new File(filename), StoryDTO.class);
+            }
+            catch ( IOException exc )
+            {
+            	// TODO Auto-generated catch block
+            	exc.printStackTrace();
+            }
+ 
+            if(storyDTO != null)
+            {
+            	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
+        		updateKeyIndices();
+        		updateKeyMarks();        	
+        		kfAnim.updateTransitionTimeline();
+        		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
+            }
+
+        }
 	}
+	
 
 }

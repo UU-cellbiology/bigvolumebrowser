@@ -137,7 +137,15 @@
   			<artifactId>laszip4j</artifactId>
   			<version>${laszip4j.version}</version>
 		</dependency>
-  		
+		<!-- Animation timeline storage -->
+  		<dependency>
+		 <groupId>com.fasterxml.jackson.core</groupId>
+		  <artifactId>jackson-core</artifactId>
+		</dependency>
+  		<dependency>
+		 <groupId>com.fasterxml.jackson.core</groupId>
+		  <artifactId>jackson-databind</artifactId>
+		</dependency>
 		<!-- ImgLib2 dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>

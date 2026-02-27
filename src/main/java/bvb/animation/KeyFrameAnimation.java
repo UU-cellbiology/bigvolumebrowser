@@ -2,11 +2,13 @@ package bvb.animation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.DefaultListModel;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
+import bvb.animation.dto.KeyFrameAnimationDTO;
 import bvb.gui.AnisotropicTransformAnimator3D;
 
 public class KeyFrameAnimation
@@ -21,8 +23,6 @@ public class KeyFrameAnimation
 	
 	final ArrayList<KeyFrameScene> keyFrameList = new ArrayList<>();
 	
-	final public HashMap<Object, ArrayList<AnimationTransformObject>> objectToTransform = new HashMap<>();
-	
 	public KeyFrameAnimation( final DefaultListModel<KeyFrameScene> keyFrames_)
 	{
 		keyFrames = keyFrames_;
@@ -30,6 +30,11 @@ public class KeyFrameAnimation
 	
 	public void setTotalTime(int t)
 	{
+		if(t < 0)
+		{
+			nTotalTime = 1;
+		}
+		
 		nTotalTime = t;
 	}
 	
@@ -121,5 +126,32 @@ public class KeyFrameAnimation
 		final AffineTransform3D finalAT = viewAnimate.get( nIndex - 1 ).get( fraction );
 	
 		return new SceneView( finalAT, nTimeFrame );
+	}
+	
+	public KeyFrameAnimationDTO toDTO()
+	{
+		final KeyFrameAnimationDTO out = new KeyFrameAnimationDTO ();
+		out.nTotalTime = nTotalTime;
+		for (int i = 0; i < keyFrames.getSize(); i++)
+		{
+			out.keyFrameList.add( keyFrames.get( i ).toDTO() );
+		}
+		return out;
+				
+	}
+	
+	public Map<String, KeyFrameScene > restoreFromDTO(final KeyFrameAnimationDTO in)	
+	{
+		nTotalTime = in.nTotalTime;
+		keyFrames.clear();
+		final Map<String, KeyFrameScene > keyFrameSceneMap = new HashMap<>();
+		for(int i = 0; i < in.keyFrameList.size(); i++)
+		{
+			final KeyFrameScene kFS = new KeyFrameScene( in.keyFrameList.get( i ));
+			keyFrames.addElement( kFS );
+			keyFrameSceneMap.put( kFS.getCurrentID(), kFS );
+		}
+		updateTransitionTimeline();
+		return keyFrameSceneMap;
 	}
 }

@@ -1,7 +1,8 @@
 package bvb.animation.utils;
 
 @FunctionalInterface
-public interface Easing {
+public interface Easing 
+{
     float apply(float t);
 
     Easing LINEAR = t -> t;

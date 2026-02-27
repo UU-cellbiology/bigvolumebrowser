@@ -9,6 +9,7 @@ import net.imglib2.RandomAccessibleInterval;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import bvb.animation.dto.BVBObjectsDTO;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.shapes.BasicShape;
 import bvb.utils.Misc;
@@ -124,5 +125,12 @@ public class ObjectHashStorage
 	public Object getObjectFromHash(final String hash)
 	{
 		return hashObject.get( hash );
+	}
+	
+	public BVBObjectsDTO toDTO()
+	{
+		BVBObjectsDTO out = new BVBObjectsDTO();
+		out.presentObjectsNames = new ArrayList<>(hashObject.keySet());
+		return out;
 	}
 }
