@@ -26,6 +26,8 @@ public class Timeline
     final TimeLineHandler timeLineHandler;
     
     final PropertyRegistry propertyRegistry;
+    
+    final public static EasingRegistry easingRegistry = new EasingRegistry();
        
     public Timeline (final BigVolumeBrowser bvb)
     {

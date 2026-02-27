@@ -46,7 +46,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import bvb.animation.dto.BVBObjectsDTO;
 import bvb.animation.dto.StoryDTO;
 import bvb.animation.io.ValueCodecRegistry;
-import bvb.animation.utils.Easing;
 import bvb.animation.utils.Timeline;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
@@ -487,7 +486,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	{
 		float fTimeMovie =  ((float)timeSlider.getValue() / (float)(tsSpan)) * kfAnim.getTotalTime();
 		KeyFrameScene newKeyFrame = new KeyFrameScene(SceneView.getCurrentSceneView( bvb.bvvViewer ), 
-				fTimeMovie, Easing.LINEAR);
+				fTimeMovie, Timeline.easingRegistry.get( "easeInQuad" ));
 		
 		if(listModel.size() == 0)
 		{
@@ -754,11 +753,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	        bLocked = true;
 	        for(int i = 0; i < keyPoints.size(); i++)
 	        {
-	        	//int h = Math.round( nMaxAscent+keyPoints.get( i ).floatValue()*nTotalRange);
 	        	g.drawString("["+Integer.toString( i )+"]", 0, 
 	        			Math.round( nMaxAscent + keyPoints.get( i ).floatValue() * nTotalRange));
-	        	//g.drawString( "top",  0, nMaxAscent);
-	        	//g.drawString( "bottom",  0, (int)(bounds.getHeight())-nMaxDescent);
 	        }
 	        bLocked = false;
 
@@ -824,7 +820,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			String filename;
 			
-			filename = BVBSettings.lastDir + "/animation_bvbstory";
+			filename = BVBSettings.lastDir + "/animation_timeline_bvb";
 			SaveDialog sd = new SaveDialog("Save storyline ", filename, ".json");
 	        String path = sd.getDirectory();
 	        if (path == null)
@@ -846,8 +842,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			{
 				exc.printStackTrace();
 				IJ.log( "BVB: Error while saving animation timeline. See console for the full log." );
-			}
-	        
+			}	        
+		}
+		else
+		{
+			IJ.showStatus( "BVB: cannot save animation timeline, at least 2 keyframes are required." );
 		}
 	}
 	
@@ -875,7 +874,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
             }
             catch ( IOException exc )
             {
-            	// TODO Auto-generated catch block
             	exc.printStackTrace();
             }
  
@@ -893,7 +891,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
         		updateKeyIndices();
         		updateKeyMarks();        	
         		kfAnim.updateTransitionTimeline();
-        		checkObjectsPresence(storyDTO.bvbObjects);
+        		checkObjectsPresence( storyDTO.bvbObjects, filename );
         		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
             }
             else
@@ -903,13 +901,14 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
         }
 	}
-	void checkObjectsPresence(final BVBObjectsDTO dto)
+	void checkObjectsPresence(final BVBObjectsDTO dto, String filename)
 	{
 		for(String hash:dto.presentObjectsNames)
 		{
 			if(bvb.objectHashStorage.getObjectFromHash( hash ) == null)
 			{
-				IJ.log( "WARNING: BVB animation timeline loading. Cannot find object " + hash  );
+				IJ.log( "WARNING: BVB animation timeline loading " + filename);
+				IJ.log( "Cannot find object " + hash  );
 				IJ.log( "It was not loaded or moved/renamed? Can be ignored? Skipping for now."  );
 			}
 		}

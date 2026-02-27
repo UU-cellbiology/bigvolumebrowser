@@ -4,6 +4,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import bvb.animation.dto.KeyFrameSceneDTO;
 import bvb.animation.utils.Easing;
+import bvb.animation.utils.Timeline;
 
 public class KeyFrameScene
 {
@@ -35,21 +36,7 @@ public class KeyFrameScene
 		name = dto.name;
 		nIndex = dto.nIndex;
 		fMovieTimePoint = dto.fMovieTimePoint;
-    	easing = Easing.LINEAR;
-    	if(dto.easing.equals( "EASE_IN" ) )
-    	{
-    		easing = Easing.EASE_IN;
-    	}
-    	
-    	if(dto.easing.equals( "EASE_OUT" ) )
-    	{
-    		easing = Easing.EASE_OUT;
-    	}
-    	
-    	if(dto.easing.equals( "EASE_IN_OUT" ) )
-    	{
-    		easing = Easing.EASE_IN_OUT;
-    	}
+    	easing = Timeline.easingRegistry.get( dto.easingId );
 	}
 	
 	public KeyFrameScene (String kfName)
@@ -120,27 +107,8 @@ public class KeyFrameScene
 		out.nIndex = nIndex;
 		out.nTimeFrame = scene.nTimeFrame;
 		out.id = getCurrentID();
+		out.easingId = easing.getId();
 		scene.getViewerTransform().toArray( out.transformMatrix );
-		
-    	if(easing == Easing.LINEAR)
-    	{
-    		out.easing = "LINEAR";
-    	}
-    	
-    	if(easing == Easing.EASE_IN)
-    	{
-    		out.easing = "EASE_IN";
-    	}
-
-    	if(easing == Easing.EASE_OUT)
-    	{
-    		out.easing = "EASE_OUT";
-    	}
-    	
-    	if(easing == Easing.EASE_IN_OUT)
-    	{
-    		out.easing = "EASE_IN_OUT";
-    	}
 		return out;		
 	}
 }

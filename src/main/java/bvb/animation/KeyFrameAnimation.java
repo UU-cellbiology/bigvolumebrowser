@@ -97,8 +97,8 @@ public class KeyFrameAnimation
 			
 		}
 		
-		double fraction;		
-		double dNorm;
+		float localT;		
+		float dNorm;
 		
 		if(nIndex >= timeIntervals.size() - 1)
 		{
@@ -111,19 +111,20 @@ public class KeyFrameAnimation
 		}
 		if(dNorm < 0.00000001)
 		{
-			fraction = 0;
+			localT = 0;
 		}
 		else
 		{
-			fraction = (fTimePoint - timeIntervals.get( nIndex-1 ))/dNorm;
+			localT = (fTimePoint - timeIntervals.get( nIndex-1 ))/dNorm;
 		}
-		
+		localT = keyFrameList.get(nIndex-1).easing.apply( localT );
 		//time frame
 		int nIniFrame = keyFrameList.get(nIndex-1).getSceneView().getTimeFrame();
 		int nNextFrame = keyFrameList.get(nIndex).getSceneView().getTimeFrame();
-		int nTimeFrame = ( int ) ( nIniFrame + Math.round( fraction * (nNextFrame - nIniFrame)) );
+		int nTimeFrame = nIniFrame + Math.round( localT * (nNextFrame - nIniFrame));
+		
 		// transform camera view
-		final AffineTransform3D finalAT = viewAnimate.get( nIndex - 1 ).get( fraction );
+		final AffineTransform3D finalAT = viewAnimate.get( nIndex - 1 ).get( localT );
 	
 		return new SceneView( finalAT, nTimeFrame );
 	}

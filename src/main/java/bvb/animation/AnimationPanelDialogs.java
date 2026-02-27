@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import bvb.animation.utils.Timeline;
 import bvb.core.BVVSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
@@ -177,6 +178,7 @@ public class AnimationPanelDialogs
 	{
 		final DefaultListModel< KeyFrameScene > listModel = aPanel.listModel;
 		final KeyFrameAnimation kfAnim = aPanel.kfAnim;
+		final KeyFrameScene keyFrame = listModel.get( nInd );
 		
 		DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
 		decimalFormatSymbols.setDecimalSeparator('.');
@@ -185,46 +187,71 @@ public class AnimationPanelDialogs
 		final JPanel panEdit = new JPanel();
 		panEdit.setLayout(new GridBagLayout());
 		
-		GridBagConstraints cd = new GridBagConstraints();
-		GBCHelper.alighLeft(cd);
+		GridBagConstraints gbc = new GridBagConstraints();
+		GBCHelper.alighLeft(gbc);
 		
 		JTextField tfName = new JTextField(listModel.get( nInd ).name); 
 		
 		NumberField nfTimePoint = new NumberField(4);		
 		nfTimePoint.setText(df.format(listModel.get( nInd ).fMovieTimePoint));
+		String[] easingNames = Timeline.easingRegistry.getAllNames();
+		final JComboBox<String> cbEasing = new JComboBox<>(easingNames);
+		cbEasing.setSelectedItem( keyFrame.easing.getId() );
 		
-		cd.gridx = 0;
-		cd.gridy = 0;	
-		panEdit.add(new JLabel("Name:"),cd);
-		cd.gridx++;
-		panEdit.add(tfName, cd);	
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		panEdit.add(new JLabel("Name:"),gbc);
+		gbc.gridx++;
+		panEdit.add(tfName, gbc);	
 		
-		cd.gridx = 0;
-		cd.gridy++;	
-		panEdit.add(new JLabel("Time position:"),cd);
-		cd.gridx++;
-		panEdit.add(nfTimePoint, cd);	
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panEdit.add(new JLabel("Time position:"),gbc);
+		gbc.gridx++;
+		panEdit.add(nfTimePoint, gbc);	
 		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panEdit.add(new JLabel("Easing:"),gbc);
+		gbc.gridx++;
+		panEdit.add(cbEasing, gbc);	
+
 		
 		int reply = JOptionPane.showConfirmDialog(null, panEdit, "Edit KeyFrame", 
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 				
 		if (reply == JOptionPane.OK_OPTION) 
 		{
-			final KeyFrameScene keyFrame = listModel.get( nInd );
+			boolean bUpdateKF = false;
+
 			if(tfName.getText().length() > 0)
 			{
-				keyFrame.name = tfName.getText();
-				listModel.setElementAt( keyFrame, nInd );
+				if(!tfName.getText().equals( keyFrame.name ))
+				{
+					listModel.setElementAt( keyFrame, nInd );
+					bUpdateKF = true;
+				}
 			}
+			else
+				return null;
 			
 			float fNewTime = Math.min(Math.max(0, Float.parseFloat( nfTimePoint.getText())), kfAnim.nTotalTime);
 			
 			if(Math.abs( listModel.get( nInd ).fMovieTimePoint - fNewTime) > 0.001)
+				{ bUpdateKF = true;	}
+			
+			String easingID = (String)cbEasing.getSelectedItem();
+			
+			if(!easingID.equals( keyFrame.easing.getId() ))
+				{ bUpdateKF = true;}
+			
+			if(bUpdateKF)
 			{
+				keyFrame.name = tfName.getText();
 				keyFrame.fMovieTimePoint = fNewTime;
 				listModel.setElementAt( keyFrame, nInd );
 				aPanel.sortListModel();
+				keyFrame.easing = Timeline.easingRegistry.get( (String)cbEasing.getSelectedItem() );
 				return keyFrame;
 			}
 			return null;

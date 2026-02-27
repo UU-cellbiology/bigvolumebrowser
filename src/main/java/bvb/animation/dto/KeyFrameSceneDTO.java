@@ -8,7 +8,7 @@ public class KeyFrameSceneDTO
 	public String name;
 	public int nIndex;
 	public String id;
-	public String easing;
+	public String easingId;
 	public KeyFrameSceneDTO()
 	{
 		
