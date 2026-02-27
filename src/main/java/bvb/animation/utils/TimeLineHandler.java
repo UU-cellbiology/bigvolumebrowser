@@ -91,6 +91,10 @@ public class TimeLineHandler
 		timeline.addCurrentKeyframe(csName, "cs_lightingType", easing, keyFrameScene );
 
 		timeline.addCurrentKeyframe(csName, "cs_voxelInterpolation", easing, keyFrameScene );
+		
+		timeline.addCurrentKeyframe(csName, "cs_color", easing, keyFrameScene );
+
+		timeline.addCurrentKeyframe(csName, "cs_LUT", easing, keyFrameScene );
 
     }
     

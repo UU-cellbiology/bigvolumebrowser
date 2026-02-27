@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.type.numeric.ARGBType;
 
 import bdv.viewer.SourceAndConverter;
 import bvb.core.BigVolumeBrowser;
@@ -357,6 +358,39 @@ public class PropertyRegistry
 			final PropertyBinding<Integer> binding = new PropertyBinding<>();
 			binding.property = pVoxelInterpolation;
 			binding.interpolator = Interpolator.integerStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "cs_color" ))
+		{
+	    	final Property<Color> pColor = new Property<Color>() {
+			    @Override
+				public Color get() { return new Color(cs.getColor().get(),true ); }
+			    @Override
+				public void set(Color v) { cs.setColor( new ARGBType(v.getRGB()) ); }
+			};
+			final PropertyBinding<Color> binding = new PropertyBinding<>();
+			binding.property = pColor;
+			binding.interpolator = new HSBColorInterpolator();
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "cs_LUT" ))
+		{
+	    	final Property<String> pLUT = new Property<String>() {
+			    @Override
+				public String get() { 
+			    	String lut = cs.getLUTName(); 
+			    	if(lut == null)
+			    		lut = "";
+			    	return lut;
+					}
+			    @Override
+				public void set(String v) { if(!v.equals( "" )) {cs.setLUT( v );}}
+			};
+			final PropertyBinding<String> binding = new PropertyBinding<>();
+			binding.property = pLUT;
+			binding.interpolator = Interpolator.stringStep;
 			return ( PropertyBinding< T > ) binding;
 		}
 		
