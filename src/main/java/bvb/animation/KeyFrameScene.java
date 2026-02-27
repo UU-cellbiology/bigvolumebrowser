@@ -3,6 +3,7 @@ package bvb.animation;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bvb.animation.dto.KeyFrameSceneDTO;
+import bvb.animation.utils.Easing;
 
 public class KeyFrameScene
 {
@@ -13,14 +14,17 @@ public class KeyFrameScene
 	
 	String name;
 	
+	public Easing easing;
+	
 	/** ordered index in the animation list **/
 	int nIndex = 0;
 	
-	public KeyFrameScene(final SceneView scene_, float fMovieTimePoint_)
+	public KeyFrameScene(final SceneView scene, float fMovieTimePoint, Easing easing)
 	{
-		scene = new SceneView(scene_.getViewerTransform(), scene_.getTimeFrame());
+		this.scene = new SceneView(scene.getViewerTransform(), scene.getTimeFrame());
 		name = "key" + Integer.toString(this.hashCode());
-		fMovieTimePoint = fMovieTimePoint_;	
+		this.fMovieTimePoint = fMovieTimePoint;	
+		this.easing = easing;
 	}
 	
 	public KeyFrameScene(final KeyFrameSceneDTO dto)
@@ -31,6 +35,21 @@ public class KeyFrameScene
 		name = dto.name;
 		nIndex = dto.nIndex;
 		fMovieTimePoint = dto.fMovieTimePoint;
+    	easing = Easing.LINEAR;
+    	if(dto.easing.equals( "EASE_IN" ) )
+    	{
+    		easing = Easing.EASE_IN;
+    	}
+    	
+    	if(dto.easing.equals( "EASE_OUT" ) )
+    	{
+    		easing = Easing.EASE_OUT;
+    	}
+    	
+    	if(dto.easing.equals( "EASE_IN_OUT" ) )
+    	{
+    		easing = Easing.EASE_IN_OUT;
+    	}
 	}
 	
 	public KeyFrameScene (String kfName)
@@ -83,7 +102,7 @@ public class KeyFrameScene
 	
 	public KeyFrameScene duplicate()
 	{
-		final KeyFrameScene out = new KeyFrameScene(scene, fMovieTimePoint);
+		final KeyFrameScene out = new KeyFrameScene(scene, fMovieTimePoint, easing);
 		out.name = this.name;
 		return out;
 	}
@@ -102,6 +121,26 @@ public class KeyFrameScene
 		out.nTimeFrame = scene.nTimeFrame;
 		out.id = getCurrentID();
 		scene.getViewerTransform().toArray( out.transformMatrix );
+		
+    	if(easing == Easing.LINEAR)
+    	{
+    		out.easing = "LINEAR";
+    	}
+    	
+    	if(easing == Easing.EASE_IN)
+    	{
+    		out.easing = "EASE_IN";
+    	}
+
+    	if(easing == Easing.EASE_OUT)
+    	{
+    		out.easing = "EASE_OUT";
+    	}
+    	
+    	if(easing == Easing.EASE_IN_OUT)
+    	{
+    		out.easing = "EASE_IN_OUT";
+    	}
 		return out;		
 	}
 }

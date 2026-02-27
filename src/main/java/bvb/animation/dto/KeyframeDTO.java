@@ -8,8 +8,6 @@ public class KeyframeDTO
 	 
 	 public String kfsId;
 	 
-	 public String easing;
-	 
 	 public KeyframeDTO()
 	 {
 		 

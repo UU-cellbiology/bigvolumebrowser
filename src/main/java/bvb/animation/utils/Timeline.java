@@ -70,7 +70,6 @@ public class Timeline
             String propertyName,
             final Property<T> property,
             final Interpolator<T> interpolator,
-            final Easing easing,
             final KeyFrameScene keyFrameScene)
     {
         @SuppressWarnings("unchecked")
@@ -92,13 +91,12 @@ public class Timeline
         setT.add( track );
         
         //add keyframe to the track
-        track.addKeyframe(new Keyframe<>(property.get(), keyFrameScene, easing));
+        track.addKeyframe(new Keyframe<>(property.get(), keyFrameScene));
     }
     
     public <T> void addCurrentKeyframe(
             String objectId,
             String propertyName,
-            final Easing easing,
             final KeyFrameScene keyFrameScene)
     {
         final PropertyBinding< T > binding = propertyRegistry.get( objectId, propertyName );
@@ -129,7 +127,7 @@ public class Timeline
         setT.add( track );
         
         //add keyframe to the track
-        track.addKeyframe(new Keyframe<>(binding.property.get(), keyFrameScene, easing));
+        track.addKeyframe(new Keyframe<>(binding.property.get(), keyFrameScene));
     }
     
     public void deleteKeyframe(final KeyFrameScene keyFrameScene)
@@ -164,7 +162,7 @@ public class Timeline
     	 }
     }
     
-    public void addKeyframeBVB(final BigVolumeBrowser bvb, final KeyFrameScene keyFrameScene, final Easing easing)
+    public void addKeyframeBVB(final BigVolumeBrowser bvb, final KeyFrameScene keyFrameScene)
     {
     	final ArrayList<Object> allObjects = new ArrayList<>();
     	final ArrayList<GammaConverterSetup> converterSetups = new ArrayList<>();
@@ -191,21 +189,21 @@ public class Timeline
 		{
     		if(obj instanceof Clippable3D)
     		{
-    			timeLineHandler.addKeyframeTransform(obj, keyFrameScene, easing);
-    			timeLineHandler.addKeyframeClippable3D((Clippable3D)obj, keyFrameScene, easing);    		
+    			timeLineHandler.addKeyframeTransform(obj, keyFrameScene);
+    			timeLineHandler.addKeyframeClippable3D((Clippable3D)obj, keyFrameScene);    		
     		}
 		}    	
     	
     	//cs specific routine
     	for(final GammaConverterSetup cs :converterSetups)
 		{
-    		timeLineHandler.addKeyframeConverterSetup(cs, keyFrameScene, easing);
+    		timeLineHandler.addKeyframeConverterSetup(cs, keyFrameScene);
 		}
     	
     	//shape specific routine
     	for (final BasicShape shape : shapes)
     	{
-    		timeLineHandler.addKeyframeBasicShape( shape, keyFrameScene, easing);
+    		timeLineHandler.addKeyframeBasicShape( shape, keyFrameScene);
     	}
     	
     }

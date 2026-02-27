@@ -9,13 +9,11 @@ public class Keyframe< T >
 {
     public final T value;
     public final KeyFrameScene parentKF;    
-    public final Easing easing;
 
-    public Keyframe(final T value, final KeyFrameScene parentKF, final Easing easing) 
+    public Keyframe(final T value, final KeyFrameScene parentKF) 
     {
     	this.parentKF = parentKF;
         this.value = value;
-        this.easing = easing;
     }
     
     public float getTime()
@@ -35,23 +33,23 @@ public class Keyframe< T >
     	
     	Object decoded = codec.decode(dto.value);
 
-    	Easing easing_out = Easing.LINEAR;
-    	if(dto.easing.equals( "EASE_IN" ) )
-    	{
-    		easing_out = Easing.EASE_IN;
-    	}
+//    	Easing easing_out = Easing.LINEAR;
+//    	if(dto.easing.equals( "EASE_IN" ) )
+//    	{
+//    		easing_out = Easing.EASE_IN;
+//    	}
+//    	
+//    	if(dto.easing.equals( "EASE_OUT" ) )
+//    	{
+//    		easing_out = Easing.EASE_OUT;
+//    	}
+//    	
+//    	if(dto.easing.equals( "EASE_IN_OUT" ) )
+//    	{
+//    		easing_out = Easing.EASE_IN_OUT;
+//    	}
     	
-    	if(dto.easing.equals( "EASE_OUT" ) )
-    	{
-    		easing_out = Easing.EASE_OUT;
-    	}
-    	
-    	if(dto.easing.equals( "EASE_IN_OUT" ) )
-    	{
-    		easing_out = Easing.EASE_IN_OUT;
-    	}
-    	
-    	return new Keyframe<>( (T)decoded, parentKF_, easing_out );
+    	return new Keyframe<>( (T)decoded, parentKF_);
     }
 
 	public KeyframeDTO toGTO()
@@ -66,26 +64,6 @@ public class Keyframe< T >
     	out.valueType = codec.getTypeId();
     	out.value = codec.encode( this.value );
     	
-    	if(easing == Easing.LINEAR)
-    	{
-    		out.easing = "LINEAR";
-    	}
-    	
-    	if(easing == Easing.EASE_IN)
-    	{
-    		out.easing = "EASE_IN";
-    	}
-
-    	if(easing == Easing.EASE_OUT)
-    	{
-    		out.easing = "EASE_OUT";
-    	}
-    	
-    	if(easing == Easing.EASE_IN_OUT)
-    	{
-    		out.easing = "EASE_IN_OUT";
-    	}
-
     	return out;
     }
 }

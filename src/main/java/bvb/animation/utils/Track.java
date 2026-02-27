@@ -85,7 +85,7 @@ public class Track< T >
         float localT =
             (time - a.getTime()) / (b.getTime() - a.getTime());
 
-        localT = a.easing.apply(localT);
+        localT = a.parentKF.easing.apply(localT);
 
         T value = interpolator.interpolate(a.value, b.value, localT);
 

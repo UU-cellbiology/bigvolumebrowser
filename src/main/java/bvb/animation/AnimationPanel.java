@@ -486,7 +486,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	void addCurrentKeyFrame()
 	{
 		float fTimeMovie =  ((float)timeSlider.getValue() / (float)(tsSpan)) * kfAnim.getTotalTime();
-		KeyFrameScene newKeyFrame = new KeyFrameScene(SceneView.getCurrentSceneView( bvb.bvvViewer ), fTimeMovie);
+		KeyFrameScene newKeyFrame = new KeyFrameScene(SceneView.getCurrentSceneView( bvb.bvvViewer ), 
+				fTimeMovie, Easing.LINEAR);
 		
 		if(listModel.size() == 0)
 		{
@@ -514,7 +515,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 		kfAnim.updateTransitionTimeline();
 	
-	    timeline.addKeyframeBVB(bvb, newKeyFrame, Easing.LINEAR);
+	    timeline.addKeyframeBVB(bvb, newKeyFrame);
 	}
 	
 	void replaceSelectedKeyFrame()
@@ -526,7 +527,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			keyFrameScene.setScene( SceneView.getCurrentSceneView( bvb.bvvViewer ) );
 			kfAnim.updateTransitionTimeline();
 			timeline.deleteKeyframe( keyFrameScene );
-			timeline.addKeyframeBVB(bvb, keyFrameScene, Easing.LINEAR);
+			timeline.addKeyframeBVB(bvb, keyFrameScene);
 		}
 	}
 	
@@ -844,6 +845,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			catch ( IOException exc )
 			{
 				exc.printStackTrace();
+				IJ.log( "BVB: Error while saving animation timeline. See console for the full log." );
 			}
 	        
 		}
@@ -893,6 +895,10 @@ public class AnimationPanel extends JPanel implements ChangeListener
         		kfAnim.updateTransitionTimeline();
         		checkObjectsPresence(storyDTO.bvbObjects);
         		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
+            }
+            else
+            {
+            	IJ.log( "BVB: Error while loading animation timeline. See console for the full log." );
             }
 
         }
