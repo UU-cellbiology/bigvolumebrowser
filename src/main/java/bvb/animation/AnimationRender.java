@@ -63,6 +63,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 			return null;
 		}		
 
+		bvb.bvbActions.turnOffManualTransform();
 		bvb.multiBoxOverlayBVB.setEnabled( aPanel.bRenderMultiBox );
 		
 		Prefs.showScaleBar(aPanel.bRenderScaleBar);

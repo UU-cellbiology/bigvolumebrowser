@@ -40,7 +40,7 @@ public class BVBSettings
 	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
 
-	/** background color of BVV canvas **/
+	/** info render color equal to the inverted background color of BVV canvas **/
 	public static Color canvasOverlayColor = new Color((int)Prefs.get( "BVB.canvasOverlayColor", Color.WHITE.getRGB() ));
 	
 	/** status of displaying boxes around sources **/

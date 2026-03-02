@@ -489,7 +489,7 @@ public class ViewPanel extends JPanel
 	{
 		String filename;
 
-		filename = BVBSettings.lastDir + "/sceneStateBVB";
+		filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "_sceneStateBVB";
 		SaveDialog sd = new SaveDialog("Save BVB scene state", filename, ".json");
 		String path = sd.getDirectory();
 		if (path == null)
@@ -516,7 +516,7 @@ public class ViewPanel extends JPanel
 		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
 		chooser.setDialogTitle( "Load BVB scene state" );
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "BVB animation timeline", "json");
+                "BVB scene state", "json");
         chooser.setFileFilter(filter);
         
         int returnVal = chooser.showOpenDialog(null);
@@ -543,11 +543,11 @@ public class ViewPanel extends JPanel
             	{
             		IJ.log( "BVB scene state was made in version " + sceneDTO.BVBVersion
             				+ ", but current plugin version is " + BVBSettings.sVersion + ".");
-            		IJ.log( "Trying to load timeline anyway.");
+            		IJ.log( "Trying to load stored data anyway.");
 
             	}
             	
-            	SceneStateDTO.restoreState( bvb, sceneDTO );
+            	SceneStateDTO.restoreState( bvb, sceneDTO, filename );
      
             }
             else

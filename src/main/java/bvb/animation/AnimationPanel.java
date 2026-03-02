@@ -810,7 +810,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			String filename;
 			
-			filename = BVBSettings.lastDir + "/animationTimelineBVB";
+			filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "animationTimelineBVB";
 			SaveDialog sd = new SaveDialog("Save storyline ", filename, ".json");
 	        String path = sd.getDirectory();
 	        if (path == null)

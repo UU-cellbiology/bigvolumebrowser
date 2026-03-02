@@ -55,7 +55,7 @@ public class SceneStateDTO
 	}
 	
 	@SuppressWarnings( "rawtypes" )
-	public static void restoreState(final BigVolumeBrowser bvb, final SceneStateDTO scene)
+	public static void restoreState(final BigVolumeBrowser bvb, final SceneStateDTO scene, final String filename)
 	{
 		
 		bvb.bvvViewer.state().setCurrentTimepoint( scene.timePoint );
@@ -70,6 +70,10 @@ public class SceneStateDTO
 
 			if (obj == null)
 			{
+				if(filename != null)
+				{
+					IJ.log( "WARNING:  BVB recover scene state, while loading" +  filename);					
+				}
 				IJ.log( "BVB: Cannot find object " +  objDTO.objectId);
 				continue; 
 			}

@@ -13,8 +13,9 @@ It can display volumetric (microscopy) data, SMLM datasets, and geometric object
 Objects can be clipped and transformed freely in 3D, and it works with timelapse data.
 
 BVB performs lazy loading and supports a multi-scale pyramidal data formats.   
-This speeds up render and allows exploration of datasets larger than GPU memory.
+This speeds up render and allows exploration of datasets larger than GPU memory.   
 
+It supports rendering of 3D visualization movies using key frame animation interface.    
 
 **Users**: please check full description/tutorials in the **[project's wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.   
 There is a **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary)).   

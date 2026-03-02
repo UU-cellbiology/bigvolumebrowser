@@ -79,7 +79,7 @@ import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
-import bvb.io.dto.SceneStateDTO;
+import bvb.gui.overlays.TransformModeOverlayRenderer;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
 import ij.Prefs;
@@ -111,9 +111,9 @@ public class BVBActions
 	public static final String[] ROTATE_Z_AXIS_WORLD  = new String[] { "alt Z" };
 	public static final String[] ROTATE_Y_AXIS_WORLD   = new String[] { "alt Y", "alt A" };
 
-	SceneStateDTO scene = null;
-	
 	final long lRotationDuration = 100;
+	
+	TransformModeOverlayRenderer transfromModeOverlay = new TransformModeOverlayRenderer();
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
@@ -122,6 +122,8 @@ public class BVBActions
 		behaviours = new Behaviours( new InputTriggerConfig() );
 		installBehaviors();
 		installActions();
+		transfromModeOverlay.bindBVB( bvb_ );
+		bvb.bvvViewer.getDisplay().overlays().add( transfromModeOverlay );
 	}
 	
 	/** install separate drag/rotation working with manual transform **/
@@ -160,10 +162,6 @@ public class BVBActions
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
-		actions.runnableAction(() -> store(), "store", "9");
-		actions.runnableAction(() -> restore(), "restore", "0");
-
-		
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigVolumeBrowser actions" );
 		
 	}
@@ -176,18 +174,6 @@ public class BVBActions
 	public InputMap getInputMap()
 	{
 		return actions.getInputMap();
-	}
-	
-	void store()
-	{
-		scene = SceneStateDTO.captureState( bvb );
-	}
-	void restore()
-	{
-		if(scene != null)
-		{
-			SceneStateDTO.restoreState( bvb, scene );
-		}
 	}
 	
 	void dummy() 
@@ -634,7 +620,7 @@ public class BVBActions
 
 	}
 	
-	void turnOffManualTransform()
+	public void turnOffManualTransform()
 	{
 		if( bvb.getInputLock() )
 			return;
@@ -643,6 +629,7 @@ public class BVBActions
 		if(!bvb.bManualTransformMode)
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			this.transfromModeOverlay.setEnabled(false);
 		}
 	}
 	
@@ -654,12 +641,14 @@ public class BVBActions
 		
 		if(bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual full transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			
 		}
 		else
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual full transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
+		transfromModeOverlay.setEnabled( bvb.bManualTransformMode );
 	}
 	
 	public void alignToAxis( final int nAxis )
