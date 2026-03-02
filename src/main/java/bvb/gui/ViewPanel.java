@@ -62,12 +62,25 @@ public class ViewPanel extends JPanel
 	
 	final JButton butProjType;
 
-	final JButton butSettings;
-	
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];
 	
+	final JButton butSettings;
+	
+	final JButton [] butAlign = new JButton [3];
+
+	final JButton butRotateCoords;
+	
+	final ImageIcon [] rotIcon = new ImageIcon[2];
+	final String[] rotToolTip = new String[2];
+	
+	final JButton [] butRotate = new JButton [3];
+	
+	int nRotationCoord = 0;
+	
 	public ColorUserSettings selectColors = new ColorUserSettings();
+
+	String [] sAxesNames = new String [] {"X", "Y", "Z"};
 	
 	public ViewPanel(final BigVolumeBrowser bvb_)
 	{
@@ -124,24 +137,72 @@ public class ViewPanel extends JPanel
 	    	}
 	    	butProjType.setIcon( projIcon[newProj] );
 	    	butProjType.setToolTipText( projToolTip[newProj]);
-	    	bvb.bvvViewer.setProjectionType(newProj);
-	    });  
+	    	bvb.bvvViewer.setProjectionType( newProj );
+	    }); 
 	    
 		//SETTINGS
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butSettings = new JButton(tabIcon);
 	    butSettings.setToolTipText("Settings");
-	    butSettings.addActionListener((e) -> dialSettings());
+	    butSettings.addActionListener((e) -> dialSettings());	    
+	    
+	    //ALIGN TO AXES
+	    for(int d = 0; d < 3; d++)
+	    {
+			icon_path = this.getClass().getResource(BVBSettings.sIconPath + "align" + sAxesNames[d]+".png");
+			tabIcon = new ImageIcon(icon_path);
+	    	butAlign[d] = new JButton(tabIcon);
+	    	butAlign[d].setToolTipText( "Align " + sAxesNames[d] + " axis towards camera\n"
+	    			+ "(shortcut Shift + " + sAxesNames[d] + ")" ); 	
+	    }
+	    
+	    butAlign[0].addActionListener((e) -> bvb.bvbActions.alignToAxis( 0 ) );
+	    butAlign[1].addActionListener((e) -> bvb.bvbActions.alignToAxis( 1 ) );
+	    butAlign[2].addActionListener((e) -> bvb.bvbActions.alignToAxis( 2 ));
+	    
+	    //ROTATE AROUND AXES
+	    rotToolTip[0] = "Rotate along camera view coordinates";
+	    rotToolTip[1] = "Rotate along world/scene coordinates";
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "camera.png");
+		rotIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "frame_global.png");
+		rotIcon[1] = new ImageIcon(icon_path);
+		
+		butRotateCoords = new JButton( rotIcon[ nRotationCoord ] );
+		butRotateCoords.setToolTipText( rotToolTip[ nRotationCoord ]);
+
+		butRotateCoords.addActionListener((e)->
+	    {
+	    	if(nRotationCoord == 0)
+	    	{
+	    		nRotationCoord = 1;
+	    	}
+	    	else
+	    		nRotationCoord = 0;
+	    	butRotateCoords.setIcon( rotIcon[nRotationCoord] );
+	    	butRotateCoords.setToolTipText( rotToolTip[nRotationCoord]);
+	    }); 
+		
+	    for(int d = 0; d < 3; d++)
+	    {
+			icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme 
+					+ "rotate" + sAxesNames[d] + ".png");
+			tabIcon = new ImageIcon(icon_path);
+	    	butRotate[d] = new JButton(tabIcon);
+	    	butRotate[d].setToolTipText( "Rotate around " + sAxesNames[d] + " axis" );	    	
+	    }	    
+	    
+	    butRotate[0].addActionListener((e) -> bvb.bvbActions.rotate( 0, nRotationCoord == 0 ));
+	    butRotate[1].addActionListener((e) -> bvb.bvbActions.rotate( 1, nRotationCoord == 0 ));
+	    butRotate[2].addActionListener((e) -> bvb.bvbActions.rotate( 2, nRotationCoord == 0 ));
 	    
 	    GridBagConstraints gbc = new GridBagConstraints();
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
-    	this.add(butCenter,gbc);
-	    
-		gbc.gridx++;
-    	this.add(butToggleVisibility,gbc);
+
+	    this.add(butToggleVisibility,gbc);
 		
 		gbc.gridx++;
     	this.add(butVBox,gbc);
@@ -152,6 +213,25 @@ public class ViewPanel extends JPanel
 		gbc.gridx++;	    
 		this.add(butSettings,gbc);
 
+		gbc.gridy ++;	    
+		gbc.gridx = 0;
+    	this.add(butCenter,gbc);
+	    
+	    for(int d = 0; d < 3; d++)
+	    {
+	    	gbc.gridx++;
+			this.add(butAlign[d],gbc);
+	    }
+
+		gbc.gridy ++;	    
+		gbc.gridx = 0;
+		this.add(butRotateCoords, gbc);
+
+	    for(int d = 0; d < 3; d++)
+	    {
+	    	gbc.gridx++;
+			this.add(butRotate[d],gbc);
+	    }
 	}
 	
 	public void dialSettings()
@@ -170,7 +250,6 @@ public class ViewPanel extends JPanel
 			if (newColor != null)
 			{
 				selectColors.setColor(newColor, 0);
-
 				butCanvasBGColor.setIcon(new ColorIcon(newColor));
 			}
 			
@@ -201,10 +280,8 @@ public class ViewPanel extends JPanel
 			if (newColor != null)
 			{
 				selectColors.setColor(newColor, 1);
-
 				butHighLightColor.setIcon(new ColorIcon(newColor));
-			}
-			
+			}			
 		});
 		
 		JCheckBox cbPyramidize = new JCheckBox();

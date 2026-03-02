@@ -669,7 +669,7 @@ public class BVBActions
 		bvb.bvvViewer.setTransformAnimator( new RotationAnimator( transform, centerX, centerY, qTarget, 300 ) );
 	}
 	
-	void rotate(final int nAxis, boolean bViewCoords)
+	public void rotate(final int nAxis, boolean bViewCoords)
 	{
 		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
 		final double centerY = bvb.bvvViewer.getHeight() * 0.5;

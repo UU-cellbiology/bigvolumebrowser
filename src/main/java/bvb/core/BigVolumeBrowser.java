@@ -88,7 +88,7 @@ import bvb.gui.data.BVBShapeCollectionInfo;
 import bvb.gui.data.BVBSpimDataInfo;
 import bvb.gui.data.DataTreeModel;
 import bvb.gui.data.DataTreeNode;
-import bvb.gui.overlays.AxisOverlayRenderer;
+import bvb.gui.overlays.AxesOverlayRenderer;
 import bvb.gui.overlays.MultiBoxOverlayRendererBVB;
 import bvb.io.LUTNameFIJI;
 import bvb.io.RAIToSpimDataBvv;
@@ -157,7 +157,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	final public ObjectHashStorage objectHashStorage;
 	
 	/** XYZ axis rotation gizmo **/
-	final public AxisOverlayRenderer axisOverlay = new AxisOverlayRenderer();
+	final public AxesOverlayRenderer axisOverlay = new AxesOverlayRenderer();
 	
 	/** multibox that includes shapes instead of default**/
 	public MultiBoxOverlayRendererBVB multiBoxOverlayBVB;

@@ -16,11 +16,11 @@ import bdv.util.Affine3DHelpers;
 import bdv.viewer.AbstractViewerPanel;
 import bdv.viewer.OverlayRenderer;
 
-public class AxisOverlayRenderer implements OverlayRenderer
+public class AxesOverlayRenderer implements OverlayRenderer
 {
 	private AbstractViewerPanel viewer = null;
 	
-	final Color [] axisColors = new Color[] 
+	final Color [] axesColors = new Color[] 
 //			{new Color(255,54,83,255), new Color(118,178,23,255), new Color(48,121,204,255)};
 			{new Color(255,54,83,255), new Color(118,178,23,255), new Color(48,121,204,255),
 			new Color(255,54,83,128), new Color(118,178,23,128), new Color(48,121,204,128)};
@@ -131,14 +131,14 @@ public class AxisOverlayRenderer implements OverlayRenderer
 			for( int d = 0; d < 6; d++)
 			{
 				graphics.setStroke(vectorStroke);
-				// Example: draw fixed screen-space text
 				final int index = (int)axisOrder[d][1];
 				
 				int x = (int) Math.round( dAxis[index][0]);
 				int y = (int) Math.round( dAxis[index][1]);
 				if(index < 3)
 				{
-					graphics.setColor(axisColors[index]);					 
+					//vector body
+					graphics.setColor(axesColors[index]);					 
 					graphics.drawLine(center.x, center.y, x, y);
 					graphics.setStroke(ovalStroke);
 					graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
@@ -146,10 +146,10 @@ public class AxisOverlayRenderer implements OverlayRenderer
 				}
 				else
 				{
-					graphics.setColor(axisColors[index].darker());
+					graphics.setColor(axesColors[index].darker());
 					graphics.setStroke(ovalStroke);
 					graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
-					graphics.setColor(axisColors[index - 3]);
+					graphics.setColor(axesColors[index - 3]);
 					graphics.drawOval(x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);					
 				}
 			}
