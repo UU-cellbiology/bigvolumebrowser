@@ -1,4 +1,4 @@
-package bvb.core;
+package bvb.registry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,15 +122,22 @@ public class ObjectHashStorage
 		return null;
 
 	}
+	
 	public Object getObjectFromHash(final String hash)
 	{
 		return hashObject.get( hash );
+	}
+
+	public List<String> getAllObjectIDs()
+	{
+		return new ArrayList<>( hashObject.keySet());
 	}
 	
 	public BVBObjectsDTO toDTO()
 	{
 		BVBObjectsDTO out = new BVBObjectsDTO();
-		out.presentObjectsNames = new ArrayList<>(hashObject.keySet());
+		out.presentObjectsNames = getAllObjectIDs();
 		return out;
 	}
+	
 }

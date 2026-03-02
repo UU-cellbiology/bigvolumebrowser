@@ -1,7 +1,20 @@
-package bvb.io.codecs;
+package bvb.registry;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import bvb.io.codecs.AffineTransformCodec;
+import bvb.io.codecs.BooleanCodec;
+import bvb.io.codecs.ColorCodec;
+import bvb.io.codecs.DoubleArrayCodec;
+import bvb.io.codecs.DoubleCodec;
+import bvb.io.codecs.FinalRealIntervalCodec;
+import bvb.io.codecs.Float2DArrayCodec;
+import bvb.io.codecs.FloatArrayCodec;
+import bvb.io.codecs.FloatCodec;
+import bvb.io.codecs.IntegerCodec;
+import bvb.io.codecs.StringCodec;
+import bvb.io.codecs.ValueCodec;
 
 public class ValueCodecRegistry
 {

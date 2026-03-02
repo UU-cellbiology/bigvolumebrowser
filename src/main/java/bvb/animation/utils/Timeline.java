@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import bdv.viewer.SourceAndConverter;
 import bvb.animation.KeyFrameScene;
 import bvb.core.BigVolumeBrowser;
 import bvb.io.dto.TimeLineDTO;
-import bvb.shapes.BasicShape;
-import bvvpg.source.converters.Clippable3D;
-import bvvpg.source.converters.GammaConverterSetup;
+import bvb.registry.PropertyRegistry;
 
 public class Timeline 
 {	
@@ -22,8 +19,6 @@ public class Timeline
     private final Map<String, Track<?>> trackIndex = new HashMap<>();
     
     private final Map <KeyFrameScene, Set<Track<?>>> keyFramesToTracks = new HashMap<>();
-   
-    final TimeLineHandler timeLineHandler;
     
     final PropertyRegistry propertyRegistry;
     
@@ -31,7 +26,6 @@ public class Timeline
        
     public Timeline (final BigVolumeBrowser bvb)
     {
-    	timeLineHandler = new TimeLineHandler(bvb, this);
     	propertyRegistry = new PropertyRegistry(bvb);
     }
     
@@ -166,48 +160,24 @@ public class Timeline
     
     public void addKeyframeBVB(final BigVolumeBrowser bvb, final KeyFrameScene keyFrameScene)
     {
-    	final ArrayList<Object> allObjects = new ArrayList<>();
-    	final ArrayList<GammaConverterSetup> converterSetups = new ArrayList<>();
-    	// add all converter setups
-    	final List< SourceAndConverter< ? > > allSources = bvb.bvvViewer.state().getSources();
     	
-    	for(final SourceAndConverter< ? > sac :allSources)
-		{
-    		converterSetups.add( ( GammaConverterSetup ) bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
-    		allObjects.add( bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
-		}
-    	
-    	//add all the shapes
-    	final ArrayList<BasicShape> shapes = new ArrayList<>();
-    	
-    	for (final BasicShape shape : bvb.shapes)
+    	final List<String> objIDs = bvb.objectHashStorage.getAllObjectIDs();
+    	for(String objID : objIDs)
     	{
-    		allObjects.add( shape );
-    		shapes.add( shape );
-    	}
-    	
-    	//clipping
-    	for(final Object obj : allObjects)
-		{
-    		if(obj instanceof Clippable3D)
+    		final List< String > prList = PropertyRegistry.getPropertyNames( bvb.objectHashStorage.getObjectFromHash( objID ) );
+    		for (int i = 0; i < prList.size(); i++ )
     		{
-    			timeLineHandler.addKeyframeTransform(obj, keyFrameScene);
-    			timeLineHandler.addKeyframeClippable3D((Clippable3D)obj, keyFrameScene);    		
+    			addCurrentKeyframe(objID, prList.get( i ), keyFrameScene);
     		}
-		}    	
-    	
-    	//cs specific routine
-    	for(final GammaConverterSetup cs :converterSetups)
-		{
-    		timeLineHandler.addKeyframeConverterSetup(cs, keyFrameScene);
-		}
-    	
-    	//shape specific routine
-    	for (final BasicShape shape : shapes)
-    	{
-    		timeLineHandler.addKeyframeBasicShape( shape, keyFrameScene);
     	}
     	
+    }
+    void addCurrentKeyframe(String objID, List<String> propertyNames, final KeyFrameScene keyFrameScene)
+    {
+    	for(int i = 0; i < propertyNames.size(); i++)
+    	{
+    		addCurrentKeyframe(objID, propertyNames.get( i ), keyFrameScene);
+    	}
     }
     
     public TimeLineDTO toDTO()

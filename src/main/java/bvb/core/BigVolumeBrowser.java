@@ -94,6 +94,7 @@ import bvb.io.LUTNameFIJI;
 import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataWrapper;
+import bvb.registry.ObjectHashStorage;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;

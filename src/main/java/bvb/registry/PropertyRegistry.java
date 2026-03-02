@@ -1,15 +1,20 @@
-package bvb.animation.utils;
+package bvb.registry;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.type.numeric.ARGBType;
 
 import bdv.viewer.SourceAndConverter;
+import bvb.animation.utils.HSBColorInterpolator;
+import bvb.animation.utils.Interpolator;
+import bvb.animation.utils.Property;
+import bvb.animation.utils.PropertyBinding;
 import bvb.core.BigVolumeBrowser;
-import bvb.core.ObjectHashStorage;
 import bvb.gui.shapes.SpotsMapSetups;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
@@ -46,6 +51,100 @@ public class PropertyRegistry
     	spotsMapSetups = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.colorCodePanel.spotsLUTSetup;
     	spotsAlphaSetup = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.opacityPanel.spotsAlphaSetup;
 	
+	}
+	
+	public static List<String> getPropertyNames(final Object obj)
+	{
+		final List<String> properties = new ArrayList<>();
+		if(obj instanceof Clippable3D )
+    	{
+			properties.add( "transform_center" );
+			properties.add( "transform_rotation" );
+			properties.add( "transform_scale" );
+			properties.add( "transform_deskew" );
+			properties.add( "clip_type" );
+			properties.add( "clip_range" );
+			properties.add( "clip_center" );
+			properties.add( "clip_rotation" );
+    	}
+		if(obj instanceof GammaConverterSetup)
+		{
+			properties.add( "cs_visibility" );
+			properties.add( "cs_displayRange" );
+			properties.add( "cs_gamma" );
+			properties.add( "cs_alphaRange" );
+			properties.add( "cs_alphaGamma" );
+			properties.add( "cs_renderType" );
+			properties.add( "cs_lightingType" );
+			properties.add( "cs_voxelInterpolation" );
+			properties.add( "cs_color" );
+			properties.add( "cs_LUT" );
+			
+		}
+		
+		if(obj instanceof BasicShape)
+		{
+			properties.add( "bs_visible" );
+			if(obj instanceof BasicMeshShape)
+			{
+				final BasicMeshShape mesh = (BasicMeshShape) obj;
+				properties.add( "mesh_color" );
+				if(mesh.hasTexture())
+				{
+					properties.add( "mesh_useTexture" );					
+				}
+				properties.add( "mesh_renderType" );
+				properties.add( "mesh_pointSize" );
+				properties.add( "mesh_surfaceRenderType" );
+				properties.add( "mesh_surfaceGrid" );
+				properties.add( "mesh_wireWidth" );
+				properties.add( "mesh_silDecay" );
+			}
+			if(obj instanceof BasicSpots)
+			{
+				final BasicSpots spots = (BasicSpots) obj;
+				// if point size is the same
+		    	if(spots.getPointSize() >= 0.0)
+		    	{
+		    		// point size
+		    		properties.add( "spots_pointSize" );
+		    	}
+		    	// each point has its own size
+		    	else
+		    	{
+		    		properties.add( "spots_pointSizeScale" );
+		    	}
+		    	if(!spots.isMultiColor())
+		    	{
+		    		//spots color 
+		    		properties.add( "spots_color" );
+		    	}
+		    	// extra transparency
+		    	properties.add( "spots_extraAlpha" );
+		    	// renderType
+		    	properties.add( "spots_renderType" );
+		    	// spots shape
+		    	properties.add( "spots_shape" );
+		    	// spots shading
+		    	properties.add( "spots_shade" );
+		    	// LUT mapping mode
+		    	properties.add( "spots_mapLUTMode" );
+		    	// LUT
+		    	properties.add( "spots_LUT" );
+		    	// LUT inversion
+		    	properties.add( "spots_LUTInverse" );
+		    	// LUT Range
+		    	properties.add( "spots_LUTRange" );
+		    	// alpha mapping mode
+		    	properties.add( "spots_alphaMapMode" );
+		    	// alpha map inversion
+		    	properties.add( "spots_alphaInverse" );
+		    	// LUT Range
+		    	properties.add( "spots_alphaRange" );
+		    	
+			}
+		}
+		return properties;
 	}
 	
 	public <T> PropertyBinding<T> get(String objectId, String propertyName) 
