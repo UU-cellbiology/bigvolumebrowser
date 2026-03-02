@@ -28,19 +28,23 @@ import bvvpg.source.converters.GammaConverterSetup;
 
 public class PropertyRegistry
 {
-	final ObjectHashStorage objectHashStorage;
+	ObjectHashStorage objectHashStorage;
 	
-	final ClipSetups clipSetups;
+	ClipSetups clipSetups;
 	
-	final TransformSetups transformSetups;
+	TransformSetups transformSetups;
 	
-	final VolumeViewerPanel bvvViewer;
+	VolumeViewerPanel bvvViewer;
 	
-	final SpotsMapSetups spotsMapSetups;
+	SpotsMapSetups spotsMapSetups;
 	
-	final SpotsMapSetups spotsAlphaSetup;
+	SpotsMapSetups spotsAlphaSetup;
 	
-	public PropertyRegistry(final BigVolumeBrowser bvb)
+	public PropertyRegistry()
+	{	
+	}
+	
+	public void bindBVB(final BigVolumeBrowser bvb)
 	{
     	objectHashStorage = bvb.objectHashStorage;
 
@@ -49,8 +53,7 @@ public class PropertyRegistry
     	bvvViewer = bvb.bvvViewer;
     	
     	spotsMapSetups = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.colorCodePanel.spotsLUTSetup;
-    	spotsAlphaSetup = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.opacityPanel.spotsAlphaSetup;
-	
+    	spotsAlphaSetup = bvb.bvbCards.panelShapesProperties.panelSpotsProperties.opacityPanel.spotsAlphaSetup;	
 	}
 	
 	public static List<String> getPropertyNames(final Object obj)

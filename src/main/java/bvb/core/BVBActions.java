@@ -79,6 +79,7 @@ import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
+import bvb.io.dto.SceneStateDTO;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
 import ij.Prefs;
@@ -110,6 +111,7 @@ public class BVBActions
 	public static final String[] ROTATE_Z_AXIS_WORLD  = new String[] { "alt Z" };
 	public static final String[] ROTATE_Y_AXIS_WORLD   = new String[] { "alt Y", "alt A" };
 
+	SceneStateDTO scene = null;
 	
 	final long lRotationDuration = 50;
 	
@@ -154,9 +156,13 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(0, false), "rotate 90 x axis wrld", ROTATE_X_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
-
+		
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
+		
+		actions.runnableAction(() -> store(), "store", "9");
+		actions.runnableAction(() -> restore(), "restore", "0");
+
 		
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigVolumeBrowser actions" );
 		
@@ -170,6 +176,18 @@ public class BVBActions
 	public InputMap getInputMap()
 	{
 		return actions.getInputMap();
+	}
+	
+	void store()
+	{
+		scene = SceneStateDTO.captureState( bvb );
+	}
+	void restore()
+	{
+		if(scene != null)
+		{
+			SceneStateDTO.restoreState( bvb, scene );
+		}
 	}
 	
 	void dummy() 

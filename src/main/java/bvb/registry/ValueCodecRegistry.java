@@ -22,6 +22,11 @@ public class ValueCodecRegistry
     private final Map<String, ValueCodec<?>> byId = new HashMap<>();
     private final Map<Class<?>, ValueCodec<?>> byClass = new HashMap<>();
 
+    
+    public ValueCodecRegistry()
+    {
+    	initializeAll();
+    }
     public <T> void register(ValueCodec<T> codec) {
         byId.put(codec.getTypeId(), codec);
         byClass.put(codec.getValueClass(), codec);

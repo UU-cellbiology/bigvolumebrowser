@@ -1,7 +1,7 @@
 package bvb.animation.utils;
 
-import bvb.animation.AnimationPanel;
 import bvb.animation.KeyFrameScene;
+import bvb.core.BigVolumeBrowser;
 import bvb.io.codecs.ValueCodec;
 import bvb.io.dto.KeyframeDTO;
 
@@ -25,29 +25,13 @@ public class Keyframe< T >
 	public static <T> Keyframe<T> fromDTO(final KeyframeDTO dto, final KeyFrameScene parentKF_)
     {
     	
-    	final ValueCodec<T> codec = AnimationPanel.registry.getById(dto.valueType);
+    	final ValueCodec<T> codec = BigVolumeBrowser.registry.getById(dto.valueType);
     	
     	if (codec == null)
     		 throw new IllegalStateException(
     	                "Unknown valueType: " + dto.valueType);
     	
     	Object decoded = codec.decode(dto.value);
-
-//    	Easing easing_out = Easing.LINEAR;
-//    	if(dto.easing.equals( "EASE_IN" ) )
-//    	{
-//    		easing_out = Easing.EASE_IN;
-//    	}
-//    	
-//    	if(dto.easing.equals( "EASE_OUT" ) )
-//    	{
-//    		easing_out = Easing.EASE_OUT;
-//    	}
-//    	
-//    	if(dto.easing.equals( "EASE_IN_OUT" ) )
-//    	{
-//    		easing_out = Easing.EASE_IN_OUT;
-//    	}
     	
     	return new Keyframe<>( (T)decoded, parentKF_);
     }
@@ -55,7 +39,7 @@ public class Keyframe< T >
 	public KeyframeDTO toGTO()
     {
     	@SuppressWarnings( "unchecked" )
-		final ValueCodec<T> codec = AnimationPanel.registry.getByClass( (Class<T>) this.value.getClass() );
+		final ValueCodec<T> codec = BigVolumeBrowser.registry.getByClass( (Class<T>) this.value.getClass() );
     	if (codec == null)
    	        throw new IllegalStateException("No codec for " + this.value.getClass());
     	

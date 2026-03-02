@@ -49,7 +49,6 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
 import bvb.io.dto.BVBObjectsDTO;
 import bvb.io.dto.StoryDTO;
-import bvb.registry.ValueCodecRegistry;
 import ij.IJ;
 import ij.Prefs;
 import ij.io.SaveDialog;
@@ -124,8 +123,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	private static final ObjectMapper MAPPER = new ObjectMapper()
 	        .enable(SerializationFeature.INDENT_OUTPUT);
-
-	final public static ValueCodecRegistry registry = new ValueCodecRegistry();
 	
 	final AnimationPanelDialogs dialogsAnim;
 	
@@ -136,8 +133,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		this.bvb = bvb_;
 	
 		dialogsAnim = new AnimationPanelDialogs(bvb, this);
-		
-		registry.initializeAll();
 		
 		int nInitialTotalTime = 5;
 		
@@ -820,7 +815,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			String filename;
 			
-			filename = BVBSettings.lastDir + "/animation_timeline_bvb";
+			filename = BVBSettings.lastDir + "/animationTimelineBVB";
 			SaveDialog sd = new SaveDialog("Save storyline ", filename, ".json");
 	        String path = sd.getDirectory();
 	        if (path == null)
@@ -887,12 +882,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
             	}
             	
-            	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
-        		updateKeyIndices();
-        		updateKeyMarks();        	
-        		kfAnim.updateTransitionTimeline();
         		checkObjectsPresence( storyDTO.bvbObjects, filename );
-        		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
+        		restoreStory( storyDTO );
             }
             else
             {
@@ -901,13 +892,24 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
         }
 	}
+	
+	public void restoreStory(final StoryDTO storyDTO)
+	{
+    	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
+		updateKeyIndices();
+		updateKeyMarks();        	
+		kfAnim.updateTransitionTimeline();
+		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
+		
+	}
+	
 	void checkObjectsPresence(final BVBObjectsDTO dto, String filename)
 	{
 		for(String hash:dto.presentObjectsNames)
 		{
 			if(bvb.objectHashStorage.getObjectFromHash( hash ) == null)
 			{
-				IJ.log( "WARNING: BVB animation timeline loading " + filename);
+				IJ.log( "WARNING: BVB animation timeline, while loading " + filename);
 				IJ.log( "Cannot find object " + hash  );
 				IJ.log( "It was not loaded or moved/renamed? Can be ignored? Skipping for now."  );
 			}

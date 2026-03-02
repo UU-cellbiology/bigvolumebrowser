@@ -94,7 +94,10 @@ import bvb.io.LUTNameFIJI;
 import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SpimDataWrapper;
+import bvb.io.dto.StoryDTO;
 import bvb.registry.ObjectHashStorage;
+import bvb.registry.PropertyRegistry;
+import bvb.registry.ValueCodecRegistry;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
@@ -157,6 +160,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** hash map of loaded objects **/
 	final public ObjectHashStorage objectHashStorage;
 	
+	/** storage of object properties **/
+	final public PropertyRegistry propertyRegistry;
+	
+	/** registry of codecs for DTO (storage) **/
+	final public static ValueCodecRegistry registry = new ValueCodecRegistry();
+	
 	/** XYZ axis rotation gizmo **/
 	final public AxesOverlayRenderer axisOverlay = new AxesOverlayRenderer();
 	
@@ -195,6 +204,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		volumeBoxes.setVisible( BVBSettings.bShowVolumeBoxes );
 		clipBoxes = new VolumeBBoxes(this, true);
 		objectHashStorage = new ObjectHashStorage();
+		propertyRegistry = new PropertyRegistry();
 		
 	}
 	
@@ -263,6 +273,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 			bvvFrame.getSplitPanel().setDividerLocation( 400 );
 			bvvViewer.addTimePointListener(this);
 		}
+		propertyRegistry.bindBVB( this );
 	}
 	
 	void initBVV()
@@ -710,6 +721,15 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		boolean focusStore = BVBSettings.bFocusOnSourcesOnLoad;
 		BVBSettings.bFocusOnSourcesOnLoad = false;
+		
+		//store animation settings
+		final StoryDTO story = new StoryDTO();
+        story.keyFrameAnimation = bvbCards.animationPanel.kfAnim.toDTO();
+        story.bvbObjects = objectHashStorage.toDTO();
+        story.timeline = bvbCards.animationPanel.timeline.toDTO();
+        
+        //store number of timepoints
+        final int nTPNumber = bvvViewer.state().getNumTimepoints();
 
 		//now restart	
 		closeBVV();
@@ -758,6 +778,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		//restore window location
 		bvvWindowState.restoreBvvWindowState();
 		bvvViewer.addTimePointListener(this);
+		propertyRegistry.bindBVB( this );
+		
+		//restore animation settings
+		this.bvbCards.animationPanel.restoreStory( story );
+		
+		bvvViewer.state().setNumTimepoints( nTPNumber );
 		
 		//notify listener that BVB finished restarting
 		for(Listener l : listeners)

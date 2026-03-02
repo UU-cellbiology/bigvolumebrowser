@@ -23,6 +23,10 @@ public class FloatArrayCodec implements ValueCodec<float[]>
     @Override
     public float[] decode(Object raw) {
 
+    	if(raw instanceof float[])
+    	{
+    		return (float[])raw;
+    	}
         List<?> list = (List<?>) raw;
 
         float[] result = new float[list.size()];

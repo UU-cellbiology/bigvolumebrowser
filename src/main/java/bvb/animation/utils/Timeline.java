@@ -26,7 +26,7 @@ public class Timeline
        
     public Timeline (final BigVolumeBrowser bvb)
     {
-    	propertyRegistry = new PropertyRegistry(bvb);
+    	propertyRegistry = bvb.propertyRegistry;
     }
     
     public <T> void addTrackAndBind(final Track<T> track)
