@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
+import bvb.animation.SceneView;
 import bvb.animation.utils.PropertyBinding;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
@@ -28,8 +29,9 @@ public class SceneStateDTO
 		 final SceneStateDTO scene = new SceneStateDTO();
 		 scene.BVBVersion = BVBSettings.sVersion;
 		 scene.bvbObjects = bvb.objectHashStorage.toDTO();
-		 scene.timePoint = bvb.bvvViewer.state().getCurrentTimepoint();
-		 bvb.bvvViewer.state().getViewerTransform().toArray( scene.transformMatrix );
+		 SceneView sceneView = SceneView.getCurrentSceneView( bvb.bvvViewer );
+		 scene.timePoint = sceneView.getTimeFrame();
+		 sceneView.getViewerTransform().toArray( scene.transformMatrix );
 		 for (String objectId : scene.bvbObjects.presentObjectsNames) 
 		 {
 			 final ObjectStateDTO objDTO = new ObjectStateDTO();
@@ -59,7 +61,8 @@ public class SceneStateDTO
 		bvb.bvvViewer.state().setCurrentTimepoint( scene.timePoint );
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		viewerTransform.set( scene.transformMatrix );
-		bvb.bvvViewer.state().setViewerTransform( viewerTransform );
+		final SceneView sceneView = new SceneView(viewerTransform, scene.timePoint);
+		SceneView.setSceneView( bvb.bvvViewer, sceneView );
 
 		for (ObjectStateDTO objDTO : scene.objects) 
 		{

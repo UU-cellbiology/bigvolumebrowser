@@ -31,7 +31,10 @@ package bvb.gui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -40,33 +43,43 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bdv.tools.brightness.ColorIcon;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import bvb.io.dto.SceneStateDTO;
+import bvb.io.dto.SerializationIO;
+
+import ij.IJ;
 import ij.Prefs;
+import ij.io.SaveDialog;
 
 public class ViewPanel extends JPanel
 {	
 	final BigVolumeBrowser bvb;
 
-	final JButton butCenter;
 	
 	final JButton butToggleVisibility;
 
 	final JToggleButton butVBox;
 	
 	final JButton butProjType;
+	
+	final JButton butAxesGizmo;
 
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];
-	
-	final JButton butSettings;
-	
+
+	final JButton butCenter;
+
 	final JButton [] butAlign = new JButton [3];
 
 	final JButton butRotateCoords;
@@ -75,6 +88,10 @@ public class ViewPanel extends JPanel
 	final String[] rotToolTip = new String[2];
 	
 	final JButton [] butRotate = new JButton [3];
+
+	final JButton butSettings;
+	final JButton butSave;
+	final JButton butLoad;
 	
 	int nRotationCoord = 0;
 	
@@ -90,14 +107,7 @@ public class ViewPanel extends JPanel
 		URL icon_path;
 		ImageIcon tabIcon;
 		bvb = bvb_;
-		//Center selected
-		
-		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "center.png");
-		tabIcon = new ImageIcon(icon_path);
-
-		butCenter = new JButton( tabIcon );
-		butCenter.setToolTipText("Center view on selected objects\n(shortcut C)");
-		butCenter.addActionListener((e) -> bvb.bvbActions.actionCenterView());
+	
 		
 		//TOGGLE VISIBILITY
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "toggle_visibility.png");
@@ -115,7 +125,7 @@ public class ViewPanel extends JPanel
 	    butVBox.setToolTipText("Volume Box");
 	    butVBox.setSelected( BVBSettings.bShowVolumeBoxes  );
 	    butVBox.addItemListener((e)->
-	    		bvb.showVolumeBoxes( e.getStateChange() == ItemEvent.SELECTED ));
+	    		bvb.showVolumeBoxes( e.getStateChange() == ItemEvent.SELECTED ));  
 	    
 	    //PROJECTION MATRIX
 	    projToolTip[0] = "Perspective";
@@ -140,21 +150,45 @@ public class ViewPanel extends JPanel
 	    	bvb.bvvViewer.setProjectionType( newProj );
 	    }); 
 	    
-		//SETTINGS
-		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
-	    tabIcon = new ImageIcon(icon_path);
-	    butSettings = new JButton(tabIcon);
-	    butSettings.setToolTipText("Settings");
-	    butSettings.addActionListener((e) -> dialSettings());	    
 	    
+	    
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "axesGizmo.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butAxesGizmo = new JButton(tabIcon);
+	    butAxesGizmo.setToolTipText( "Toggle axes align gizmo" );
+	    butAxesGizmo.addActionListener((e) ->
+	    {
+	    	boolean bToggle = !bvb.axisOverlay.isEnabled();
+	    	Prefs.set( "BVB.bShowAxisOverlay", bToggle  );
+	    	bvb.axisOverlay.setEnabled( bToggle  );
+	    	bvb.repaintBVV();
+	    });	  
+	        
+	    
+		//Center selected objects	
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "center.png");
+		tabIcon = new ImageIcon(icon_path);
+
+		butCenter = new JButton( tabIcon );
+		butCenter.setToolTipText("Center view on selected objects\n(shortcut C)");
+		butCenter.addActionListener((e) -> bvb.bvbActions.actionCenterView());
+		
 	    //ALIGN TO AXES
 	    for(int d = 0; d < 3; d++)
 	    {
 			icon_path = this.getClass().getResource(BVBSettings.sIconPath + "align" + sAxesNames[d]+".png");
 			tabIcon = new ImageIcon(icon_path);
 	    	butAlign[d] = new JButton(tabIcon);
-	    	butAlign[d].setToolTipText( "Align " + sAxesNames[d] + " axis towards camera\n"
-	    			+ "(shortcut Shift + " + sAxesNames[d] + ")" ); 	
+	    	if(d != 1)
+	    	{
+	    		butAlign[d].setToolTipText( "Align " + sAxesNames[d] + " axis towards camera\n"
+	    				+ "(shortcut Shift + " + sAxesNames[d] + ")" ); 
+	    	}
+	    	else
+	    	{
+	    		butAlign[d].setToolTipText( "Align " + sAxesNames[d] + " axis towards camera\n"
+	    				+ "(shortcut Shift + " + sAxesNames[d] + " / Shift + A)" ); 	    		
+	    	}
 	    }
 	    
 	    butAlign[0].addActionListener((e) -> bvb.bvbActions.alignToAxis( 0 ) );
@@ -197,6 +231,26 @@ public class ViewPanel extends JPanel
 	    butRotate[1].addActionListener((e) -> bvb.bvbActions.rotate( 1, nRotationCoord == 0 ));
 	    butRotate[2].addActionListener((e) -> bvb.bvbActions.rotate( 2, nRotationCoord == 0 ));
 	    
+		//SETTINGS
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butSettings = new JButton(tabIcon);
+	    butSettings.setToolTipText("Settings");
+	    butSettings.addActionListener((e) -> dialSettings());	
+	    
+	    //SAVE/LOAD
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "scene_save.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butSave = new JButton(tabIcon);
+	    butSave.setToolTipText("Save scene state");
+	    butSave.addActionListener( (e) -> dialSceneStateSave() );
+
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "scene_load.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butLoad = new JButton(tabIcon);
+	    butLoad.setToolTipText("Load scene state");
+	    butLoad.addActionListener ( (e) -> dialSceneStateLoad() );
+
 	    GridBagConstraints gbc = new GridBagConstraints();
 
 	    gbc.gridx = 0;
@@ -209,9 +263,9 @@ public class ViewPanel extends JPanel
 		
 		gbc.gridx++;	    
 		this.add(butProjType,gbc);
-		
+
 		gbc.gridx++;	    
-		this.add(butSettings,gbc);
+		this.add(butAxesGizmo,gbc);
 
 		gbc.gridy ++;	    
 		gbc.gridx = 0;
@@ -232,6 +286,27 @@ public class ViewPanel extends JPanel
 	    	gbc.gridx++;
 			this.add(butRotate[d],gbc);
 	    }
+	    gbc.gridy = 0;
+	    gbc.gridx++;
+	    gbc.gridheight = 3;
+	    gbc.fill = SwingConstants.VERTICAL;
+	    gbc.insets = new Insets(0,10,0,10);
+		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
+		this.add(sp,gbc);
+		
+	    gbc.gridy = 0;
+	    gbc.gridx++;
+	    gbc.gridheight = 1;
+	    gbc.insets = new Insets(0,0,0,0);
+	    gbc.fill = GridBagConstraints.NONE;
+		this.add(butSettings, gbc);
+		
+	    gbc.gridy++;
+		this.add(butSave, gbc);
+
+		gbc.gridy++;
+		this.add(butLoad, gbc);
+
 	}
 	
 	public void dialSettings()
@@ -410,5 +485,75 @@ public class ViewPanel extends JPanel
 		}
 	}
 	
+	void dialSceneStateSave()
+	{
+		String filename;
 
+		filename = BVBSettings.lastDir + "/sceneStateBVB";
+		SaveDialog sd = new SaveDialog("Save BVB scene state", filename, ".json");
+		String path = sd.getDirectory();
+		if (path == null)
+			return;
+		BVBSettings.lastDir = path;
+		Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+		filename = path + sd.getFileName();
+		SceneStateDTO scene = SceneStateDTO.captureState( bvb );
+
+		try
+		{
+			SerializationIO.MAPPER.writeValue( new File(filename), scene );
+		}
+		catch ( IOException exc )
+		{
+			exc.printStackTrace();
+			IJ.log( "BVB: Error while saving scene state. See console for the full log." );
+		}	        
+	}
+	
+	void dialSceneStateLoad()
+	{
+		String filename;
+		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
+		chooser.setDialogTitle( "Load BVB scene state" );
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "BVB animation timeline", "json");
+        chooser.setFileFilter(filter);
+        
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            filename =  chooser.getSelectedFile().getPath();
+            SceneStateDTO sceneDTO = null;
+    
+            try
+            {
+            	sceneDTO = SerializationIO.MAPPER.readValue(new File(filename), SceneStateDTO.class);
+            }
+            catch ( IOException exc )
+            {
+            	exc.printStackTrace();
+            }
+ 
+            if(sceneDTO != null)
+            {
+            	if(!sceneDTO.BVBVersion.equals( BVBSettings.sVersion ))
+            	{
+            		IJ.log( "BVB scene state was made in version " + sceneDTO.BVBVersion
+            				+ ", but current plugin version is " + BVBSettings.sVersion + ".");
+            		IJ.log( "Trying to load timeline anyway.");
+
+            	}
+            	
+            	SceneStateDTO.restoreState( bvb, sceneDTO );
+     
+            }
+            else
+            {
+            	IJ.log( "BVB: Error while loading scene state. See console for the full log." );
+            }
+        }
+	}
 }

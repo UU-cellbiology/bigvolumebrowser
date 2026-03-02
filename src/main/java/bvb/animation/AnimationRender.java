@@ -67,7 +67,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 		
 		Prefs.showScaleBar(aPanel.bRenderScaleBar);
 		Prefs.showScaleBarInMovie( aPanel.bRenderScaleBar );
-		
+	
 		bvb.axisOverlay.setEnabled( false );
 
 		Prefs.showTextOverlay(false);
