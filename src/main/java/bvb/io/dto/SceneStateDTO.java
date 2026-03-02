@@ -3,6 +3,8 @@ package bvb.io.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.imglib2.realtransform.AffineTransform3D;
+
 import bvb.animation.utils.PropertyBinding;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
@@ -15,6 +17,8 @@ public class SceneStateDTO
 	public String BVBVersion;
 	public BVBObjectsDTO bvbObjects;
 	public List<ObjectStateDTO> objects = new ArrayList<>();
+	public int timePoint;
+	public double [] transformMatrix = new double[12];
 	
 	public SceneStateDTO() {}
 	
@@ -24,6 +28,8 @@ public class SceneStateDTO
 		 final SceneStateDTO scene = new SceneStateDTO();
 		 scene.BVBVersion = BVBSettings.sVersion;
 		 scene.bvbObjects = bvb.objectHashStorage.toDTO();
+		 scene.timePoint = bvb.bvvViewer.state().getCurrentTimepoint();
+		 bvb.bvvViewer.state().getViewerTransform().toArray( scene.transformMatrix );
 		 for (String objectId : scene.bvbObjects.presentObjectsNames) 
 		 {
 			 final ObjectStateDTO objDTO = new ObjectStateDTO();
@@ -49,30 +55,36 @@ public class SceneStateDTO
 	@SuppressWarnings( "rawtypes" )
 	public static void restoreState(final BigVolumeBrowser bvb, final SceneStateDTO scene)
 	{
-		 for (ObjectStateDTO objDTO : scene.objects) 
-		 {
+		
+		bvb.bvvViewer.state().setCurrentTimepoint( scene.timePoint );
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		viewerTransform.set( scene.transformMatrix );
+		bvb.bvvViewer.state().setViewerTransform( viewerTransform );
+
+		for (ObjectStateDTO objDTO : scene.objects) 
+		{
 			final Object obj = bvb.objectHashStorage.getObjectFromHash( objDTO.objectId );
 
-	        if (obj == null)
-	        {
-	        	IJ.log( "BVB: Cannot find object " +  objDTO.objectId);
-		            continue; 
-	        }
-	        for (final PropertyStateDTO propDTO : objDTO.properties) 
-	        {
-	        	final PropertyBinding< Object > binding = bvb.propertyRegistry.get( objDTO.objectId, propDTO.propertyName);
+			if (obj == null)
+			{
+				IJ.log( "BVB: Cannot find object " +  objDTO.objectId);
+				continue; 
+			}
+			for (final PropertyStateDTO propDTO : objDTO.properties) 
+			{
+				final PropertyBinding< Object > binding = bvb.propertyRegistry.get( objDTO.objectId, propDTO.propertyName);
 
-	            if (binding == null)
-	                continue;
+				if (binding == null)
+					continue;
 
-	            final ValueCodec codec =
-	            		 BigVolumeBrowser.registry.getById(propDTO.valueType);
+				final ValueCodec codec =
+						BigVolumeBrowser.registry.getById(propDTO.valueType);
 
-	            final Object decoded =
-	                    codec.decode(propDTO.value);
+				final Object decoded =
+						codec.decode(propDTO.value);
 
-	            binding.property.set(decoded);
-	        }
-		 }
+				binding.property.set(decoded);
+			}
+		}
 	}
 }

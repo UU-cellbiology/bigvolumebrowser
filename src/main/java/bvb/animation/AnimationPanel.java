@@ -1,8 +1,5 @@
 package bvb.animation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -48,6 +45,7 @@ import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
 import bvb.io.dto.BVBObjectsDTO;
+import bvb.io.dto.SerializationIO;
 import bvb.io.dto.StoryDTO;
 import ij.IJ;
 import ij.Prefs;
@@ -120,9 +118,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	int nRenderFrameTimeLimit = (int)Prefs.get("BVB.nRenderFrameTimeLimit", 60);
 	
 	String sRenderSavePath = null;
-	
-	private static final ObjectMapper MAPPER = new ObjectMapper()
-	        .enable(SerializationFeature.INDENT_OUTPUT);
 	
 	final AnimationPanelDialogs dialogsAnim;
 	
@@ -831,7 +826,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
 	        try
 			{
-				MAPPER.writeValue( new File(filename), story );
+	        	SerializationIO.MAPPER.writeValue( new File(filename), story );
 			}
 			catch ( IOException exc )
 			{
@@ -865,7 +860,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
     
             try
             {
-            	storyDTO = MAPPER.readValue(new File(filename), StoryDTO.class);
+            	storyDTO = SerializationIO.MAPPER.readValue(new File(filename), StoryDTO.class);
             }
             catch ( IOException exc )
             {

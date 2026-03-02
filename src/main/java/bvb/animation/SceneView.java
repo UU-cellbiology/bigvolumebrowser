@@ -1,16 +1,10 @@
 package bvb.animation;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
 import net.imglib2.realtransform.AffineTransform3D;
 
 import bvvpg.core.VolumeViewerPanel;
 
-/** class stores current viewer transform and the timepoint **/
+/** class stores current viewer transform and BVV timepoint **/
 public class SceneView
 {
 	final AffineTransform3D viewerTransform;
@@ -48,51 +42,6 @@ public class SceneView
 	{
 		nTimeFrame = nTimeFrame_;
 		return;
-	}
-
-	public void save(final FileWriter writer)
-	{
-		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-		symbols.setDecimalSeparator('.');
-		DecimalFormat df3 = new DecimalFormat ("#.#######", symbols);
-		try
-		{
-			writer.write("TimePoint," + Integer.toString(nTimeFrame) + "\n");
-			writer.write("ViewTransform");
-			final double [] transform = new double [12];
-			viewerTransform.toArray(transform);
-			for (int m = 0; m < 12; m++)
-			{
-				writer.write("," + df3.format(transform[m]));
-			}
-			writer.write("\n");
-		
-			
-		}
-		catch ( IOException exc )
-		{
-			exc.printStackTrace();
-		}
-		
-	}
-	
-	public void load(final BufferedReader br) throws IOException
-	{
-		String[] line_array;
-		String line;
-		//time frame
-		line = br.readLine();
-		line_array = line.split(",");
-		this.setTimeFrame(  Integer.parseInt( line_array[ 1 ] ) );
-		//ViewTransform
-		line = br.readLine();
-		line_array = line.split(",");
-		final double [] transform = new double [ 12 ];
-		for(int m = 0; m < 12; m++)
-		{
-			transform[ m ] = Double.parseDouble( line_array[ m + 1 ] );
-		}
-		this.setViewerTransform( transform );
 	}
 	
 	public static SceneView getCurrentSceneView(final VolumeViewerPanel viewer)

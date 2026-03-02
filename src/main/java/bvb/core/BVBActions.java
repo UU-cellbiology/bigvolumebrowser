@@ -113,7 +113,7 @@ public class BVBActions
 
 	SceneStateDTO scene = null;
 	
-	final long lRotationDuration = 50;
+	final long lRotationDuration = 100;
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
