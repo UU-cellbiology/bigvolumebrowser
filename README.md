@@ -32,9 +32,10 @@ Want to contribute? Submit a [PR](https://en.wikipedia.org/wiki/Fork_and_pull_mo
 Wanna see live progress on development? Check [this feed](https://bsky.app/hashtag/bigvolumebrowser).  
 Not happy with it? Something is fundamentally wrong?  
 Consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).    
+Like it? Spread the word and give it a star on GitHub.   
 
 ----------
-**Acknowledgements:**  
+**Acknowledgements**  
 Powered (and made possible) by a hard work of very talented people behind:   
 - [ImageJ](https://github.com/imagej) 
 - [FIJI](https://fiji.sc/) 
