@@ -187,6 +187,7 @@ public class BVBActions
 			return;
 		JPanel pViewSettings = new JPanel(new GridBagLayout());
 		
+		GridBagConstraints gbcTitle = new GridBagConstraints();
 		GridBagConstraints gbcL = new GridBagConstraints();
 		GridBagConstraints gbcR = new GridBagConstraints();
 		
@@ -266,14 +267,31 @@ public class BVBActions
 		
 		gbcL.insets = new Insets(5,5,5,5);
 		gbcR.insets = new Insets(5,5,5,5);
+		gbcTitle.insets = new Insets(5,5,5,5);
+		
+		gbcTitle.anchor = GridBagConstraints.CENTER;
+		gbcTitle.gridwidth = 2;
 		gbcL.anchor = GridBagConstraints.EAST;
 		gbcR.fill = GridBagConstraints.HORIZONTAL;
 		gbcR.weightx = 1.0;
 		
-		gbcL.gridx=0;
-		gbcR.gridx=1;
-		gbcL.gridy=0;
-		gbcR.gridy=0;
+		gbcL.gridx = 0;
+		gbcR.gridx = 1;
+		gbcL.gridy = 0;
+		gbcR.gridy = 0;
+		pViewSettings.add( new JLabel("<html><b>GPU cache size (in MB)</b></html>"), gbcL );
+		pViewSettings.add( maxCacheSizeInMB,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("GPU cache tile size"), gbcL );
+		pViewSettings.add( cacheBlockSize,gbcR );
+		
+		gbcTitle.gridy = gbcL.gridy + 1;
+		pViewSettings.add( new JLabel("Viewport render resolution"), gbcTitle );	
+		
+		gbcL.gridy += 2;
+		gbcR.gridy += 2;
 		pViewSettings.add( new JLabel("Render width"), gbcL );	
 		pViewSettings.add( renderWidth,gbcR );
 		
@@ -282,8 +300,11 @@ public class BVBActions
 		pViewSettings.add( new JLabel("Render height"), gbcL );
 		pViewSettings.add( renderHeight,gbcR );
 		
-		gbcL.gridy++;
-		gbcR.gridy++;
+		gbcTitle.gridy = gbcL.gridy + 1;
+		pViewSettings.add( new JLabel("Dither"), gbcTitle );	
+		
+		gbcL.gridy += 2;
+		gbcR.gridy += 2;
 		pViewSettings.add( new JLabel("Dither window size"), gbcL );
 		pViewSettings.add( ditherWidthsList, gbcR );
 
@@ -291,19 +312,12 @@ public class BVBActions
 		gbcR.gridy++;
 		pViewSettings.add( new JLabel("Number of dither samples"), gbcL );
 		pViewSettings.add( slNumDitherSamples,gbcR );
-
-		gbcL.gridy++;
-		gbcR.gridy++;
-		pViewSettings.add( new JLabel("GPU cache tile size"), gbcL );
-		pViewSettings.add( cacheBlockSize,gbcR );
+	
+		gbcTitle.gridy = gbcL.gridy + 1;
+		pViewSettings.add( new JLabel("Perspective camera"), gbcTitle );	
 		
-		gbcL.gridy++;
-		gbcR.gridy++;
-		pViewSettings.add( new JLabel("GPU cache size (in MB)"), gbcL );
-		pViewSettings.add( maxCacheSizeInMB,gbcR );
-		
-		gbcL.gridy++;
-		gbcR.gridy++;
+		gbcL.gridy += 2;
+		gbcR.gridy += 2;
 		pViewSettings.add( new JLabel("Camera distance"), gbcL );
 		pViewSettings.add( dCam,gbcR );
 		
