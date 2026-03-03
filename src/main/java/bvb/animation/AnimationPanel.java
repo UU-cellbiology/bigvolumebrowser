@@ -1,6 +1,7 @@
 package bvb.animation;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -122,6 +123,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	final AnimationPanelDialogs dialogsAnim;
 	
 	public Timeline timeline;
+	
+	final ArrayList<Component> allComp = new ArrayList<>();
 
 	public AnimationPanel(final BigVolumeBrowser bvb_)
 	{
@@ -316,6 +319,21 @@ public class AnimationPanel extends JPanel implements ChangeListener
 
 		panAnimPlot.add( butUpdateSlider, gbc );
 		
+		allComp.add( butUpdateSlider );
+		allComp.add( butLoad );
+		allComp.add( butSave );
+		allComp.add( butDelete );
+		allComp.add( butEdit );
+		allComp.add( butReplace );
+		allComp.add( butAdd );
+	
+		allComp.add( listScroller );
+		allComp.add( timeSlider );
+		allComp.add( butPlayStop );
+		allComp.add( butRecord );
+		allComp.add( butSettings );
+		allComp.add( nfTotalTime);
+		
 		// Blank/filler component
 		gbc.gridy++;
 		gbc.weightx = 0.01;
@@ -476,7 +494,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	{
 		float fTimeMovie =  ((float)timeSlider.getValue() / (float)(tsSpan)) * kfAnim.getTotalTime();
 		KeyFrameScene newKeyFrame = new KeyFrameScene(SceneView.getCurrentSceneView( bvb.bvvViewer ), 
-				fTimeMovie, Timeline.easingRegistry.get( "easeInQuad" ));
+				fTimeMovie, Timeline.easingRegistry.get( "linear" ));
 		
 		if(listModel.size() == 0)
 		{
@@ -554,12 +572,21 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	/** total time of the animation changed **/
 	public void setNewTotalTime(final double nNewTime_)
 	{
-		final int nNewTime = ( int ) Math.round( Math.abs( nNewTime_ ) );
+		int nNewTime = ( int ) Math.round( Math.abs( nNewTime_ ) );
+		if(nNewTime_ < 1)
+		{
+			if(nNewTime < 1 )
+				nNewTime = 1;
+			nfTotalTime.setText( Integer.toString( nNewTime ) );
+		
+			//return;
+		}
+
 		int nOldTime = kfAnim.nTotalTime;
 				
 		if(listModel.size() > 0)
 		{		
-			if(!dialogsAnim.dialChangeTotalTime(nNewTime>=nOldTime))
+			if(!dialogsAnim.dialChangeTotalTime(nNewTime >= nOldTime))
 				return;
 			
 			kfAnim.setTotalTime(nNewTime);			
@@ -810,11 +837,12 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			String filename;
 			
-			filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "animationTimelineBVB";
+			filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "_animationTimelineBVB";
 			SaveDialog sd = new SaveDialog("Save storyline ", filename, ".json");
 	        String path = sd.getDirectory();
 	        if (path == null)
 	        	return;
+	        setEnabled( false );
 	        BVBSettings.lastDir = path;
 	        Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
 	        filename = path + sd.getFileName();
@@ -833,6 +861,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				exc.printStackTrace();
 				IJ.log( "BVB: Error while saving animation timeline. See console for the full log." );
 			}	        
+	        setEnabled( true );
+
 		}
 		else
 		{
@@ -853,6 +883,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
         
         if(returnVal == JFileChooser.APPROVE_OPTION) 
         {
+	        setEnabled( false );
+
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
             filename =  chooser.getSelectedFile().getPath();
@@ -884,6 +916,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
             {
             	IJ.log( "BVB: Error while loading animation timeline. See console for the full log." );
             }
+	        setEnabled( true );
+
 
         }
 	}
@@ -908,6 +942,15 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				IJ.log( "Cannot find object " + hash  );
 				IJ.log( "It was not loaded or moved/renamed? Can be ignored? Skipping for now."  );
 			}
+		}
+	}
+	
+	@Override
+	public void setEnabled( boolean bEnabled )
+	{
+		for(final Component nC:allComp)
+		{
+			nC.setEnabled( bEnabled );
 		}
 	}
 
