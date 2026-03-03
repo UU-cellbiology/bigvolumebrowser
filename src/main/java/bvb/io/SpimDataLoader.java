@@ -28,7 +28,6 @@
  */
 package bvb.io;
 
-import java.io.File;
 import java.io.IOException;
 
 import net.imglib2.RandomAccessibleInterval;
@@ -109,7 +108,7 @@ public class SpimDataLoader
 	    	seriesBitDepth = new int[nSeriesCount];
 
 	    	MetadataRetrieve retrieve = (MetadataRetrieve) r.getMetadataStore();
-	    	for (int nS=0;nS<nSeriesCount;nS++)
+	    	for (int nS = 0; nS < nSeriesCount; nS++)
 	    	{
 	    		r.setSeries(nS);
 	    		seriesZsize[nS] = r.getSizeZ();
@@ -180,11 +179,11 @@ public class SpimDataLoader
 		if (seriesBitDepth[nOpenSeries] == FormatTools.UINT16 || seriesBitDepth[nOpenSeries] == FormatTools.UINT8 || seriesBitDepth[nOpenSeries] == FormatTools.FLOAT)
 		{
 			OpenerSettings settings = OpenerSettings.BioFormats()
-					.location(new File(imageFileName))
+					.location(imageFileName)
 					.unit("MICROMETER")
 					.setSerie(nOpenSeries)
 					.positionConvention("TOP LEFT")
-					.pyramidize( BVBSettings.bPyramidize );
+					.pyramidize( BVBSettings.bLoadPyramidize );
 			spimData = (SpimData)OpenersToSpimData.getSpimData(settings);	
 		}
 		else

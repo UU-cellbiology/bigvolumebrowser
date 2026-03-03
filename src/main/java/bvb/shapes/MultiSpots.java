@@ -133,7 +133,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		boundBox = FinalRealInterval.wrap( bb[0], bb[1]);
 		pointSize = pointSize_;
 		
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -155,7 +155,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	{
 		pointColor = new Color(pointColor_.getRed(),pointColor_.getGreen(),pointColor_.getBlue(),pointColor_.getAlpha());
 		
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -179,30 +179,32 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		this.sLUTName = sLUTName;
 		lutGPU = new LUTUploaderGPU();
 		lutGPU.setLUT( icm_, sLUTName );
-		if(visRendersTimeMap.size()>0 )
-		{
-			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
-			for(final AbstractClipTransformVis visRender:visRenders)
-			{		
-				((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
-			}
-			
-		}
-	}
-	
-	@Override
-	public void setLUT( String sLUTName ) 
-	{	
-		this.sLUTName = sLUTName;
-		lutGPU = new LUTUploaderGPU();
-		lutGPU.setLUT( sLUTName );
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
 				((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
 			}			
+		}
+	}
+	
+	@Override
+	public void setLUT( String sLUTName ) 
+	{	
+		if(!sLUTName.equals( "" ))
+		{
+			this.sLUTName = sLUTName;
+			lutGPU = new LUTUploaderGPU();
+			lutGPU.setLUT( sLUTName );
+			if( visRendersTimeMap.size() > 0 )
+			{
+				final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
+				for(final AbstractClipTransformVis visRender:visRenders)
+				{		
+					((VisSpots)visRender).setLUTUploaderGPU( lutGPU );
+				}			
+			}
 		}
 	}
 	
@@ -216,7 +218,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public void setRenderType( int nRenderType )
 	{
 		renderType = nRenderType;
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -238,7 +240,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public void setPointShape( int nShape )
 	{
 		pointShape = nShape;
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -260,7 +262,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	public void setPointShade( int nShade )
 	{
 		pointShade = nShade;
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -293,7 +295,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 		final int nTotSpotsN = sptParser.times.length;
 
 		float [][] patTimesIndices = new float[nTotSpotsN][2];
-		for (int i = 0; i< nTotSpotsN; i++)
+		for (int i = 0; i < nTotSpotsN; i++)
 		{
 			patTimesIndices[i][0] = sptParser.times[i];
 			patTimesIndices[i][1] = i;

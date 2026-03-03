@@ -47,7 +47,7 @@ public class ClipSetups
 {
 	final public ClipRotation clipRotation = new ClipRotation();
 	
-	final public ClipAxesBounds clipAxesBounds;
+	final public ClipRangeBounds clipRangeBounds;
 	
 	final public ClipCenters clipCenters;
 	
@@ -66,7 +66,7 @@ public class ClipSetups
 		bvb = bvb_;
 		converterSetups = bvb.bvvViewer.getConverterSetups();
 		selectedObjects = bvb.selectedObjects;
-		clipAxesBounds = new ClipAxesBounds(converterSetups);
+		clipRangeBounds = new ClipRangeBounds(converterSetups);
 		clipCenters = new ClipCenters(converterSetups);
 		clipCenterBounds = new ClipCenterBounds(converterSetups);
 	}
@@ -117,10 +117,10 @@ public class ClipSetups
 		final double [] eAngles = clipRotation.getAngles( obj );
 		
 		//reset rotation
-		if(LinAlgHelpers.length( eAngles )<0.0001)
+		if(LinAlgHelpers.length( eAngles ) < 0.0001)
 		{
 			qCurr[0] = 1.0;
-			for(int d=1;d<4;d++)
+			for(int d = 1; d < 4; d++)
 				qCurr[d] = 0.0;
 		}
 		else
@@ -130,7 +130,7 @@ public class ClipSetups
 				//add quaternion rotation
 				//calculate changes in angles
 				final double [] dChangeAngle = new double [3];
-				for (int d=0;d<3;d++)
+				for (int d = 0; d < 3; d++)
 				{
 					dChangeAngle[d] = eAngles[d] - previousAngles[d];
 				}

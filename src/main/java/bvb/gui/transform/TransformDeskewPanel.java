@@ -127,7 +127,10 @@ public class TransformDeskewPanel extends JPanel
 		
 		blockUpdates = true;
 		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		final double angle = trDeskewPanel.getValue().getCurrentValue() * Math.PI / 180.;
+		double angle = trDeskewPanel.getValue().getCurrentValue();
+		angle = Math.max( angle, bDeskewAngleBoundMin );
+		angle = Math.min( angle, bDeskewAngleBoundMax );
+		angle *=  Math.PI / 180.;
 		for ( final Object obj: objList)
 		{	
 			transformSetups.transformDeskew.setAngle( obj, angle);

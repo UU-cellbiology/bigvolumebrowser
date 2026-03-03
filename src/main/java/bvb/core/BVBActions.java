@@ -63,28 +63,57 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerModel;
 
 import net.imglib2.RealInterval;
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import bdv.tools.brightness.ConverterSetup;
+import bdv.util.Affine3DHelpers;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.animate.RotationAnimator;
+import bvb.gui.AnisotropicTransformAnimator3D;
 import bvb.gui.CanvasSelection;
 import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
+import bvb.gui.overlays.TransformModeOverlayRenderer;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
-
 import ij.Prefs;
 
 public class BVBActions
 {
+	
 	final BigVolumeBrowser bvb;
 	
 	final Actions actions;
+	
 	final Behaviours behaviours;
+	
+	public static final String ALIGN_XY_PLANE = "align XY plane";
+	public static final String ALIGN_ZY_PLANE = "align ZY plane";
+	public static final String ALIGN_XZ_PLANE = "align XZ plane";
+	
+	private final static double cQuat = Math.cos( Math.PI / 4 );
+	
+	public static final String[] ALIGN_XY_PLANE_KEYS = new String[] { "shift Z" };
+	public static final String[] ALIGN_ZY_PLANE_KEYS = new String[] { "shift X" };
+	public static final String[] ALIGN_XZ_PLANE_KEYS = new String[] { "shift Y", "shift A" };
+
+	public static final String[] ROTATE_X_AXIS_VIEW = new String[] { "ctrl X" };
+	public static final String[] ROTATE_Z_AXIS_VIEW  = new String[] { "ctrl Z" };
+	public static final String[] ROTATE_Y_AXIS_VIEW   = new String[] { "ctrl Y", "ctrl A" };
+
+	public static final String[] ROTATE_X_AXIS_WORLD = new String[] { "alt X" };
+	public static final String[] ROTATE_Z_AXIS_WORLD  = new String[] { "alt Z" };
+	public static final String[] ROTATE_Y_AXIS_WORLD   = new String[] { "alt Y", "alt A" };
+
+	final long lRotationDuration = 100;
+	
+	TransformModeOverlayRenderer transfromModeOverlay = new TransformModeOverlayRenderer();
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
@@ -93,6 +122,8 @@ public class BVBActions
 		behaviours = new Behaviours( new InputTriggerConfig() );
 		installBehaviors();
 		installActions();
+		transfromModeOverlay.bindBVB( bvb_ );
+		bvb.bvvViewer.getDisplay().overlays().add( transfromModeOverlay );
 	}
 	
 	/** install separate drag/rotation working with manual transform **/
@@ -112,10 +143,22 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "toggle manual transformation", "T" );
 
 		actions.runnableAction(() -> actionToggleManualTransform(), "toggle manual transformation (BVB)", "T" );
+		actions.runnableAction(() -> turnOffManualTransform(), "off manual transform mode(BVB)", "ESCAPE" );		
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
 		actions.runnableAction(() -> actionSelectClosestObject(2), "toggle object selection", "ctrl E" );
+		actions.runnableAction(() -> actionSelectAll(), "select all objects", "ctrl A" );
+		actions.runnableAction(() -> alignToPlane( AlignPlaneBVB.XY ), ALIGN_XY_PLANE, ALIGN_XY_PLANE_KEYS );
+		actions.runnableAction(() -> alignToPlane( AlignPlaneBVB.ZY ), ALIGN_ZY_PLANE, ALIGN_ZY_PLANE_KEYS );
+		actions.runnableAction(() -> alignToPlane( AlignPlaneBVB.XZ ), ALIGN_XZ_PLANE, ALIGN_XZ_PLANE_KEYS );
+		actions.runnableAction(() -> rotate(0, true), "rotate 90 x axis", ROTATE_X_AXIS_VIEW);
+		actions.runnableAction(() -> rotate(1, true), "rotate 90 y axis", ROTATE_Y_AXIS_VIEW);
+		actions.runnableAction(() -> rotate(2, true), "rotate 90 z axis", ROTATE_Z_AXIS_VIEW);
+		actions.runnableAction(() -> rotate(0, false), "rotate 90 x axis wrld", ROTATE_X_AXIS_WORLD);
+		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
+		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
+		
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
@@ -140,8 +183,11 @@ public class BVBActions
 
 	void runSettingsCommand()
 	{
+		if( bvb.getInputLock() )
+			return;
 		JPanel pViewSettings = new JPanel(new GridBagLayout());
 		
+		GridBagConstraints gbcTitle = new GridBagConstraints();
 		GridBagConstraints gbcL = new GridBagConstraints();
 		GridBagConstraints gbcR = new GridBagConstraints();
 		
@@ -221,14 +267,31 @@ public class BVBActions
 		
 		gbcL.insets = new Insets(5,5,5,5);
 		gbcR.insets = new Insets(5,5,5,5);
+		gbcTitle.insets = new Insets(5,5,5,5);
+		
+		gbcTitle.anchor = GridBagConstraints.CENTER;
+		gbcTitle.gridwidth = 2;
 		gbcL.anchor = GridBagConstraints.EAST;
 		gbcR.fill = GridBagConstraints.HORIZONTAL;
 		gbcR.weightx = 1.0;
 		
-		gbcL.gridx=0;
-		gbcR.gridx=1;
-		gbcL.gridy=0;
-		gbcR.gridy=0;
+		gbcL.gridx = 0;
+		gbcR.gridx = 1;
+		gbcL.gridy = 0;
+		gbcR.gridy = 0;
+		pViewSettings.add( new JLabel("<html><b>GPU cache size (in MB)</b></html>"), gbcL );
+		pViewSettings.add( maxCacheSizeInMB,gbcR );
+		
+		gbcL.gridy++;
+		gbcR.gridy++;
+		pViewSettings.add( new JLabel("GPU cache tile size"), gbcL );
+		pViewSettings.add( cacheBlockSize,gbcR );
+		
+		gbcTitle.gridy = gbcL.gridy + 1;
+		pViewSettings.add( new JLabel("Viewport render resolution"), gbcTitle );	
+		
+		gbcL.gridy += 2;
+		gbcR.gridy += 2;
 		pViewSettings.add( new JLabel("Render width"), gbcL );	
 		pViewSettings.add( renderWidth,gbcR );
 		
@@ -237,8 +300,11 @@ public class BVBActions
 		pViewSettings.add( new JLabel("Render height"), gbcL );
 		pViewSettings.add( renderHeight,gbcR );
 		
-		gbcL.gridy++;
-		gbcR.gridy++;
+		gbcTitle.gridy = gbcL.gridy + 1;
+		pViewSettings.add( new JLabel("Dither"), gbcTitle );	
+		
+		gbcL.gridy += 2;
+		gbcR.gridy += 2;
 		pViewSettings.add( new JLabel("Dither window size"), gbcL );
 		pViewSettings.add( ditherWidthsList, gbcR );
 
@@ -246,19 +312,12 @@ public class BVBActions
 		gbcR.gridy++;
 		pViewSettings.add( new JLabel("Number of dither samples"), gbcL );
 		pViewSettings.add( slNumDitherSamples,gbcR );
-
-		gbcL.gridy++;
-		gbcR.gridy++;
-		pViewSettings.add( new JLabel("GPU cache tile size"), gbcL );
-		pViewSettings.add( cacheBlockSize,gbcR );
+	
+		gbcTitle.gridy = gbcL.gridy + 1;
+		pViewSettings.add( new JLabel("Perspective camera"), gbcTitle );	
 		
-		gbcL.gridy++;
-		gbcR.gridy++;
-		pViewSettings.add( new JLabel("GPU cache size (in MB)"), gbcL );
-		pViewSettings.add( maxCacheSizeInMB,gbcR );
-		
-		gbcL.gridy++;
-		gbcR.gridy++;
+		gbcL.gridy += 2;
+		gbcR.gridy += 2;
 		pViewSettings.add( new JLabel("Camera distance"), gbcL );
 		pViewSettings.add( dCam,gbcR );
 		
@@ -380,7 +439,7 @@ public class BVBActions
 	{
 		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//solution for now, to not interfere with typing
-		if(!bvb.bLocked && !(c instanceof JTextField))
+		if(!bvb.getInputLock() && !(c instanceof JTextField))
 		{
 			//final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleSourcesBoundindBox(bvb);
 			final RealInterval focusInt = CenterZoomBVV.getAllSelectedVisibleObjectsBoundindBox(bvb);
@@ -393,7 +452,7 @@ public class BVBActions
 	
 	public void actionToggleVisibility()
 	{
-		if(!bvb.selectedObjects.isAnythingSelected() )
+		if(!bvb.selectedObjects.isAnythingSelected() || bvb.getInputLock())
 			return;
 		
 		if(bvb.selectedObjects.areSourcesSelected())
@@ -487,10 +546,10 @@ public class BVBActions
 	{
 		Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//solution for now, to not interfere with typing
-		if(!bvb.bLocked && !(c instanceof JTextField))
+		if(!bvb.getInputLock() && !(c instanceof JTextField))
 		{
-
 			final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+			
 			final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
 
 			boolean bShouldNotBeSelected = false;
@@ -555,16 +614,148 @@ public class BVBActions
 		}
 	}
 	
+	void actionSelectAll()
+	{
+		ArrayList< Object > focusSet = CenterZoomBVV.getAllVisibleObjects( bvb );
+		if(focusSet.size() == 0)
+			return;
+		final ArrayList<SourceAndConverter<?>> selectedSAC = new ArrayList<>();
+		final ArrayList<BasicShape> selectedShapes = new ArrayList<>();
+		for(final Object obj : focusSet)
+		{
+			if(obj instanceof SourceAndConverter)
+				selectedSAC.add( ( SourceAndConverter< ? > ) obj );
+			if(obj instanceof BasicShape)
+				selectedShapes.add( ( BasicShape ) obj );
+		}
+		bvb.bvvViewer.sourceSelection.table.setSelectedSources( selectedSAC );
+		bvb.bvbCards.panelShapes.tableShapes.setSelectedShapes( selectedShapes );
+		bvb.updateSceneRender();
+
+	}
+	
+	public void turnOffManualTransform()
+	{
+		if( bvb.getInputLock() )
+			return;
+		bvb.bManualTransformMode = !bvb.bManualTransformMode;
+		
+		if(!bvb.bManualTransformMode)
+		{
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			this.transfromModeOverlay.setEnabled(false);
+		}
+	}
+	
 	void actionToggleManualTransform()
 	{
-		bvb.bManualTransformMode =  !bvb.bManualTransformMode;
+		if( bvb.getInputLock() )
+			return;
+		bvb.bManualTransformMode = !bvb.bManualTransformMode;
+		
 		if(bvb.bManualTransformMode)
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			
 		}
 		else
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+		}
+		transfromModeOverlay.setEnabled( bvb.bManualTransformMode );
+	}
+	
+	public void alignToAxis( final int nAxis )
+	{
+		switch (nAxis)
+		{
+		case 0:
+			alignToPlane(AlignPlaneBVB.ZY);
+			break;
+		case 1:
+			alignToPlane(AlignPlaneBVB.XZ);
+			break;
+		case 2:
+			alignToPlane(AlignPlaneBVB.XY);
+		}
+	}
+	
+	void alignToPlane(final AlignPlaneBVB plane)
+	{
+		final double[] qTarget = new double[ 4 ];
+		LinAlgHelpers.quaternionInvert( plane.qAlign, qTarget );
+		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
+		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
+		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
+		bvb.bvvViewer.setTransformAnimator( new RotationAnimator( transform, centerX, centerY, qTarget, 300 ) );
+	}
+	
+	public void rotate(final int nAxis, boolean bViewCoords)
+	{
+		final double centerX = bvb.bvvViewer.getWidth() * 0.5;
+		final double centerY = bvb.bvvViewer.getHeight() * 0.5;
+		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
+
+		if(bViewCoords)
+		{
+			final AffineTransform3D transformNew = new  AffineTransform3D();
+			transformNew.set( transform );
+			// center shift
+			transformNew.set( transformNew.get( 0, 3 ) - centerX, 0, 3 );
+			transformNew.set( transformNew.get( 1, 3 ) - centerY, 1, 3 );	
+			//rotate
+			transformNew.rotate( nAxis, 0.5 * Math.PI );
+			// center un-shift
+			transformNew.set( transformNew.get( 0, 3 ) + centerX, 0, 3 );
+			transformNew.set( transformNew.get( 1, 3 ) + centerY, 1, 3 );
+			bvb.bvvViewer.setTransformAnimator( new AnisotropicTransformAnimator3D(transform, transformNew, lRotationDuration ));
+		}
+		else
+		{
+			final double[] qTarget = new double[ 4 ];
+			Affine3DHelpers.extractRotationAnisotropic( transform, qTarget );
+			final double[] dAxis = new double[3];
+			dAxis[nAxis] = 1.0;
+			final double[] qRot = new double[ 4 ];
+			LinAlgHelpers.quaternionFromAngleAxis(dAxis, 0.5 * Math.PI, qRot);
+			LinAlgHelpers.quaternionMultiply( qTarget, qRot, qTarget );
+			LinAlgHelpers.normalize( qTarget );
+			//LinAlgHelpers.quaternionInvert( qTarget, qTarget );			
+			bvb.bvvViewer.setTransformAnimator( new RotationAnimator(transform, centerX, centerY, qTarget, lRotationDuration ));
+
+		}
+	}
+	
+	/**
+	 * The planes which can be aligned with the viewer coordinate system: XY,
+	 * ZY, and XZ plane.
+	 * Diffenrent from BDV, since 
+	 * in XY plain align Z looks towards viewer (and X, Y oriented as in ImageJ) 
+	 * and Z looks up for two other (like in Blender)
+	 */
+	public enum AlignPlaneBVB
+	{
+		XY( 2, new double[] { 0, 0, 1, 0 } ),
+		ZY( 0, new double[] { 0.5, -0.5, -0.5, 0.5 } ),
+		XZ( 1, new double[] { 0, 0, cQuat, -cQuat } );
+
+		/**
+		 * rotation from the xy-plane aligned coordinate system to this plane.
+		 */
+		public final double[] qAlign; 
+
+		/**
+		 * Axis index. The plane spanned by the remaining two axes will be
+		 * transformed to the same plane by the computed rotation and the
+		 * "rotation part" of the affine source transform.
+		 * @see Affine3DHelpers#extractApproximateRotationAffine(AffineTransform3D, double[], int)
+		 */
+		public final int coerceAffineDimension;
+
+		private AlignPlaneBVB( final int coerceAffineDimension, final double[] qAlign )
+		{
+			this.coerceAffineDimension = coerceAffineDimension;
+			this.qAlign = qAlign;
 		}
 	}
 	

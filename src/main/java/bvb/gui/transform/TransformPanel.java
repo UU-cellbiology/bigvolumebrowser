@@ -133,9 +133,9 @@ public class TransformPanel extends JPanel
 		coordToolTip[0] = "Global world coordinates";
 		coordToolTip[1] = "Local volume coordinates";
 
-		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "frame_global.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "frame_global.png");
 		coordIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "frame_local.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "frame_local.png");
 		coordIcon[1] = new ImageIcon(icon_path);
 		gbc.gridx ++;
 		gbc.weightx = 0.6;
@@ -173,7 +173,7 @@ public class TransformPanel extends JPanel
 		
 		gbc.weightx = 0.05;
 		gbc.fill = GridBagConstraints.NONE;
-		icon_path = this.getClass().getResource("/icons/red_cross.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetCurrent = new JButton(icon);
 		butResetCurrent.setToolTipText( "Reset current panel" );
@@ -181,7 +181,7 @@ public class TransformPanel extends JPanel
 		gbc.gridx ++;
 		this.add(butResetCurrent,gbc);	
 		
-		icon_path = this.getClass().getResource("/icons/red_crossx2.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_crossx2.png");
 		icon = new ImageIcon(icon_path);
 		butResetAll = new JButton(icon);
 		butResetAll.setToolTipText( "Reset all transforms" );

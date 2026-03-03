@@ -186,8 +186,7 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 	public void setSurfaceRender(final int nSurfaceRenderType)
 	{
 		if(visRender != null )
-		{
-			((VisMesh)visRender).setRenderType( VisMesh.MESH );			
+		{		
 			((VisMesh)visRender).setSurfaceRenderType( nSurfaceRenderType );
 			defineTransparency();	
 		}
@@ -204,7 +203,6 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 	{
 		if(visRender != null )
 		{			
-			((VisMesh)visRender).setRenderType( VisMesh.MESH );
 			((VisMesh)visRender).setSurfaceGridType( nSurfaceGridType );
 			defineTransparency();
 		}
@@ -267,6 +265,12 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 	}
 	
 	@Override
+	public float getWireLineWidth()
+	{		
+		return ((VisMesh)visRender).getWireLineWidth();
+	}
+	
+	@Override
 	public void setSilhouetteDecay(final float silhouetteDecay_)
 	{		
 		if(visRender != null )
@@ -275,6 +279,11 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 		}
 	}
 	
+	@Override
+	public float getSilhouetteDecay()
+	{		
+		return ((VisMesh)visRender).getSilhouetteDecay( );
+	}
 
 	@Override
 	public String toString()

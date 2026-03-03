@@ -92,15 +92,14 @@ public class ShapesTable extends JTable
 				{
 					
 					final int mcol = convertColumnIndexToModel( vcol );
-					if(e.getClickCount()==2)
+					if(e.getClickCount() == 2)
 					{
 						final int mrow = convertRowIndexToModel( vrow );
-						focusOnSelectedShapes();
 						final BasicShape currShape = bvb.shapes.get( mrow );
 						final RealInterval shapeBox = currShape.boundingBox();
 						if(shapeBox != null)
 						{
-							if(currShape.getTimePoint()>=0)
+							if(currShape.getTimePoint() >= 0)
 							{
 								bvb.bvvViewer.setTimepoint( currShape.getTimePoint() );
 							}
@@ -181,6 +180,7 @@ public class ShapesTable extends JTable
 			shapes.add( bvb.shapes.get( row ));
 		return shapes;
 	}
+	
 	public void setSelectedShapes(List< BasicShape > shList)
 	{
 		this.clearSelection();
@@ -192,9 +192,9 @@ public class ShapesTable extends JTable
 			selectedIndices.add( new Integer ( nIndex ));
 		}
 		
-		for(int i=0;i<selectedIndices.size(); i++)
+		for(int i = 0; i < selectedIndices.size(); i++)
 		{
-			if(i==0)
+			if(i == 0)
 			{
 				this.setRowSelectionInterval( selectedIndices.get( i ).intValue(), selectedIndices.get( i ).intValue() );
 			}
@@ -215,11 +215,4 @@ public class ShapesTable extends JTable
 		bvb.repaintBVV();
 	}
 	
-	void focusOnSelectedShapes()
-	{
-		final List< BasicShape > shapes = new ArrayList<>();
-		for ( final int row : getSelectedRows() )
-			shapes.add( bvb.shapes.get( row ));
-		
-	}
 }

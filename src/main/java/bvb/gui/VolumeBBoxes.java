@@ -62,7 +62,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	
 	private boolean bVisible = false;
 	
-	private boolean bLocked = false;
+	private volatile boolean bLocked = false;
 
 	public static final float NOT_SELECTED_WIDTH = 1.5f, SELECTED_WIDTH = 4.0f;
 	
@@ -91,7 +91,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 			{
 				try
 				{
-					Thread.sleep(100);
+					Thread.sleep(5);
 				}
 				catch ( InterruptedException exc )
 				{
@@ -114,7 +114,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 								final Color origColor = vbox.getLineColor();
 								vbox.setLineColor( BVBSettings.boxHighlightColor );
 								vbox.setLineThickness( SELECTED_WIDTH );
-								vbox.setAntiAlias(  SELECTED_WIDTH);
+								vbox.setAntiAlias( SELECTED_WIDTH );
 								vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
 								vbox.setAntiAlias(1.5f);
 								vbox.setLineColor(origColor );
@@ -123,6 +123,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 						}
 
 						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+						
 					}
 				}
 			});
@@ -194,7 +195,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		{
 			try
 			{
-				Thread.sleep(100);
+				Thread.sleep(5);
 			}
 			catch ( InterruptedException exc )
 			{
@@ -208,47 +209,15 @@ public class VolumeBBoxes extends AbstractBasicShape
 		
 		for(final SourceAndConverter< ? > sac : sacList )
 		{
-			final Source< ? > src = sac.getSpimSource();
-			if(src.isPresent( nTimePoint ))
-			{
-				final double [] min = src.getSource( nTimePoint, 0 ).minAsDoubleArray();
-				final double [] max = src.getSource( nTimePoint, 0 ).maxAsDoubleArray();
-				//extend to include all range
-				for(int d=0; d<3; d++)
-				{
-					min[d] -= 0.5;
-					max[d] += 0.5;
-				}
-				final FinalRealInterval interval = new FinalRealInterval(min, max);
-				final AffineTransform3D transform = new AffineTransform3D();
-				src.getSourceTransform( nTimePoint, 0, transform );
-				final VolumeBox currBox = bvvSourceToBox.get( sac );
-				if(currBox == null)
-				{		
-					final VolumeBox vb = new VolumeBox(interval, transform , lineThickness, lineColor, bDashed);
-					bvvSourceToBox.put( sac, vb);
-				}
-				else
-				{
-					if(!currBox.compareIntervalTransform( interval, transform ))
-					{
-						currBox.setTransform(transform, false);
-						currBox.setInterval( interval );
-					}
-				}
-			}
-			else
-			{
-				bvvSourceToBox.remove( sac );					
-			}
+			updateVolumeBoxSaC(sac, nTimePoint);
 		}
 		
 		for(final BasicShape sh:bvb.shapes)
 		{
-			if(sh.getTimePoint()<0 || sh.getTimePoint() == nTimePoint)
+			if(sh.getTimePoint() < 0 || sh.getTimePoint() == nTimePoint)
 			{
 
-				final FinalRealInterval interval = new FinalRealInterval(sh.boundingBoxNotTransformed());
+				final RealInterval interval = sh.boundingBoxNotTransformed();
 				final AffineTransform3D transform = new AffineTransform3D();
 				sh.getTransform( transform );
 
@@ -256,7 +225,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 				if(currBox == null)
 				{				
 					final VolumeBox vb = new VolumeBox(interval, transform, lineThickness, lineColor, bDashed); 
-					shapeToBox.put( sh, vb);
+					shapeToBox.put( sh, vb );
 				}
 				else
 				{
@@ -276,6 +245,47 @@ public class VolumeBBoxes extends AbstractBasicShape
 		bLocked = false;
 	}
 	
+	public void updateVolumeBoxSaC(final SourceAndConverter< ? > sac, final int nTimePoint)
+	{
+		final Source< ? > src = sac.getSpimSource();
+		bLocked = true;
+		if(src.isPresent( nTimePoint ))
+		{
+			final double [] min = src.getSource( nTimePoint, 0 ).minAsDoubleArray();
+			final double [] max = src.getSource( nTimePoint, 0 ).maxAsDoubleArray();
+			//extend to include all range
+			for(int d = 0; d < 3; d++)
+			{
+				min[d] -= 0.5;
+				max[d] += 0.5;
+			}
+			final FinalRealInterval interval = new FinalRealInterval(min, max, false);
+			final AffineTransform3D transform = new AffineTransform3D();
+
+			src.getSourceTransform( nTimePoint, 0, transform );
+			final VolumeBox currBox = bvvSourceToBox.get( sac );
+			if(currBox == null)
+			{		
+				final VolumeBox vb = new VolumeBox(interval, transform , lineThickness, lineColor, bDashed);
+				bvvSourceToBox.put( sac, vb);
+			}
+			else
+			{
+				if(!currBox.compareIntervalTransform( interval, transform ))
+				{
+					currBox.setTransform(transform, false);
+					currBox.setInterval( interval );
+				}
+			}
+		}
+		else
+		{
+			bvvSourceToBox.remove( sac );					
+		}
+		bLocked = false;
+	}
+	
+	
 	public synchronized void updateClipBoxes()
 	{
 		if(!bVisible)
@@ -284,7 +294,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 		{
 			try
 			{
-				Thread.sleep(100);
+				Thread.sleep(5);
 			}
 			catch ( InterruptedException exc )
 			{

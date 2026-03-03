@@ -88,7 +88,7 @@ public class DebugTransparencyBlending
 		diffPoints.setPoints( verticesDiff, diameters, null );
 		//diffPoints.setRenderType( VisSpots.RENDER_GAUSS_UNIFORM );
 
-		testBVB.addShape( samePoints );
+		//testBVB.addShape( samePoints );
 		testBVB.addShape( diffPoints );
 
 

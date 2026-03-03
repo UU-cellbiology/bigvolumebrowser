@@ -32,6 +32,7 @@ package bvb.scene;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 
 import net.imglib2.RealPoint;
@@ -127,8 +128,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	void initShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisSpots.class, "/scene/spots.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisSpots.class, "/scene/spots.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots.fp" ).instantiate();		
 		prog = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 	}
 	

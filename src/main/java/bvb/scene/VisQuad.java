@@ -34,6 +34,8 @@ import com.jogamp.opengl.GL3;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import bvb.core.BVBSettings;
+
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
@@ -49,7 +51,7 @@ public class VisQuad
 {
 	private DefaultShader progQuad = null;
 	
-	private int nBGShader;
+	private final int nBGShader;
 	
 	private int vaoQuad;
 	
@@ -57,7 +59,7 @@ public class VisQuad
 	
 	long fTimeIni  = 0;
 
-	public VisQuad(int nShaderN )
+	public VisQuad(final int nShaderN )
 	{
 		nBGShader = nShaderN;
 	
@@ -65,21 +67,21 @@ public class VisQuad
 	}
 	private void initShader()
 	{
-		final Segment quadvp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg.vp" ).instantiate();
+		final Segment quadvp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg.vp" ).instantiate();
 		Segment quadfp = null;
 		switch(nBGShader)
 		{
 		case 2:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg2.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg2.fp" ).instantiate();
 			break;
 		case 3:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg3.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg3.fp" ).instantiate();
 			break;
 		case 4:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg4.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg4.fp" ).instantiate();
 			break;
 		default:
-			quadfp = new SegmentTemplate( VisQuad.class, "/scene/bg/bg1.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg1.fp" ).instantiate();
 		}
 		progQuad = new DefaultShader( quadvp.getCode(), quadfp.getCode() );
 	}
@@ -146,14 +148,11 @@ public class VisQuad
 			fTimeIni = System.currentTimeMillis();
 		}
 
-		//fTime = fTime/10;
 		gl.glDepthFunc( GL.GL_ALWAYS);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
 		
-//		float fTime = ( float ) ( System.currentTimeMillis()%100.5453 );//-fTimeIni;
-		//fTime /= 10.5453;
-		//fTime += 43758.5453;
+
 		progQuad.getUniform1f("fTime").set(fTime);
 		
 		progQuad.setUniforms( context );

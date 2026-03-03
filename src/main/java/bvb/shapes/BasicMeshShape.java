@@ -32,7 +32,6 @@ import java.awt.Color;
 
 public interface BasicMeshShape
 {
-	
 	public void setColor(final Color colorin);
 	
 	public Color getColor();
@@ -43,28 +42,36 @@ public interface BasicMeshShape
 	
 	public boolean isTextureUsed();
 
+	/** mesh render style, 0 - surface and 1 - points **/
 	public void setRenderType(final int nRenderType_);
 	
+	/** mesh render style, 0 - surface and 1 - points **/	
 	public int getRenderType();
 	
-	public void setPointSize (final float fPointSize);
+	public void setPointSize(final float fPointSize);
 	
 	public float getPointSize();
-		
+	
+	/** Surface render style 0 - plain, 1 - shaded, 2 - shiny, 3 - silhouette **/ 
 	public void setSurfaceRender(final int nSurfaceRenderType);
-
+	
+	/** Surface render style 0 - plain, 1 - shaded, 2 - shiny, 3 - silhouette **/ 
 	public int getSurfaceRender();
 	
+	/** Surface grid type 0 - no grid, 1 - wire, 2 - cartesian **/
 	public void setSurfaceGrid(final int nSurfaceGridType);
-	
+
+	/** Surface grid type 0 - no grid, 1 - wire, 2 - cartesian **/
 	public int getSurfaceGrid();
 
 	public void setWireLineWidth(final float fThickness);
+	
+	public float getWireLineWidth();
 	
 	public void setCartesianGrid(final float cartesianGridStep, final float cartesianFraction);
 	
 	public void setSilhouetteDecay(final float silhouetteDecay);
 	
-	
+	public float getSilhouetteDecay();
 	
 }

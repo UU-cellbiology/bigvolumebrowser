@@ -50,6 +50,7 @@ import javax.swing.SwingUtilities;
 
 import bdv.util.BoundedRange;
 import bdv.util.BoundedValueDouble;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
@@ -75,7 +76,7 @@ public class SpotsOpacityPanel extends JPanel
 	
 	final JComboBox<String> cbMapAlpha;
 	
-	final SpotsMapSetups spotsAlphaSetup = new SpotsMapSetups();
+	final public SpotsMapSetups spotsAlphaSetup = new SpotsMapSetups();
 	
 	final JButton butResetToDefault;
 		
@@ -149,7 +150,7 @@ public class SpotsOpacityPanel extends JPanel
 		cbInverted.addItemListener( (e)-> updateAlphaInversion());
 		
 				
-		URL icon_path = this.getClass().getResource("/icons/red_cross.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetToDefault = new JButton(icon);
 		butResetToDefault.setToolTipText( "Reset to default" );
@@ -263,6 +264,7 @@ public class SpotsOpacityPanel extends JPanel
 		final int nMapAlphaFin = nMapAlpha;
 		final boolean bMapAlphaSameFin = bMapAlphaSame;
 		final boolean bAlphaInvertedSameFin = bAlphaInvertedSame;
+		final boolean bAlphaInvertedFin = bAlphaInverted;
 		
 		final BoundedRange finalRange = range;
 		final BoundedValueDoubleBVB finalGamma = gamma;
@@ -286,6 +288,7 @@ public class SpotsOpacityPanel extends JPanel
 				pMapInverted.setConsistent( bAlphaInvertedSameFin );
 				
 				cbInverted.setEnabled( true );
+				cbInverted.setSelected( bAlphaInvertedFin );
 				alphaRangePanel.setEnabled( true );
 				alphaRangePanel.setConsistent( allRangesEqualFin );
 

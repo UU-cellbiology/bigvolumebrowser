@@ -35,12 +35,12 @@ import ij.Prefs;
 public class BVBSettings
 {
 	
-	public static String sVersion = "0.0.7";
+	public static String sVersion = "0.0.8";
 	
 	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
 
-	/** background color of BVV canvas **/
+	/** info render color equal to the inverted background color of BVV canvas **/
 	public static Color canvasOverlayColor = new Color((int)Prefs.get( "BVB.canvasOverlayColor", Color.WHITE.getRGB() ));
 	
 	/** status of displaying boxes around sources **/
@@ -61,9 +61,11 @@ public class BVBSettings
 	
 	public static boolean bShowScaleBar = Prefs.get( "BVB.bShowScaleBar", true );
 	
+	public static boolean bShowAxisOverlay = Prefs.get( "BVB.bShowAxisOverlay", true );
+	
 	public static double dFocusScreenFraction =  Prefs.get("BVB.dFocusScreenFraction", 0.95);
 	
-	public static boolean bPyramidize = true;//Prefs.get( "BVB.bPyramidize", false );
+	public static boolean bLoadPyramidize = Prefs.get( "BVB.bLoadPyramidize", true );
 	
 	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", true ); 
 	
@@ -83,6 +85,10 @@ public class BVBSettings
 	public static int nAddedRAINumber = 1;
 	
 	public static boolean bWeightedOIT = Prefs.get( "BVB.bWeightedOIT", true );
+	
+	public static String sIconPath = "/bvb/icons/";
+	
+	public static String sShaderPath = "/bvb/scene/";
 	
 	public static String sUITheme = "";
 	

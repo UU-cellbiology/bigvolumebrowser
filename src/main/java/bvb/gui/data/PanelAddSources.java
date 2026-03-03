@@ -31,21 +31,28 @@ package bvb.gui.data;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.File;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import net.imglib2.util.ValuePair;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import bvb.gui.ColorTextOverlayAnimator;
+import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
+import mpicbg.spim.data.generic.AbstractSpimData;
 
 public class PanelAddSources extends JPanel
 {
@@ -66,49 +73,24 @@ public class PanelAddSources extends JPanel
 		//this.setBorder(new PanelTitle(" Add data "));
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
-		URL icon_path = this.getClass().getResource("/icons/bioformats.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "bioformats.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butBioFormats = new JButton(tabIcon);
 	    butBioFormats.setToolTipText("Load TIF/BioFormats");
-	    
-	    butBioFormats.addActionListener( new ActionListener() {
+	    butBioFormats.addActionListener( (e) -> loadBioFormatsDialog());				
 
-			@Override
-			public void actionPerformed( ActionEvent e )
-			{
-				loadBioFormatsDialog();				
-			}
-	    	
-	    } );
-
-		icon_path = this.getClass().getResource("/icons/fiji-logo.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "fiji-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butFIJI = new JButton(tabIcon);
 	    butFIJI.setToolTipText("Load Current Image");
 	    
-	    butFIJI.addActionListener( new ActionListener() {
-
-			@Override
-			public void actionPerformed( ActionEvent e )
-			{
-				loadImagePlus();				
-			}
-	    	
-	    } );
+	    butFIJI.addActionListener((e) -> loadImagePlus());	
 	    
-		icon_path = this.getClass().getResource("/icons/bdv-logo.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "bdv-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butBDVXML = new JButton(tabIcon);
 	    butBDVXML.setToolTipText("Load BDV XML/HDF5");
-	    butBDVXML.addActionListener( new ActionListener() {
-
-			@Override
-			public void actionPerformed( ActionEvent e )
-			{
-				loadBDVXMLDialog();				
-			}
-	    	
-	    } );
+	    butBDVXML.addActionListener( (e) ->	loadBDVXMLDialog());	
 	    
 	    gbc.insets = new Insets(4,3,4,3);
 
@@ -139,7 +121,17 @@ public class PanelAddSources extends JPanel
         {
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
-            bvb.loadBDVHDF5( chooser.getSelectedFile().getPath() );
+            String sFilename = chooser.getSelectedFile().getPath();
+			final File f = new File(sFilename);
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading " + f.getName() + ",\nplease wait...", 3000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			executor.submit(() -> {
+				final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = 
+						bvb.spimDataWrapper.createSpimDataBDVorBF( sFilename, 0 );
+			    SwingUtilities.invokeLater(() -> {
+			    	bvb.addSpimData( spimDataInfo.getA(), spimDataInfo.getB() );
+			    });
+			});
         }
 	}
 	
@@ -154,13 +146,23 @@ public class PanelAddSources extends JPanel
         {
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
-            bvb.loadBioFormats(chooser.getSelectedFile().getPath() );
+            String sFilename = chooser.getSelectedFile().getPath();
+			final File f = new File(sFilename);
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading " + f.getName() + ",\nplease wait...", 3000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			executor.submit(() -> {
+				final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = 
+						bvb.spimDataWrapper.createSpimDataBDVorBF( sFilename, 1 );
+			    SwingUtilities.invokeLater(() -> {
+			    	bvb.addSpimData( spimDataInfo.getA(), spimDataInfo.getB() );
+			    });
+			});
         }
 	}
 	
 	public void loadImagePlus()
 	{	
-		ImagePlus imp = null;
+		final ImagePlus imp;
 		try
 		{
 			imp = IJ.getImage();
@@ -175,6 +177,15 @@ public class PanelAddSources extends JPanel
 		    IJ.error("Only 8-, 16- or 32-bit grayscale images are currently supported.");
 		    return;
 		}
-		bvb.addImagePlus( imp );
+		bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading " + imp.getTitle() + ",\nplease wait...", 3000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		executor.submit(() -> {
+			final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = 
+					bvb.spimDataWrapper.createSpimDataImagePlus(imp);
+		    SwingUtilities.invokeLater(() -> {
+		    	bvb.addSpimData( spimDataInfo.getA(), spimDataInfo.getB() );
+		    });
+		});
 	}
 }

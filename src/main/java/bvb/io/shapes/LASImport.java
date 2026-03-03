@@ -34,6 +34,7 @@ import com.github.mreutegg.laszip4j.LASReader;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -44,7 +45,7 @@ import bvb.scene.VisSpots;
 import bvb.shapes.Spots;
 import ij.IJ;
 
-public class LASImport extends SwingWorker<Void, Void> 
+public class LASImport extends SwingWorker<Void, String> 
 {
 	public File filein = null;
 	
@@ -55,6 +56,17 @@ public class LASImport extends SwingWorker<Void, Void>
 	int nCount = 0;
 	
 	public boolean bSpotsRead = false;
+	
+	@Override
+    protected void process(List<String> chunks) 
+	{
+		String message = chunks.get( chunks.size() - 1 );
+		if(message.startsWith( "Progress " ))
+		{
+			IJ.showProgress(Double.parseDouble( message.substring( 9, message.length() )));
+		}
+
+    }
 	
 	@Override
 	protected Void doInBackground() throws Exception
@@ -78,11 +90,12 @@ public class LASImport extends SwingWorker<Void, Void>
 			vertices.add( new RealPoint(new double[] {p.getX(), p.getY(), p.getZ()}));
 			
 			colors[nCount*4] = p.getRed()/255f;
-			colors[nCount*4+1] = p.getGreen()/255f;
-			colors[nCount*4+2] = p.getBlue()/255f;
-			colors[nCount*4+3] = 1.0f;
+			colors[nCount*4 + 1] = p.getGreen()/255f;
+			colors[nCount*4 + 2] = p.getBlue()/255f;
+			colors[nCount*4 + 3] = 1.0f;
 	    	nCount++;
-	    	IJ.showProgress( (double)nCount/((double)nMaxRecords) );
+	    	publish("Progress " + Double.toString( (double)nCount/((double)nMaxRecords)));
+	    	//IJ.showProgress(  );
 
 	    }
 

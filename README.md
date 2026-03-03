@@ -1,5 +1,5 @@
 [![](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml/badge.svg)](https://github.com/UU-cellbiology/bigvolumebrowser/actions/workflows/build.yml) 
-[![Maven Scijava Version](https://img.shields.io/github/v/tag/UU-cellbiology/bigvolumebrowser?label=Version-[Maven%20Scijava])](https://maven.scijava.org/#browse/browse:releases:nl%2Fuu%2Fscience%2Fcellbiology%2Fbigvolumebrowser)
+[![Maven Scijava Version](https://img.shields.io/github/v/tag/UU-cellbiology/bigvolumebrowser?label=[Maven%20Scijava])](https://maven.scijava.org/#browse/browse:releases:nl%2Fuu%2Fscience%2Fcellbiology%2Fbigvolumebrowser)
 
 
 <picture>
@@ -13,13 +13,16 @@ It can display volumetric (microscopy) data, SMLM datasets, and geometric object
 Objects can be clipped and transformed freely in 3D, and it works with timelapse data.
 
 BVB performs lazy loading and supports a multi-scale pyramidal data formats.   
-This speeds up render and allows exploration of datasets larger than GPU memory.
+This speeds up render and allows exploration of datasets larger than GPU memory.   
 
+It supports rendering of 3D visualization movies using key frame animation interface.    
 
 **Users**: please check full description/tutorials in the **[project's wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.   
+There is a **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary)).   
 For questions, tag me (<a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a>) at <a href="https://forum.image.sc/">image.sc</a> forum.   
 
-**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples). Feel free to reach out, since the code comments are not in the best shape. 
+**Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).  
+Feel free to reach out, since the code description/comments are not always in the best shape. 
 
 ----------
 **Questions with answers:**  
@@ -29,9 +32,10 @@ Want to contribute? Submit a [PR](https://en.wikipedia.org/wiki/Fork_and_pull_mo
 Wanna see live progress on development? Check [this feed](https://bsky.app/hashtag/bigvolumebrowser).  
 Not happy with it? Something is fundamentally wrong?  
 Consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).    
+Like it? Spread the word and give it a star on GitHub.   
 
 ----------
-**Acknowledgements:**  
+**Acknowledgements**  
 Powered (and made possible) by a hard work of very talented people behind:   
 - [ImageJ](https://github.com/imagej) 
 - [FIJI](https://fiji.sc/) 

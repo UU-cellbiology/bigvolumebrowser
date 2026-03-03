@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -44,9 +46,12 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.util.Affine3DHelpers;
 import bdv.util.BoundedRange;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
+import bvvpg.vistools.BvvStackSource;
 
 public class Misc
 {
+	
 	public static RealInterval getSourceBoundingBox(final Source<?> source, int nTimePoint, int baseLevel)
 	{
 		final AffineTransform3D transformSource = new AffineTransform3D();
@@ -54,7 +59,28 @@ public class Misc
 		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
 		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
 		//extend to include all range
-		for(int d=0; d<3; d++)
+		for(int d = 0; d < 3; d++)
+		{
+			min[d] -= 0.5;
+			max[d] += 0.5;
+		}
+		final FinalRealInterval interval = new FinalRealInterval(min, max);
+		return transformSource.estimateBounds( interval );
+	}
+	
+	public static RealInterval getSourceBoundingBoxNoFixed(final Source<?> source, int nTimePoint, int baseLevel)
+	{
+		final AffineTransform3D transformSource = new AffineTransform3D();
+		final AffineTransform3D transformFixed = new AffineTransform3D();
+
+		(( TransformedSource< ? > ) source).getSourceTransform(nTimePoint, baseLevel, transformSource);
+		(( TransformedSource< ? > ) source).getFixedTransform( transformFixed );
+		transformSource.preConcatenate( transformFixed.inverse() );
+
+		final double [] min = source.getSource( nTimePoint, baseLevel ).minAsDoubleArray();
+		final double [] max = source.getSource( nTimePoint, baseLevel ).maxAsDoubleArray();
+		//extend to include all range
+		for(int d = 0; d < 3; d++)
 		{
 			min[d] -= 0.5;
 			max[d] += 0.5;
@@ -87,6 +113,30 @@ public class Misc
 		return interval;
 	}
 	
+	public static RealInterval getSourceBoundingBoxAllTPNoFixed(final Source<?> source)
+	{
+		RealInterval interval = null;
+		if ( source != null )
+		{
+			//get the range over all timepoints
+			int t = 0;
+			while(source.isPresent( t ))
+			{
+				if(interval == null)
+				{
+					interval = Misc.getSourceBoundingBoxNoFixed(source,t,0);
+				}
+				else
+				{
+					interval = Intervals.union( interval, Misc.getSourceBoundingBoxNoFixed(source,t,0));
+				}
+					
+				t++;
+			}
+		}
+		return interval;
+	}
+	
 	/** Depending on provided axes index, extracts Euler rotation angle
 	 * from the quaternion. Follows the formula/code from wikipedia.
 	 * @param nAxis axis index numbered from zero
@@ -107,7 +157,7 @@ public class Misc
 		case 1:
 			sin = Math.sqrt(1.0 + 2.0 * (q[0] * q[2] - q[1] * q[3]));
 			cos = Math.sqrt(1.0 - 2.0 * (q[0] * q[2] - q[1] * q[3]));
-			return 2.0*Math.atan2(sin, cos) - Math.PI*0.5;
+			return 2.0 * Math.atan2(sin, cos) - Math.PI * 0.5;
 		case 2:
 			sin = 2 * (q[0] * q[3] + q[1] * q[2]);
 			cos = 1 - 2 * (q[2] * q[2] + q[3] * q[3]);
@@ -122,7 +172,7 @@ public class Misc
 	{
 		final double [] eAngles = new double[3];
 		
-		for (int d=0;d<3;d++)
+		for (int d = 0; d < 3; d++)
 		{
 			eAngles[d] = quaternionToAngle(d,q);
 		}
@@ -164,7 +214,7 @@ public class Misc
 		
 	}
 	
-	public static boolean compareAffineTransforms(AffineTransform3D af1,AffineTransform3D af2 )
+	public static boolean compareAffineTransforms(AffineTransform3D af1, AffineTransform3D af2 )
 	{
 		boolean bOut = true;
 		
@@ -361,6 +411,22 @@ public class Misc
 		}
 		return out;
 	}
-	
+	public static ArrayList<SourceAndConverter< ? >> bvvSourcesToSaCList (final List< BvvStackSource< ? > > bvvSources)
+	{
+		if(bvvSources == null)
+		{
+			return null;
+		}
+		
+		final ArrayList<SourceAndConverter< ? >> sacList = new ArrayList<>();
+		for (BvvStackSource< ? > bvvS : bvvSources)
+		{
+			for(SourceAndConverter< ? > sac : bvvS.getSources())
+			{
+				sacList.add( sac );
+			}
+		}
+		return sacList;
+	}
 	
 }

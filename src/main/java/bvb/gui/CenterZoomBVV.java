@@ -62,7 +62,7 @@ public class CenterZoomBVV
 	
 	public static RealInterval getAllSelectedVisibleObjectsBoundindBox(final BigVolumeBrowser bvb)
 	{
-		final ArrayList< Object > focusSet = new ArrayList<>();
+		ArrayList< Object > focusSet = new ArrayList<>();
 		
 		if(bvb.selectedObjects.isAnythingSelected())
 		{
@@ -80,26 +80,15 @@ public class CenterZoomBVV
 					final SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( (ConverterSetup)obj );
 					if(bvb.bvvViewer.state().isSourceVisible( sac ))
 					{
-						focusSet.add( obj );	
+						focusSet.add( sac );	
 					}
 				}
 			}
 		}
 		//nothing is selected, let's focus on everything visible
-		if(focusSet.size() == 0)
+		else
 		{
-			final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
-			for(final SourceAndConverter< ? > sac :visibleSet)
-			{
-				focusSet.add( bvb.bvvHandle.getConverterSetups().getConverterSetup( sac ) );
-			}
-			for(final BasicShape sh : bvb.shapes)
-			{
-				if(sh.isVisible())
-				{
-					focusSet.add( sh );
-				}
-			}
+			focusSet = getAllVisibleObjects(bvb);
 		}
 		
 		if(focusSet.size() == 0)
@@ -109,7 +98,25 @@ public class CenterZoomBVV
 		
 	}
 	
-	public static RealInterval getIntervalFromObjectsList(final BigVolumeBrowser bvb, final List<Object> objList)
+	public static ArrayList< Object > getAllVisibleObjects(final BigVolumeBrowser bvb)
+	{
+		ArrayList< Object > focusSet = new ArrayList<>();
+		final Set< SourceAndConverter< ? > > visibleSet = bvb.bvvViewer.state().getVisibleSources();
+		for(final SourceAndConverter< ? > sac :visibleSet)
+		{
+			focusSet.add( sac );
+		}
+		for(final BasicShape sh : bvb.shapes)
+		{
+			if(sh.isVisible())
+			{
+				focusSet.add( sh );
+			}
+		}
+		return focusSet;
+	}
+	
+	public static RealInterval getIntervalFromObjectsList(final BigVolumeBrowser bvb, final List<?> objList)
 	{
 		RealInterval allInt = null;
 
@@ -119,9 +126,9 @@ public class CenterZoomBVV
 			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			for(final Object obj : objList)
 			{
-				if(obj instanceof ConverterSetup)
+				if(obj instanceof SourceAndConverter)
 				{
-					final SourceAndConverter< ? > sac = bvb.bvvHandle.getConverterSetups().getSource( (ConverterSetup)obj );
+					final SourceAndConverter< ? > sac = ( SourceAndConverter< ? > ) obj;
 					if(sac.getSpimSource().isPresent( nTimePoint ))
 					{
 						final GammaConverterSetup cs = (GammaConverterSetup)bvb.bvvHandle.getConverterSetups().getConverterSetup( sac );
@@ -246,7 +253,7 @@ public class CenterZoomBVV
 	{
 		RealInterval allInt = null;
 		//just in case
-		if(sacList.size()>0)
+		if(sacList.size() > 0)
 		{
 			final int nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
 			for(SourceAndConverter< ? > sac : sacList)
@@ -309,7 +316,7 @@ public class CenterZoomBVV
 		
 		final AffineTransform3D transform_scale = getCenteredViewTransform(bvb, inInterval,zoomFraction);
 		
-		final AnisotropicTransformAnimator3D anim = new AnisotropicTransformAnimator3D(transform,transform_scale,0,0, BVBSettings.nTransformAnimationDuration);			
+		final AnisotropicTransformAnimator3D anim = new AnisotropicTransformAnimator3D(transform,transform_scale, BVBSettings.nTransformAnimationDuration);			
 		
 		return anim;
 	}

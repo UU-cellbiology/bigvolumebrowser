@@ -31,10 +31,10 @@ package bvb.gui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -43,108 +43,269 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bdv.tools.brightness.ColorIcon;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
+import bvb.io.dto.SceneStateDTO;
+import bvb.io.dto.SerializationIO;
+
+import ij.IJ;
 import ij.Prefs;
+import ij.io.SaveDialog;
 
 public class ViewPanel extends JPanel
 {	
 	final BigVolumeBrowser bvb;
 
-	JToggleButton butVBox;
 	
-	JButton butProjType;
+	final JButton butToggleVisibility;
 
-	JButton butSettings;
+	final JToggleButton butVBox;
 	
+	final JButton butProjType;
+	
+	final JButton butAxesGizmo;
+
 	final ImageIcon [] projIcon = new ImageIcon[2];
 	final String[] projToolTip = new String[2];
+
+	final JButton butCenter;
+
+	final JButton [] butAlign = new JButton [3];
+
+	final JButton butRotateCoords;
+	
+	final ImageIcon [] rotIcon = new ImageIcon[2];
+	final String[] rotToolTip = new String[2];
+	
+	final JButton [] butRotate = new JButton [3];
+
+	final JButton butSettings;
+	final JButton butSave;
+	final JButton butLoad;
+	
+	int nRotationCoord = 0;
 	
 	public ColorUserSettings selectColors = new ColorUserSettings();
+
+	String [] sAxesNames = new String [] {"X", "Y", "Z"};
 	
 	public ViewPanel(final BigVolumeBrowser bvb_)
 	{
 		super();
 		setLayout(new GridBagLayout());
+
+		URL icon_path;
+		ImageIcon tabIcon;
 		bvb = bvb_;
-		//this.setBorder(new PanelTitle(" View "));
-	    
-	    //BOX AROUND
-		URL icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "boxvolume.png");
-		ImageIcon tabIcon = new ImageIcon(icon_path);
+	
+		
+		//TOGGLE VISIBILITY
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "toggle_visibility.png");
+		tabIcon = new ImageIcon(icon_path);
+
+		butToggleVisibility = new JButton( tabIcon );
+		butToggleVisibility.setToolTipText("Toggle visibility of selected objects\n(shortcut V)");
+		butToggleVisibility.addActionListener((e) -> bvb.bvbActions.actionToggleVisibility());
+		
+		//BOX AROUND
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "boxvolume.png");
+		tabIcon = new ImageIcon(icon_path);
 	    butVBox = new JToggleButton(tabIcon);
 	    //butVBox.setSelected(btdata.bVolumeBox);
 	    butVBox.setToolTipText("Volume Box");
 	    butVBox.setSelected( BVBSettings.bShowVolumeBoxes  );
-	    butVBox.addItemListener(new ItemListener() {
-
-	    	@Override
-	    	public void itemStateChanged(ItemEvent e) 
-	    	{
-	    		if(e.getStateChange() == ItemEvent.SELECTED)
-	    		{
-	    			bvb.showVolumeBoxes( true );
-
-	    		} 
-	    		else 
-	    		{
-	    			bvb.showVolumeBoxes( false );
-	    		}
-	    	}
-	    });
+	    butVBox.addItemListener((e)->
+	    		bvb.showVolumeBoxes( e.getStateChange() == ItemEvent.SELECTED ));  
 	    
 	    //PROJECTION MATRIX
 	    projToolTip[0] = "Perspective";
 	    projToolTip[1] = "Orthographic";
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "proj_persp.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "proj_persp.png");
 		projIcon[0] = new ImageIcon(icon_path);
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "proj_ortho.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "proj_ortho.png");
 		projIcon[1] = new ImageIcon(icon_path);
 
 	    butProjType = new JButton( projIcon[ bvb.bvvViewer.getProjectionType() ] );
 	    butProjType.setToolTipText( projToolTip[ bvb.bvvViewer.getProjectionType() ]);
 	    
-	    butProjType.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent arg0 )
-			{
-				int newProj = 0; 
-				if(bvb.bvvViewer.getProjectionType() == 0)
-				{
-					newProj = 1;
-				}
-				butProjType.setIcon( projIcon[newProj] );
-				butProjType.setToolTipText( projToolTip[newProj]);
-				bvb.bvvViewer.setProjectionType(newProj);
-			}
-	
-		});  
+	    butProjType.addActionListener((e)->
+	    {
+	    	int newProj = 0; 
+	    	if(bvb.bvvViewer.getProjectionType() == 0)
+	    	{
+	    		newProj = 1;
+	    	}
+	    	butProjType.setIcon( projIcon[newProj] );
+	    	butProjType.setToolTipText( projToolTip[newProj]);
+	    	bvb.bvvViewer.setProjectionType( newProj );
+	    }); 
+	    
+	    
+	    
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "axesGizmo.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butAxesGizmo = new JButton(tabIcon);
+	    butAxesGizmo.setToolTipText( "Toggle axes align gizmo" );
+	    butAxesGizmo.addActionListener((e) ->
+	    {
+	    	boolean bToggle = !bvb.axisOverlay.isEnabled();
+	    	Prefs.set( "BVB.bShowAxisOverlay", bToggle  );
+	    	bvb.axisOverlay.setEnabled( bToggle  );
+	    	bvb.repaintBVV();
+	    });	  
+	        
+	    
+		//Center selected objects	
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "center.png");
+		tabIcon = new ImageIcon(icon_path);
+
+		butCenter = new JButton( tabIcon );
+		butCenter.setToolTipText("Center view on selected objects\n(shortcut C)");
+		butCenter.addActionListener((e) -> bvb.bvbActions.actionCenterView());
+		
+	    //ALIGN TO AXES
+	    for(int d = 0; d < 3; d++)
+	    {
+			icon_path = this.getClass().getResource(BVBSettings.sIconPath + "align" + sAxesNames[d]+".png");
+			tabIcon = new ImageIcon(icon_path);
+	    	butAlign[d] = new JButton(tabIcon);
+	    	if(d != 1)
+	    	{
+	    		butAlign[d].setToolTipText( "Align " + sAxesNames[d] + " axis towards camera\n"
+	    				+ "(shortcut Shift + " + sAxesNames[d] + ")" ); 
+	    	}
+	    	else
+	    	{
+	    		butAlign[d].setToolTipText( "Align " + sAxesNames[d] + " axis towards camera\n"
+	    				+ "(shortcut Shift + " + sAxesNames[d] + " / Shift + A)" ); 	    		
+	    	}
+	    }
+	    
+	    butAlign[0].addActionListener((e) -> bvb.bvbActions.alignToAxis( 0 ) );
+	    butAlign[1].addActionListener((e) -> bvb.bvbActions.alignToAxis( 1 ) );
+	    butAlign[2].addActionListener((e) -> bvb.bvbActions.alignToAxis( 2 ));
+	    
+	    //ROTATE AROUND AXES
+	    rotToolTip[0] = "Rotate along camera view coordinates";
+	    rotToolTip[1] = "Rotate along world/scene coordinates";
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "camera.png");
+		rotIcon[0] = new ImageIcon(icon_path);
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "frame_global.png");
+		rotIcon[1] = new ImageIcon(icon_path);
+		
+		butRotateCoords = new JButton( rotIcon[ nRotationCoord ] );
+		butRotateCoords.setToolTipText( rotToolTip[ nRotationCoord ]);
+
+		butRotateCoords.addActionListener((e)->
+	    {
+	    	if(nRotationCoord == 0)
+	    	{
+	    		nRotationCoord = 1;
+	    	}
+	    	else
+	    		nRotationCoord = 0;
+	    	butRotateCoords.setIcon( rotIcon[nRotationCoord] );
+	    	butRotateCoords.setToolTipText( rotToolTip[nRotationCoord]);
+	    }); 
+		
+	    for(int d = 0; d < 3; d++)
+	    {
+			icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme 
+					+ "rotate" + sAxesNames[d] + ".png");
+			tabIcon = new ImageIcon(icon_path);
+	    	butRotate[d] = new JButton(tabIcon);
+	    	butRotate[d].setToolTipText( "Rotate around " + sAxesNames[d] + " axis" );	    	
+	    }	    
+	    
+	    butRotate[0].addActionListener((e) -> bvb.bvbActions.rotate( 0, nRotationCoord == 0 ));
+	    butRotate[1].addActionListener((e) -> bvb.bvbActions.rotate( 1, nRotationCoord == 0 ));
+	    butRotate[2].addActionListener((e) -> bvb.bvbActions.rotate( 2, nRotationCoord == 0 ));
 	    
 		//SETTINGS
-		icon_path = this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "settings.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butSettings = new JButton(tabIcon);
 	    butSettings.setToolTipText("Settings");
-	    butSettings.addActionListener((e)->dialSettings());
+	    butSettings.addActionListener((e) -> dialSettings());	
 	    
+	    //SAVE/LOAD
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "scene_save.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butSave = new JButton(tabIcon);
+	    butSave.setToolTipText("Save scene state");
+	    butSave.addActionListener( (e) -> dialSceneStateSave() );
+
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "scene_load.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butLoad = new JButton(tabIcon);
+	    butLoad.setToolTipText("Load scene state");
+	    butLoad.addActionListener ( (e) -> dialSceneStateLoad() );
+
 	    GridBagConstraints gbc = new GridBagConstraints();
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
+
+	    this.add(butToggleVisibility,gbc);
+		
+		gbc.gridx++;
     	this.add(butVBox,gbc);
 		
 		gbc.gridx++;	    
 		this.add(butProjType,gbc);
-		
+
 		gbc.gridx++;	    
-		this.add(butSettings,gbc);
+		this.add(butAxesGizmo,gbc);
+
+		gbc.gridy ++;	    
+		gbc.gridx = 0;
+    	this.add(butCenter,gbc);
+	    
+	    for(int d = 0; d < 3; d++)
+	    {
+	    	gbc.gridx++;
+			this.add(butAlign[d],gbc);
+	    }
+
+		gbc.gridy ++;	    
+		gbc.gridx = 0;
+		this.add(butRotateCoords, gbc);
+
+	    for(int d = 0; d < 3; d++)
+	    {
+	    	gbc.gridx++;
+			this.add(butRotate[d],gbc);
+	    }
+	    gbc.gridy = 0;
+	    gbc.gridx++;
+	    gbc.gridheight = 3;
+	    gbc.fill = SwingConstants.VERTICAL;
+	    gbc.insets = new Insets(0,10,0,10);
+		JSeparator sp = new JSeparator(SwingConstants.VERTICAL);
+		this.add(sp,gbc);
+		
+	    gbc.gridy = 0;
+	    gbc.gridx++;
+	    gbc.gridheight = 1;
+	    gbc.insets = new Insets(0,0,0,0);
+	    gbc.fill = GridBagConstraints.NONE;
+		this.add(butSettings, gbc);
+		
+	    gbc.gridy++;
+		this.add(butSave, gbc);
+
+		gbc.gridy++;
+		this.add(butLoad, gbc);
 
 	}
 	
@@ -164,7 +325,6 @@ public class ViewPanel extends JPanel
 			if (newColor != null)
 			{
 				selectColors.setColor(newColor, 0);
-
 				butCanvasBGColor.setIcon(new ColorIcon(newColor));
 			}
 			
@@ -195,14 +355,12 @@ public class ViewPanel extends JPanel
 			if (newColor != null)
 			{
 				selectColors.setColor(newColor, 1);
-
 				butHighLightColor.setIcon(new ColorIcon(newColor));
-			}
-			
+			}			
 		});
 		
 		JCheckBox cbPyramidize = new JCheckBox();
-		cbPyramidize.setSelected(BVBSettings.bPyramidize);
+		cbPyramidize.setSelected(BVBSettings.bLoadPyramidize);
 		
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
@@ -258,11 +416,11 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(cbZoomLoad, gbc);
 
 		// not sure if we need it, skip for now
-//		gbc.gridx=0;
-//		gbc.gridy++;
-//		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
-//		gbc.gridx++;
-//		pViewSettings.add(cbPyramidize, gbc);
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbPyramidize, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -306,7 +464,7 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowMultiBox = cbShowMultiBox.isSelected();
 			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
-			bdv.util.Prefs.showMultibox( BVBSettings.bShowMultiBox );
+			bvb.multiBoxOverlayBVB.setEnabled(  BVBSettings.bShowMultiBox );
 			
 			BVBSettings.bHighlightSelectedBoxes = cbHighLightBox.isSelected();
 			Prefs.set("BVB.bHighlightSelectedBoxes", BVBSettings.bHighlightSelectedBoxes);
@@ -314,8 +472,8 @@ public class ViewPanel extends JPanel
 			BVBSettings.dFocusScreenFraction = Double.parseDouble(nfFocusScreenFraction.getText());
 			Prefs.set("BVB.dFocusScreenFraction",BVBSettings.dFocusScreenFraction);
 					
-			BVBSettings.bPyramidize = cbPyramidize.isSelected();
-			Prefs.set("BVB.bPyramidize", BVBSettings.bPyramidize);
+			BVBSettings.bLoadPyramidize = cbPyramidize.isSelected();
+			Prefs.set("BVB.bLoadPyramidize", BVBSettings.bLoadPyramidize);
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
@@ -327,5 +485,75 @@ public class ViewPanel extends JPanel
 		}
 	}
 	
+	void dialSceneStateSave()
+	{
+		String filename;
 
+		filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "_sceneStateBVB";
+		SaveDialog sd = new SaveDialog("Save BVB scene state", filename, ".json");
+		String path = sd.getDirectory();
+		if (path == null)
+			return;
+		BVBSettings.lastDir = path;
+		Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+		filename = path + sd.getFileName();
+		SceneStateDTO scene = SceneStateDTO.captureState( bvb );
+
+		try
+		{
+			SerializationIO.MAPPER.writeValue( new File(filename), scene );
+		}
+		catch ( IOException exc )
+		{
+			exc.printStackTrace();
+			IJ.log( "BVB: Error while saving scene state. See console for the full log." );
+		}	        
+	}
+	
+	void dialSceneStateLoad()
+	{
+		String filename;
+		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
+		chooser.setDialogTitle( "Load BVB scene state" );
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "BVB scene state", "json");
+        chooser.setFileFilter(filter);
+        
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            filename =  chooser.getSelectedFile().getPath();
+            SceneStateDTO sceneDTO = null;
+    
+            try
+            {
+            	sceneDTO = SerializationIO.MAPPER.readValue(new File(filename), SceneStateDTO.class);
+            }
+            catch ( IOException exc )
+            {
+            	exc.printStackTrace();
+            }
+ 
+            if(sceneDTO != null)
+            {
+            	if(!sceneDTO.BVBVersion.equals( BVBSettings.sVersion ))
+            	{
+            		IJ.log( "BVB scene state was made in version " + sceneDTO.BVBVersion
+            				+ ", but current plugin version is " + BVBSettings.sVersion + ".");
+            		IJ.log( "Trying to load stored data anyway.");
+
+            	}
+            	
+            	SceneStateDTO.restoreState( bvb, sceneDTO, filename );
+     
+            }
+            else
+            {
+            	IJ.log( "BVB: Error while loading scene state. See console for the full log." );
+            }
+        }
+	}
 }

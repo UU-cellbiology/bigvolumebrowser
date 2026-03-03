@@ -66,6 +66,7 @@ public class TransformRotation
 		
 		return out;
 	}
+	
 	public double[] getQuaternion( final Object obj )
 	{
 		double [] out =  objToQuaternion.get( obj );
@@ -81,12 +82,15 @@ public class TransformRotation
 	public void setAngles( final Object obj, final double[] eAngles)
 	{
 		objToAngles.put( obj, eAngles );
+		//updates stored quaternion
+		getCurrentEulerAngles(obj);
 	}
 	
 
 	public void setQuaternion( final Object obj, final double[] quat)
 	{
 		objToQuaternion.put( obj, quat );
+		objToAngles.put( obj, Misc.quaternionToEulerAngles(quat) );
 	}
 		
 	public double [] getCurrentEulerAngles(final Object obj)

@@ -149,7 +149,6 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{
-				((VisMesh)visRender).setRenderType( VisMesh.MESH );
 				((VisMesh)visRender).setSurfaceRenderType( nSurfaceRenderType );	
 			}
 			defineTransparency();
@@ -170,7 +169,6 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
 			{		
-				((VisMesh)visRender).setRenderType( VisMesh.MESH );
 				((VisMesh)visRender).setSurfaceGridType( nSurfaceGridType );
 			}
 			defineTransparency();
@@ -239,7 +237,7 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 	@Override
 	public void setWireLineWidth(final float fThickness)
 	{		
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -249,11 +247,16 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 		}
 	}
 	
+	@Override
+	public float getWireLineWidth()
+	{
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getWireLineWidth();
+	}
 	
 	@Override
 	public void setSilhouetteDecay(final float silhouetteDecay_)
 	{	
-		if(visRendersTimeMap.size()>0 )
+		if( visRendersTimeMap.size() > 0 )
 		{
 			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
 			for(final AbstractClipTransformVis visRender:visRenders)
@@ -261,6 +264,12 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 				((VisMesh)visRender).setSilhouetteDecay( silhouetteDecay_ );
 			}
 		}
+	}
+	
+	@Override
+	public float getSilhouetteDecay()
+	{
+		return ((VisMesh)visRendersTimeMap.keySet().toArray()[0]).getSilhouetteDecay();
 	}
 	
 	@Override

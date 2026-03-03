@@ -42,10 +42,13 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 public class DataTreeNode implements TreeNode
 {
 	DataTreeNode root = null;
+	
 	public AbstractSpimData< ? > spimData = null;
+	
 	public BvvStackSource<?> bvvSource = null;
 	
 	public List<BasicShape> shapesArr = null;
+	
 	public BasicShape shape = null;
 	
 	final DataTreeModel dataModel;
@@ -138,7 +141,7 @@ public class DataTreeNode implements TreeNode
 		{
 			return null;
 		}
-		if(arg0<dataModel.dataParentChildren.get( this ).size())
+		if(arg0 < dataModel.dataParentChildren.get( this ).size())
 		{
 			return dataModel.dataParentChildren.get( this ).get( arg0 );
 		}
@@ -156,7 +159,7 @@ public class DataTreeNode implements TreeNode
 //		{
 //			return dataModel.dataParentChildren.size();
 //		}
-		if(dataModel.dataParentChildren.size() ==0)
+		if(dataModel.dataParentChildren.size() == 0)
 			return 0;
 		
 		return dataModel.dataParentChildren.get( this ).size();
@@ -167,9 +170,8 @@ public class DataTreeNode implements TreeNode
 	public int getIndex( TreeNode arg0 )
 	{
 		List< DataTreeNode > listKids = dataModel.dataParentChildren.get( this );
-		for(int i=0;i<listKids.size();i++)
-		{
-			
+		for(int i = 0; i < listKids.size(); i++)
+		{			
 			if(listKids.get( i ).equals( arg0 ))
 			{
 				return i;

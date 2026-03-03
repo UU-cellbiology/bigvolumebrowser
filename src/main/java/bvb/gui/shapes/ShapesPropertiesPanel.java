@@ -45,7 +45,7 @@ public class ShapesPropertiesPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	
-	final SpotsPropertiesPanel panelSpotsProperties;
+	final public SpotsPropertiesPanel panelSpotsProperties;
 	final MeshesPropertiesPanel panelMeshesProperties;
 	final GeneralPropertiesPanel panelGeneralProperties;
 

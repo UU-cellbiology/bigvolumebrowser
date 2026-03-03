@@ -497,14 +497,15 @@ public class VolumeBox extends AbstractBasicShape
 	}
 
 	@Override
-	public void getTransform( AffineTransform3D t )
+	public void getTransform( final AffineTransform3D t )
 	{
-		
+		t.set( transform );
 	}
 
 	@Override
 	public void setTransform( AffineTransform3D t )
 	{
+		transform.set( t );
 		
 	}
 

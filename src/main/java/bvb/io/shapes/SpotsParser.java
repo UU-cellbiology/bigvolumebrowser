@@ -38,6 +38,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -47,7 +48,7 @@ import net.imglib2.RealPoint;
 import bvb.utils.Misc;
 import ij.IJ;
 
-public class SpotsParser extends SwingWorker<Void, Void> 
+public class SpotsParser extends SwingWorker<Void, String> 
 {
 	
 	public File fileSpots = null;
@@ -102,6 +103,24 @@ public class SpotsParser extends SwingWorker<Void, Void>
 	
 	public boolean bSpotsAdded = false;
 	
+	@Override
+    protected void process(List<String> chunks) 
+	{
+		String message = chunks.get( chunks.size() - 1 );
+		if(message.startsWith( "Progress " ))
+		{
+			IJ.showProgress(Double.parseDouble( message.substring( 9, message.length() )));
+		}
+		else if (message.startsWith( "Log " ))
+		{
+			IJ.log( message.substring( 4, message.length() ));
+		}
+		else
+		{
+			IJ.showMessage( message );
+		}
+
+    }
 	
 	@Override
 	protected Void doInBackground() throws Exception
@@ -114,8 +133,8 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		
 		try ( BufferedReader br = new BufferedReader(new FileReader(fileSpots))) 
 		{
-			IJ.showStatus( "Importing "+ fileSpots.getName());
-			IJ.log("Importing "+ fileSpots.getName());
+			publish("Importing "+ fileSpots.getName());
+			publish("Log Importing "+ fileSpots.getName());
 			//file size in bytes
 			final double filesize = Files.size( fileSpots.toPath() );
 			long bytesRead = 0;
@@ -135,7 +154,8 @@ public class SpotsParser extends SwingWorker<Void, Void>
 				if(line == null)
 					break;
 				bytesRead += line.getBytes().length + bytesNewLine;
-				IJ.showProgress( bytesRead/filesize );
+				publish("Progress " + Double.toString( bytesRead/filesize ));
+
 				la = line.split(sSeparator);
 				bAllParsedOK = parseCoordinates( la );
 				
@@ -204,8 +224,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
 		}
 		
 		nTotSpots = vertices.size();
-		
-		IJ.log( "Parsed  " + Long.toString( nTotSpots ) + " spots.");
+		publish("Log Parsed  " + Long.toString( nTotSpots ) + " spots.");
 		if(bDataCleanup)
 		{
 			dataCleanup();
@@ -389,8 +408,9 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	
     	final int indMin = ( int ) Math.max( 0, Math.round( dPercMin*nInN/100. ) );
     	final int indMax = ( int ) Math.min( nInN - 1, Math.round( dPercMax*nInN/100. ) );
-    	IJ.showStatus( "Cleaning up spots data..");
-    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+	    publish("Cleaning up spots data..");
+	    publish("Progress " + Double.toString(  dProgressCurrent/dProgressTotal ));
+
     	// 3D coordinates + size + filtermark (always last)
     	if(parseSize)
     	{
@@ -430,7 +450,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     		}
     	}
     	dProgressCurrent++;
-    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+    	publish("Progress " + Double.toString( dProgressCurrent/dProgressTotal ));
     	
     	//now let's sort by each column and mark outliers
     	//filter only by user specified columns 
@@ -454,7 +474,7 @@ public class SpotsParser extends SwingWorker<Void, Void>
     		if(bFilter)
     		{
 	        	dProgressCurrent++;
-	        	IJ.showProgress( dProgressCurrent/dProgressTotal);
+	        	publish("Progress " + Double.toString( dProgressCurrent/dProgressTotal ));
 	
 	    		final int nColX = nCol;
 	    		Arrays.sort(allData, (a, b) -> Float.compare(a[nColX], b[nColX]));
@@ -472,7 +492,8 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	vertices.clear();
     	int nTotFiltCount = 0;
       	dProgressCurrent++;
-    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+      	publish("Progress " + Double.toString( dProgressCurrent/dProgressTotal ));
+
     	for(int i = 0; i < nInN; i++)
     	{
     		if(allData[i][nColN-1]<0.5f)
@@ -525,10 +546,11 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	
     	
       	dProgressCurrent++;
-    	IJ.showProgress( dProgressCurrent/dProgressTotal);
+      	publish("Progress " + Double.toString( dProgressCurrent/dProgressTotal ));
+
     	String finOut = "Cleanup done: " +Integer.toString( nTotFiltCount )+" spots left from "+Integer.toString( nInN ); 
-    	IJ.showStatus( finOut );
-    	IJ.log( finOut  );
+    	publish(finOut);
+    	publish("Log " + finOut  );
     	nTotSpots = nTotFiltCount;
     	final float fInverseScale = 1.0f/fScale;
     	final float fInverseSizeScale = 1.0f/fSizeScale;
@@ -549,9 +571,11 @@ public class SpotsParser extends SwingWorker<Void, Void>
     	//export cleaned up data
     	if(bExportCleanData)
     	{
-    		IJ.log( "Exporting cleaned up data to "+ sExportFilename +".");
+    		
+    		publish( "Log Exporting cleaned up data to "+ sExportFilename +".");
     		final File file = new File(sExportFilename);
-    		IJ.showStatus( "Exporting cleaned up spots data..");
+    		publish("Exporting cleaned up spots data..");
+    	
 			try (FileWriter writer = new FileWriter(file))
 			{
 				DecimalFormatSymbols symbols = new DecimalFormatSymbols();

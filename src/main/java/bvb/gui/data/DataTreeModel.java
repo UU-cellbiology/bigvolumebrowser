@@ -39,6 +39,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import bvb.core.BVBSettings;
+import bvb.registry.ObjectHashStorage;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
@@ -50,6 +51,8 @@ public class DataTreeModel implements TreeModel
 	public final ConcurrentHashMap < DataTreeNode, List< DataTreeNode> > dataParentChildren;
 
 	public final ConcurrentHashMap < DataTreeNode, DataTreeNode > dataChildParent;
+	
+	public final ObjectHashStorage objectHashStorage = new ObjectHashStorage();
 	
 	final DataTreeNode rootNode;
 	
@@ -85,27 +88,29 @@ public class DataTreeModel implements TreeModel
 	{
 		dataParentChildren =  new ConcurrentHashMap<>();
 		dataChildParent =  new ConcurrentHashMap<>();
+
+		
 		rootNode = new DataTreeNode(this);
 		listeners = new ArrayList<>();
 
-		iconBDV = new ImageIcon(this.getClass().getResource("/icons/bdv-small.png"));
-		iconBioFormats = new ImageIcon(this.getClass().getResource("/icons/bioformats-small.png"));
-		iconFIJI = new ImageIcon(this.getClass().getResource("/icons/fiji-logo-small.png"));
-		iconMoBIE = new ImageIcon(this.getClass().getResource("/icons/mobie-logo-small.png"));		
-		iconDefaultData = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "data-small-default.png"));
-		iconOneSource = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "source-small.png"));
-		iconShapeGroup = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "shapes-small.png"));
-		iconMeshColor = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "mesh-small.png"));
-		iconSpots = new ImageIcon(this.getClass().getResource("/icons/" + BVBSettings.sUITheme + "spots-small.png"));
+		iconBDV = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bdv-small.png"));
+		iconBioFormats = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bioformats-small.png"));
+		iconFIJI = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "fiji-logo-small.png"));
+		iconMoBIE = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "mobie-logo-small.png"));		
+		iconDefaultData = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "data-small-default.png"));
+		iconOneSource = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "source-small.png"));
+		iconShapeGroup = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "shapes-small.png"));
+		iconMeshColor = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "mesh-small.png"));
+		iconSpots = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "spots-small.png"));
 
 	}
 	
-	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, BVBSpimDataInfo info)
+	public DataTreeNode addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, BVBSpimDataInfo info)
 	{
-		addData(spimData, bvvList, info.sourceDescription, info.icon);
+		return addData(spimData, bvvList, info.sourceDescription, info.icon);
 	}
 	
-	public void addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, String dataName, final ImageIcon spimDataIcon)
+	public DataTreeNode addData(final AbstractSpimData< ? > spimData, final List<BvvStackSource<?>> bvvList, String dataName, final ImageIcon spimDataIcon)
 	{
 		List<DataTreeNode> spim =  dataParentChildren.get( rootNode );
 		if(spim == null)
@@ -117,10 +122,10 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( rootNode, spim );
 		dataChildParent.put( spimNode, rootNode );
 		ArrayList<DataTreeNode> sourcesTN = new ArrayList<>(); 
-		for(BvvStackSource<?> src :bvvList)
+		for(final BvvStackSource<?> bvvSource : bvvList)
 		{
-			final DataTreeNode srcNode = new DataTreeNode(this, src);
-			srcNode.setDescription( src.getSources().get( 0 ).getSpimSource().getName() );
+			final DataTreeNode srcNode = new DataTreeNode(this, bvvSource);
+			srcNode.setDescription( bvvSource.getSources().get( 0 ).getSpimSource().getName() );
 			sourcesTN.add( srcNode );
 			dataChildParent.put( srcNode, spimNode );
 			
@@ -128,16 +133,17 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( spimNode, sourcesTN );
 		
 		fireTreeStructureChanged();
+		return spimNode;
 	}
 	
-	public void addData(BasicShape shape_, String dataName, final ImageIcon shapeIcon)
+	public DataTreeNode addData(BasicShape shape_, String dataName, final ImageIcon shapeIcon)
 	{
 		final ArrayList<BasicShape> shList = new ArrayList<>();
 		shList.add( shape_ );
-		addData(shList, dataName, shapeIcon);
+		return addData(shList, dataName, shapeIcon);
 	}
 	
-	public void addData(final List<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
+	public DataTreeNode addData(final List<BasicShape> shapes_, String dataName, final ImageIcon shapeIcon)
 	{
 		List<DataTreeNode> listNodes =  dataParentChildren.get( rootNode );
 		if(listNodes == null)
@@ -149,7 +155,7 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( rootNode, listNodes );
 		dataChildParent.put( shapesNode, rootNode );
 		ArrayList<DataTreeNode> shapesTN = new ArrayList<>(); 
-		for(BasicShape sh :shapes_)
+		for(final BasicShape sh : shapes_)
 		{
 			final DataTreeNode shNode = new DataTreeNode(this, sh);
 			shNode.setDescription( sh.toString() );
@@ -168,6 +174,7 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren.put( shapesNode, shapesTN );
 		
 		fireTreeStructureChanged();
+		return shapesNode;
 	}
 	
 	@Override
@@ -197,7 +204,7 @@ public class DataTreeModel implements TreeModel
 	@Override
 	public Object getChild( Object parent, int index )
 	{
-		if(parent==null || !(parent instanceof DataTreeNode) )
+		if(parent == null || !(parent instanceof DataTreeNode) )
 			return null;
 		final List< DataTreeNode > list = dataParentChildren.get((DataTreeNode)parent );
 		if(list == null)
@@ -227,7 +234,7 @@ public class DataTreeModel implements TreeModel
 	@Override
 	public int getIndexOfChild( Object parent, Object child )
 	{
-		if(parent==null || child == null )
+		if(parent == null || child == null )
 			return 0;
 		if(!(parent instanceof DataTreeNode))
 			return 0;
@@ -237,7 +244,7 @@ public class DataTreeModel implements TreeModel
 		final List< DataTreeNode > list = dataParentChildren.get((DataTreeNode)parent );
 		if(list == null)
 			return 0;
-		for(int i=0; i<list.size();i++)
+		for(int i = 0; i < list.size(); i++)
 		{
 			if(list.get( i ).equals( child ))
 				return i;

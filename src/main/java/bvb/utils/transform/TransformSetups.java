@@ -89,7 +89,7 @@ public class TransformSetups
 		final double [] eAngles = transformRotation.getAngles( obj );
 		
 		//reset rotation
-		if(LinAlgHelpers.length( eAngles )<0.0001)
+		if(LinAlgHelpers.length( eAngles ) < 0.0001)
 		{
 			qCurr[0] = 1.0;
 			for(int d = 1; d < 4; d++)
@@ -118,8 +118,13 @@ public class TransformSetups
 		LinAlgHelpers.quaternionToR( qCurr, rotMatrix );		
 		trRot.set( rotMatrix );	
 	}
-
+	
 	public void updateTransform(final Object obj, final double [] previousAngles)
+	{
+		updateTransform(obj, previousAngles, bTransformClip);
+	}
+	
+	public void updateTransform(final Object obj, final double [] previousAngles, final boolean bUpdateClip)
 	{
 		
 		//rotation
@@ -138,8 +143,7 @@ public class TransformSetups
 			// reset both transforms just in case
 			(( TransformedSource< ? > )src).setFixedTransform( newTransform );
 			(( TransformedSource< ? > )src).setIncrementalTransform( newTransform );
-			
-			interval = Misc.getSourceBoundingBoxAllTP(src);
+			interval = Misc.getSourceBoundingBoxAllTP( src );
 		}
 		if(obj instanceof BasicShape)
 		{
@@ -149,7 +153,7 @@ public class TransformSetups
 			interval = ((BasicShape)obj).boundingBox();
 		}
 		final double [] center =  Misc.getIntervalCenterNegative( interval );
-		final double [] dCurrScale = transformScale.getScale(obj );		
+		final double [] dCurrScale = transformScale.getScale( obj );		
 
 		//move to the origin
 		newTransform.translate( center );
@@ -177,8 +181,6 @@ public class TransformSetups
 		final AffineTransform3D translTr = new AffineTransform3D();
 		translTr.translate( tr );
 		newTransform.preConcatenate( translTr );
-			
-
 		
 		if(obj instanceof ConverterSetup)
 		{
@@ -190,8 +192,8 @@ public class TransformSetups
 			((BasicShape)obj).setTransform( newTransform );
 		}
 
-		/////   update clipping, if needed
-		if(bTransformClip)
+		///// update clipping, if needed
+		if(bUpdateClip)
 		{
 			
 			final Clippable3D objCl = (Clippable3D)obj;
@@ -225,7 +227,7 @@ public class TransformSetups
 					max[d] += shift[d];
 				}
 				objCl.setClipInterval( FinalRealInterval.wrap( min, max));
-				final Bounds3D bounds = bvb.bvbCards.clipPanel.clipSetups.clipAxesBounds.getBounds( objCl );
+				final Bounds3D bounds = bvb.bvbCards.clipPanel.clipSetups.clipRangeBounds.getBounds( objCl );
 				
 				bounds.translate( shift );
 				
@@ -247,7 +249,8 @@ public class TransformSetups
 			}
 			bvb.bvbCards.clipPanel.updateGUI();
 		}
-		bvb.updateSceneRender();		
+		bvb.updateSceneRender();	
+		
 				
 	}	
 

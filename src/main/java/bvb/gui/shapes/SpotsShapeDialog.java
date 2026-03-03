@@ -167,8 +167,7 @@ public class SpotsShapeDialog
 			{
 				//show percentile dialog
 				return showDataCleanUpDialog(bHasSize, bHasProperty);
-			}
-			
+			}			
 			
 			return true;
 		}
@@ -184,8 +183,7 @@ public class SpotsShapeDialog
 		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 		symbols.setDecimalSeparator('.');
 		DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
-		
-		
+			
 		NumberField nfPercMin = new NumberField(5);
 		nfPercMin.setText(df3.format( Prefs.get( "BVB.dSpotsPercMin", 1.0 ) ));
 		NumberField nfPercMax = new NumberField(5);
@@ -202,15 +200,14 @@ public class SpotsShapeDialog
 		for(int d = 0; d < 3; d++)
 		{
 			cbAxes[d] = new JCheckBox(sAxes[d]);
-			cbAxes[d].setSelected( Prefs.get( "BigTrace.SpotCleanupAxis"+sAxes[d],true) );
+			cbAxes[d].setSelected( Prefs.get( "BVB.SpotCleanupAxis" + sAxes[d], true) );
 		}
 		final JCheckBox cbSize = new JCheckBox("Size");
 		final JCheckBox cbProperty = new JCheckBox("Property");
 		
-		cbSize.setSelected( Prefs.get( "BigTrace.SpotCleanupSize",true) );
-		cbProperty.setSelected( Prefs.get( "BigTrace.SpotCleanupProperty",true) );
-		
-		
+		cbSize.setSelected( Prefs.get( "BVB.SpotCleanupSize", true) );
+		cbProperty.setSelected( Prefs.get( "BVB.SpotCleanupProperty", true) );
+				
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		for(int d = 0; d < 3; d++)
@@ -298,8 +295,7 @@ public class SpotsShapeDialog
 				final double temp = dSpotsPercMin;
 				dSpotsPercMin = dSpotsPercMax;
 				dSpotsPercMax = temp;
-			}
-			
+			}			
 		}
 		else
 		{
@@ -317,9 +313,7 @@ public class SpotsShapeDialog
 				IJ.log( "Exporting cleaned up data is aborted." );
 				return true;
 			}
-			sExportFilename = sExportFilename+ sd.getFileName();
-			
-			
+			sExportFilename = sExportFilename+ sd.getFileName();						
 		}
 		return true;
 		

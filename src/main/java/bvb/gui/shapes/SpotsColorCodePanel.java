@@ -49,6 +49,7 @@ import net.imglib2.type.numeric.ARGBType;
 
 import bdv.util.BoundedRange;
 import bdv.util.BoundedValueDouble;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.JPanelConsistent;
@@ -69,7 +70,7 @@ public class SpotsColorCodePanel extends JPanel
 	
 	final JComboBox<String> cbMapLUT;
 	
-	final SpotsMapSetups spotsLUTSetup = new SpotsMapSetups();
+	final public SpotsMapSetups spotsLUTSetup = new SpotsMapSetups();
 	
 	final JButton butResetToDefault;
 		
@@ -78,6 +79,7 @@ public class SpotsColorCodePanel extends JPanel
 	private boolean blockUpdates = false;
 	
 	private final BoundedRangePanelPG lutRangePanel;
+	
 	private final BoundedValuePanelPG lutGammaPanel;
 	
 	public SpotsColorCodePanel(final BigVolumeBrowser bvb_)
@@ -122,7 +124,7 @@ public class SpotsColorCodePanel extends JPanel
 		panelLUT.cbInverted.addItemListener( (e)-> updateLUTInversion());
 		
 		
-		URL icon_path = this.getClass().getResource("/icons/red_cross.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "red_cross.png");
 		ImageIcon icon = new ImageIcon(icon_path);
 		butResetToDefault = new JButton(icon);
 		butResetToDefault.setToolTipText( "Reset to default" );
@@ -254,6 +256,7 @@ public class SpotsColorCodePanel extends JPanel
 		final boolean bColorSameFin = bColorSame;
 		final boolean bMapLUTSameFin = bMapLUTSame;
 		final boolean bLUTSameFin = (bLUTSame && bLUTInvertedSame);
+		final boolean bLUTInvertedFin = bLUTInverted;
 		
 		final BoundedRange finalRange = range;
 		final BoundedValueDoubleBVB finalGamma = gamma;
@@ -268,6 +271,7 @@ public class SpotsColorCodePanel extends JPanel
 				pMapLUT.setConsistent( bMapLUTSameFin );
 				panelLUT.setConsistent( bLUTSameFin );
 				panelLUT.setEnabled( true );
+				panelLUT.cbInverted.setSelected( bLUTInvertedFin );
 				
 				lutRangePanel.setEnabled( true );
 				lutRangePanel.setConsistent( allRangesEqualFin );
