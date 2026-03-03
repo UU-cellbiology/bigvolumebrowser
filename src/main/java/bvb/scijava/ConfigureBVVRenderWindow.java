@@ -2,7 +2,7 @@
  * #%L
  * browsing large volumetric data
  * %%
- * Copyright (C) 2025 Cell Biology, Neurobiology and Biophysics Department of Utrecht University.
+ * Copyright (C) 2025 - 2026 Cell Biology, Neurobiology and Biophysics Department of Utrecht University.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
