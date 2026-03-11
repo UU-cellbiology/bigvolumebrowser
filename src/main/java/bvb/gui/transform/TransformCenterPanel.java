@@ -305,10 +305,19 @@ public class TransformCenterPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int d = 0; d < 3; d++)
-		{
-			centerPanels[ d ].setEnabled( bEnabled );
-		}
+		if(blockUpdates)
+			return;
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( TransformCenterPanel.this )
+			{				
+				blockUpdates = true;
+				for(int d = 0; d < 3; d++)
+				{
+					centerPanels[ d ].setEnabled( bEnabled );
+				}
+				blockUpdates = false;
+			}
+		});
 	}
 	
 	double [][] shiftVectors(final double [] v1, final double [] v2, final double [] v3, final double [] shift, boolean bPositive)

@@ -56,6 +56,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -113,7 +114,7 @@ public class BVBActions
 
 	final long lRotationDuration = 100;
 	
-	TransformModeOverlayRenderer transfromModeOverlay = new TransformModeOverlayRenderer();
+	final TransformModeOverlayRenderer transfromModeOverlay = new TransformModeOverlayRenderer();
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
@@ -143,7 +144,7 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "toggle manual transformation", "T" );
 
 		actions.runnableAction(() -> actionToggleManualTransform(), "toggle manual transformation (BVB)", "T" );
-		actions.runnableAction(() -> turnOffManualTransform(), "off manual transform mode(BVB)", "ESCAPE" );		
+		actions.runnableAction(() -> turnOffManualTransform(true), "off manual transform mode(BVB)", "ESCAPE" );		
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
@@ -634,7 +635,7 @@ public class BVBActions
 
 	}
 	
-	public void turnOffManualTransform()
+	public void turnOffManualTransform(final boolean bShowMessage)
 	{
 		if( bvb.getInputLock() )
 			return;
@@ -642,8 +643,14 @@ public class BVBActions
 		
 		if(!bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
-			this.transfromModeOverlay.setEnabled(false);
+			if(bShowMessage)
+			{
+				bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			}
+			SwingUtilities.invokeLater(() -> {
+				this.transfromModeOverlay.setEnabled(false);
+				bvb.repaintBVV();
+			});
 		}
 	}
 	
@@ -655,14 +662,16 @@ public class BVBActions
 		
 		if(bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
-			
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );			
 		}
 		else
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
-		transfromModeOverlay.setEnabled( bvb.bManualTransformMode );
+		SwingUtilities.invokeLater(() -> {
+			this.transfromModeOverlay.setEnabled( bvb.bManualTransformMode);
+			bvb.repaintBVV();
+		});
 	}
 	
 	public void alignToAxis( final int nAxis )

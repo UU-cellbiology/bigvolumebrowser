@@ -42,7 +42,7 @@ public class TransformModeOverlayRenderer  implements OverlayRenderer
 {
 	private BigVolumeBrowser bvb = null;
 	
-	boolean isEnabled = false;
+	private volatile boolean isEnabled = false;
 	
 	String sModeMessage = "transform mode";
 	
@@ -50,23 +50,24 @@ public class TransformModeOverlayRenderer  implements OverlayRenderer
     {
     	this.bvb  = bvb_;
     }
+	
 	@Override
 	public void drawOverlays( Graphics g )
 	{
-		if(bvb != null && isEnabled)
-		{
-			Graphics2D graphics = (Graphics2D) g;
-			final Font font = UIUtils.getFont( "monospaced.small.font" );
-			final Rectangle clipBounds = g.getClipBounds();
-	
-			graphics.setColor( BVBSettings.canvasOverlayColor );
-			graphics.setFont( font );
-			graphics.drawString( sModeMessage, (float)(clipBounds.getWidth() - 170), (float)(clipBounds.getHeight() - 35) );
+		if(bvb == null || !isEnabled)
+			return;
 
-		}
+		Graphics2D graphics = (Graphics2D) g;
+		final Font font = UIUtils.getFont( "monospaced.small.font" );
+		final Rectangle clipBounds = g.getClipBounds();
+
+		graphics.setColor( BVBSettings.canvasOverlayColor );
+		graphics.setFont( font );
+		graphics.drawString( sModeMessage, (float)(clipBounds.getWidth() - 170), (float)(clipBounds.getHeight() - 35) );
+
 	}
 	
-	public void setEnabled (boolean bEnabled)
+	public synchronized void setEnabled (boolean bEnabled)
 	{
 		isEnabled = bEnabled;
 	}

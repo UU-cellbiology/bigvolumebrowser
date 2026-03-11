@@ -60,7 +60,7 @@ public class AxesOverlayRenderer implements OverlayRenderer
 	final BasicStroke ovalStroke = new BasicStroke(1);
 	final BasicStroke letterStroke = new BasicStroke(1.3f);
 	
-	boolean isEnabled = false;
+	private volatile boolean isEnabled = false;
 	
 	boolean isHover = false;
 	
@@ -84,105 +84,106 @@ public class AxesOverlayRenderer implements OverlayRenderer
 	@Override
 	public void drawOverlays( Graphics g )
 	{
-		if(viewer != null && isEnabled)
+		if(viewer == null || !isEnabled)
+			return;
+
+		Graphics2D graphics = (Graphics2D) g;
+		final Rectangle clipBounds = g.getClipBounds();
+		center.setLocation( clipBounds.getWidth() - 80 , 100 );
+		isHover = false;
+		final Point pMouse = viewer.getMousePosition();
+		if (pMouse != null)
 		{
-			Graphics2D graphics = (Graphics2D) g;
-			final Rectangle clipBounds = g.getClipBounds();
-			center.setLocation( clipBounds.getWidth() - 80 , 100 );
-			isHover = false;
-			final Point pMouse = viewer.getMousePosition();
-			if (pMouse != null)
-			{
-				final float dMouseX = pMouse.x - center.x;
-				final float dMouseY = pMouse.y - center.y;
-								
-				if( dMouseX * dMouseX + dMouseY * dMouseY < fullRadiusSquared)
-				{
-					graphics.setColor( hoverBGColor );
-					graphics.fillOval( center.x - vectRadius - circleAxisRadius, 
-									   center.y - vectRadius - circleAxisRadius, 
-									   2 * (vectRadius + circleAxisRadius) + 1, 
-									   2 * (vectRadius + circleAxisRadius) + 1);
-					isHover = true;
-				}
-			}
+			final float dMouseX = pMouse.x - center.x;
+			final float dMouseY = pMouse.y - center.y;
 
-			graphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-			AffineTransform3D transform = new AffineTransform3D();
-			viewer.state().getViewerTransform(transform);
-			final double [] qRotation = new double[4];
-			Affine3DHelpers.extractRotationAnisotropic( transform, qRotation );
-			final double [][] dAxis = new double [6][3];
-			final double [][] axisOrder = new double [6][2];
-			for(int d = 0; d < 6; d++)
+			if( dMouseX * dMouseX + dMouseY * dMouseY < fullRadiusSquared)
 			{
-				if(d < 3)
-					dAxis[d][d] = vectRadius;
-				else
-					dAxis[d][d - 3] = -vectRadius;
-				LinAlgHelpers.quaternionApply( qRotation, dAxis[d], dAxis[d] );
-				//z-coordinate
-				axisOrder[d][0] = dAxis[d][2]; 
-				//index
-				axisOrder[d][1] = d; 	
-				dAxis[d][0] += center.x;
-				dAxis[d][1] += center.y;
+				graphics.setColor( hoverBGColor );
+				graphics.fillOval( center.x - vectRadius - circleAxisRadius, 
+						center.y - vectRadius - circleAxisRadius, 
+						2 * (vectRadius + circleAxisRadius) + 1, 
+						2 * (vectRadius + circleAxisRadius) + 1);
+				isHover = true;
 			}
-					
-			//highlight axis if hover is active
-			if(isHover)
-			{
-				float dx, dy;
-				dx = (float)dAxis[0][0] - pMouse.x;
-				dy = (float)dAxis[0][1] - pMouse.y;
-				float fDistance = dx * dx + dy * dy;
-				nHighlightedAxis = 0;
-				for(int d = 1; d < 3; d++)
-				{
-					dx = (float)dAxis[d][0] - pMouse.x;
-					dy = (float)dAxis[d][1] - pMouse.y;
-					if(dx * dx + dy * dy < fDistance)
-					{
-						nHighlightedAxis = d;
-						fDistance = dx * dx + dy * dy;
-					}
+		}
 
+		graphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+		AffineTransform3D transform = new AffineTransform3D();
+		viewer.state().getViewerTransform(transform);
+		final double [] qRotation = new double[4];
+		Affine3DHelpers.extractRotationAnisotropic( transform, qRotation );
+		final double [][] dAxis = new double [6][3];
+		final double [][] axisOrder = new double [6][2];
+		for(int d = 0; d < 6; d++)
+		{
+			if(d < 3)
+				dAxis[d][d] = vectRadius;
+			else
+				dAxis[d][d - 3] = -vectRadius;
+			LinAlgHelpers.quaternionApply( qRotation, dAxis[d], dAxis[d] );
+			//z-coordinate
+			axisOrder[d][0] = dAxis[d][2]; 
+			//index
+			axisOrder[d][1] = d; 	
+			dAxis[d][0] += center.x;
+			dAxis[d][1] += center.y;
+		}
+
+		//highlight axis if hover is active
+		if(isHover)
+		{
+			float dx, dy;
+			dx = (float)dAxis[0][0] - pMouse.x;
+			dy = (float)dAxis[0][1] - pMouse.y;
+			float fDistance = dx * dx + dy * dy;
+			nHighlightedAxis = 0;
+			for(int d = 1; d < 3; d++)
+			{
+				dx = (float)dAxis[d][0] - pMouse.x;
+				dy = (float)dAxis[d][1] - pMouse.y;
+				if(dx * dx + dy * dy < fDistance)
+				{
+					nHighlightedAxis = d;
+					fDistance = dx * dx + dy * dy;
 				}
+
+			}
+		}
+		else
+		{
+			nHighlightedAxis = -1;
+		}
+		//sort by depth (z-coord)
+		Arrays.sort(axisOrder, (a, b) -> (-1) * Double.compare(a[0], b[0]));
+
+		for( int d = 0; d < 6; d++)
+		{
+			graphics.setStroke(vectorStroke);
+			final int index = (int)axisOrder[d][1];
+
+			int x = (int) Math.round( dAxis[index][0]);
+			int y = (int) Math.round( dAxis[index][1]);
+			if(index < 3)
+			{
+				//vector body
+				graphics.setColor(axesColors[index]);					 
+				graphics.drawLine(center.x, center.y, x, y);
+				graphics.setStroke(ovalStroke);
+				graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
+				drawLetter(graphics, x + 1 , y + 1, index);
 			}
 			else
 			{
-				nHighlightedAxis = -1;
+				graphics.setColor(axesColors[index].darker());
+				graphics.setStroke(ovalStroke);
+				graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
+				graphics.setColor(axesColors[index - 3]);
+				graphics.drawOval(x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);					
 			}
-			//sort by depth (z-coord)
-			Arrays.sort(axisOrder, (a, b) -> (-1) * Double.compare(a[0], b[0]));
-			
-			for( int d = 0; d < 6; d++)
-			{
-				graphics.setStroke(vectorStroke);
-				final int index = (int)axisOrder[d][1];
-				
-				int x = (int) Math.round( dAxis[index][0]);
-				int y = (int) Math.round( dAxis[index][1]);
-				if(index < 3)
-				{
-					//vector body
-					graphics.setColor(axesColors[index]);					 
-					graphics.drawLine(center.x, center.y, x, y);
-					graphics.setStroke(ovalStroke);
-					graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
-					drawLetter(graphics, x + 1 , y + 1, index);
-				}
-				else
-				{
-					graphics.setColor(axesColors[index].darker());
-					graphics.setStroke(ovalStroke);
-					graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
-					graphics.setColor(axesColors[index - 3]);
-					graphics.drawOval(x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);					
-				}
-			}
-
 		}
+
+
 	}
 	
 	/** since fonts vary from OS to OS, I will draw axes letter with lines.**/
@@ -222,7 +223,7 @@ public class AxesOverlayRenderer implements OverlayRenderer
     {
     }  
 	
-	public void setEnabled (boolean bEnabled)
+	public synchronized void setEnabled (final boolean bEnabled)
 	{
 		isEnabled = bEnabled;
 	}
@@ -231,6 +232,7 @@ public class AxesOverlayRenderer implements OverlayRenderer
 	{
 		return isEnabled;
 	}
+	
 	public int getHighlightedAxis()
 	{
 		return nHighlightedAxis;

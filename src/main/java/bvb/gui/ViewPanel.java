@@ -50,6 +50,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bdv.tools.brightness.ColorIcon;
@@ -464,7 +465,10 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowMultiBox = cbShowMultiBox.isSelected();
 			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
-			bvb.multiBoxOverlayBVB.setEnabled(  BVBSettings.bShowMultiBox );
+			SwingUtilities.invokeLater(() -> {
+				bvb.multiBoxOverlayBVB.setEnabled(  BVBSettings.bShowMultiBox );
+				bvb.repaintBVV();
+			});
 			
 			BVBSettings.bHighlightSelectedBoxes = cbHighLightBox.isSelected();
 			Prefs.set("BVB.bHighlightSelectedBoxes", BVBSettings.bHighlightSelectedBoxes);

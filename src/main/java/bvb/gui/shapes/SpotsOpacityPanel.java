@@ -331,6 +331,8 @@ public class SpotsOpacityPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
+		if(blockUpdates)
+			return;
 		SwingUtilities.invokeLater( () -> {
 			synchronized ( SpotsOpacityPanel.this )
 			{				
