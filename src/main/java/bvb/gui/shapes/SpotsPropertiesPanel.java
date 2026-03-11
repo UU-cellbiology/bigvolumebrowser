@@ -246,6 +246,9 @@ public class SpotsPropertiesPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
+		
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
 		boolean bFirstMesh = true;
 		
 		boolean bColorSame = true;
@@ -431,127 +434,129 @@ public class SpotsPropertiesPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(final Component nC:allComp)
-		{
-			nC.setEnabled( bEnabled );
-		}
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( SpotsPropertiesPanel.this )
+			{				
+				blockUpdates = true;
+				for(final Component nC:allComp)
+				{
+					nC.setEnabled( bEnabled );
+				}
+				blockUpdates = false;
+			} });
 	}
 	
 	synchronized void updateColors()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final Color cColor = selectColors.getColor( 0 );
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final Color cColor = selectColors.getColor( 0 );
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setColor( cColor );
-					((BasicSpots)sh).setMapLUTMode( 0 );
-				}
+				((BasicSpots)sh).setColor( cColor );
+				((BasicSpots)sh).setMapLUTMode( 0 );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();		
 	}
 	
 	synchronized void updatePointSize(final double v)
-	{
-		if(!blockUpdates)
+	{		
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final float fv = (float)v;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final float fv = (float)v;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				if(((BasicSpots)sh).getPointSize() >= 0.0f)
 				{
-					if(((BasicSpots)sh).getPointSize() >= 0.0f)
-					{
-						((BasicSpots)sh).setPointSize( fv );
-					}
+					((BasicSpots)sh).setPointSize( fv );
 				}
 			}
-			bvb.updateSceneRender();
-			updateGUI();
 		}
+		bvb.updateSceneRender();
+		updateGUI();		
 	}
 	
 	synchronized void updateSizeScale(final double v)
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final float fv = (float)v;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final float fv = (float)v;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				if(((BasicSpots)sh).getPointSize() < 0.0f)
 				{
-					if(((BasicSpots)sh).getPointSize() < 0.0f)
-					{
-						((BasicSpots)sh).setSizeScale( fv );
-					}
+					((BasicSpots)sh).setSizeScale( fv );
 				}
 			}
-			bvb.updateSceneRender();
-			updateGUI();
 		}
+		bvb.updateSceneRender();
+		updateGUI();		
 	}
 	
 	synchronized void updateShape()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final int nShapeType = cbShape.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final int nShapeType = cbShape.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setPointShape( nShapeType );
-				}
+				((BasicSpots)sh).setPointShape( nShapeType );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
 	}
 	
 	synchronized void updateRender()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final int nRenderType = cbRender.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final int nRenderType = cbRender.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setRenderType( nRenderType );
-				}
+				((BasicSpots)sh).setRenderType( nRenderType );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();		
 	}
 	
 	synchronized void updateRoundShaded()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final int nShaded = cbShaded.isSelected()? 1 : 0;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final int nShaded = cbShaded.isSelected()? 1 : 0;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setPointShade( nShaded ); 
-				}
+				((BasicSpots)sh).setPointShade( nShaded ); 
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
-		
+		bvb.repaintBVV();
+		updateGUI();				
 	}
-	
 
 }

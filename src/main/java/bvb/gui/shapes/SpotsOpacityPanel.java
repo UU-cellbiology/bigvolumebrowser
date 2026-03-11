@@ -202,6 +202,9 @@ public class SpotsOpacityPanel extends JPanel
 	synchronized void updateGUI()
 	{
 		
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		
 		boolean bFirstSpots = true;	
 		boolean bMapAlphaSame = true;
 		boolean bAlphaInvertedSame = true;	
@@ -325,170 +328,161 @@ public class SpotsOpacityPanel extends JPanel
 		
 	}
 	
-	synchronized void updateAlphaMapping()
-	{
-		if(!blockUpdates)
-		{
-			final int nMapAlphaMode = cbMapAlpha.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
-			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setMapAlphaMode( nMapAlphaMode );
-					if(nMapAlphaMode != 0)
-					{
-						final float [] range = spotsAlphaSetup.getMapRangeFloat( ((BasicSpots)sh), nMapAlphaMode - 1 );
-						((BasicSpots)sh).setMapAlphaRange( range[0], range[1] );
-					}
-				}
-			}
-			bvb.repaintBVV();
-			updateGUI();
-		}
-	}
-	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(final Component nC:allComp)
-		{
-			nC.setEnabled( bEnabled );
-		}
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( SpotsOpacityPanel.this )
+			{				
+				blockUpdates = true;
+				for(final Component nC:allComp)
+				{
+					nC.setEnabled( bEnabled );
+				}
+				blockUpdates = false;
+			} });
 	}
 	
+	synchronized void updateAlphaMapping()
+	{
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final int nMapAlphaMode = cbMapAlpha.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
+		{
+			if(sh instanceof BasicSpots)
+			{
+				((BasicSpots)sh).setMapAlphaMode( nMapAlphaMode );
+				if(nMapAlphaMode != 0)
+				{
+					final float [] range = spotsAlphaSetup.getMapRangeFloat( ((BasicSpots)sh), nMapAlphaMode - 1 );
+					((BasicSpots)sh).setMapAlphaRange( range[0], range[1] );
+				}
+			}
+		}
+		bvb.repaintBVV();
+		updateGUI();
+	}
 	
 	synchronized void updateAlphaInversion()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final boolean bInvAlpha = cbInverted.isSelected();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final boolean bInvAlpha = cbInverted.isSelected();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setInvertedAlpha( bInvAlpha );
-				}
+				((BasicSpots)sh).setInvertedAlpha( bInvAlpha );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
+
 	}
 	
 	public synchronized void updateAlphaMapRangeBounds()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+
+		final BoundedRange rangeUI = alphaRangePanel.getRange();
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-		
-			final BoundedRange rangeUI = alphaRangePanel.getRange();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				final int nMapMode = ((BasicSpots)sh).getMapAlphaMode();
+				if(nMapMode != 0)
 				{
-					final int nMapMode = ((BasicSpots)sh).getMapAlphaMode();
-					if(nMapMode != 0)
-					{
-						((BasicSpots)sh).setMapAlphaRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
-					
-						float [] rangeStored = spotsAlphaSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
-						rangeStored[0] = (float)rangeUI.getMin();
-						rangeStored[1] = (float)rangeUI.getMax();
-						rangeStored[2] = (float)rangeUI.getMinBound();
-						rangeStored[3] = (float)rangeUI.getMaxBound();
-					}
+					((BasicSpots)sh).setMapAlphaRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
+
+					float [] rangeStored = spotsAlphaSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+					rangeStored[0] = (float)rangeUI.getMin();
+					rangeStored[1] = (float)rangeUI.getMax();
+					rangeStored[2] = (float)rangeUI.getMinBound();
+					rangeStored[3] = (float)rangeUI.getMaxBound();
 				}
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
+
+		bvb.repaintBVV();
+		updateGUI();
 	}
 	
 	public synchronized void updateAlphaMapGamma()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		BoundedValueDouble gammaCurr = alphaGammaPanel.getValue();
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			BoundedValueDouble gammaCurr = alphaGammaPanel.getValue();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				final int nMapMode = ((BasicSpots)sh).getMapAlphaMode();
+				if(nMapMode != 0)
 				{
-					final int nMapMode = ((BasicSpots)sh).getMapAlphaMode();
-					if(nMapMode != 0)
-					{
-						((BasicSpots)sh).setMapAlphaGamma( (float) gammaCurr.getCurrentValue() );   
-						float [] rangeStored = spotsAlphaSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
-						rangeStored[4] = (float) gammaCurr.getCurrentValue();
-						rangeStored[5] = (float) gammaCurr.getRangeMin();
-						rangeStored[6] = (float) gammaCurr.getRangeMax();
-					}
+					((BasicSpots)sh).setMapAlphaGamma( (float) gammaCurr.getCurrentValue() );   
+					float [] rangeStored = spotsAlphaSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+					rangeStored[4] = (float) gammaCurr.getCurrentValue();
+					rangeStored[5] = (float) gammaCurr.getRangeMin();
+					rangeStored[6] = (float) gammaCurr.getRangeMax();
 				}
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
+
+		bvb.repaintBVV();
+		updateGUI();
 	}
 	
 	public void updateExtraAlpha(double extraAlpha)
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-	
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setExtraAlphaCoefficient( ( float ) extraAlpha );
-				}
+				((BasicSpots)sh).setExtraAlphaCoefficient( ( float ) extraAlpha );
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
+
+		bvb.repaintBVV();
+		updateGUI();		
 	}
 	
 	
 	void resetAlphaMapRangeBounds()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				final int nMapMode = ((BasicSpots)sh).getMapAlphaMode() - 1;
+				if(nMapMode >= 0)
 				{
-					final int nMapMode = ((BasicSpots)sh).getMapAlphaMode() - 1;
-					if(nMapMode >= 0)
+					final float [][] rangeDef = spotsAlphaSetup.getDefaultRanges( (BasicSpots)sh );
+					final float [] currRange = spotsAlphaSetup.getMapRangeFloat( (BasicSpots)sh , nMapMode );
+					for(int i = 0; i < 7; i++)
 					{
-						final float [][] rangeDef = spotsAlphaSetup.getDefaultRanges( (BasicSpots)sh );
-						final float [] currRange = spotsAlphaSetup.getMapRangeFloat( (BasicSpots)sh , nMapMode );
-						for(int i = 0; i < 7; i++)
-						{
-							currRange[i] = rangeDef[nMapMode][i];
-						}
-						((BasicSpots)sh).setMapAlphaGamma( currRange[4] );
-						((BasicSpots)sh).setMapAlphaRange( currRange[0], currRange[1] );
+						currRange[i] = rangeDef[nMapMode][i];
 					}
+					((BasicSpots)sh).setMapAlphaGamma( currRange[4] );
+					((BasicSpots)sh).setMapAlphaRange( currRange[0], currRange[1] );
 				}
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
-		
+
+		bvb.repaintBVV();
+		updateGUI();		
 	}
 	
 	private JMenuItem runnableItem( final String text, final Runnable action )

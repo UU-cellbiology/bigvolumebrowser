@@ -236,17 +236,29 @@ public class TransformRotationPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int d = 0; d < 3; d++)
-		{
-			trRotationPanels[ d ].setEnabled( bEnabled );
-		}
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( TransformRotationPanel.this )
+			{				
+				blockUpdates = true;
+				for(int d = 0; d < 3; d++)
+				{
+					trRotationPanels[ d ].setEnabled( bEnabled );
+				}
+				blockUpdates = false;
+			} });
 	}
 	
 	void setSliderColors(Color [] colors)
 	{
-		for(int d = 0; d < 3; d++)
-		{
-			trRotationPanels[ d ].setSliderForeground( colors[ d ] );	
-		}
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( TransformRotationPanel.this )
+			{				
+				blockUpdates = true;
+				for(int d = 0; d < 3; d++)
+				{
+					trRotationPanels[ d ].setSliderForeground( colors[ d ] );	
+				}
+				blockUpdates = false;
+			} });
 	}
 }

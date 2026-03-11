@@ -201,6 +201,10 @@ public class MeshesPropertiesPanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
+		
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		
 		boolean bFirstMesh = true;
 		boolean bRenderSame = true;
 		boolean bColorSame = true;
@@ -339,132 +343,135 @@ public class MeshesPropertiesPanel extends JPanel
 		} );
 	}
 	
+	@Override
+	public void setEnabled(boolean bEnabled)
+	{
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( MeshesPropertiesPanel.this )
+			{				
+				blockUpdates = true;
+				for(final Component nC:allComp)
+				{
+					nC.setEnabled( bEnabled );
+				}
+				blockUpdates = false;
+			} });
+	}
+	
 	synchronized void updateRender()
 	{
-		if(!blockUpdates)
+
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		
+		final int nRenderType = cbRender.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final int nRenderType = cbRender.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicMeshShape)
 			{
-				if(sh instanceof BasicMeshShape)
-				{
-					((BasicMeshShape)sh).setRenderType( nRenderType );
-				}
+				((BasicMeshShape)sh).setRenderType( nRenderType );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
 	}
 	
 	synchronized void updateColors()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final Color cColor = selectColors.getColor( 0 );
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final Color cColor = selectColors.getColor( 0 );
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicMeshShape)
 			{
-				if(sh instanceof BasicMeshShape)
-				{
-					((BasicMeshShape)sh).setColor( cColor );
-				}
+				((BasicMeshShape)sh).setColor( cColor );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
+		
 	}
 	
 	synchronized void updateUseOfTexture()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final boolean bUseTexture = cbTexture.isSelected();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final boolean bUseTexture = cbTexture.isSelected();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicMeshShape)
 			{
-				if(sh instanceof BasicMeshShape)
-				{
-					((BasicMeshShape)sh).useTexture( bUseTexture );
-				}
+				((BasicMeshShape)sh).useTexture( bUseTexture );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
+		
 	}
 	
 	synchronized void updatePointSize(final double v)
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final float fv = (float)v;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final float fv = (float)v;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicMeshShape)
 			{
-				if(sh instanceof BasicMeshShape)
+				if(((BasicMeshShape)sh).getRenderType() == VisMesh.POINTS)
 				{
-					if(((BasicMeshShape)sh).getRenderType() == VisMesh.POINTS)
-					{
-						((BasicMeshShape)sh).setPointSize( fv );
-					}
+					((BasicMeshShape)sh).setPointSize( fv );
 				}
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
 	}
 	
 	synchronized void updateSurface()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final int nSurfaceType = cbSurface.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final int nSurfaceType = cbSurface.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicMeshShape)
 			{
-				if(sh instanceof BasicMeshShape)
+				if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 				{
-					if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
-					{
-						((BasicMeshShape)sh).setSurfaceRender( nSurfaceType );
-					}
+					((BasicMeshShape)sh).setSurfaceRender( nSurfaceType );
 				}
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
+		
 	}
 	
 	synchronized void updateGrid()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final int nGridType = cbGrid.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final int nGridType = cbGrid.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicMeshShape)
 			{
-				if(sh instanceof BasicMeshShape)
+				if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 				{
-					if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
-					{
-						((BasicMeshShape)sh).setSurfaceGrid( nGridType );
-					}
+					((BasicMeshShape)sh).setSurfaceGrid( nGridType );
 				}
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
 	}
-	
-	@Override
-	public void setEnabled(boolean bEnabled)
-	{
-		for(final Component nC:allComp)
-		{
-			nC.setEnabled( bEnabled );
-		}
-	}
-	
-
 
 }
