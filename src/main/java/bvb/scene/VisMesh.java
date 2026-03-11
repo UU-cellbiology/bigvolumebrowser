@@ -55,6 +55,7 @@ import org.joml.Vector4f;
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
+import bvb.shapes.MeshProcessing;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -275,7 +276,8 @@ public class VisMesh extends AbstractClipTransformVis
 		}
 		else
 		{
-			Meshes.calculateNormals( mesh, this.mesh );
+			Mesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, 3);
+			Meshes.calculateNormals( tempMesh, this.mesh );
 		}
 	}	
 	
