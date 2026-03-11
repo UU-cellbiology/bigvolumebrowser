@@ -493,8 +493,8 @@ public class ViewPanel extends JPanel
 	{
 		String filename;
 
-		filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "_sceneStateBVB";
-		SaveDialog sd = new SaveDialog("Save BVB scene state", filename, ".json");
+		filename = SerializationIO.getTimestamp() + "_sceneStateBVB";
+		SaveDialog sd = new SaveDialog("Save BVB scene state", BVBSettings.lastDir, filename, ".json");
 		String path = sd.getDirectory();
 		if (path == null)
 			return;
