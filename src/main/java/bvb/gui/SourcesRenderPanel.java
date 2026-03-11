@@ -63,13 +63,11 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	
 	final JPanelConsistent panRender;
 	
-	
 	final ButtonGroup lightMode = new ButtonGroup();
 	
 	final JToggleButton [] butLight = new JToggleButton[3];
 	
 	final JPanelConsistent panLighting;
-
 	
 	final ButtonGroup interpolationMode = new ButtonGroup();
 	
@@ -78,7 +76,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	final JPanelConsistent panInterpolation;
 	
 	private boolean blockUpdates = false;
-
 
 	public SourcesRenderPanel(final ConverterSetups convSetups, final SelectedObjects selectedSources_)
 	{
@@ -172,8 +169,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 			panInterpolation.add( butInter[i], gbc );
 			gbc.gridy++;
 		}		
-		
-		
+			
 		gbc = new GridBagConstraints();
 		
 		gbc.insets =  new Insets(1,10,1,10);
@@ -203,16 +199,23 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	
 	synchronized void updateGUI()
 	{
+		if(blockUpdates)
+			return;
 		
 		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 		if(csList == null || csList.isEmpty())
 		{
-			setChoicesEnabled(false);
+			SwingUtilities.invokeLater( () -> {
+				synchronized ( SourcesRenderPanel.this )
+				{
+					blockUpdates = true;
+					setChoicesEnabled(false);
+					blockUpdates = false;
+				}
+			});
 			return;
 		}
-		
-		setChoicesEnabled(true);
-		
+			
 		boolean bRenderConsistent = true;
 		boolean bInterpConsistent = true;
 		boolean bLightConsistent = true;
@@ -247,7 +250,9 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 			synchronized ( SourcesRenderPanel.this )
 			{
 				blockUpdates = true;
-
+				
+				setChoicesEnabled(true);
+				
 				panRender.setConsistent( bRenderFin );
 				if(bRenderFin)
 				{
@@ -283,8 +288,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	}
 	
 	void setChoicesEnabled(boolean bEnabled)
-	{
-		
+	{		
 		for(int i = 0; i < 3; i++)
 		{
 			butRender[i].setEnabled( bEnabled );
@@ -299,45 +303,47 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	@Override
 	public synchronized void actionPerformed( ActionEvent arg0 )
 	{
-		if(!blockUpdates)
+		if(!selectedSources.areSourcesSelected() || blockUpdates)
+			return;
+		blockUpdates = true;
+
+		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
+
+		if(csList== null || csList.isEmpty())
+			return;
+		for(int i = 0; i < 2; i++)
 		{
-			final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
-			
-			if(csList== null || csList.isEmpty())
+			if(arg0.getSource() == butInter[i])
+			{
+				for ( final ConverterSetup cs: csList)
+				{
+					((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
+				}
 				return;
-			for(int i = 0; i < 2; i++)
-			{
-				if(arg0.getSource() == butInter[i])
-				{
-					for ( final ConverterSetup cs: csList)
-					{
-						((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
-					}
-					return;
-				}
-			}
-			for(int i = 0; i < 3; i++)
-			{
-				if(arg0.getSource() == butRender[i])
-				{
-					for ( final ConverterSetup cs: csList)
-					{
-						((GammaConverterSetup)cs).setRenderType( i );
-					}
-					return;
-				}
-			}
-			for(int i = 0; i < 3; i++)
-			{
-				if(arg0.getSource() == butLight[i])
-				{
-					for ( final ConverterSetup cs: csList)
-					{
-						((GammaConverterSetup)cs).setLightingType( i );
-					}
-					return;
-				}
 			}
 		}
+		for(int i = 0; i < 3; i++)
+		{
+			if(arg0.getSource() == butRender[i])
+			{
+				for ( final ConverterSetup cs: csList)
+				{
+					((GammaConverterSetup)cs).setRenderType( i );
+				}
+				return;
+			}
+		}
+		for(int i = 0; i < 3; i++)
+		{
+			if(arg0.getSource() == butLight[i])
+			{
+				for ( final ConverterSetup cs: csList)
+				{
+					((GammaConverterSetup)cs).setLightingType( i );
+				}
+				return;
+			}
+		}
+		blockUpdates = false;
 	}
 }
