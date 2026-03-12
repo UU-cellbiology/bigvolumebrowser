@@ -43,6 +43,7 @@ import net.imglib2.util.LinAlgHelpers;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.AbstractViewerPanel;
 import bdv.viewer.OverlayRenderer;
+import bvb.core.BVBActions.AlignPlaneBVB;
 
 public class AxesOverlayRenderer implements OverlayRenderer
 {
@@ -64,16 +65,41 @@ public class AxesOverlayRenderer implements OverlayRenderer
 	
 	boolean isHover = false;
 	
+	final double [] qRotation = new double[4];
+	
 	final Point center = new Point();
 	
 	final int vectRadius = 40;
 	final int circleAxisRadius = 9;	
 	final int fullRadiusSquared = (vectRadius + circleAxisRadius) * (vectRadius + circleAxisRadius);
-	
+	final double [][] dAxisCircleCenter = new double [6][3];
+	final double [][] dAxisVector = new double [6][3];
+
+	final double [][] axisOrder = new double [6][2];
+
 	int nHighlightedAxis = -1;
 	
 	private final static int xLetterHalf = 3;
 	private final static int yLetterHalf = 4;
+	
+	private final double [][] quaterLibrary = new double[6][4];
+	
+	private int nAlignIndex;
+	
+	public AxesOverlayRenderer()
+	{
+		super();
+		//there should be an easier way?!
+		for(int d = 0; d < 4; d++)
+		{
+			LinAlgHelpers.quaternionInvert( AlignPlaneBVB.ZY.qAlign, quaterLibrary[0] );
+			LinAlgHelpers.quaternionInvert( AlignPlaneBVB.XZ.qAlign, quaterLibrary[1] );
+			LinAlgHelpers.quaternionInvert( AlignPlaneBVB.XY.qAlign, quaterLibrary[2] );
+			LinAlgHelpers.quaternionInvert( AlignPlaneBVB.YZ.qAlign, quaterLibrary[3] );
+			LinAlgHelpers.quaternionInvert( AlignPlaneBVB.ZX.qAlign, quaterLibrary[4] );
+			LinAlgHelpers.quaternionInvert( AlignPlaneBVB.YX.qAlign, quaterLibrary[5] );
+		}
+	}
 	
 	public void bindViewer(final AbstractViewerPanel viewer_)
     {
@@ -111,37 +137,49 @@ public class AxesOverlayRenderer implements OverlayRenderer
 		graphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 		AffineTransform3D transform = new AffineTransform3D();
 		viewer.state().getViewerTransform(transform);
-		final double [] qRotation = new double[4];
+
 		Affine3DHelpers.extractRotationAnisotropic( transform, qRotation );
-		final double [][] dAxis = new double [6][3];
-		final double [][] axisOrder = new double [6][2];
 		for(int d = 0; d < 6; d++)
 		{
+			for(int i = 0; i < 3; i ++)
+			{
+				dAxisCircleCenter[d][i] = 0.0;
+				dAxisVector[d][i] = 0.0;
+			}
 			if(d < 3)
-				dAxis[d][d] = vectRadius;
+			{
+				dAxisCircleCenter[d][d] = vectRadius;
+				dAxisVector[d][d] = vectRadius - circleAxisRadius - 2;
+			}
 			else
-				dAxis[d][d - 3] = -vectRadius;
-			LinAlgHelpers.quaternionApply( qRotation, dAxis[d], dAxis[d] );
+			{
+				dAxisCircleCenter[d][d - 3] = -vectRadius;
+				dAxisVector[d][d - 3] = circleAxisRadius - vectRadius + 2 ;
+			}
+			LinAlgHelpers.quaternionApply( qRotation, dAxisCircleCenter[d], dAxisCircleCenter[d] );
+			LinAlgHelpers.quaternionApply( qRotation, dAxisVector[d], dAxisVector[d] );
 			//z-coordinate
-			axisOrder[d][0] = dAxis[d][2]; 
+			axisOrder[d][0] = dAxisCircleCenter[d][2]; 
 			//index
 			axisOrder[d][1] = d; 	
-			dAxis[d][0] += center.x;
-			dAxis[d][1] += center.y;
+			dAxisCircleCenter[d][0] += center.x;
+			dAxisCircleCenter[d][1] += center.y;
+			dAxisVector[d][0] += center.x;
+			dAxisVector[d][1] += center.y;
 		}
 
 		//highlight axis if hover is active
 		if(isHover)
 		{
 			float dx, dy;
-			dx = (float)dAxis[0][0] - pMouse.x;
-			dy = (float)dAxis[0][1] - pMouse.y;
+			dx = (float)dAxisCircleCenter[0][0] - pMouse.x;
+			dy = (float)dAxisCircleCenter[0][1] - pMouse.y;
 			float fDistance = dx * dx + dy * dy;
 			nHighlightedAxis = 0;
-			for(int d = 1; d < 3; d++)
+			for(int d = 1; d < 6; d++)
 			{
-				dx = (float)dAxis[d][0] - pMouse.x;
-				dy = (float)dAxis[d][1] - pMouse.y;
+				dx = (float)dAxisCircleCenter[d][0] - pMouse.x;
+				dy = (float)dAxisCircleCenter[d][1] - pMouse.y;
 				if(dx * dx + dy * dy < fDistance)
 				{
 					nHighlightedAxis = d;
@@ -156,30 +194,42 @@ public class AxesOverlayRenderer implements OverlayRenderer
 		}
 		//sort by depth (z-coord)
 		Arrays.sort(axisOrder, (a, b) -> (-1) * Double.compare(a[0], b[0]));
-
+		nAlignIndex = isAlignedWithPlanes(qRotation);
 		for( int d = 0; d < 6; d++)
 		{
 			graphics.setStroke(vectorStroke);
 			final int index = (int)axisOrder[d][1];
 
-			int x = (int) Math.round( dAxis[index][0]);
-			int y = (int) Math.round( dAxis[index][1]);
+			int x = (int) Math.round( dAxisCircleCenter[index][0]);
+			int y = (int) Math.round( dAxisCircleCenter[index][1]);
+			//positive axes
 			if(index < 3)
 			{
-				//vector body
+				//vector's body
 				graphics.setColor(axesColors[index]);					 
 				graphics.drawLine(center.x, center.y, x, y);
 				graphics.setStroke(ovalStroke);
 				graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
 				drawLetter(graphics, x + 1 , y + 1, index);
 			}
+			//negative axes
 			else
 			{
 				graphics.setColor(axesColors[index].darker());
+				if(nAlignIndex >= 0)
+				{
+					graphics.drawLine(center.x, center.y, (int) Math.round( dAxisVector[index][0]), (int) Math.round( dAxisVector[index][1]));
+					//graphics.drawLine(center.x, center.y, x, y);
+
+					if(nAlignIndex == index)
+						graphics.setColor(axesColors[index - 3]);
+				}
+					
 				graphics.setStroke(ovalStroke);
 				graphics.fillOval( x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);
 				graphics.setColor(axesColors[index - 3]);
 				graphics.drawOval(x - circleAxisRadius, y - circleAxisRadius , 2 * circleAxisRadius + 2 , 2 * circleAxisRadius + 2);					
+				drawLetter(graphics, x + 1 , y + 1, index);
 			}
 		}
 
@@ -195,26 +245,54 @@ public class AxesOverlayRenderer implements OverlayRenderer
 			graphics.setPaint( Color.BLACK );
 		
 		graphics.setStroke(letterStroke);
-		switch (index)
+		int nShiftedX = x;
+		int nFinIndex = index;
+		if (index > 2)
+		{
+			if(nHighlightedAxis == index)
+			{
+				//draw minus
+				graphics.drawLine( nShiftedX -2*xLetterHalf, y, nShiftedX - xLetterHalf, y);
+
+				nFinIndex = index - 3;
+				nShiftedX += 3;
+			}
+			else if(nAlignIndex == index )
+			{
+				//draw minus
+				graphics.drawLine( nShiftedX -2*xLetterHalf, y, nShiftedX - xLetterHalf, y);
+
+				nFinIndex = index - 3;
+				nShiftedX += 3;
+				
+			}
+			else
+			{
+				return;
+			}
+		}
+		switch (nFinIndex)
 		{
 		//x
 		case 0:
-			graphics.drawLine( x - xLetterHalf, y - yLetterHalf, x + xLetterHalf, y + yLetterHalf);
-			graphics.drawLine( x - xLetterHalf, y + yLetterHalf, x + xLetterHalf, y - yLetterHalf);
+			graphics.drawLine( nShiftedX - xLetterHalf, y - yLetterHalf, nShiftedX + xLetterHalf, y + yLetterHalf);
+			graphics.drawLine( nShiftedX - xLetterHalf, y + yLetterHalf, nShiftedX + xLetterHalf, y - yLetterHalf);
 			break;
 		//y
 		case 1:
-			graphics.drawLine( x - xLetterHalf, y - yLetterHalf, x, y + 1 );
-			graphics.drawLine( x + xLetterHalf, y - yLetterHalf, x, y + 1);
-			graphics.drawLine( x, y + 1, x, y + yLetterHalf);
+			graphics.drawLine( nShiftedX - xLetterHalf, y - yLetterHalf, nShiftedX, y + 1 );
+			graphics.drawLine( nShiftedX + xLetterHalf, y - yLetterHalf, nShiftedX, y + 1);
+			graphics.drawLine( nShiftedX, y + 1,nShiftedX, y + yLetterHalf);
 			break;
 		//z
 		case 2:
-			graphics.drawLine( x - xLetterHalf, y - yLetterHalf, x + xLetterHalf, y - yLetterHalf);
-			graphics.drawLine( x - xLetterHalf, y + yLetterHalf, x + xLetterHalf, y - yLetterHalf);
-			graphics.drawLine( x - xLetterHalf, y + yLetterHalf, x + xLetterHalf, y + yLetterHalf);
+			graphics.drawLine( nShiftedX - xLetterHalf, y - yLetterHalf, nShiftedX + xLetterHalf, y - yLetterHalf);
+			graphics.drawLine( nShiftedX - xLetterHalf, y + yLetterHalf, nShiftedX + xLetterHalf, y - yLetterHalf);
+			graphics.drawLine( nShiftedX - xLetterHalf, y + yLetterHalf, nShiftedX + xLetterHalf, y + yLetterHalf);
 			break;
 
+		default:
+			break;
 		}
 	}
 
@@ -237,5 +315,20 @@ public class AxesOverlayRenderer implements OverlayRenderer
 	{
 		return nHighlightedAxis;
 	}
-
+	/** function checks if provided quaternion is close
+	 * to the ones defining the alignment planes.
+	 * Returns the plane number or -1 if quaternion is far**/
+	int isAlignedWithPlanes (final double [] qCurrent)
+	{
+		int nIndex = -1;
+		for(int i = 0; i < 6; i++)
+		{
+			double dot = Math.abs( LinAlgHelpers.dot( qCurrent, quaterLibrary[i] ));
+			if(dot > 0.99999)
+			{
+				nIndex = i;
+			}
+		}
+		return nIndex;
+	}
 }

@@ -686,11 +686,31 @@ public class BVBActions
 			break;
 		case 2:
 			alignToPlane(AlignPlaneBVB.XY);
+			break;
+		case 3:
+			alignToPlane(AlignPlaneBVB.YZ);
+			break;
+		case 4:
+			alignToPlane(AlignPlaneBVB.ZX);
+			break;
+		case 5:
+			alignToPlane(AlignPlaneBVB.YX);
+			break;
 		}
 	}
 	
 	void alignToPlane(final AlignPlaneBVB plane)
 	{
+//		//test
+//		double [] axis = new double[3];
+//		axis[0] = 1.0;
+//		double [] quatAddition = new double[4];
+//		LinAlgHelpers.quaternionFromAngleAxis( axis, -Math.PI, quatAddition );
+//		
+//		double [] quatCurrent = new double[]{ 0, 0, 1, 0 };
+//		
+//		LinAlgHelpers.quaternionMultiply( quatCurrent, quatAddition, quatCurrent );
+		
 		final double[] qTarget = new double[ 4 ];
 		LinAlgHelpers.quaternionInvert( plane.qAlign, qTarget );
 		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
@@ -744,9 +764,12 @@ public class BVBActions
 	 */
 	public enum AlignPlaneBVB
 	{
-		XY( 2, new double[] { 0, 0, 1, 0 } ),
 		ZY( 0, new double[] { 0.5, -0.5, -0.5, 0.5 } ),
-		XZ( 1, new double[] { 0, 0, cQuat, -cQuat } );
+		XZ( 1, new double[] { 0, 0, cQuat, -cQuat } ),
+		XY( 2, new double[] { 0, 0, 1, 0 } ),
+		YZ( 3, new double[] { 0.5, -0.5, 0.5, -0.5 } ),
+		ZX( 4, new double[] { cQuat, -cQuat, 0, 0 } ),
+		YX( 5, new double[] { 0, 0, 0, 1 } );
 
 		/**
 		 * rotation from the xy-plane aligned coordinate system to this plane.

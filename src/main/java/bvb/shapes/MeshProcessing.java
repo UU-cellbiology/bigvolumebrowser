@@ -131,6 +131,7 @@ public class MeshProcessing
 			dest.triangles().add( v0, v1, v2, triNormal[ 0 ], triNormal[ 1 ], triNormal[ 2 ] );
 		}
 	}
+	
 	public static BufferMesh removeDuplicateVertices( final Mesh mesh, final int precision )
 	{
 		final Map< String, IndexedVertex > vertices = new LinkedHashMap<>();
