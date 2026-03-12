@@ -28,9 +28,9 @@ public class MeshProcessing
 	{
 
 		// Store the triangle normals
-		final HashMap< Long, float[] > triNormals = new HashMap<>();
+		final HashMap< Long, float[] > triNormals = new HashMap<>(src.triangles().size());
 		// Store per vertex normals
-		final HashMap< Long, float[] > vNormals = new HashMap<>();
+		final HashMap< Long, float[] > vNormals = new HashMap<>(src.vertices().size());
 		//vertex cumulative normal
 		float[] cumNormal;
 		//vertex index

@@ -260,24 +260,25 @@ public class VisMesh extends AbstractClipTransformVis
 	public void setMesh(final Mesh mesh)
 	{
 		
-		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-		
 		if( mesh.vertices().size() == 0)
 		{
 			System.err.println("Error loading mesh, zero vertices!");
 			return;
 		}
-		//see if normals were setup already
+		//see if normals are already present in the provided mesh
 		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ),mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
-		
-		if(Double.compare(  LinAlgHelpers.length( test_norm ),0.0) != 0)
+		//yes, they are, let's just load
+		if(Double.compare(  LinAlgHelpers.length( test_norm ), 0.0) != 0)
 		{
+			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
 			Meshes.copy( mesh, this.mesh );
 		}
+		//no, let's simplify mesh and calculate normals
 		else
 		{
-			Mesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, 3);
-			Meshes.calculateNormals( tempMesh, this.mesh );
+			final BufferMesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, 3) ;
+			this.mesh = new BufferMesh( tempMesh.vertices().size(), tempMesh.triangles().size(), true );
+			MeshProcessing.calculateNormals( tempMesh, this.mesh );
 		}
 	}	
 	
