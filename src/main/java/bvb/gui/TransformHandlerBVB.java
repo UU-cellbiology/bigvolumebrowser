@@ -248,12 +248,12 @@ public class TransformHandlerBVB
 		@Override
 		public void end( final int x, final int y )
 		{
-			if(!isDrag)
+			if( !isDrag )
 			{
 				final int nAxis = bvb.axisOverlay.getHighlightedAxis();
 				if( nAxis >= 0 )
 				{
-					bvb.bvbActions.alignToAxis(nAxis);
+					bvb.bvbActions.alignToAxis( nAxis );
 				}
 			}
 		}

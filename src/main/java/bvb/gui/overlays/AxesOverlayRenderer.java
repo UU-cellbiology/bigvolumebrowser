@@ -287,10 +287,9 @@ public class AxesOverlayRenderer implements OverlayRenderer
 			{
 				//draw minus
 				graphics.drawLine( nFinalX -2*xLetterHalf, y, nFinalX - xLetterHalf, y);
-
+				//shift letter
 				nFinIndex = index - 3;
-				nFinalX += 3;
-				
+				nFinalX += 3;				
 			}
 			else
 			{
