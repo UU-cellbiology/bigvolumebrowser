@@ -214,9 +214,9 @@ public class BVBActions
 		slNumDitherSamples.setMinorTickSpacing(1);
 		Hashtable< Integer, JLabel > labelTable = new Hashtable<>();
 		labelTable.put( new Integer( 1 ), new JLabel("1") );
-		for(int i=1; i<=4; i++)
+		for(int i = 1; i <= 4; i++)
 		{
-			labelTable.put( new Integer( i*2 ), new JLabel(Integer.toString( i*2 )) );
+			labelTable.put( new Integer( i * 2 ), new JLabel(Integer.toString( i * 2 )) );
 			
 		}
 		slNumDitherSamples.setLabelTable( labelTable );
@@ -639,10 +639,10 @@ public class BVBActions
 	{
 		if( bvb.getInputLock() )
 			return;
-		bvb.bManualTransformMode = !bvb.bManualTransformMode;
 		
-		if(!bvb.bManualTransformMode)
+		if(bvb.bManualTransformMode)
 		{
+			bvb.bManualTransformMode = false;
 			if(bShowMessage)
 			{
 				bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );

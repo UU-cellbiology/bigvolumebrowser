@@ -605,10 +605,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			if(nNewTime < 1 )
 				nNewTime = 1;
-			nfTotalTime.setText( Integer.toString( nNewTime ) );
-		
-			//return;
 		}
+		nfTotalTime.setText( Integer.toString( nNewTime ) );
 
 		int nOldTime = kfAnim.nTotalTime;
 				
@@ -952,10 +950,13 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	public void restoreStory(final StoryDTO storyDTO)
 	{
+		listModel.clear();
+		setNewTotalTime( storyDTO.keyFrameAnimation.nTotalTime);
     	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
-		updateKeyIndices();
+    	updateKeyIndices();
 		updateKeyMarks();        	
 		kfAnim.updateTransitionTimeline();
+		setSliderTotalTime();
 		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
 		
 	}

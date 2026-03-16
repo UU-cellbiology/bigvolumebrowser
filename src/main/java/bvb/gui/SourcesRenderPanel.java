@@ -282,8 +282,9 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 				{
 					interpolationMode.clearSelection();
 				}
+				blockUpdates = false;
 			}
-			blockUpdates = false;
+			
 		} );
 	}
 	
@@ -305,12 +306,15 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	{
 		if(!selectedSources.areSourcesSelected() || blockUpdates)
 			return;
-		blockUpdates = true;
+
 
 		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 
-		if(csList== null || csList.isEmpty())
+		if(csList == null || csList.isEmpty())
 			return;
+		
+		blockUpdates = true;
+		
 		for(int i = 0; i < 2; i++)
 		{
 			if(arg0.getSource() == butInter[i])
@@ -319,6 +323,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 				{
 					((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
 				}
+				blockUpdates = false;
 				return;
 			}
 		}
@@ -330,6 +335,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 				{
 					((GammaConverterSetup)cs).setRenderType( i );
 				}
+				blockUpdates = false;
 				return;
 			}
 		}
@@ -341,6 +347,7 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 				{
 					((GammaConverterSetup)cs).setLightingType( i );
 				}
+				blockUpdates = false;
 				return;
 			}
 		}
