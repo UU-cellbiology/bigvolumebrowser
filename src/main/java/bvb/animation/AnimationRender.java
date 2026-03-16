@@ -133,8 +133,8 @@ public class AnimationRender extends SwingWorker<Void, String>
 
 		bvb.bvvFrame.getContentPane().setPreferredSize( null );
 		final Point bvv_p = bvb.bvvFrame.getLocation();
+
 		bvb.bvvFrame.setBounds( new Rectangle(bvv_p.x, bvv_p.y, nRenderDim.width, nRenderDim.height) );
-		
 		SwingUtilities.invokeAndWait( ()->
 		{
 			bvb.bvvFrame.setResizable( false );
@@ -266,14 +266,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 		Prefs.showTextOverlay(true);
 
     	IJ.log( "BVB: rendering is finished." );
-    	
         bvvWindowState.restoreBvvWindowState();
-
-//		SwingUtilities.invokeLater( ()->
-//		{
-//			bvb.repaintBVV();
-//		});
-
 
 
 		
