@@ -41,7 +41,7 @@ import javax.swing.Timer;
 import bdv.ui.splitpanel.SplitPanel;
 import bvb.animation.SceneView;
 import bvb.core.BigVolumeBrowser;
-import bvvpg.core.VolumeViewerPanel;
+import bvvpg.core.InteractiveGLDisplayCanvas.CanvasSizeListener;
 
 /** wait for BVV window to finish window resizing 
  * before applying viewer transform **/
@@ -121,7 +121,6 @@ public class BVVWindowState
 
 		final Timer splitPanelTimer = new Timer(200, e -> 
 		{
-
 				bvb.bvvViewer.removeComponentListener(holder[0]);
 				bvb.bvvFrame.getSplitPanel().setCollapsed( bSplitPanelCollapsed );
 				bvb.bvvFrame.getSplitPanel().setDividerLocation( dividerProportion );
@@ -149,33 +148,37 @@ public class BVVWindowState
 	}
 
 	public void setViewerTransformAfterResizeIsDone()
-	{
-		final ComponentListener[] holder = new ComponentListener[1];
-		final Dimension lastSize = new Dimension();
-
-
-		final Timer transformTimer = new Timer(200, e -> 
+	{	
+		final Timer transformTimer ;
+		final CanvasListenerWithTimer canvasListener = 
+				new CanvasListenerWithTimer();
+		
+		transformTimer = new Timer(200, e -> 
 		{	
-			bvb.bvvViewer.removeComponentListener(holder[0]);
+			bvb.bvvViewer.getDisplay().canvasSizeListeners().remove( canvasListener );
 			SceneView.setSceneView( bvb.bvvViewer, sceneView );
 		});
+
 		transformTimer.setRepeats(false);
-		lastSize.setSize( bvb.bvvViewer.getSize());
-		holder[0] = new ComponentAdapter() 
-		{
-			@Override
-			public void componentResized(ComponentEvent e) {
-				Dimension current = bvb.bvvViewer.getSize();
-				if (!current.equals(lastSize) ) 
-				{
-					lastSize.setSize(current);
-					transformTimer.restart();
-				}
-			}
-		};
+		canvasListener.setTimer(transformTimer);
 
-		bvb.bvvViewer.addComponentListener(holder[0]);
-
+		bvb.bvvViewer.getDisplay().canvasSizeListeners().add( canvasListener );
 		transformTimer.start();
+	}
+	public class CanvasListenerWithTimer implements CanvasSizeListener
+	{
+		Timer transformTimerCanvas;
+		
+		public void setTimer (final Timer timer)
+		{
+			transformTimerCanvas = timer;
+		}
+		@Override
+		public void setCanvasSize( int width, int height )
+		{
+			transformTimerCanvas.restart();		
+			System.out.println("resrrr");
+		}
+		
 	}
 }
