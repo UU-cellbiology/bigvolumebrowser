@@ -333,7 +333,7 @@ public class BVBActions
 		pViewSettings.add( dClipNear,gbcR );
 		
 		
-		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "BVV canvas settings", 
+		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "3D rendering settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (reply == JOptionPane.OK_OPTION) 
@@ -513,7 +513,7 @@ public class BVBActions
 				+"&nbsp;<b>S</b> - separate brightness/color dialog<br><br>"
 				+"&nbsp;<b>Shift + X/Y/Z</b> - rotate to major plane<br><br>"					
 				+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
-				+"&nbsp;<b>F10</b> - BVV (canvas) settings<br><br></html>";
+				+"&nbsp;<b>F10</b> - 3D rendering settings<br><br></html>";
 		JLabel jlInfo = new JLabel(shortCutInfo);
 		jlInfo.setVerticalAlignment(SwingConstants.TOP);
 		jlInfo.setHorizontalAlignment(SwingConstants.CENTER);
