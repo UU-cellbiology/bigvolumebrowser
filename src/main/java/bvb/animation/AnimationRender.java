@@ -207,8 +207,6 @@ public class AnimationRender extends SwingWorker<Void, String>
 	        else
 	        {
 	        	biOut = resizeCenterCrop(bi,aPanel.nRenderWidth, aPanel.nRenderHeight);
-
-	        	//biOut = resizeWithPadding(bi,nRenderDim.width, nRenderDim.height, BVBSettings.canvasBGColor);
 	        }			
 			ImageIO.write( biOut, "png", new File( aPanel.sRenderSavePath + 
 			String.format("%0" + String.valueOf(nTotFrames).length() + "d", nFr + 1) + ".png") );
@@ -268,8 +266,6 @@ public class AnimationRender extends SwingWorker<Void, String>
     	IJ.log( "BVB: rendering is finished." );
         bvvWindowState.restoreBvvWindowState();
 
-
-		
     	//unlock user interaction
 //    	bt.bInputLock = false;
 //    	bt.setLockMode(false);
