@@ -44,8 +44,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +53,6 @@ import java.util.Map;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -65,20 +62,18 @@ import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.animation.utils.Timeline;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.NumberField;
 import bvb.io.dto.BVBObjectsDTO;
-import bvb.io.dto.SerializationIO;
 import bvb.io.dto.StoryDTO;
 import ij.IJ;
 import ij.Prefs;
-import ij.io.SaveDialog;
 
 public class AnimationPanel extends JPanel implements ChangeListener												
 {
@@ -86,6 +81,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	final JButton butRecord;
 	final JButton butPlayStop;
+	final JButton butSnapshot;
 	final JButton butSettings;
 	final JSlider timeSlider;
 	
@@ -198,12 +194,6 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		tabIconStop = new ImageIcon(icon_path);		
 		butPlayStop.setToolTipText("Play");
 		butPlayStop.setPreferredSize(new Dimension(nButtonSize , nButtonSize ));
-				
-		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
-		ImageIcon tabIcon = new ImageIcon(icon_path);
-		butSettings = new JButton(tabIcon);
-		butSettings.setToolTipText("Settings");
-		butSettings.setPreferredSize(new Dimension(nButtonSize, nButtonSize));
 		
 		butPlayStop.addMouseListener(new MouseAdapter() {
 			@Override
@@ -213,15 +203,28 @@ public class AnimationPanel extends JPanel implements ChangeListener
 					dialogsAnim.dialPlayerSettings();
 				} 
 			}
-		});	
-				
+		});		
+		
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "snapshot.png");
+		ImageIcon tabIcon = new ImageIcon(icon_path);
+		butSnapshot = new JButton(tabIcon);
+		butSnapshot.setToolTipText("Make a snapshot\n(shortcut Ctrl + S)");
+		butSnapshot.setPreferredSize(new Dimension(nButtonSize, nButtonSize));
+		
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "settings.png");
+		tabIcon = new ImageIcon(icon_path);
+		butSettings = new JButton(tabIcon);
+		butSettings.setToolTipText("Settings");
+		butSettings.setPreferredSize(new Dimension(nButtonSize, nButtonSize));
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		panAnimTools.add(butRecord,gbc);
 		
 		gbc.gridx++;
 		panAnimTools.add(butPlayStop,gbc);
-		
+		gbc.gridx++;
+		panAnimTools.add(butSnapshot,gbc);
 		
 		JPanel panTotTime = new JPanel(new GridBagLayout());
 		//panTotTime.setBorder(new PanelTitle(""));
@@ -415,16 +418,16 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		butLoad.setPreferredSize(butDim); 
 		
 		// LISTENERS ASSIGNMENT
-		butRecord.addActionListener( (e) -> recordRenderButtonAction() );
+		butRecord.addActionListener  ( (e) -> recordRenderButtonAction() );
 		butPlayStop.addActionListener( (e) -> playStopButtonAction() );
+		butSnapshot.addActionListener( (e) -> makeSnapshot() );
 		butSettings.addActionListener( (e) -> dialogsAnim.dialPanelSettings());
-		butAdd.addActionListener((e) -> addCurrentKeyFrame());
-		butReplace.addActionListener((e) -> replaceSelectedKeyFrame());
-		butEdit.addActionListener((e) -> editSelectedKeyFrame());
-		butDelete.addActionListener( (e)-> deleteSelectedKeyFrame());
-		butSave.addActionListener((e) -> dialStorylineSave());
-		butLoad.addActionListener((e) -> dialStorylineLoad());
-
+		butAdd.addActionListener     ( (e) -> addCurrentKeyFrame());
+		butReplace.addActionListener ( (e) -> replaceSelectedKeyFrame());
+		butEdit.addActionListener    ( (e) -> editSelectedKeyFrame());
+		butDelete.addActionListener  ( (e) -> deleteSelectedKeyFrame());
+		butSave.addActionListener    ( (e) -> dialogsAnim.dialStorylineSave());
+		butLoad.addActionListener    ( (e) -> dialogsAnim.dialStorylineLoad());
 		butUpdateSlider.addActionListener((e)-> {bUpdateSlider = butUpdateSlider.isSelected();});
 		
 	}
@@ -448,39 +451,25 @@ public class AnimationPanel extends JPanel implements ChangeListener
             }
 		});
 		
-		glassPanel.setOpaque(false);
-		KeyListener[] kl = glassPanel.getKeyListeners();
-		for(int i = 0; i< kl.length; i++)
-			glassPanel.removeKeyListener( kl[i] );
-		
-		glassPanel.addKeyListener(new KeyListener() {
+		initGlassPanel(render);
 
-			@Override
-			public void keyPressed( KeyEvent e )
-			{
-				
-				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
-				{
-					render.cancel( true );
-					IJ.log( "BVB: Animation rendering was interrupted." );
-                }	
-			}
-
-			@Override
-			public void keyReleased( KeyEvent e )
-			{			
-			}
-
-			@Override
-			public void keyTyped( KeyEvent e )
-			{
-				
-			}});
 		render.glass = glassPanel;
 		IJ.log( "BVB: starting rendering to " + sRenderSavePath);
 		IJ.log( "BVB: press Esc to interrupt");
 		
 		render.execute();
+	}
+	
+	public void makeSnapshot()
+	{
+		if(player.isPlaying())
+			player.stop();	
+		
+		final AnimationSnapshot snapshot = new AnimationSnapshot(bvb, this);
+		
+		initGlassPanel( snapshot );
+		snapshot.glass = glassPanel;
+		snapshot.execute();
 	}
 	
 	/** run or stop player **/
@@ -526,6 +515,38 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		{
 			IJ.showStatus( "cannot render: add at least one key frame." );
 		}
+	}
+	
+	void initGlassPanel (final SwingWorker< ?, ? > worker )
+	{
+		glassPanel.setOpaque(false);
+		KeyListener[] kl = glassPanel.getKeyListeners();
+		for(int i = 0; i< kl.length; i++)
+			glassPanel.removeKeyListener( kl[i] );
+		
+		glassPanel.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyPressed( KeyEvent e )
+			{
+				
+				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				{
+					worker.cancel( true );
+					IJ.log( "BVB: Animation rendering was interrupted." );
+                }	
+			}
+
+			@Override
+			public void keyReleased( KeyEvent e )
+			{			
+			}
+
+			@Override
+			public void keyTyped( KeyEvent e )
+			{
+				
+			}});
 	}
 	
 	void addCurrentKeyFrame()
@@ -866,102 +887,12 @@ public class AnimationPanel extends JPanel implements ChangeListener
     		}
 		}
 	}
-	
-	void dialStorylineSave()
-	{
-		if(listModel.size() > 0)
-		{
-			String filename;
-			
-			filename = SerializationIO.getTimestamp() + "_animationTimelineBVB";
-			SaveDialog sd = new SaveDialog("Save storyline ", BVBSettings.lastDir, filename, ".json");
-	        String path = sd.getDirectory();
-	        if (path == null)
-	        	return;
-	        setEnabled( false );
-	        BVBSettings.lastDir = path;
-	        Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
-	        filename = path + sd.getFileName();
-	        StoryDTO story = new StoryDTO();
-	        story.BVBVersion = BVBSettings.sVersion;
-	        story.keyFrameAnimation = kfAnim.toDTO();
-	        story.bvbObjects = bvb.objectHashStorage.toDTO();
-	        story.timeline = timeline.toDTO();
 
-	        try
-			{
-	        	SerializationIO.MAPPER.writeValue( new File(filename), story );
-			}
-			catch ( IOException exc )
-			{
-				exc.printStackTrace();
-				IJ.log( "BVB: Error while saving animation timeline. See console for the full log." );
-			}	        
-	        setEnabled( true );
-
-		}
-		else
-		{
-			IJ.showStatus( "BVB: cannot save animation timeline, at least 2 keyframes are required." );
-		}
-	}
-	
-	void dialStorylineLoad()
-	{
-		String filename;
-		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
-		chooser.setDialogTitle( "Load BVB animation timeline" );
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "BVB animation timeline", "json");
-        chooser.setFileFilter(filter);
-        
-        int returnVal = chooser.showOpenDialog(null);
-        
-        if(returnVal == JFileChooser.APPROVE_OPTION) 
-        {
-	        setEnabled( false );
-
-            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
-            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
-            filename =  chooser.getSelectedFile().getPath();
-            StoryDTO storyDTO = null;
-    
-            try
-            {
-            	storyDTO = SerializationIO.MAPPER.readValue(new File(filename), StoryDTO.class);
-            }
-            catch ( IOException exc )
-            {
-            	exc.printStackTrace();
-            }
- 
-            if(storyDTO != null)
-            {
-            	if(!storyDTO.BVBVersion.equals( BVBSettings.sVersion ))
-            	{
-            		IJ.log( "BVB animation timeline was made in version " + storyDTO.BVBVersion
-            				+ ", but current plugin version is " +BVBSettings.sVersion + ".");
-            		IJ.log( "Trying to load timeline anyway.");
-
-            	}
-            	
-        		checkObjectsPresence( storyDTO.bvbObjects, filename );
-        		restoreStory( storyDTO );
-            }
-            else
-            {
-            	IJ.log( "BVB: Error while loading animation timeline. See console for the full log." );
-            }
-	        setEnabled( true );
-
-
-        }
-	}
 	
 	public void restoreStory(final StoryDTO storyDTO)
 	{
 		listModel.clear();
-		setNewTotalTime( storyDTO.keyFrameAnimation.nTotalTime);
+		setNewTotalTime( storyDTO.keyFrameAnimation.nTotalTime );
     	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
     	updateKeyIndices();
 		updateKeyMarks();        	
@@ -971,7 +902,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		
 	}
 	
-	void checkObjectsPresence(final BVBObjectsDTO dto, String filename)
+	public void checkObjectsPresence(final BVBObjectsDTO dto, String filename)
 	{
 		for(String hash:dto.presentObjectsNames)
 		{

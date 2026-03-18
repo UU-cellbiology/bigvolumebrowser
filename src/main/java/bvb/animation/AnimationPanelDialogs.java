@@ -32,25 +32,33 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.animation.utils.Timeline;
+import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.GetFolderDialog;
 import bvb.gui.NumberField;
+import bvb.io.dto.SerializationIO;
+import bvb.io.dto.StoryDTO;
 import ij.IJ;
 import ij.Prefs;
+import ij.io.SaveDialog;
 
 public class AnimationPanelDialogs
 {
@@ -400,4 +408,97 @@ public class AnimationPanelDialogs
 		}
 	
 	}
+	
+	void dialStorylineLoad()
+	{
+		String filename;
+		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
+		chooser.setDialogTitle( "Load BVB animation timeline" );
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "BVB animation timeline", "json");
+        chooser.setFileFilter(filter);
+        
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+	        aPanel.setEnabled( false );
+
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            filename =  chooser.getSelectedFile().getPath();
+            StoryDTO storyDTO = null;
+    
+            try
+            {
+            	storyDTO = SerializationIO.MAPPER.readValue(new File(filename), StoryDTO.class);
+            }
+            catch ( IOException exc )
+            {
+            	exc.printStackTrace();
+            }
+ 
+            if(storyDTO != null)
+            {
+            	if(!storyDTO.BVBVersion.equals( BVBSettings.sVersion ))
+            	{
+            		IJ.log( "BVB animation timeline was made in version " + storyDTO.BVBVersion
+            				+ ", but current plugin version is " +BVBSettings.sVersion + ".");
+            		IJ.log( "Trying to load timeline anyway.");
+
+            	}
+            	
+        		aPanel.checkObjectsPresence( storyDTO.bvbObjects, filename );
+        		aPanel.restoreStory( storyDTO );
+            }
+            else
+            {
+            	IJ.log( "BVB: Error while loading animation timeline. See console for the full log." );
+            }
+            aPanel.setEnabled( true );
+
+
+        }
+	}
+
+	
+	void dialStorylineSave()
+	{
+		if(aPanel.listModel.size() > 0)
+		{
+			String filename;
+			
+			filename = SerializationIO.getTimestamp() + "_animationTimelineBVB";
+			SaveDialog sd = new SaveDialog("Save storyline ", BVBSettings.lastDir, filename, ".json");
+	        String path = sd.getDirectory();
+	        if (path == null)
+	        	return;
+	        aPanel.setEnabled( false );
+	        BVBSettings.lastDir = path;
+	        Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+	        filename = path + sd.getFileName();
+	        StoryDTO story = new StoryDTO();
+	        story.BVBVersion = BVBSettings.sVersion;
+	        story.keyFrameAnimation = aPanel.kfAnim.toDTO();
+	        story.bvbObjects = bvb.objectHashStorage.toDTO();
+	        story.timeline = aPanel.timeline.toDTO();
+
+	        try
+			{
+	        	SerializationIO.MAPPER.writeValue( new File(filename), story );
+			}
+			catch ( IOException exc )
+			{
+				exc.printStackTrace();
+				IJ.log( "BVB: Error while saving animation timeline. See console for the full log." );
+			}	        
+	        aPanel.setEnabled( true );
+
+		}
+		else
+		{
+			IJ.showStatus( "BVB: cannot save animation timeline, at least 2 keyframes are required." );
+		}
+	}
+	
 }

@@ -159,7 +159,7 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(0, false), "rotate 90 x axis wrld", ROTATE_X_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
-		
+		actions.runnableAction(() -> bvb.bvbCards.animationPanel.makeSnapshot(), "make snapshot", "ctrl S" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
