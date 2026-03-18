@@ -18,7 +18,11 @@ This speeds up render and allows exploration of datasets larger than GPU memory.
 It supports rendering of 3D visualization movies using key frame animation interface.    
 
 **Users**: please check full description/tutorials in the **[project's wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.   
-There is a **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary)).   
+
+
+You can also watch a short (12 m) **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary))   
+or a longer (1 h) [extended version](https://www.youtube.com/watch?v=Z9rbxIqZNp8).   
+
 For questions, tag me (<a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a>) at <a href="https://forum.image.sc/">image.sc</a> forum.   
 
 **Developers**: check some code [examples](https://github.com/UU-cellbiology/bigvolumebrowser/tree/main/src/test/java/bvb/examples).  
