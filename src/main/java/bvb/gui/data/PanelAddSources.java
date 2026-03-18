@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -146,13 +147,31 @@ public class PanelAddSources extends JPanel
         {
             BVBSettings.lastDir = chooser.getSelectedFile().getParent();
             Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
-            String sFilename = chooser.getSelectedFile().getPath();
-			final File f = new File(sFilename);
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading " + f.getName() + ",\nplease wait...", 3000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
+            String sPathFilenameIni = chooser.getSelectedFile().getPath();
+			final File f = new File(sPathFilenameIni);
+			String sFilename = f.getName();
+			final int [] nMode = new int [1];
+			nMode[0] = 1;
+			if(sFilename.endsWith( "xml" ) || sFilename.endsWith( "h5" ))
+			{
+				nMode[0] = showXMLsuspectedMessage();
+				if(nMode[0] == 0 && sFilename.endsWith( "h5" ))
+				{
+					sPathFilenameIni = sPathFilenameIni.substring( 0, sPathFilenameIni.length() - 2 );
+					sPathFilenameIni = sPathFilenameIni + "xml";
+					String sFilenameh5 = sFilename;
+					sFilename = sFilename.substring( 0, sFilename.length() - 2 );
+					sFilename = sFilename + "xml";
+					IJ.log( "Opening " + sFilename + " instead of " + sFilenameh5 + ".");
+				}
+					
+			}
+			String sPathFilename = sPathFilenameIni;
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "Loading " + sFilename + ",\nplease wait...", 3000, TextPosition.CENTER, BVBSettings.canvasOverlayColor )  );
 			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(() -> {
 				final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = 
-						bvb.spimDataWrapper.createSpimDataBDVorBF( sFilename, 1 );
+						bvb.spimDataWrapper.createSpimDataBDVorBF( sPathFilename, nMode[0] );
 			    SwingUtilities.invokeLater(() -> {
 			    	bvb.addSpimData( spimDataInfo.getA(), spimDataInfo.getB() );
 			    });
@@ -187,5 +206,17 @@ public class PanelAddSources extends JPanel
 		    	bvb.addSpimData( spimDataInfo.getA(), spimDataInfo.getB() );
 		    });
 		});
+	}
+	
+	int showXMLsuspectedMessage()
+	{
+		
+		if (JOptionPane.showConfirmDialog(null, "Looks like you are opening XML file with BioFormats.\n"
+				+ "If it is BDV XML, only one resolution level will be available.\nDo you want to open it in full multi-res mode instead?", "Loading sources",
+		        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+		    return 0;
+		} 
+		return 1;
+		
 	}
 }
