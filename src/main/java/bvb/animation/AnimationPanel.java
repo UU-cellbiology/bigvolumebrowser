@@ -146,6 +146,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	
 	boolean bRenderScaleBar =  Prefs.get("BVB.bRenderScaleBar", false);
 	
+	boolean bRenderAxesGizmo =  Prefs.get("BVB.bRenderAxesGizmo", false);
+	
 	int nRenderFrameTimeLimit = (int)Prefs.get("BVB.nRenderFrameTimeLimit", 60);
 	
 	String sRenderSavePath = null;

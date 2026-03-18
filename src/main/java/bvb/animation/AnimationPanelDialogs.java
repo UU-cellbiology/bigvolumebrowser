@@ -338,6 +338,9 @@ public class AnimationPanelDialogs
 		
 		JCheckBox cbScaleBar = new JCheckBox();
 		cbScaleBar.setSelected( aPanel.bRenderScaleBar);
+
+		JCheckBox cbAxesGizmo = new JCheckBox();
+		cbAxesGizmo.setSelected( aPanel.bRenderAxesGizmo);
 		
 		NumberField nfFrameRenderMax = new NumberField(4);
 		nfFrameRenderMax.setIntegersOnly(true);
@@ -355,6 +358,12 @@ public class AnimationPanelDialogs
 		pAnimSettings.add(new JLabel("Render scale bar: "),cd);
 		cd.gridx++;
 		pAnimSettings.add(cbScaleBar,cd);
+
+		cd.gridx = 0;
+		cd.gridy++;
+		pAnimSettings.add(new JLabel("Render axes gizmo: "),cd);
+		cd.gridx++;
+		pAnimSettings.add(cbAxesGizmo,cd);
 		
 		cd.gridx = 0;
 		cd.gridy++;
@@ -381,6 +390,10 @@ public class AnimationPanelDialogs
 			//scale bar
 			aPanel.bRenderScaleBar = cbScaleBar.isSelected();
 			Prefs.set("BVB.bRenderScaleBar", aPanel.bRenderScaleBar );
+			
+			//axes gizmo
+			aPanel.bRenderAxesGizmo = cbAxesGizmo.isSelected();
+			Prefs.set("BVB.bRenderAxesGizmo", aPanel.bRenderAxesGizmo );
 			
 			aPanel.nRenderFrameTimeLimit = Integer.parseInt(nfFrameRenderMax.getText());
 			Prefs.set("BVB.nRenderFrameTimeLimit", aPanel.nRenderFrameTimeLimit);
