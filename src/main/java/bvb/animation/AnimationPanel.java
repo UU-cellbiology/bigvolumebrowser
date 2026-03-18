@@ -134,11 +134,13 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	/** keyframe render **/
 	AnimationRender render;
 	
-	int nRenderFPS = (int)Prefs.get("BVB.nRenderFPS", 24.0);
+	int nRenderFPS = (int)Prefs.get("BVB.nRenderFPS", 30.0);
 	
 	int nRenderWidth = (int)Prefs.get("BVB.nRenderWidth", 1280);
 	
 	int nRenderHeight = (int)Prefs.get("BVB.nRenderHeight", 720);
+	
+	boolean bRenderCurrentWindowSize = Prefs.get("BVB.bRenderCurrentWindowSize", false);
 	
 	boolean bRenderMultiBox =  Prefs.get("BVB.bRenderMultiBox", false);
 	
@@ -153,6 +155,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	public Timeline timeline;
 	
 	final ArrayList<Component> allComp = new ArrayList<>();
+	
+	final JPanel glassPanel = new JPanel();
 
 	public AnimationPanel(final BigVolumeBrowser bvb_)
 	{
@@ -167,6 +171,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		
 		kfAnim = new KeyFrameAnimation(listModel);
 		kfAnim.setTotalTime( nInitialTotalTime );
+		
+		glassPanel.addMouseListener(new MouseAdapter() {});
 	
 		this.player = new AnimationPlayer(bvb, this);
 		
@@ -440,10 +446,12 @@ public class AnimationPanel extends JPanel implements ChangeListener
             }
 		});
 		
-		final JPanel glass = new JPanel();
-		glass.setOpaque(false);
-		glass.addMouseListener(new MouseAdapter() {});
-		glass.addKeyListener(new KeyListener() {
+		glassPanel.setOpaque(false);
+		KeyListener[] kl = glassPanel.getKeyListeners();
+		for(int i = 0; i< kl.length; i++)
+			glassPanel.removeKeyListener( kl[i] );
+		
+		glassPanel.addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyPressed( KeyEvent e )
@@ -466,7 +474,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 			{
 				
 			}});
-		render.glass = glass;
+		render.glass = glassPanel;
 		IJ.log( "BVB: starting rendering to " + sRenderSavePath);
 		IJ.log( "BVB: press Esc to interrupt");
 		

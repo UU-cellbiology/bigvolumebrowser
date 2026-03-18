@@ -106,39 +106,46 @@ public class AnimationRender extends SwingWorker<Void, String>
 		bvb.bvvFrame.setExtendedState(Frame.NORMAL);
 		bvb.bvvViewer.setRenderMode( true );
 		
-		SplitPanel splitPanel =  bvb.bvvFrame.getSplitPanel();
-		
-		if(!splitPanel.isCollapsed())
+		if(!aPanel.bRenderCurrentWindowSize)
 		{
-			splitPanel.setCollapsed( true );
+			//resize the canvas and close the splitpanel
+			SplitPanel splitPanel =  bvb.bvvFrame.getSplitPanel();
+			
+			if(!splitPanel.isCollapsed())
+			{
+				splitPanel.setCollapsed( true );
+			}
+					
+			int nHeight = aPanel.nRenderHeight;
+			
+			//check if there is time slider => +25 in height
+			if(bvb.bvvViewer.state().getNumTimepoints() > 1)
+			{
+				nHeight += 25;
+			}
+			
+			Dimension nRenderDim = new Dimension(aPanel.nRenderWidth, nHeight);
+	
+			bvb.bvvFrame.getContentPane().setPreferredSize( null );
+			final Point bvv_p = bvb.bvvFrame.getLocation();
+	
+			bvb.bvvFrame.setBounds( new Rectangle(bvv_p.x, bvv_p.y, nRenderDim.width, nRenderDim.height) );
 		}
-		
-		Component component = bvb.bvvViewer;	
-		
-		int nHeight = aPanel.nRenderHeight;
-		
-		//check if there is time slider => +25 in height
-		if(bvb.bvvViewer.state().getNumTimepoints() > 1)
-		{
-			nHeight += 25;
-		}
-		
-		Dimension nRenderDim = new Dimension(aPanel.nRenderWidth, nHeight);
+
 		if(glass != null)
 		{
 			bvb.bvvFrame.setGlassPane( glass );
 			glass.setVisible(true);
 			glass.requestFocusInWindow();
 		}
-
-		bvb.bvvFrame.getContentPane().setPreferredSize( null );
-		final Point bvv_p = bvb.bvvFrame.getLocation();
-
-		bvb.bvvFrame.setBounds( new Rectangle(bvv_p.x, bvv_p.y, nRenderDim.width, nRenderDim.height) );
+		
+		
 		SwingUtilities.invokeAndWait( ()->
 		{
 			bvb.bvvFrame.setResizable( false );
 		});
+		
+		Component component = bvb.bvvViewer;	
 		
 		Rectangle rect = bvb.bvvViewer.getDisplayComponent().getBounds();
 		final BufferedImage bi =
@@ -146,11 +153,13 @@ public class AnimationRender extends SwingWorker<Void, String>
                                     BufferedImage.TYPE_INT_ARGB);
 		
 		boolean bResize = false;
-		if(aPanel.nRenderWidth != rect.width || aPanel.nRenderHeight != rect.height)
+		if(!aPanel.bRenderCurrentWindowSize)
 		{
-			bResize = true;
+			if(aPanel.nRenderWidth != rect.width || aPanel.nRenderHeight != rect.height)
+			{
+				bResize = true;
+			}
 		}
-		
 		RepaintType status;
 		//refresh first frame 
 		SwingUtilities.invokeAndWait( ()->
@@ -248,7 +257,8 @@ public class AnimationRender extends SwingWorker<Void, String>
     		System.out.println("Animation render interrupted by user.");
 
     	}	
-    	setProgress(100);    	
+    	setProgress(100);  
+    	
     	bvb.bvvViewer.setRenderMode( false );
 		bvb.bvvFrame.setResizable( true );
         if(glass != null)
@@ -264,7 +274,12 @@ public class AnimationRender extends SwingWorker<Void, String>
 		Prefs.showTextOverlay(true);
 
     	IJ.log( "BVB: rendering is finished." );
-        bvvWindowState.restoreBvvWindowState();
+        //restore the panel
+    	if(!aPanel.bRenderCurrentWindowSize)
+        	bvvWindowState.restoreBvvWindowState();
+    	else
+        	bvvWindowState.setViewerTransformAfterResizeIsDone();
+    	
 
     	//unlock user interaction
 //    	bt.bInputLock = false;

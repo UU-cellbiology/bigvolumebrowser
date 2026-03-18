@@ -271,7 +271,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				showNoise();
 			}
 			bvvFrame.getSplitPanel().setDividerLocation( 400 );
-			bvvViewer.addTimePointListener(this);
+			bvvViewer.timePointListeners().add( this );
 		}
 		propertyRegistry.bindBVB( this );
 	}
@@ -777,7 +777,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		//restore window location
 		bvvWindowState.restoreBvvWindowState();
-		bvvViewer.addTimePointListener(this);
+		bvvViewer.timePointListeners().add( this );
 		propertyRegistry.bindBVB( this );
 		
 		//restore animation settings
@@ -806,6 +806,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final Color bbFrameColor = BVBSettings.getInvertedColor(bgColor);
 		BVBSettings.canvasOverlayColor = new Color(bbFrameColor.getRed(),bbFrameColor.getGreen(),bbFrameColor.getBlue(),bbFrameColor.getAlpha());		
 		ij.Prefs.set("BVB.canvasOverlayColor", bbFrameColor.getRGB());
+		bvvViewer.setOverlayTextColor( BVBSettings.canvasOverlayColor  );
 		volumeBoxes.setLineColor( bbFrameColor );
 		clipBoxes.setLineColor( bbFrameColor );
 	}

@@ -28,8 +28,10 @@
  */
 package bvb.animation;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ItemEvent;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
@@ -67,36 +69,66 @@ public class AnimationPanelDialogs
 		final JPanel panRenderSettings = new JPanel();
 		panRenderSettings.setLayout(new GridBagLayout());
 		
-		GridBagConstraints cd = new GridBagConstraints();
-		GBCHelper.alighLeft(cd);
+		GridBagConstraints gbc = new GridBagConstraints();
+		GBCHelper.alighLeft(gbc);
 		
 		final NumberField nfFPS = new NumberField(4);
 		nfFPS.setIntegersOnly( true );
 		nfFPS.setText(Integer.toString( aPanel.nRenderFPS ));
+		
 		final NumberField nfWidth = new NumberField(4);
 		nfWidth.setIntegersOnly( true );
 		nfWidth.setText(Integer.toString( aPanel.nRenderWidth ));
+		
 		final NumberField nfHeight = new NumberField(4);
 		nfHeight.setIntegersOnly( true );
 		nfHeight.setText(Integer.toString( aPanel.nRenderHeight));
 		
-		cd.gridx = 0;
-		cd.gridy = 0;	
-		panRenderSettings.add(new JLabel("Render FPS:"),cd);
-		cd.gridx++;
-		panRenderSettings.add(nfFPS, cd);	
+		final JCheckBox cbCurrentWindow = new JCheckBox("");
 		
-		cd.gridx = 0;
-		cd.gridy++;	
-		panRenderSettings.add(new JLabel("Render width (px):"),cd);
-		cd.gridx++;
-		panRenderSettings.add(nfWidth, cd);			
+		cbCurrentWindow.addItemListener((e)->{
+			boolean bNFState =  !(e.getStateChange() 
+					== ItemEvent.SELECTED ? true : false);
+			nfWidth.setEnabled( bNFState );
+			nfHeight.setEnabled( bNFState );
+		});
+		cbCurrentWindow.setSelected( aPanel.bRenderCurrentWindowSize );
+
+		final Dimension currDimensionsWindow = bvb.bvvViewer.getSize();
 		
-		cd.gridx = 0;
-		cd.gridy++;	
-		panRenderSettings.add(new JLabel("Render height (px):"),cd);
-		cd.gridx++;
-		panRenderSettings.add(nfHeight, cd);			
+		String sCurrSize = Integer.toString( currDimensionsWindow.width )+
+				" x " + Integer.toString( currDimensionsWindow.height );
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		panRenderSettings.add(new JLabel("Render FPS:"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(nfFPS, gbc);	
+		
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("Movie width (px):"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(nfWidth, gbc);			
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("Movie height (px):"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(nfHeight, gbc);	
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("Or use current [" + sCurrSize + "]"),gbc);
+		gbc.gridx++;
+		gbc.gridheight = 2;
+		panRenderSettings.add(cbCurrentWindow, gbc);		
+		gbc.gridheight = 1;
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("canvas/window size"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(new JLabel(), gbc);	
 		
 		int reply = JOptionPane.showConfirmDialog(null, panRenderSettings, "Render settings", 
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -105,11 +137,17 @@ public class AnimationPanelDialogs
 			aPanel.nRenderFPS = Integer.parseInt( nfFPS.getText());
 			Prefs.set("BVB.nRenderFPS", (double)aPanel.nRenderFPS);
 			
-			aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
-			Prefs.set("BVB.nRenderWidth", (double)aPanel.nRenderWidth);
+			aPanel.bRenderCurrentWindowSize = cbCurrentWindow.isSelected();
+			Prefs.set("BVB.bRenderCurrentWindowSize", aPanel.bRenderCurrentWindowSize);
 			
-			aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
-			Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
+			if(!aPanel.bRenderCurrentWindowSize)
+			{
+				aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
+				Prefs.set("BVB.nRenderWidth", (double)aPanel.nRenderWidth);
+				
+				aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
+				Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
+			}
 			
 			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder.." );
 			

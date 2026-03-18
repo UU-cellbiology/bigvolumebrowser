@@ -149,21 +149,24 @@ public class BVVWindowState
 
 	public void setViewerTransformAfterResizeIsDone()
 	{	
-		final Timer transformTimer ;
-		final CanvasListenerWithTimer canvasListener = 
-				new CanvasListenerWithTimer();
-		
-		transformTimer = new Timer(200, e -> 
-		{	
-			bvb.bvvViewer.getDisplay().canvasSizeListeners().remove( canvasListener );
-			SceneView.setSceneView( bvb.bvvViewer, sceneView );
-		});
-
-		transformTimer.setRepeats(false);
-		canvasListener.setTimer(transformTimer);
-
-		bvb.bvvViewer.getDisplay().canvasSizeListeners().add( canvasListener );
-		transformTimer.start();
+		if(bInitialized)
+		{
+			final Timer transformTimer ;
+			final CanvasListenerWithTimer canvasListener = 
+					new CanvasListenerWithTimer();
+			
+			transformTimer = new Timer(200, e -> 
+			{	
+				bvb.bvvViewer.getDisplay().canvasSizeListeners().remove( canvasListener );
+				SceneView.setSceneView( bvb.bvvViewer, sceneView );
+			});
+	
+			transformTimer.setRepeats(false);
+			canvasListener.setTimer(transformTimer);
+	
+			bvb.bvvViewer.getDisplay().canvasSizeListeners().add( canvasListener );
+			transformTimer.start();
+		}
 	}
 	public class CanvasListenerWithTimer implements CanvasSizeListener
 	{
