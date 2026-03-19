@@ -280,7 +280,27 @@ public class BVBActions
 		gbcR.gridx = 1;
 		gbcL.gridy = 0;
 		gbcR.gridy = 0;
-		pViewSettings.add( new JLabel("<html><b>GPU cache size (in MB)</b></html>"), gbcL );
+		JLabel hyperlink = new JLabel("<html><a href=\"https://github.com/UU-cellbiology/bigvolumebrowser/wiki/3D-rendering-parameters#gpu-usage-settings\">"
+				+ "<b>GPU cache size (in MB)</b></a></html>");
+		
+		hyperlink.setForeground(Color.BLUE.darker());
+		hyperlink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		hyperlink.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				try
+				{
+					Desktop.getDesktop().browse(new URI("https://github.com/UU-cellbiology/bigvolumebrowser/wiki/3D-rendering-parameters#gpu-usage-settings"));
+				}
+				catch ( IOException | URISyntaxException exc )
+				{
+					exc.printStackTrace();
+				}
+
+			}
+		});
+		pViewSettings.add(hyperlink , gbcL );
 		pViewSettings.add( maxCacheSizeInMB,gbcR );
 		
 		gbcL.gridy++;
