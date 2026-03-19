@@ -531,6 +531,7 @@ public class BVBActions
 				+"&nbsp;<b>V</b> - toggle visibility of selected objects<br><br>"
 				+"&nbsp;<b>O</b> - toggle sources render method<br><br>"
 				+"&nbsp;<b>S</b> - separate brightness/color dialog<br><br>"
+				+"&nbsp;<b>Ctrl + S</b> - make a snapshot<br><br>"
 				+"&nbsp;<b>Shift + X/Y/Z</b> - rotate to major plane<br><br>"					
 				+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
 				+"&nbsp;<b>F10</b> - 3D rendering settings<br><br></html>";
