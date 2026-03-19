@@ -155,6 +155,8 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
 	final JPanel glassPanel = new JPanel();
+	
+	boolean bShowAnimationWarning = Prefs.get( "BVB.bShowAnimationWarning", true );
 
 	public AnimationPanel(final BigVolumeBrowser bvb_)
 	{
@@ -441,6 +443,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 	{
 		if(player.isPlaying())
 			player.stop();
+		
+		if(bShowAnimationWarning)
+			dialogsAnim.showAnimationModeWarning();
 		
 		render = new AnimationRender(bvb, this);
 		

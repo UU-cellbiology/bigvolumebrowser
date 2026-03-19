@@ -31,6 +31,7 @@ package bvb.animation;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
@@ -337,7 +338,7 @@ public class AnimationPanelDialogs
 	{
 		JPanel pAnimSettings = new JPanel();
 		
-		GridBagConstraints cd = new GridBagConstraints();
+		GridBagConstraints gbc = new GridBagConstraints();
 	
 		pAnimSettings.setLayout(new GridBagLayout());
 		
@@ -354,37 +355,37 @@ public class AnimationPanelDialogs
 		nfFrameRenderMax.setIntegersOnly(true);
 		nfFrameRenderMax.setText(Integer.toString(aPanel.nRenderFrameTimeLimit));
 		
-		cd.gridx = 0;
-		cd.gridy = 0;	
-		GBCHelper.alighLoose(cd);
-		pAnimSettings.add(new JLabel("Render BVV MultiBox: "),cd);
-		cd.gridx++;
-		pAnimSettings.add(cbMultiBox,cd);	
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		GBCHelper.alighLoose(gbc);
+		pAnimSettings.add(new JLabel("Render BVV MultiBox: "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(cbMultiBox,gbc);	
 		
-		cd.gridx = 0;
-		cd.gridy++;
-		pAnimSettings.add(new JLabel("Render scale bar: "),cd);
-		cd.gridx++;
-		pAnimSettings.add(cbScaleBar,cd);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pAnimSettings.add(new JLabel("Render scale bar: "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(cbScaleBar,gbc);
 
-		cd.gridx = 0;
-		cd.gridy++;
-		pAnimSettings.add(new JLabel("Render axes gizmo: "),cd);
-		cd.gridx++;
-		pAnimSettings.add(cbAxesGizmo,cd);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pAnimSettings.add(new JLabel("Render axes gizmo: "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(cbAxesGizmo,gbc);
 		
-		cd.gridx = 0;
-		cd.gridy++;
-		pAnimSettings.add(new JLabel("Maximum frame render limit (s): "),cd);
-		cd.gridx++;
-		pAnimSettings.add(nfFrameRenderMax,cd);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pAnimSettings.add(new JLabel("Maximum frame render limit (s): "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(nfFrameRenderMax,gbc);
 		
-		cd.gridx = 0;
-		cd.gridy++;
-		cd.gridwidth = 2;
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 2;
 		pAnimSettings.add(new JLabel("OpenGL viewport resolution "+ 
 				Integer.toString( BVVSettings.renderWidth )
-				+"x"+Integer.toString( BVVSettings.renderHeight) + " (px)"),cd);
+				+"x"+Integer.toString( BVVSettings.renderHeight) + " (px)"),gbc);
 		
 		int reply = JOptionPane.showConfirmDialog(null, pAnimSettings, "Animation Settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -500,5 +501,31 @@ public class AnimationPanelDialogs
 			IJ.showStatus( "BVB: cannot save animation timeline, at least 2 keyframes are required." );
 		}
 	}
-	
+	void showAnimationModeWarning()
+	{
+		JPanel pWarning = new JPanel(new GridBagLayout());
+		
+		String message  = "<html>During the render BVB window becomes locked.<br />"
+				+ "You can interrupt it at any time by pressing the <b>Esc</b> button.</html>";
+		String[] options = {"OK"};
+		
+		JCheckBox cbShowAgain = new JCheckBox("Do not show this message again");
+		
+		cbShowAgain.setSelected( false );
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(5,0,5,0);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pWarning.add( new JLabel(message), gbc );
+		gbc.gridy++;
+		gbc.anchor = GridBagConstraints.EAST;
+		pWarning.add( cbShowAgain, gbc );
+		
+		JOptionPane.showOptionDialog(null, pWarning, "Animation render mode", 
+				JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		
+		
+		aPanel.bShowAnimationWarning = !cbShowAgain.isSelected();
+		Prefs.get( "BVB.bShowAnimationWarning", aPanel.bShowAnimationWarning );
+	}
 }

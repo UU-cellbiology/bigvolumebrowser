@@ -180,7 +180,6 @@ public class BVVWindowState
 		public void setCanvasSize( int width, int height )
 		{
 			transformTimerCanvas.restart();		
-			System.out.println("resrrr");
 		}
 		
 	}
