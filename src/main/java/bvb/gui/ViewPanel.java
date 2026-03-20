@@ -257,25 +257,25 @@ public class ViewPanel extends JPanel
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
 
-	    this.add(butToggleVisibility,gbc);
+	    this.add(butToggleVisibility, gbc);
 		
 		gbc.gridx++;
-    	this.add(butVBox,gbc);
+    	this.add(butVBox, gbc);
 		
 		gbc.gridx++;	    
-		this.add(butProjType,gbc);
+		this.add(butProjType, gbc);
 
 		gbc.gridx++;	    
-		this.add(butAxesGizmo,gbc);
+		this.add(butAxesGizmo, gbc);
 
 		gbc.gridy ++;	    
 		gbc.gridx = 0;
-    	this.add(butCenter,gbc);
+    	this.add(butCenter, gbc);
 	    
 	    for(int d = 0; d < 3; d++)
 	    {
 	    	gbc.gridx++;
-			this.add(butAlign[d],gbc);
+			this.add(butAlign[d], gbc);
 	    }
 
 		gbc.gridy ++;	    
@@ -285,7 +285,7 @@ public class ViewPanel extends JPanel
 	    for(int d = 0; d < 3; d++)
 	    {
 	    	gbc.gridx++;
-			this.add(butRotate[d],gbc);
+			this.add(butRotate[d], gbc);
 	    }
 	    gbc.gridy = 0;
 	    gbc.gridx++;
@@ -365,6 +365,9 @@ public class ViewPanel extends JPanel
 		
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
+		
+		JCheckBox cbMeshNormals = new JCheckBox();
+		cbMeshNormals.setSelected(BVBSettings.bShowMeshNormalsDialog);	
 				
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
@@ -481,7 +484,10 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
-			
+
+			BVBSettings.bShowMeshNormalsDialog = cbMeshNormals.isSelected();
+			Prefs.set("BVB.bShowMeshNormalsDialog", BVBSettings.bShowMeshNormalsDialog);
+
 			if(bRepaintBVV)
 			{
 				bvb.repaintBVV();

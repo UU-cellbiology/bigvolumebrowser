@@ -35,6 +35,7 @@ import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -55,6 +56,7 @@ import net.imglib2.util.LinAlgHelpers;
 
 import org.apache.commons.io.FilenameUtils;
 
+import bvb.core.BVBSettings;
 import bvb.scene.AbstractClipTransformVis;
 import bvb.scene.VisMesh;
 import bvb.utils.Misc;
@@ -149,69 +151,95 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 		//no normals
 		if(!(Double.compare(  LinAlgHelpers.length( test_norm ), 0.0) != 0))
 		{
-			//what do we do about it? 
-			//let's ask users
-			final JPanel pMeshSettings  = new JPanel(new GridBagLayout());
+			if(BVBSettings.bShowMeshNormalsDialog)
+			{
+				//what do we do about it? 
+				//let's ask users
+				final JPanel pMeshSettings  = new JPanel(new GridBagLayout());
+				
+				String message  = "<html>Provided mesh does not have normals.<br/>"
+						+ "Please choose how to calculate them:</html>";
+				String[] sMethod = {"Use all vertices as they are", "Remove duplicate vertices"};
+				
+				int nSpinnerPrecision = (int) ij.Prefs.get( "BVB.nMeshFilterPrecision", 3.0);
+				final SpinnerModel precisionM = new SpinnerNumberModel(nSpinnerPrecision, 1, 10, 1);		
+				final JSpinner precisionSP = new JSpinner(precisionM);
+				precisionSP.setEditor( new JSpinner.NumberEditor(precisionSP, "#") );
+				final JComboBox<String> cbMethod = new JComboBox<>(sMethod);
+	
+				cbMethod.addActionListener( (e)->{
+					if(cbMethod.getSelectedIndex() == 0)
+					{
+						precisionSP.setEnabled( false );
+					}
+					else
+					{
+						precisionSP.setEnabled( true );
+					}
+					});
+				cbMethod.setSelectedIndex( (int)
+						ij.Prefs.get( "BVB.nMeshNormalsCalculation", 0.0) );
+				
+				final JCheckBox cbRemember = new JCheckBox("Remember and don't ask again");
+				cbRemember.setSelected( false );
+				
+				GridBagConstraints gbc = new GridBagConstraints();
+				gbc.gridx = 0;
+				gbc.gridy = 0;
+				gbc.gridwidth = 2;
+				gbc.insets = new Insets(5,0,5,0);
+				pMeshSettings.add( new JLabel(message), gbc );
+				
+				gbc.gridx = 0;
+				gbc.gridy ++;
+				gbc.gridwidth = 1;
+				gbc.insets = new Insets(0,3,0,3);
+				pMeshSettings.add( new JLabel("Filtering "), gbc );
+				gbc.gridx ++;
+				pMeshSettings.add( cbMethod, gbc );
+				
+				gbc.gridx = 0;
+				gbc.gridy ++;
+				pMeshSettings.add( new JLabel("Precision "), gbc );
+				gbc.gridx ++;
+				pMeshSettings.add( precisionSP, gbc );
+				
+				gbc.gridx = 0;
+				gbc.gridy ++;
+				gbc.gridwidth = 2;
+				gbc.insets = new Insets(5,0,5,0);
+				pMeshSettings.add( new JLabel("Not sure? Try both and compare."), gbc );
+				gbc.gridx = 0;
+				gbc.gridy ++;
+				gbc.insets = new Insets(5,0,0,0);
+				pMeshSettings.add( cbRemember, gbc );
+				
+				
+				String[] options = {"OK"};
+				JOptionPane.showOptionDialog(null, pMeshSettings, "Mesh loading", 
+						JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 			
-			String message  = "<html>Provided mesh does not have normals.<br/>"
-					+ "Please choose how to calculate them:</html>";
-			String[] sMethod = {"Use all vertices as they are", "Remove duplicate vertices"};
-			
-			int nSpinnerPrecision = (int) ij.Prefs.get( "BVB.nMeshFilterPrecision", 3.0);
-			final SpinnerModel precisionM = new SpinnerNumberModel(nSpinnerPrecision, 1, 10, 1);		
-			final JSpinner precisionSP = new JSpinner(precisionM);
-			precisionSP.setEditor( new JSpinner.NumberEditor(precisionSP, "#") );
-			final JComboBox<String> cbMethod = new JComboBox<>(sMethod);
-
-			cbMethod.addActionListener( (e)->{
-				if(cbMethod.getSelectedIndex() == 0)
+				double dMethodSel = cbMethod.getSelectedIndex();
+				ij.Prefs.set( "BVB.nMeshNormalsCalculation", dMethodSel);
+				double dPrecisionSel = ((Integer)precisionSP.getValue()).intValue();
+				ij.Prefs.set( "BVB.nMeshFilterPrecision", dPrecisionSel);
+				if(cbRemember.isSelected())
 				{
-					precisionSP.setEnabled( false );
+					BVBSettings.bShowMeshNormalsDialog = false;
+					ij.Prefs.set( "BVB.bShowMeshNormalsDialog", false);
 				}
-				else
-				{
-					precisionSP.setEnabled( true );
-				}
-				});
-			cbMethod.setSelectedItem( ij.Prefs.get( "BVB.bMeshNormalsCalculation", "Use all vertices as they are") );
+				
+			}			
 			
-			
-			GridBagConstraints gbc = new GridBagConstraints();
-			gbc.gridx = 0;
-			gbc.gridy = 0;
-			gbc.gridwidth = 2;
-			gbc.insets = new Insets(5,0,5,0);
-			pMeshSettings.add( new JLabel(message), gbc );
-			
-			gbc.gridx = 0;
-			gbc.gridy ++;
-			gbc.gridwidth = 1;
-			gbc.insets = new Insets(0,3,0,3);
-			pMeshSettings.add( new JLabel("Filtering "), gbc );
-			gbc.gridx ++;
-			pMeshSettings.add( cbMethod, gbc );
-			
-			gbc.gridx = 0;
-			gbc.gridy ++;
-			pMeshSettings.add( new JLabel("Precision "), gbc );
-			gbc.gridx ++;
-			pMeshSettings.add( precisionSP, gbc );
-			
-			String[] options = {"OK"};
-			JOptionPane.showOptionDialog(null, pMeshSettings, "Mesh loading", 
-					JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
-		
-			int nMethod = cbMethod.getSelectedIndex();
-			ij.Prefs.set( "BVB.bMeshNormalsCalculation", sMethod[nMethod]);
-			double nPrecision = ((Integer)precisionSP.getValue()).intValue();
-			ij.Prefs.set( "BVB.nMeshFilterPrecision", nPrecision);
+			int nMethod = (int) ij.Prefs.get( "BVB.nMeshNormalsCalculation", 0.0);
+			int nPrecision = (int) ij.Prefs.get( "BVB.nMeshFilterPrecision", 0.0);
 			if(nMethod == 0)
 			{
 				Mesh outmesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
 				MeshProcessing.calculateNormals( mesh, outmesh );
 				return outmesh;
 			}
-			final BufferMesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, (int)nPrecision) ;
+			final BufferMesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, nPrecision) ;
 			Mesh outmesh = new BufferMesh( tempMesh.vertices().size(), tempMesh.triangles().size(), true );
 			MeshProcessing.calculateNormals( tempMesh, outmesh );
 			return outmesh;
