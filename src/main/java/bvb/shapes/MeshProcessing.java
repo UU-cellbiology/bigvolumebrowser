@@ -187,7 +187,7 @@ public class MeshProcessing
 
 	private static String getHash( final RealPoint point, final int precision )
 	{
-		final int factor = ( int ) Math.pow( 10, precision );
+		final double factor = Math.pow( 10, precision );
 		return Math.round( point.getFloatPosition( 0 ) * factor ) + "-" + Math.round( point.getFloatPosition( 1 ) * factor ) + "-" + Math.round( point.getFloatPosition( 2 ) * factor );
 	}
 

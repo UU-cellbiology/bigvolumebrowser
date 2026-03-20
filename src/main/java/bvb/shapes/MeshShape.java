@@ -29,16 +29,29 @@
 package bvb.shapes;
 
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -96,12 +109,12 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 	public static Mesh loadMeshFromFile(String sFilename)
 	{
 		String fileExt = FilenameUtils.getExtension( sFilename );
-				
+		Mesh mesh = null;
 		if(fileExt.equals( "stl" ))
 		{
 			try
 			{
-				return STLMeshIO.open( sFilename );
+				mesh = STLMeshIO.open( sFilename );
 			}
 			catch ( IOException exc )
 			{
@@ -114,7 +127,7 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 		{
 			try
 			{
-				return PLYMeshIO.open( sFilename );				
+				mesh = PLYMeshIO.open( sFilename );				
 			}
 			catch ( IOException exc )
 			{
@@ -122,7 +135,89 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 				return null;
 			}
 		}
-		return null;
+		if(mesh != null)
+		{
+			mesh = calculateNormalsDialog(mesh);
+		}
+		return mesh;
+	}
+	
+	public static Mesh calculateNormalsDialog(final Mesh mesh)
+	{
+		//see if normals are already present in the provided mesh
+		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ), mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
+		//no normals
+		if(!(Double.compare(  LinAlgHelpers.length( test_norm ), 0.0) != 0))
+		{
+			//what do we do about it? 
+			//let's ask users
+			final JPanel pMeshSettings  = new JPanel(new GridBagLayout());
+			
+			String message  = "<html>Provided mesh does not have normals.<br/>"
+					+ "Please choose how to calculate them:</html>";
+			String[] sMethod = {"Use all vertices as they are", "Remove duplicate vertices"};
+			
+			int nSpinnerPrecision = (int) ij.Prefs.get( "BVB.nMeshFilterPrecision", 3.0);
+			final SpinnerModel precisionM = new SpinnerNumberModel(nSpinnerPrecision, 1, 10, 1);		
+			final JSpinner precisionSP = new JSpinner(precisionM);
+			precisionSP.setEditor( new JSpinner.NumberEditor(precisionSP, "#") );
+			final JComboBox<String> cbMethod = new JComboBox<>(sMethod);
+
+			cbMethod.addActionListener( (e)->{
+				if(cbMethod.getSelectedIndex() == 0)
+				{
+					precisionSP.setEnabled( false );
+				}
+				else
+				{
+					precisionSP.setEnabled( true );
+				}
+				});
+			cbMethod.setSelectedItem( ij.Prefs.get( "BVB.bMeshNormalsCalculation", "Use all vertices as they are") );
+			
+			
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			gbc.gridwidth = 2;
+			gbc.insets = new Insets(5,0,5,0);
+			pMeshSettings.add( new JLabel(message), gbc );
+			
+			gbc.gridx = 0;
+			gbc.gridy ++;
+			gbc.gridwidth = 1;
+			gbc.insets = new Insets(0,3,0,3);
+			pMeshSettings.add( new JLabel("Filtering "), gbc );
+			gbc.gridx ++;
+			pMeshSettings.add( cbMethod, gbc );
+			
+			gbc.gridx = 0;
+			gbc.gridy ++;
+			pMeshSettings.add( new JLabel("Precision "), gbc );
+			gbc.gridx ++;
+			pMeshSettings.add( precisionSP, gbc );
+			
+			String[] options = {"OK"};
+			JOptionPane.showOptionDialog(null, pMeshSettings, "Mesh loading", 
+					JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		
+			int nMethod = cbMethod.getSelectedIndex();
+			ij.Prefs.set( "BVB.bMeshNormalsCalculation", sMethod[nMethod]);
+			double nPrecision = ((Integer)precisionSP.getValue()).intValue();
+			ij.Prefs.set( "BVB.nMeshFilterPrecision", nPrecision);
+			if(nMethod == 0)
+			{
+				Mesh outmesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
+				MeshProcessing.calculateNormals( mesh, outmesh );
+				return outmesh;
+			}
+			final BufferMesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, (int)nPrecision) ;
+			Mesh outmesh = new BufferMesh( tempMesh.vertices().size(), tempMesh.triangles().size(), true );
+			MeshProcessing.calculateNormals( tempMesh, outmesh );
+			return outmesh;
+		}
+		
+		return mesh;
 	}
 	
 	AbstractClipTransformVis getVisObject()

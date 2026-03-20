@@ -126,6 +126,7 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	boolean bUseTexture = false;  
 	
+	
 	public VisMesh()
 	{
 		initShader();
@@ -145,14 +146,14 @@ public class VisMesh extends AbstractClipTransformVis
 	public VisMesh(final Mesh meshin)
 	{
 		this();
-		setMesh(meshin, true);
+		setMesh(meshin);
 		
 	}
 	
 	public VisMesh(final Mesh meshin, final BufferedImage imageTexture )
 	{
 		this(imageTexture);
-		setMesh(meshin, false);
+		setMesh(meshin);
 		bHasTexture  = true;
 		bUseTexture = true;
 	}	
@@ -257,7 +258,7 @@ public class VisMesh extends AbstractClipTransformVis
 		return silhouetteDecay;
 	}
 	
-	public void setMesh(final Mesh mesh, boolean bRemoveVertices)
+	public void setMesh(final Mesh mesh)
 	{
 		
 		if( mesh.vertices().size() == 0)
@@ -273,20 +274,11 @@ public class VisMesh extends AbstractClipTransformVis
 			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
 			Meshes.copy( mesh, this.mesh );
 		}
-		//no, let's simplify mesh and calculate normals
+		//no, let's calculate normals
 		else
 		{
-			if(bRemoveVertices)
-			{
-				final BufferMesh tempMesh = MeshProcessing.removeDuplicateVertices( mesh, 3) ;
-				this.mesh = new BufferMesh( tempMesh.vertices().size(), tempMesh.triangles().size(), true );
-				MeshProcessing.calculateNormals( tempMesh, this.mesh );
-			}
-			else
-			{
-				this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-				MeshProcessing.calculateNormals( mesh, this.mesh );
-			}
+			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
+			MeshProcessing.calculateNormals( mesh, this.mesh );
 		}
 	}	
 	
