@@ -249,7 +249,7 @@ public class PanelAddSources extends JPanel
 		final int nDatasetSize = estimateSizeSingleTimeFrameInMB(spimData);
 		final String sDatasetSizeGB = Integer.toString((int)Math.round( nDatasetSize/1000. ));
 
-		if(nDatasetSize >= 4)
+		if(nDatasetSize >= 4000)
 		{
 			sReason = " is pretty large ("+ sDatasetSizeGB +" GB).</html>";
 		}

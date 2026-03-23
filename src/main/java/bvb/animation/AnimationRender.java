@@ -101,11 +101,12 @@ public class AnimationRender extends SwingWorker<Void, String>
 		bvb.axisOverlay.setEnabled( aPanel.bRenderAxesGizmo );
 
 		Prefs.showTextOverlay(false);
-		bvb.bvvFrame.setExtendedState(Frame.NORMAL);
 		bvb.bvvViewer.setRenderMode( true );
 		
 		if(!aPanel.bRenderCurrentWindowSize)
 		{
+			bvb.bvvFrame.setExtendedState(Frame.NORMAL);
+
 			//resize the canvas and close the splitpanel
 			SplitPanel splitPanel =  bvb.bvvFrame.getSplitPanel();
 			
