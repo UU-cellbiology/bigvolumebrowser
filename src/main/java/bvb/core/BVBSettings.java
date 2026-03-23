@@ -91,10 +91,16 @@ public class BVBSettings
 	public static String sShaderPath = "/bvb/scene/";
 	
 	public static String sUITheme = "";
-	
+	//warnings
+	/** first start warning, set up BVB **/
 	public static boolean bFirstStart = Prefs.get( "BVB.bFirstStart", true );
 	
+	/** option for meshes without normals **/	
 	public static boolean bShowMeshNormalsDialog = Prefs.get( "BVB.bShowMeshNormalsDialog", true );
+	
+	/** loaded datset size warning **/	
+	public static boolean bShowFileSizeDialog = Prefs.get( "BVB.bShowFileSizeDialog", true );
+
 	
 	public static Color getInvertedColor(Color color_in)
 	{		

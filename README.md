@@ -20,8 +20,8 @@ It supports rendering of 3D visualization movies using key frame animation inter
 **Users**: please check full description/tutorials in the **[project's wiki](https://github.com/UU-cellbiology/bigvolumebrowser/wiki)**.   
 
 
-You can also watch a short (12 m) **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary))   
-or a longer (1 h) [extended version](https://www.youtube.com/watch?v=Z9rbxIqZNp8).   
+You can also watch a short **[video tutorial](https://www.youtube.com/watch?v=c0frU3WpfwE)** (big thanks to [@jomaydc](https://forum.image.sc/u/jomaydc/summary)) (12 mins)  
+or a longer [extended version](https://www.youtube.com/watch?v=Z9rbxIqZNp8) (1 hour).   
 
 For questions, tag me (<a href="https://forum.image.sc/u/ekatrukha/summary">@ekatrukha</a>) at <a href="https://forum.image.sc/">image.sc</a> forum.   
 
@@ -33,7 +33,7 @@ Feel free to reach out, since the code description/comments are not always in th
 
 What's next here? See the development [roadmap](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Improvements).  
 Want to contribute? Submit a [PR](https://en.wikipedia.org/wiki/Fork_and_pull_model). Or create an [issue](https://github.com/UU-cellbiology/bigvolumebrowser/issues).  
-Wanna see live progress on development? Check [this feed](https://bsky.app/hashtag/bigvolumebrowser).  
+Wanna see live progress on development? Check [this feed](https://bsky.app/hashtag/bigvolumebrowser) or less frequent updates [thread](https://forum.image.sc/t/bigvolumebrowser-a-new-3d-multi-volume-mesh-point-cloud-smlm-data-viewer/117764).  
 Not happy with it? Something is fundamentally wrong?  
 Consider [alternative open-source tools for 3D viewing](https://github.com/UU-cellbiology/bigvolumebrowser/wiki/Alternative-3D-viewers).    
 Like it? Spread the word and give it a star on GitHub.   
