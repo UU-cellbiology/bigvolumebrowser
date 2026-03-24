@@ -59,6 +59,9 @@ public class AnimationRender extends SwingWorker<Void, String>
 	final AnimationPanel aPanel;
 	public JPanel glass = null;
 	
+	boolean bSliderUpdate;
+	int nSliderValue;
+	
 	public final BVVWindowState bvvWindowState;
 	
 	public AnimationRender(final BigVolumeBrowser bvb_, AnimationPanel aPanel_)
@@ -102,6 +105,10 @@ public class AnimationRender extends SwingWorker<Void, String>
 
 		Prefs.showTextOverlay(false);
 		bvb.bvvViewer.setRenderMode( true );
+		bSliderUpdate = aPanel.bUpdateSlider;
+		nSliderValue = aPanel.timeSlider.getValue();
+		
+		aPanel.bUpdateSlider = false;
 		
 		if(!aPanel.bRenderCurrentWindowSize)
 		{
@@ -170,7 +177,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 		{
 			setProgress(Math.round(  nFr * 100 / (nTotFrames - 1)));
 
-			publish("rendering frame ("+Integer.toString( nFr+1 )+"/"+Integer.toString(nTotFrames)+")");
+			publish("rendering frame (" + Integer.toString( nFr + 1 ) + "/" + Integer.toString(nTotFrames)+")");
 			
 			final float fTimePoint = nFr * dT;
 
@@ -258,9 +265,13 @@ public class AnimationRender extends SwingWorker<Void, String>
     	}	
     	setProgress(100);  
     	
+    	aPanel.timeSlider.setValue(nSliderValue);
+    	aPanel.bUpdateSlider = bSliderUpdate;
+    	
     	bvb.bvvViewer.setRenderMode( false );
 		bvb.bvvFrame.setResizable( true );
-        if(glass != null)
+        
+		if(glass != null)
         {
         	glass.setVisible(false);
         }

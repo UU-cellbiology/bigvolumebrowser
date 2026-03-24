@@ -308,9 +308,9 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				if (evt.getClickCount() == 2) 
 				{
 					// Double-click detected
-					SceneView.setSceneView( bvb.bvvViewer, jlist.getSelectedValue().getSceneView());
+					SceneView.setSceneView( bvb.bvvViewer, jlist.getSelectedValue().getSceneView() );
 					int nPos = Math.round( tsSpan*(jlist.getSelectedValue().fMovieTimePoint/kfAnim.getTotalTime()));
-					timeSlider.setValue( nPos);			
+					timeSlider.setValue( nPos );			
 				} 
 				if (SwingUtilities.isRightMouseButton(evt))
 				{
@@ -451,8 +451,11 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		
 		render.addPropertyChangeListener( (evt) ->
 		{
-			if ("progress".equals(evt.getPropertyName())) {
-                IJ.showProgress( (Integer)evt.getNewValue(), 100);
+			if ("progress".equals(evt.getPropertyName())) 
+			{
+				final int nProgress = (Integer)evt.getNewValue();
+                IJ.showProgress( nProgress, 100);
+                timeSlider.setValue( (int)Math.round( nProgress * 0.01 * tsSpan) );
             }
 		});
 		
