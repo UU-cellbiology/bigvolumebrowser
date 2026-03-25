@@ -58,8 +58,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerModel;
 
@@ -247,24 +245,15 @@ public class BVBActions
 		JSpinner dClipNear = new JSpinner(dClipNearM);
 		dClipNear.setEditor(new JSpinner.NumberEditor(dClipNear, "#"));
 		dClipNear.setToolTipText( "Visible depth from z=0 closer to the camera (in space units). MUST BE SMALLER THAN CAMERA DISTANCE!"  );
-		dClipNear.addChangeListener( new ChangeListener()
-				{
-
-					@Override
-					public void stateChanged( ChangeEvent arg0 )
-					{
-						int currNear =  ((Double)dClipNear.getValue()).intValue();
-						((SpinnerNumberModel)dCam.getModel()).setMinimum( new Double(currNear+5) );
-						if(currNear > ((Double)dCam.getValue()).intValue())
-						{
-							dCam.setValue( currNear+5 );
-							//(dCam.getModel()).setMinimum( new Integer(currNear+5) );
-						}
-					}
-
-			
-				}
-				);
+		dClipNear.addChangeListener( (e)->
+		{
+			int currNear =  ((Double)dClipNear.getValue()).intValue();
+			((SpinnerNumberModel)dCam.getModel()).setMinimum( new Double(currNear+5) );
+			if(currNear > ((Double)dCam.getValue()).intValue())
+			{
+				dCam.setValue( currNear + 5 );
+			}
+		});
 		
 		gbcL.insets = new Insets(5,5,5,5);
 		gbcR.insets = new Insets(5,5,5,5);
@@ -281,7 +270,7 @@ public class BVBActions
 		gbcL.gridy = 0;
 		gbcR.gridy = 0;
 		JLabel hyperlink = new JLabel("<html><a href=\"https://github.com/UU-cellbiology/bigvolumebrowser/wiki/3D-rendering-parameters#gpu-usage-settings\">"
-				+ "<b>GPU cache size (in MB)</b></a></html>");
+				+ "<b>GPU memory size (in MB)</b></a></html>");
 		
 		hyperlink.setForeground(Color.BLUE.darker());
 		hyperlink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
