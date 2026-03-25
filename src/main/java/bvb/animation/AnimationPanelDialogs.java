@@ -28,27 +28,38 @@
  */
 package bvb.animation;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bvb.animation.utils.Timeline;
+import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.GBCHelper;
 import bvb.gui.GetFolderDialog;
 import bvb.gui.NumberField;
+import bvb.io.dto.SerializationIO;
+import bvb.io.dto.StoryDTO;
 import ij.IJ;
 import ij.Prefs;
+import ij.io.SaveDialog;
 
 public class AnimationPanelDialogs
 {
@@ -67,36 +78,66 @@ public class AnimationPanelDialogs
 		final JPanel panRenderSettings = new JPanel();
 		panRenderSettings.setLayout(new GridBagLayout());
 		
-		GridBagConstraints cd = new GridBagConstraints();
-		GBCHelper.alighLeft(cd);
+		GridBagConstraints gbc = new GridBagConstraints();
+		GBCHelper.alighLeft(gbc);
 		
 		final NumberField nfFPS = new NumberField(4);
 		nfFPS.setIntegersOnly( true );
 		nfFPS.setText(Integer.toString( aPanel.nRenderFPS ));
+		
 		final NumberField nfWidth = new NumberField(4);
 		nfWidth.setIntegersOnly( true );
 		nfWidth.setText(Integer.toString( aPanel.nRenderWidth ));
+		
 		final NumberField nfHeight = new NumberField(4);
 		nfHeight.setIntegersOnly( true );
 		nfHeight.setText(Integer.toString( aPanel.nRenderHeight));
 		
-		cd.gridx = 0;
-		cd.gridy = 0;	
-		panRenderSettings.add(new JLabel("Render FPS:"),cd);
-		cd.gridx++;
-		panRenderSettings.add(nfFPS, cd);	
+		final JCheckBox cbCurrentWindow = new JCheckBox("");
 		
-		cd.gridx = 0;
-		cd.gridy++;	
-		panRenderSettings.add(new JLabel("Render width (px):"),cd);
-		cd.gridx++;
-		panRenderSettings.add(nfWidth, cd);			
+		cbCurrentWindow.addItemListener((e)->{
+			boolean bNFState =  !(e.getStateChange() 
+					== ItemEvent.SELECTED ? true : false);
+			nfWidth.setEnabled( bNFState );
+			nfHeight.setEnabled( bNFState );
+		});
+		cbCurrentWindow.setSelected( aPanel.bRenderCurrentWindowSize );
+
+		final Dimension currDimensionsWindow = bvb.bvvViewer.getSize();
 		
-		cd.gridx = 0;
-		cd.gridy++;	
-		panRenderSettings.add(new JLabel("Render height (px):"),cd);
-		cd.gridx++;
-		panRenderSettings.add(nfHeight, cd);			
+		String sCurrSize = Integer.toString( currDimensionsWindow.width )+
+				" x " + Integer.toString( currDimensionsWindow.height );
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		panRenderSettings.add(new JLabel("Render FPS:"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(nfFPS, gbc);	
+		
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("Movie width (px):"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(nfWidth, gbc);			
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("Movie height (px):"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(nfHeight, gbc);	
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("Or use current [" + sCurrSize + "]"),gbc);
+		gbc.gridx++;
+		gbc.gridheight = 2;
+		panRenderSettings.add(cbCurrentWindow, gbc);		
+		gbc.gridheight = 1;
+		gbc.gridx = 0;
+		gbc.gridy++;	
+		panRenderSettings.add(new JLabel("canvas/window size"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(new JLabel(), gbc);	
 		
 		int reply = JOptionPane.showConfirmDialog(null, panRenderSettings, "Render settings", 
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -105,11 +146,17 @@ public class AnimationPanelDialogs
 			aPanel.nRenderFPS = Integer.parseInt( nfFPS.getText());
 			Prefs.set("BVB.nRenderFPS", (double)aPanel.nRenderFPS);
 			
-			aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
-			Prefs.set("BVB.nRenderWidth", (double)aPanel.nRenderWidth);
+			aPanel.bRenderCurrentWindowSize = cbCurrentWindow.isSelected();
+			Prefs.set("BVB.bRenderCurrentWindowSize", aPanel.bRenderCurrentWindowSize);
 			
-			aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
-			Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
+			if(!aPanel.bRenderCurrentWindowSize)
+			{
+				aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
+				Prefs.set("BVB.nRenderWidth", (double)aPanel.nRenderWidth);
+				
+				aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
+				Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
+			}
 			
 			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder.." );
 			
@@ -291,7 +338,7 @@ public class AnimationPanelDialogs
 	{
 		JPanel pAnimSettings = new JPanel();
 		
-		GridBagConstraints cd = new GridBagConstraints();
+		GridBagConstraints gbc = new GridBagConstraints();
 	
 		pAnimSettings.setLayout(new GridBagLayout());
 		
@@ -300,36 +347,45 @@ public class AnimationPanelDialogs
 		
 		JCheckBox cbScaleBar = new JCheckBox();
 		cbScaleBar.setSelected( aPanel.bRenderScaleBar);
+
+		JCheckBox cbAxesGizmo = new JCheckBox();
+		cbAxesGizmo.setSelected( aPanel.bRenderAxesGizmo);
 		
 		NumberField nfFrameRenderMax = new NumberField(4);
 		nfFrameRenderMax.setIntegersOnly(true);
 		nfFrameRenderMax.setText(Integer.toString(aPanel.nRenderFrameTimeLimit));
 		
-		cd.gridx = 0;
-		cd.gridy = 0;	
-		GBCHelper.alighLoose(cd);
-		pAnimSettings.add(new JLabel("Render BVV MultiBox: "),cd);
-		cd.gridx++;
-		pAnimSettings.add(cbMultiBox,cd);	
+		gbc.gridx = 0;
+		gbc.gridy = 0;	
+		GBCHelper.alighLoose(gbc);
+		pAnimSettings.add(new JLabel("Render BVV MultiBox: "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(cbMultiBox,gbc);	
 		
-		cd.gridx = 0;
-		cd.gridy++;
-		pAnimSettings.add(new JLabel("Render scale bar: "),cd);
-		cd.gridx++;
-		pAnimSettings.add(cbScaleBar,cd);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pAnimSettings.add(new JLabel("Render scale bar: "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(cbScaleBar,gbc);
+
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pAnimSettings.add(new JLabel("Render axes gizmo: "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(cbAxesGizmo,gbc);
 		
-		cd.gridx = 0;
-		cd.gridy++;
-		pAnimSettings.add(new JLabel("Maximum frame render limit (s): "),cd);
-		cd.gridx++;
-		pAnimSettings.add(nfFrameRenderMax,cd);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		pAnimSettings.add(new JLabel("Maximum frame render limit (s): "),gbc);
+		gbc.gridx++;
+		pAnimSettings.add(nfFrameRenderMax,gbc);
 		
-		cd.gridx = 0;
-		cd.gridy++;
-		cd.gridwidth = 2;
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 2;
 		pAnimSettings.add(new JLabel("OpenGL viewport resolution "+ 
 				Integer.toString( BVVSettings.renderWidth )
-				+"x"+Integer.toString( BVVSettings.renderHeight) + " (px)"),cd);
+				+"x"+Integer.toString( BVVSettings.renderHeight) + " (px)"),gbc);
 		
 		int reply = JOptionPane.showConfirmDialog(null, pAnimSettings, "Animation Settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -344,9 +400,132 @@ public class AnimationPanelDialogs
 			aPanel.bRenderScaleBar = cbScaleBar.isSelected();
 			Prefs.set("BVB.bRenderScaleBar", aPanel.bRenderScaleBar );
 			
+			//axes gizmo
+			aPanel.bRenderAxesGizmo = cbAxesGizmo.isSelected();
+			Prefs.set("BVB.bRenderAxesGizmo", aPanel.bRenderAxesGizmo );
+			
 			aPanel.nRenderFrameTimeLimit = Integer.parseInt(nfFrameRenderMax.getText());
 			Prefs.set("BVB.nRenderFrameTimeLimit", aPanel.nRenderFrameTimeLimit);
 		}
 	
+	}
+	
+	void dialStorylineLoad()
+	{
+		String filename;
+		JFileChooser chooser = new JFileChooser(BVBSettings.lastDir);
+		chooser.setDialogTitle( "Load BVB animation timeline" );
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "BVB animation timeline", "json");
+        chooser.setFileFilter(filter);
+        
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+	        aPanel.setEnabled( false );
+
+            BVBSettings.lastDir = chooser.getSelectedFile().getParent();
+            Prefs.set( "BVB.lastDir",  BVBSettings.lastDir );
+            filename =  chooser.getSelectedFile().getPath();
+            StoryDTO storyDTO = null;
+    
+            try
+            {
+            	storyDTO = SerializationIO.MAPPER.readValue(new File(filename), StoryDTO.class);
+            }
+            catch ( IOException exc )
+            {
+            	exc.printStackTrace();
+            }
+ 
+            if(storyDTO != null)
+            {
+            	if(!storyDTO.BVBVersion.equals( BVBSettings.sVersion ))
+            	{
+            		IJ.log( "BVB animation timeline was made in version " + storyDTO.BVBVersion
+            				+ ", but current plugin version is " +BVBSettings.sVersion + ".");
+            		IJ.log( "Trying to load timeline anyway.");
+
+            	}
+            	
+        		aPanel.checkObjectsPresence( storyDTO.bvbObjects, filename );
+        		aPanel.restoreStory( storyDTO );
+            }
+            else
+            {
+            	IJ.log( "BVB: Error while loading animation timeline. See console for the full log." );
+            }
+            aPanel.setEnabled( true );
+
+
+        }
+	}
+
+	
+	void dialStorylineSave()
+	{
+		if(aPanel.listModel.size() > 0)
+		{
+			String filename;
+			
+			filename = SerializationIO.getTimestamp() + "_animationTimelineBVB";
+			SaveDialog sd = new SaveDialog("Save storyline ", BVBSettings.lastDir, filename, ".json");
+	        String path = sd.getDirectory();
+	        if (path == null)
+	        	return;
+	        aPanel.setEnabled( false );
+	        BVBSettings.lastDir = path;
+	        Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+	        filename = path + sd.getFileName();
+	        StoryDTO story = new StoryDTO();
+	        story.BVBVersion = BVBSettings.sVersion;
+	        story.keyFrameAnimation = aPanel.kfAnim.toDTO();
+	        story.bvbObjects = bvb.objectHashStorage.toDTO();
+	        story.timeline = aPanel.timeline.toDTO();
+
+	        try
+			{
+	        	SerializationIO.MAPPER.writeValue( new File(filename), story );
+			}
+			catch ( IOException exc )
+			{
+				exc.printStackTrace();
+				IJ.log( "BVB: Error while saving animation timeline. See console for the full log." );
+			}	        
+	        aPanel.setEnabled( true );
+
+		}
+		else
+		{
+			IJ.showStatus( "BVB: cannot save animation timeline, at least 2 keyframes are required." );
+		}
+	}
+	void showAnimationModeWarning()
+	{
+		JPanel pWarning = new JPanel(new GridBagLayout());
+		
+		String message  = "<html>During the render BVB window becomes locked.<br />"
+				+ "You can interrupt it at any time by pressing the <b>Esc</b> button.</html>";
+		String[] options = {"OK"};
+		
+		JCheckBox cbShowAgain = new JCheckBox("Do not show this message again");
+		
+		cbShowAgain.setSelected( false );
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(5,0,5,0);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pWarning.add( new JLabel(message), gbc );
+		gbc.gridy++;
+		gbc.anchor = GridBagConstraints.EAST;
+		pWarning.add( cbShowAgain, gbc );
+		
+		JOptionPane.showOptionDialog(null, pWarning, "Animation render mode", 
+				JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		
+		
+		aPanel.bShowAnimationWarning = !cbShowAgain.isSelected();
+		Prefs.get( "BVB.bShowAnimationWarning", aPanel.bShowAnimationWarning );
 	}
 }

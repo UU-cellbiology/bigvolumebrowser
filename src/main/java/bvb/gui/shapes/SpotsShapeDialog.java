@@ -304,8 +304,8 @@ public class SpotsShapeDialog
 		
 		if(bExportCleanData)
 		{
-			sExportFilename = fileSpots.getAbsolutePath()+"_cleanedup";
-			SaveDialog sd = new SaveDialog("Save cleaned up data ", sExportFilename, ".csv");
+			sExportFilename = fileSpots.getName()+"_cleanedup";
+			SaveDialog sd = new SaveDialog("Save cleaned up data ", fileSpots.getParent(), sExportFilename, ".csv");
 			sExportFilename = sd.getDirectory();
 			if (sExportFilename == null)
 			{

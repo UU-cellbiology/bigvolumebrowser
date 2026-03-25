@@ -36,6 +36,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.LinAlgHelpers;
 
 import org.scijava.ui.behaviour.DragBehaviour;
+import org.scijava.ui.behaviour.ScrollBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import bdv.TransformEventHandler3D;
@@ -45,13 +46,16 @@ import bvb.utils.Misc;
 import bvb.utils.transform.TransformSetups;
 import bvvpg.vistools.BvvHandle;
 
-public class TransformHandlerBVB 
+public class TransformHandlerBVB
 {
 	
-	private static final double[] speed = { 0.75, 2.0, 0.1 };
 	
 	final private static double step = Math.PI / 180;
-	
+
+	private static final double[] speedRotate = { 0.75, 2.0, 0.1 };
+
+	private static final double[] speedZoom = { 2.0, 4.0, 0.2 };
+
 	/**
 	 * Copy of transform when mouse dragging started.
 	 */
@@ -66,7 +70,7 @@ public class TransformHandlerBVB
 	 * Coordinates where mouse dragging started.
 	 */
 	private double oX, oY;
-	
+
 	/**
 	 * Screen coordinates to keep centered while zooming or rotating with the
 	 * keyboard. These are set to <em>(canvasW/2, canvasH/2)</em>
@@ -88,22 +92,26 @@ public class TransformHandlerBVB
 	final BvvHandle bvvHandle;
 	
 	// -- behaviours --
-	
 	private final TranslateXY dragTranslate;
 	private final Rotate dragRotate;
 	private final Rotate dragRotateFast;
 	private final Rotate dragRotateSlow;
+	private final Zoom zoom;
+	private final Zoom zoomFast;
+	private final Zoom zoomSlow;
 	
 	public TransformHandlerBVB( final BigVolumeBrowser bvb)
 	{
 		this.bvb = bvb;
 		bvvHandle = bvb.bvvHandle;
 		this.transform = TransformState.from( bvb.bvvViewer.state()::getViewerTransform, bvb.bvvViewer.state()::setViewerTransform );
-		
 		dragTranslate = new TranslateXY();
-		dragRotate = new Rotate( speed[ 0 ] );
-		dragRotateFast = new Rotate( speed[ 1 ] );
-		dragRotateSlow = new Rotate( speed[ 2 ] );
+		dragRotate     = new Rotate( speedRotate[ 0 ] );
+		dragRotateFast = new Rotate( speedRotate[ 1 ] );
+		dragRotateSlow = new Rotate( speedRotate[ 2 ] );
+		zoom     = new Zoom( speedZoom[0] );
+		zoomFast = new Zoom( speedZoom[1]  );
+		zoomSlow = new Zoom( speedZoom[2]  );
 
 	}
 	
@@ -113,11 +121,13 @@ public class TransformHandlerBVB
 		behaviours.behaviour( dragRotate, TransformEventHandler3D.DRAG_ROTATE, TransformEventHandler3D.DRAG_ROTATE_KEYS);
 		behaviours.behaviour( dragRotateFast, TransformEventHandler3D.DRAG_ROTATE_FAST, TransformEventHandler3D.DRAG_ROTATE_FAST_KEYS );
 		behaviours.behaviour( dragRotateSlow, TransformEventHandler3D.DRAG_ROTATE_SLOW, TransformEventHandler3D.DRAG_ROTATE_SLOW_KEYS );
+		behaviours.behaviour( zoom, TransformEventHandler3D.SCROLL_Z, TransformEventHandler3D.SCROLL_Z_KEYS);
+		behaviours.behaviour( zoomFast, TransformEventHandler3D.SCROLL_Z_FAST, TransformEventHandler3D.SCROLL_Z_FAST_KEYS );
+		behaviours.behaviour( zoomSlow, TransformEventHandler3D.SCROLL_Z_SLOW, TransformEventHandler3D.SCROLL_Z_SLOW_KEYS);
 	}
 	
 	private class Rotate implements DragBehaviour
 	{
-		@SuppressWarnings( "hiding" )
 		private final double speed;
 		
 		private boolean isDrag;
@@ -130,6 +140,8 @@ public class TransformHandlerBVB
 		@Override
 		public void init( final int x, final int y )
 		{
+			isDrag = false;
+			
 			oX = x;
 			oY = y;
 			centerX = bvvHandle.getViewerPanel().getDisplay().getWidth()/2;
@@ -158,7 +170,6 @@ public class TransformHandlerBVB
 				viewTransform.applyInverse( vXY[i], vXY[i]);
 				LinAlgHelpers.normalize( vXY[i] );
 			}
-			isDrag = false;
 			
 		}
 
@@ -166,7 +177,8 @@ public class TransformHandlerBVB
 		public void drag( final int x, final int y )
 		{
 			isDrag = true;
-			rotationXY[0]  = (y - oY) *  step * speed;
+			
+			rotationXY[0]  = (y - oY) * step * speed;
 			rotationXY[1]  = (oX - x) * step * speed;
 
 			affineDragCurrent.set( affineDragStart );
@@ -248,12 +260,12 @@ public class TransformHandlerBVB
 		@Override
 		public void end( final int x, final int y )
 		{
-			if(!isDrag)
+			if( !isDrag )
 			{
 				final int nAxis = bvb.axisOverlay.getHighlightedAxis();
 				if( nAxis >= 0 )
 				{
-					bvb.bvbActions.alignToAxis(nAxis);
+					bvb.bvbActions.alignToAxis( nAxis );
 				}
 			}
 		}
@@ -343,4 +355,48 @@ public class TransformHandlerBVB
 		public void end( final int x, final int y )
 		{}
 	}
+	
+	private class Zoom implements ScrollBehaviour
+	{
+		private final double speed;
+		
+		public Zoom(final double speed )
+		{
+			this.speed = speed;
+		}
+		
+		@Override
+		public void scroll( final double wheelRotation, final boolean isHorizontal, final int x, final int y )
+		{
+			final double s = speed * wheelRotation;
+			final double dScale = 1.0 + 0.1 * Math.abs( s );
+			centerX = bvvHandle.getViewerPanel().getDisplay().getWidth()/2;
+			centerY = bvvHandle.getViewerPanel().getDisplay().getHeight()/2;
+			//final double dScale = 1.0 + 0.05;
+			if ( s > 0 )
+				scale( 1.0 / dScale, centerX, centerY );
+			else
+				scale( dScale, centerX, centerY );
+		}
+	}
+	
+	private void scale( final double s, final double x, final double y )
+	{
+		final AffineTransform3D affine = transform.get();
+
+		// center shift
+		affine.set( affine.get( 0, 3 ) - x, 0, 3 );
+		affine.set( affine.get( 1, 3 ) - y, 1, 3 );
+
+		// scale
+		affine.scale( s );
+
+		// center un-shift
+		affine.set( affine.get( 0, 3 ) + x, 0, 3 );
+		affine.set( affine.get( 1, 3 ) + y, 1, 3 );
+
+		transform.set( affine );
+	}
+
+	
 }

@@ -72,7 +72,7 @@ public class MultiBoxOverlayRendererBVB implements OverlayRenderer
 	
 	protected final BigVolumeBrowser bvb;
 	
-	boolean isEnabled = false;
+	private volatile boolean isEnabled = false;
 
 	public MultiBoxOverlayRendererBVB(final BigVolumeBrowser bvb)
 	{
@@ -211,16 +211,17 @@ public class MultiBoxOverlayRendererBVB implements OverlayRenderer
 	@Override
 	public void drawOverlays( Graphics g )
 	{
-		if(isEnabled)
-		{
-			setViewerState(bvb.bvvViewer.state());
-			updateVirtualScreenSize(bvb.bvvViewer.getDisplay().getWidth(),bvb.bvvViewer.getDisplay().getHeight());
-			Graphics2D graphics = (Graphics2D) g;
-			paint(graphics);
-		}
+
+		if(!isEnabled)
+			return;
+		setViewerState(bvb.bvvViewer.state());
+		updateVirtualScreenSize(bvb.bvvViewer.getDisplay().getWidth(), bvb.bvvViewer.getDisplay().getHeight());
+		Graphics2D graphics = (Graphics2D) g;
+		paint(graphics);
+		
 	}
 	
-	public void setEnabled (boolean bEnabled)
+	public synchronized void setEnabled (boolean bEnabled)
 	{
 		isEnabled = bEnabled;
 	}

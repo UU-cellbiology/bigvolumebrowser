@@ -35,7 +35,7 @@ import ij.Prefs;
 public class BVBSettings
 {
 	
-	public static String sVersion = "0.0.8";
+	public static String sVersion = "0.0.9";
 	
 	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
@@ -91,6 +91,16 @@ public class BVBSettings
 	public static String sShaderPath = "/bvb/scene/";
 	
 	public static String sUITheme = "";
+	//warnings
+	/** first start warning, set up BVB **/
+	public static boolean bFirstStart = Prefs.get( "BVB.bFirstStart", true );
+	
+	/** option for meshes without normals **/	
+	public static boolean bShowMeshNormalsDialog = Prefs.get( "BVB.bShowMeshNormalsDialog", true );
+	
+	/** loaded datset size warning **/	
+	public static boolean bShowFileSizeDialog = Prefs.get( "BVB.bShowFileSizeDialog", true );
+
 	
 	public static Color getInvertedColor(Color color_in)
 	{		

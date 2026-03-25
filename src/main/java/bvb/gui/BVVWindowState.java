@@ -38,11 +38,10 @@ import java.awt.event.ComponentListener;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import net.imglib2.realtransform.AffineTransform3D;
-
 import bdv.ui.splitpanel.SplitPanel;
+import bvb.animation.SceneView;
 import bvb.core.BigVolumeBrowser;
-import bvvpg.core.VolumeViewerPanel;
+import bvvpg.core.InteractiveGLDisplayCanvas.CanvasSizeListener;
 
 /** wait for BVV window to finish window resizing 
  * before applying viewer transform **/
@@ -53,11 +52,12 @@ public class BVVWindowState
 	boolean bInitialized = false;
 	double dividerProportion;
 	Rectangle frameBounds;
+	
 	boolean bSplitPanelCollapsed;
-	AffineTransform3D viewTransform; 
-	boolean bSplitRestored = false;
-	boolean bSizeRestored = false;
+	SceneView sceneView;
 	int frameState;
+	
+	int nCount = 0;
 
 
 	public BVVWindowState(final BigVolumeBrowser bvb)
@@ -69,7 +69,7 @@ public class BVVWindowState
 	{
 		final SplitPanel splitPanel = bvb.bvvFrame.getSplitPanel();
 		dividerProportion = (double)splitPanel.getDividerLocation()/splitPanel.getWidth();
-	    viewTransform = bvb.bvvViewer.state().getViewerTransform();
+		sceneView = SceneView.getCurrentSceneView( bvb.bvvViewer );
 	    bSplitPanelCollapsed = bvb.bvvFrame.getSplitPanel().isCollapsed();
 	    bInitialized = true;
 	    frameBounds = bvb.bvvFrame.getBounds(); 
@@ -80,91 +80,107 @@ public class BVVWindowState
 	{
 		if(bInitialized)
 		{
+
 			if(frameState == Frame.MAXIMIZED_BOTH)
-			{
-				
+			{				
 				//restore window position		
 				SwingUtilities.invokeLater(() -> 
 				{
-					bvb.bvvFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
-					bSizeRestored = true;
-				});
+					final Timer resizeTimer = new Timer(150, e ->
+					{
+						bvb.bvvFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
+						setSplitPanelAfterResizeIsDone();
+					});
+					resizeTimer.setRepeats( false );
+					resizeTimer.start();
+				});			
 			}
 			else
 			{
 				//restore window position		
 				SwingUtilities.invokeLater(() -> 
 				{
-					bvb.bvvFrame.setBounds( frameBounds );
-					bSizeRestored = true;
+					
+					final Timer resizeTimer = new Timer(200, e ->
+					{
+						bvb.bvvFrame.setBounds( new Rectangle(frameBounds));
+						setSplitPanelAfterResizeIsDone();
+					});
+					resizeTimer.setRepeats( false );
+					resizeTimer.start();
 				});
 			}
-			bSplitRestored = false;
-			setSplitPanelAfterResizeIsDone();
-			//put back viewer transform after window resizing is finished
-			setViewerTransformAfterResizeIsDone( bvb.bvvViewer, viewTransform );
-
+			
 		}
 	}
 
 	public void setSplitPanelAfterResizeIsDone()
 	{
+		final ComponentListener[] holder = new ComponentListener[1];
+		final Dimension lastSize = new Dimension();
+
+		final Timer splitPanelTimer = new Timer(200, e -> 
 		{
-			ComponentListener[] holder = new ComponentListener[1];
-			final Dimension lastSize = new Dimension();
-					
-			Timer resizeTimer = new Timer(200, e -> {
 				bvb.bvvViewer.removeComponentListener(holder[0]);
 				bvb.bvvFrame.getSplitPanel().setCollapsed( bSplitPanelCollapsed );
 				bvb.bvvFrame.getSplitPanel().setDividerLocation( dividerProportion );
-				bSplitRestored = true;
-			});
-			resizeTimer.setRepeats(false);
-			lastSize.setSize( bvb.bvvViewer.getSize());
-			holder[0] = new ComponentAdapter() 
-			{
-			    @Override
-			    public void componentResized(ComponentEvent e) {
-			        Dimension current = bvb.bvvViewer.getSize();
-			        if (!current.equals(lastSize) || !bSizeRestored ) 
-			        {
-			            lastSize.setSize(current);
-			            resizeTimer.restart();
-			        }
+				setViewerTransformAfterResizeIsDone();
 
-			    }
-			};
-			
-			bvb.bvvViewer.addComponentListener(holder[0]);
-		}
-
-	}
-
-	public void setViewerTransformAfterResizeIsDone(final VolumeViewerPanel viewer, final AffineTransform3D viewTransform)
-	{
-		ComponentListener[] holder = new ComponentListener[1];
-		final Dimension lastSize = new Dimension();
-				
-		Timer resizeTimer = new Timer(200, e -> 
-		{	
-			viewer.removeComponentListener(holder[0]);
-		    viewer.state().setViewerTransform( viewTransform );
 		});
-		resizeTimer.setRepeats(false);
-		lastSize.setSize( viewer.getSize());
-		
+		splitPanelTimer.setRepeats(false);
+		lastSize.setSize( bvb.bvvViewer.getSize());
+
 		holder[0] = new ComponentAdapter() 
 		{
-		    @Override
-		    public void componentResized(ComponentEvent e) {
-		        Dimension current = viewer.getSize();
-		        if (!current.equals(lastSize) && bSplitRestored) {
-		            lastSize.setSize(current);
-		            resizeTimer.restart();
-		        }
-		    }
+			@Override
+			public void componentResized(ComponentEvent e) {
+				Dimension current = bvb.bvvViewer.getSize();
+				if (!current.equals(lastSize) ) 
+				{
+					lastSize.setSize(current);
+					splitPanelTimer.restart();
+				}
+			}
 		};
+
+		bvb.bvvViewer.addComponentListener(holder[0]);
+		splitPanelTimer.start();
+	}
+
+	public void setViewerTransformAfterResizeIsDone()
+	{	
+		if(bInitialized)
+		{
+			final Timer transformTimer ;
+			final CanvasListenerWithTimer canvasListener = 
+					new CanvasListenerWithTimer();
+			
+			transformTimer = new Timer(200, e -> 
+			{	
+				bvb.bvvViewer.getDisplay().canvasSizeListeners().remove( canvasListener );
+				SceneView.setSceneView( bvb.bvvViewer, sceneView );
+			});
+	
+			transformTimer.setRepeats(false);
+			canvasListener.setTimer(transformTimer);
+	
+			bvb.bvvViewer.getDisplay().canvasSizeListeners().add( canvasListener );
+			transformTimer.start();
+		}
+	}
+	public class CanvasListenerWithTimer implements CanvasSizeListener
+	{
+		Timer transformTimerCanvas;
 		
-		viewer.addComponentListener(holder[0]);
+		public void setTimer (final Timer timer)
+		{
+			transformTimerCanvas = timer;
+		}
+		@Override
+		public void setCanvasSize( int width, int height )
+		{
+			transformTimerCanvas.restart();		
+		}
+		
 	}
 }

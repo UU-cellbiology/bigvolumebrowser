@@ -56,9 +56,8 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerModel;
 
@@ -113,7 +112,7 @@ public class BVBActions
 
 	final long lRotationDuration = 100;
 	
-	TransformModeOverlayRenderer transfromModeOverlay = new TransformModeOverlayRenderer();
+	final TransformModeOverlayRenderer transfromModeOverlay = new TransformModeOverlayRenderer();
 	
 	public BVBActions(final BigVolumeBrowser bvb_) 
 	{
@@ -143,7 +142,7 @@ public class BVBActions
 		actions.runnableAction(() -> dummy(), "toggle manual transformation", "T" );
 
 		actions.runnableAction(() -> actionToggleManualTransform(), "toggle manual transformation (BVB)", "T" );
-		actions.runnableAction(() -> turnOffManualTransform(), "off manual transform mode(BVB)", "ESCAPE" );		
+		actions.runnableAction(() -> turnOffManualTransform(true), "off manual transform mode(BVB)", "ESCAPE" );		
 		actions.runnableAction(() -> actionToggleVisibility(), "toggle visibility", "V" );
 		actions.runnableAction(() -> actionSelectClosestObject(0), "select object", "E" );
 		actions.runnableAction(() -> actionSelectClosestObject(1), "add object", "shift E" );
@@ -158,7 +157,7 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(0, false), "rotate 90 x axis wrld", ROTATE_X_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
-		
+		actions.runnableAction(() -> bvb.bvbCards.animationPanel.makeSnapshot(), "make snapshot", "ctrl S" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
@@ -213,9 +212,9 @@ public class BVBActions
 		slNumDitherSamples.setMinorTickSpacing(1);
 		Hashtable< Integer, JLabel > labelTable = new Hashtable<>();
 		labelTable.put( new Integer( 1 ), new JLabel("1") );
-		for(int i=1; i<=4; i++)
+		for(int i = 1; i <= 4; i++)
 		{
-			labelTable.put( new Integer( i*2 ), new JLabel(Integer.toString( i*2 )) );
+			labelTable.put( new Integer( i * 2 ), new JLabel(Integer.toString( i * 2 )) );
 			
 		}
 		slNumDitherSamples.setLabelTable( labelTable );
@@ -246,24 +245,15 @@ public class BVBActions
 		JSpinner dClipNear = new JSpinner(dClipNearM);
 		dClipNear.setEditor(new JSpinner.NumberEditor(dClipNear, "#"));
 		dClipNear.setToolTipText( "Visible depth from z=0 closer to the camera (in space units). MUST BE SMALLER THAN CAMERA DISTANCE!"  );
-		dClipNear.addChangeListener( new ChangeListener()
-				{
-
-					@Override
-					public void stateChanged( ChangeEvent arg0 )
-					{
-						int currNear =  ((Double)dClipNear.getValue()).intValue();
-						((SpinnerNumberModel)dCam.getModel()).setMinimum( new Double(currNear+5) );
-						if(currNear > ((Double)dCam.getValue()).intValue())
-						{
-							dCam.setValue( currNear+5 );
-							//(dCam.getModel()).setMinimum( new Integer(currNear+5) );
-						}
-					}
-
-			
-				}
-				);
+		dClipNear.addChangeListener( (e)->
+		{
+			int currNear =  ((Double)dClipNear.getValue()).intValue();
+			((SpinnerNumberModel)dCam.getModel()).setMinimum( new Double(currNear+5) );
+			if(currNear > ((Double)dCam.getValue()).intValue())
+			{
+				dCam.setValue( currNear + 5 );
+			}
+		});
 		
 		gbcL.insets = new Insets(5,5,5,5);
 		gbcR.insets = new Insets(5,5,5,5);
@@ -279,7 +269,27 @@ public class BVBActions
 		gbcR.gridx = 1;
 		gbcL.gridy = 0;
 		gbcR.gridy = 0;
-		pViewSettings.add( new JLabel("<html><b>GPU cache size (in MB)</b></html>"), gbcL );
+		JLabel hyperlink = new JLabel("<html><a href=\"https://github.com/UU-cellbiology/bigvolumebrowser/wiki/3D-rendering-parameters#gpu-usage-settings\">"
+				+ "<b>GPU memory size (in MB)</b></a></html>");
+		
+		hyperlink.setForeground(Color.BLUE.darker());
+		hyperlink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		hyperlink.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				try
+				{
+					Desktop.getDesktop().browse(new URI("https://github.com/UU-cellbiology/bigvolumebrowser/wiki/3D-rendering-parameters#gpu-usage-settings"));
+				}
+				catch ( IOException | URISyntaxException exc )
+				{
+					exc.printStackTrace();
+				}
+
+			}
+		});
+		pViewSettings.add(hyperlink , gbcL );
 		pViewSettings.add( maxCacheSizeInMB,gbcR );
 		
 		gbcL.gridy++;
@@ -332,7 +342,7 @@ public class BVBActions
 		pViewSettings.add( dClipNear,gbcR );
 		
 		
-		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "BVV canvas settings", 
+		int reply = JOptionPane.showConfirmDialog(null, pViewSettings, "3D rendering settings", 
 		        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (reply == JOptionPane.OK_OPTION) 
@@ -510,9 +520,10 @@ public class BVBActions
 				+"&nbsp;<b>V</b> - toggle visibility of selected objects<br><br>"
 				+"&nbsp;<b>O</b> - toggle sources render method<br><br>"
 				+"&nbsp;<b>S</b> - separate brightness/color dialog<br><br>"
+				+"&nbsp;<b>Ctrl + S</b> - make a snapshot<br><br>"
 				+"&nbsp;<b>Shift + X/Y/Z</b> - rotate to major plane<br><br>"					
 				+"&nbsp;<b>M</b>/<b>N</b> - timepoint +/- <br><br>"
-				+"&nbsp;<b>F10</b> - BVV (canvas) settings<br><br></html>";
+				+"&nbsp;<b>F10</b> - 3D rendering settings<br><br></html>";
 		JLabel jlInfo = new JLabel(shortCutInfo);
 		jlInfo.setVerticalAlignment(SwingConstants.TOP);
 		jlInfo.setHorizontalAlignment(SwingConstants.CENTER);
@@ -634,16 +645,22 @@ public class BVBActions
 
 	}
 	
-	public void turnOffManualTransform()
+	public void turnOffManualTransform(final boolean bShowMessage)
 	{
 		if( bvb.getInputLock() )
 			return;
-		bvb.bManualTransformMode = !bvb.bManualTransformMode;
 		
-		if(!bvb.bManualTransformMode)
+		if(bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
-			this.transfromModeOverlay.setEnabled(false);
+			bvb.bManualTransformMode = false;
+			if(bShowMessage)
+			{
+				bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			}
+			SwingUtilities.invokeLater(() -> {
+				this.transfromModeOverlay.setEnabled(false);
+				bvb.repaintBVV();
+			});
 		}
 	}
 	
@@ -655,14 +672,16 @@ public class BVBActions
 		
 		if(bvb.bManualTransformMode)
 		{
-			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
-			
+			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode on", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );			
 		}
 		else
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "manual transform mode off", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}
-		transfromModeOverlay.setEnabled( bvb.bManualTransformMode );
+		SwingUtilities.invokeLater(() -> {
+			this.transfromModeOverlay.setEnabled( bvb.bManualTransformMode);
+			bvb.repaintBVV();
+		});
 	}
 	
 	public void alignToAxis( final int nAxis )
@@ -677,11 +696,31 @@ public class BVBActions
 			break;
 		case 2:
 			alignToPlane(AlignPlaneBVB.XY);
+			break;
+		case 3:
+			alignToPlane(AlignPlaneBVB.YZ);
+			break;
+		case 4:
+			alignToPlane(AlignPlaneBVB.ZX);
+			break;
+		case 5:
+			alignToPlane(AlignPlaneBVB.YX);
+			break;
 		}
 	}
 	
 	void alignToPlane(final AlignPlaneBVB plane)
 	{
+//		//test
+//		double [] axis = new double[3];
+//		axis[0] = 1.0;
+//		double [] quatAddition = new double[4];
+//		LinAlgHelpers.quaternionFromAngleAxis( axis, -Math.PI, quatAddition );
+//		
+//		double [] quatCurrent = new double[]{ 0, 0, 1, 0 };
+//		
+//		LinAlgHelpers.quaternionMultiply( quatCurrent, quatAddition, quatCurrent );
+		
 		final double[] qTarget = new double[ 4 ];
 		LinAlgHelpers.quaternionInvert( plane.qAlign, qTarget );
 		final AffineTransform3D transform = bvb.bvvViewer.state().getViewerTransform();
@@ -735,9 +774,12 @@ public class BVBActions
 	 */
 	public enum AlignPlaneBVB
 	{
-		XY( 2, new double[] { 0, 0, 1, 0 } ),
 		ZY( 0, new double[] { 0.5, -0.5, -0.5, 0.5 } ),
-		XZ( 1, new double[] { 0, 0, cQuat, -cQuat } );
+		XZ( 1, new double[] { 0, 0, cQuat, -cQuat } ),
+		XY( 2, new double[] { 0, 0, 1, 0 } ),
+		YZ( 3, new double[] { 0.5, -0.5, 0.5, -0.5 } ),
+		ZX( 4, new double[] { cQuat, -cQuat, 0, 0 } ),
+		YX( 5, new double[] { 0, 0, 0, 1 } );
 
 		/**
 		 * rotation from the xy-plane aligned coordinate system to this plane.

@@ -172,6 +172,7 @@ public class KeyFrameAnimation
 	public Map<String, KeyFrameScene > restoreFromDTO(final KeyFrameAnimationDTO in)	
 	{
 		nTotalTime = in.nTotalTime;
+
 		keyFrames.clear();
 		final Map<String, KeyFrameScene > keyFrameSceneMap = new HashMap<>();
 		for(int i = 0; i < in.keyFrameList.size(); i++)

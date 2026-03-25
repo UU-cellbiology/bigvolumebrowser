@@ -55,6 +55,7 @@ import org.joml.Vector4f;
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
+import bvb.shapes.MeshProcessing;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -124,6 +125,7 @@ public class VisMesh extends AbstractClipTransformVis
 	boolean bHasTexture = false;
 	
 	boolean bUseTexture = false;  
+	
 	
 	public VisMesh()
 	{
@@ -259,23 +261,24 @@ public class VisMesh extends AbstractClipTransformVis
 	public void setMesh(final Mesh mesh)
 	{
 		
-		this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
-		
 		if( mesh.vertices().size() == 0)
 		{
 			System.err.println("Error loading mesh, zero vertices!");
 			return;
 		}
-		//see if normals were setup already
+		//see if normals are already present in the provided mesh
 		final double [] test_norm = new double[] {mesh.vertices().nx( 0 ),mesh.vertices().ny( 0 ), mesh.vertices().nz( 0 )};
-		
-		if(Double.compare(  LinAlgHelpers.length( test_norm ),0.0) != 0)
+		//yes, they are, let's just load
+		if(Double.compare(  LinAlgHelpers.length( test_norm ), 0.0) != 0)
 		{
+			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
 			Meshes.copy( mesh, this.mesh );
 		}
+		//no, let's calculate normals
 		else
 		{
-			Meshes.calculateNormals( mesh, this.mesh );
+			this.mesh = new BufferMesh( mesh.vertices().size(), mesh.triangles().size(), true );
+			MeshProcessing.calculateNormals( mesh, this.mesh );
 		}
 	}	
 	

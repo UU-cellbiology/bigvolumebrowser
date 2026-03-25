@@ -50,6 +50,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bdv.tools.brightness.ColorIcon;
@@ -256,25 +257,25 @@ public class ViewPanel extends JPanel
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
 
-	    this.add(butToggleVisibility,gbc);
+	    this.add(butToggleVisibility, gbc);
 		
 		gbc.gridx++;
-    	this.add(butVBox,gbc);
+    	this.add(butVBox, gbc);
 		
 		gbc.gridx++;	    
-		this.add(butProjType,gbc);
+		this.add(butProjType, gbc);
 
 		gbc.gridx++;	    
-		this.add(butAxesGizmo,gbc);
+		this.add(butAxesGizmo, gbc);
 
 		gbc.gridy ++;	    
 		gbc.gridx = 0;
-    	this.add(butCenter,gbc);
+    	this.add(butCenter, gbc);
 	    
 	    for(int d = 0; d < 3; d++)
 	    {
 	    	gbc.gridx++;
-			this.add(butAlign[d],gbc);
+			this.add(butAlign[d], gbc);
 	    }
 
 		gbc.gridy ++;	    
@@ -284,7 +285,7 @@ public class ViewPanel extends JPanel
 	    for(int d = 0; d < 3; d++)
 	    {
 	    	gbc.gridx++;
-			this.add(butRotate[d],gbc);
+			this.add(butRotate[d], gbc);
 	    }
 	    gbc.gridy = 0;
 	    gbc.gridx++;
@@ -364,6 +365,9 @@ public class ViewPanel extends JPanel
 		
 		JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
+		
+		JCheckBox cbMeshNormals = new JCheckBox();
+		cbMeshNormals.setSelected(BVBSettings.bShowMeshNormalsDialog);	
 				
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
@@ -464,7 +468,10 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowMultiBox = cbShowMultiBox.isSelected();
 			Prefs.set("BVB.bShowMultiBox", BVBSettings.bShowMultiBox);
-			bvb.multiBoxOverlayBVB.setEnabled(  BVBSettings.bShowMultiBox );
+			SwingUtilities.invokeLater(() -> {
+				bvb.multiBoxOverlayBVB.setEnabled(  BVBSettings.bShowMultiBox );
+				bvb.repaintBVV();
+			});
 			
 			BVBSettings.bHighlightSelectedBoxes = cbHighLightBox.isSelected();
 			Prefs.set("BVB.bHighlightSelectedBoxes", BVBSettings.bHighlightSelectedBoxes);
@@ -477,7 +484,10 @@ public class ViewPanel extends JPanel
 			
 			BVBSettings.bShowRandomShader = cbBGShader.isSelected();
 			Prefs.set("BVB.bShowRandomShader", BVBSettings.bShowRandomShader);
-			
+
+			BVBSettings.bShowMeshNormalsDialog = cbMeshNormals.isSelected();
+			Prefs.set("BVB.bShowMeshNormalsDialog", BVBSettings.bShowMeshNormalsDialog);
+
 			if(bRepaintBVV)
 			{
 				bvb.repaintBVV();
@@ -489,8 +499,8 @@ public class ViewPanel extends JPanel
 	{
 		String filename;
 
-		filename = BVBSettings.lastDir + "/" + SerializationIO.getTimestamp() + "_sceneStateBVB";
-		SaveDialog sd = new SaveDialog("Save BVB scene state", filename, ".json");
+		filename = SerializationIO.getTimestamp() + "_sceneStateBVB";
+		SaveDialog sd = new SaveDialog("Save BVB scene state", BVBSettings.lastDir, filename, ".json");
 		String path = sd.getDirectory();
 		if (path == null)
 			return;

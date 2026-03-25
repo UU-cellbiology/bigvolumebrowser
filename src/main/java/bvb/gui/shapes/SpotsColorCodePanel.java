@@ -169,6 +169,9 @@ public class SpotsColorCodePanel extends JPanel
 
 	synchronized void updateGUI()
 	{
+		
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
 		boolean bFirstMesh = true;
 		
 		boolean bColorSame = true;
@@ -322,170 +325,175 @@ public class SpotsColorCodePanel extends JPanel
 		
 	}
 	
-	synchronized void updateLUTMapping()
-	{
-		if(!blockUpdates)
-		{
-			final int nMapLUTMode = cbMapLUT.getSelectedIndex();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
-			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setMapLUTMode( nMapLUTMode );
-					if(nMapLUTMode != 0)
-					{
-						final float [] range = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapLUTMode - 1 );
-						((BasicSpots)sh).setMapLUTRange( range[0], range[1] );
-					}
-				}
-			}
-			bvb.repaintBVV();
-			updateGUI();
-		}
-	}
-	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(final Component nC:allComp)
-		{
-			nC.setEnabled( bEnabled );
-		}
+		if(blockUpdates)
+			return;
+		SwingUtilities.invokeLater( () -> {
+			synchronized ( SpotsColorCodePanel.this )
+			{				
+				blockUpdates = true;
+				for(final Component nC:allComp)
+				{
+					nC.setEnabled( bEnabled );
+				}
+				blockUpdates = false;
+			} });
 	}
+	
+	synchronized void updateLUTMapping()
+	{
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		
+		final int nMapLUTMode = cbMapLUT.getSelectedIndex();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
+		{
+			if(sh instanceof BasicSpots)
+			{
+				((BasicSpots)sh).setMapLUTMode( nMapLUTMode );
+				if(nMapLUTMode != 0)
+				{
+					final float [] range = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapLUTMode - 1 );
+					((BasicSpots)sh).setMapLUTRange( range[0], range[1] );
+				}
+			}
+		}
+		bvb.repaintBVV();
+		updateGUI();
+
+	}
+
 	
 	synchronized void updateLUT()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final String sLUT = panelLUT.getICMName();
+		if(sLUT == null)
+			return;
+		if(sLUT == "")
+			return;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final String sLUT = panelLUT.getICMName();
-			if(sLUT == null)
-				return;
-			if(sLUT == "")
-				return;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setLUT( sLUT );
-				}
+				((BasicSpots)sh).setLUT( sLUT );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();
+		
 	}
 	
 	synchronized void updateLUTInversion()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final boolean bInvLUT = panelLUT.cbInverted.isSelected();
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			final boolean bInvLUT = panelLUT.cbInverted.isSelected();
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
-				{
-					((BasicSpots)sh).setInvertedLUT( bInvLUT );
-				}
+				((BasicSpots)sh).setInvertedLUT( bInvLUT );
 			}
-			bvb.repaintBVV();
-			updateGUI();
 		}
+		bvb.repaintBVV();
+		updateGUI();		
 	}
 	
 	public synchronized void updateLUTMapRangeBounds()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;		
+
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+
+		final BoundedRange rangeUI = lutRangePanel.getRange();
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-		
-			final BoundedRange rangeUI = lutRangePanel.getRange();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
+				if(nMapMode != 0)
 				{
-					final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
-					if(nMapMode != 0)
-					{
-						((BasicSpots)sh).setMapLUTRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
-					
-						float [] rangeStored = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
-						rangeStored[0] = (float)rangeUI.getMin();
-						rangeStored[1] = (float)rangeUI.getMax();
-						rangeStored[2] = (float)rangeUI.getMinBound();
-						rangeStored[3] = (float)rangeUI.getMaxBound();
-					}
+					((BasicSpots)sh).setMapLUTRange((float)rangeUI.getMin(), (float)rangeUI.getMax());
+
+					float [] rangeStored = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+					rangeStored[0] = (float)rangeUI.getMin();
+					rangeStored[1] = (float)rangeUI.getMax();
+					rangeStored[2] = (float)rangeUI.getMinBound();
+					rangeStored[3] = (float)rangeUI.getMaxBound();
 				}
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
+
+		bvb.repaintBVV();
+		updateGUI();
+		
 	}
 	
 	public synchronized void updateLUTMapGamma()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		BoundedValueDouble gammaCurr = lutGammaPanel.getValue();
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			BoundedValueDouble gammaCurr = lutGammaPanel.getValue();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
+				if(nMapMode != 0)
 				{
-					final int nMapMode = ((BasicSpots)sh).getMapLUTMode();
-					if(nMapMode != 0)
-					{
-						((BasicSpots)sh).setMapLUTGamma( (float) gammaCurr.getCurrentValue() );   
-						float [] rangeStored = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
-						rangeStored[4] = (float) gammaCurr.getCurrentValue();
-						rangeStored[5] = (float) gammaCurr.getRangeMin();
-						rangeStored[6] = (float) gammaCurr.getRangeMax();
-					}
+					((BasicSpots)sh).setMapLUTGamma( (float) gammaCurr.getCurrentValue() );   
+					float [] rangeStored = spotsLUTSetup.getMapRangeFloat( ((BasicSpots)sh), nMapMode - 1 );
+					rangeStored[4] = (float) gammaCurr.getCurrentValue();
+					rangeStored[5] = (float) gammaCurr.getRangeMin();
+					rangeStored[6] = (float) gammaCurr.getRangeMax();
 				}
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
+
+		bvb.repaintBVV();
+		updateGUI();
 	}
 	
 	
 	void resetLUTMapRangeBounds()
 	{
-		if(!blockUpdates)
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
 		{
-			blockUpdates = true;
-			final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-			for ( final BasicShape sh: shapeList)
+			if(sh instanceof BasicSpots)
 			{
-				if(sh instanceof BasicSpots)
+				final int nMapMode = ((BasicSpots)sh).getMapLUTMode() - 1;
+				if(nMapMode >= 0)
 				{
-					final int nMapMode = ((BasicSpots)sh).getMapLUTMode() - 1;
-					if(nMapMode >= 0)
+					final float [][] rangeDef = spotsLUTSetup.getDefaultRanges( (BasicSpots)sh );
+					final float [] currRange = spotsLUTSetup.getMapRangeFloat( (BasicSpots)sh , nMapMode );
+					for(int i = 0; i < 7; i++)
 					{
-						final float [][] rangeDef = spotsLUTSetup.getDefaultRanges( (BasicSpots)sh );
-						final float [] currRange = spotsLUTSetup.getMapRangeFloat( (BasicSpots)sh , nMapMode );
-						for(int i = 0; i < 7; i++)
-						{
-							currRange[i] = rangeDef[nMapMode][i];
-						}
-						((BasicSpots)sh).setMapLUTGamma( currRange[4] );
-						((BasicSpots)sh).setMapLUTRange( currRange[0], currRange[1] );
+						currRange[i] = rangeDef[nMapMode][i];
 					}
+					((BasicSpots)sh).setMapLUTGamma( currRange[4] );
+					((BasicSpots)sh).setMapLUTRange( currRange[0], currRange[1] );
 				}
 			}
-	
-			bvb.repaintBVV();
-			blockUpdates = false;
-			updateGUI();
 		}
-		
+
+		bvb.repaintBVV();
+		updateGUI();
+
 	}
 	
 	private JMenuItem runnableItem( final String text, final Runnable action )

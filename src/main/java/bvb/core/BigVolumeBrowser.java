@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import net.imglib2.RandomAccessibleInterval;
@@ -50,7 +51,6 @@ import net.imglib2.RealInterval;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.ValuePair;
-
 
 import org.joml.Matrix4f;
 
@@ -271,9 +271,22 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				showNoise();
 			}
 			bvvFrame.getSplitPanel().setDividerLocation( 400 );
-			bvvViewer.addTimePointListener(this);
+			bvvViewer.timePointListeners().add( this );
 		}
 		propertyRegistry.bindBVB( this );
+		if(BVBSettings.bFirstStart)
+		{
+			String message  = "<html>Looks like it is the first time that BVB runs on this PC.<br />"
+					+ "Please set up 3D rendering parameters (at least GPU cache size).<br />"
+					+ "We are going to invoke the settings dialog.</html>";
+			String[] options = {"OK"};
+			JOptionPane.showOptionDialog(null, message, "Let's set up BVB", 
+					JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+			bvbActions.runSettingsCommand();
+			BVBSettings.bFirstStart = false;
+			ij.Prefs.set( "BVB.bFirstStart", BVBSettings.bFirstStart );
+				
+		}
 	}
 	
 	void initBVV()
@@ -777,7 +790,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		}
 		//restore window location
 		bvvWindowState.restoreBvvWindowState();
-		bvvViewer.addTimePointListener(this);
+		bvvViewer.timePointListeners().add( this );
 		propertyRegistry.bindBVB( this );
 		
 		//restore animation settings
@@ -806,6 +819,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final Color bbFrameColor = BVBSettings.getInvertedColor(bgColor);
 		BVBSettings.canvasOverlayColor = new Color(bbFrameColor.getRed(),bbFrameColor.getGreen(),bbFrameColor.getBlue(),bbFrameColor.getAlpha());		
 		ij.Prefs.set("BVB.canvasOverlayColor", bbFrameColor.getRGB());
+		bvvViewer.setOverlayTextColor( BVBSettings.canvasOverlayColor  );
 		volumeBoxes.setLineColor( bbFrameColor );
 		clipBoxes.setLineColor( bbFrameColor );
 	}
