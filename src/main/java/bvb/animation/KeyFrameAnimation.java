@@ -152,6 +152,7 @@ public class KeyFrameAnimation
 		int nTimeFrame = nIniFrame + Math.round( localT * (nNextFrame - nIniFrame));
 		
 		// transform camera view
+	
 		final AffineTransform3D finalAT = viewAnimate.get( nIndex - 1 ).get( localT );
 	
 		return new SceneView( finalAT, nTimeFrame );

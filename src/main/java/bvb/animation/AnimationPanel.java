@@ -308,9 +308,12 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				if (evt.getClickCount() == 2) 
 				{
 					// Double-click detected
-					SceneView.setSceneView( bvb.bvvViewer, jlist.getSelectedValue().getSceneView() );
-					int nPos = Math.round( tsSpan*(jlist.getSelectedValue().fMovieTimePoint/kfAnim.getTotalTime()));
-					timeSlider.setValue( nPos );			
+				    KeyFrameScene kfScene = jlist.getSelectedValue();
+					updateScene(kfScene.fMovieTimePoint);
+					int nPos = Math.round( tsSpan*(kfScene.fMovieTimePoint/kfAnim.getTotalTime()));
+					bUpdateSlider = false;
+					timeSlider.setValue( nPos );		
+					bUpdateSlider = true;		
 				} 
 				if (SwingUtilities.isRightMouseButton(evt))
 				{
@@ -903,7 +906,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		setNewTotalTime( storyDTO.keyFrameAnimation.nTotalTime );
     	final Map< String, KeyFrameScene > mapKF = kfAnim.restoreFromDTO( storyDTO.keyFrameAnimation );
     	updateKeyIndices();
-		updateKeyMarks();        	
+		updateKeyMarks();    
 		kfAnim.updateTransitionTimeline();
 		setSliderTotalTime();
 		timeline.restoreFromDTO( storyDTO.timeline, mapKF );
