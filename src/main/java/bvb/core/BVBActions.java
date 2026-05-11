@@ -92,11 +92,11 @@ public class BVBActions
 	
 	final Behaviours behaviours;
 	
+	private final static double cQuat = Math.cos( Math.PI / 4 );
+	
 	public static final String ALIGN_XY_PLANE = "align XY plane";
 	public static final String ALIGN_ZY_PLANE = "align ZY plane";
 	public static final String ALIGN_XZ_PLANE = "align XZ plane";
-	
-	private final static double cQuat = Math.cos( Math.PI / 4 );
 	
 	public static final String[] ALIGN_XY_PLANE_KEYS = new String[] { "shift Z" };
 	public static final String[] ALIGN_ZY_PLANE_KEYS = new String[] { "shift X" };
@@ -371,7 +371,7 @@ public class BVBActions
 				Prefs.set("BVB.renderHeight", BVVSettings.renderHeight);
 			}
 			
-			nTempInt = ditherWidthsList.getSelectedIndex()+1;
+			nTempInt = ditherWidthsList.getSelectedIndex() + 1;
 			if(BVVSettings.ditherWidth != nTempInt)
 			{
 				BVVSettings.ditherWidth = nTempInt;

@@ -100,7 +100,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		tabIcon = new ImageIcon(icon_path);
 		butRender[2] = new JToggleButton(tabIcon);
 		butRender[2].setToolTipText("Surface");
-
 		
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath +"light_plain.png");
 		tabIcon = new ImageIcon(icon_path);
@@ -306,7 +305,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	{
 		if(!selectedSources.areSourcesSelected() || blockUpdates)
 			return;
-
 
 		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 

@@ -66,7 +66,6 @@ import ij.io.SaveDialog;
 public class ViewPanel extends JPanel
 {	
 	final BigVolumeBrowser bvb;
-
 	
 	final JButton butToggleVisibility;
 
