@@ -86,9 +86,8 @@ public class TransformScalePanel extends JPanel
 		super();		
 
 		transformSetups = transformSetups_;
-		
-		setLayout(new GridBagLayout());
 
+		setLayout(new GridBagLayout());
 		
 		String [] axesTitles = new String[] {"X","Y","Z"};
 		String [] voxelSizeS = new String[] {"NA","NA","NA"};
@@ -142,6 +141,11 @@ public class TransformScalePanel extends JPanel
 	
 	synchronized void updateGUI()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
 		
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;	
@@ -191,74 +195,86 @@ public class TransformScalePanel extends JPanel
 				}
 			}
 		}
-		
+
 		final double [] finalScales = scales;
 		final double [] finalVoxels = voxelSizes;
 		final boolean [] isConsistent = allScalesEqual;
 		final boolean [] isConsistentVox = allVoxelsEqual;
 		final boolean bOnlyShapesFinal = bOnlyShapes ;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( TransformScalePanel.this )
+		blockUpdates = true;
+		try
+		{				
+			for (int d = 0; d < 3; d++)
 			{
-				blockUpdates = true;
-				for (int d = 0; d < 3; d++)
+				spinners[d].setValue( finalScales[d]);
+
+				if(isConsistent[d])
 				{
-					spinners[d].setValue( finalScales[d]);
-					
-					if(isConsistent[d])
-					{
-						axesLabels[d].setBackground( consistentBg );
-						spinners[d].setBackground( consistentBg );
-					}
-					else
-					{
-						axesLabels[d].setBackground( inConsistentBg );
-						spinners[d].setBackground( inConsistentBg );
-					}
-					if(isConsistentVox[d])
-					{
-						voxelSize[d].setText( formatter.format( finalVoxels[d] ));
-					}
-					else
-					{
-						voxelSize[d].setText("NC");
-					}
-					if(bOnlyShapesFinal)
-					{
-						voxelSize[d].setText("NA");
-					}
-						
+					axesLabels[d].setBackground( consistentBg );
+					spinners[d].setBackground( consistentBg );
 				}
-				blockUpdates = false;
+				else
+				{
+					axesLabels[d].setBackground( inConsistentBg );
+					spinners[d].setBackground( inConsistentBg );
+				}
+				if(isConsistentVox[d])
+				{
+					voxelSize[d].setText( formatter.format( finalVoxels[d] ));
+				}
+				else
+				{
+					voxelSize[d].setText("NC");
+				}
+				if(bOnlyShapesFinal)
+				{
+					voxelSize[d].setText("NA");
+				}
+
 			}
-		} );
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 
-
-	synchronized void updateScaleAxis(int nAxis)
+	void updateScaleAxis(int nAxis)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> updateScaleAxis(nAxis));
+	        return;
+	    }
+
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		blockUpdates = true;
-		final double currVal = ((Double)spinners[nAxis].getValue()).doubleValue();
-		
-		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		for ( final Object obj: objList)
+		try
 		{
-			final double [] oldScale = transformSetups.transformScale.getScale( obj);
-			final double [] newScale = new double [3];
-			for(int d = 0; d < 3; d++)
+			final double currVal = ((Double)spinners[nAxis].getValue()).doubleValue();
+
+			final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+			for ( final Object obj: objList)
 			{
-				newScale[d] = oldScale[d];
+				final double [] oldScale = transformSetups.transformScale.getScale( obj);
+				final double [] newScale = new double [3];
+				for(int d = 0; d < 3; d++)
+				{
+					newScale[d] = oldScale[d];
+				}
+				newScale[nAxis] = currVal;
+				transformSetups.transformScale.setScale( obj, newScale );
+				transformSetups.updateTransform( obj, null );
+				//let's update center bounds
+				transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.resetBounds( nAxis );
 			}
-			newScale[nAxis] = currVal;
-			transformSetups.transformScale.setScale( obj, newScale );
-			transformSetups.updateTransform( obj, null );
-			//let's update center bounds
-			transformSetups.bvb.bvbCards.transformPanel.transformCentersPanel.resetBounds( nAxis );
 		}
-		blockUpdates = false;
+		finally
+		{
+			blockUpdates = false;
+		}
 		updateGUI();
 	}
 	
@@ -306,9 +322,15 @@ public class TransformScalePanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
-		for(int i = 0; i < 3; i++)
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> setEnabled(bEnabled));
+	        return;
+	    }
+
+		for(int d = 0; d < 3; d++)
 		{
-			spinners[i].setEnabled( bEnabled );
+			spinners[d].setEnabled( bEnabled );
 		}
 	}
 	

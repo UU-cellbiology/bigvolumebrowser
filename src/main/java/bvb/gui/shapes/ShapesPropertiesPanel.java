@@ -35,6 +35,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import bvb.core.BigVolumeBrowser;
 import bvb.shapes.BasicMeshShape;
@@ -86,13 +87,20 @@ public class ShapesPropertiesPanel extends JPanel
 	}
 	
 	
-	public synchronized void updateGUI()
+	public void updateGUI()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		if(!bvb.selectedObjects.areShapesSelected())
 		{
 			setPanelsEnabled(false);
 			return;
 		}
+		
 		boolean bSpotsUpdate = true;
 		boolean bMeshUpdate = true;
 		final List< BasicShape > shapes = bvb.selectedObjects.getSelectedShapes();
@@ -121,6 +129,11 @@ public class ShapesPropertiesPanel extends JPanel
 	
 	void setPanelsEnabled(boolean bEnabled)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> setPanelsEnabled(bEnabled));
+	        return;
+	    }
 		panelSpotsProperties.setEnabled( bEnabled );
 		panelMeshesProperties.setEnabled( bEnabled );
 	}

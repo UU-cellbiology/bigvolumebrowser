@@ -199,12 +199,17 @@ public class SpotsOpacityPanel extends JPanel
 		allComp.add( butResetToDefault );
 	}
 
-	synchronized void updateGUI()
+	void updateGUI()
 	{
-		
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(this::updateGUI);
+			return;
+		}
+
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
-		
+
 		boolean bFirstSpots = true;	
 		boolean bMapAlphaSame = true;
 		boolean bAlphaInvertedSame = true;	
@@ -214,21 +219,21 @@ public class SpotsOpacityPanel extends JPanel
 		boolean allRangesEqual = true;
 		boolean gammaEqual = true;		
 		boolean extraAlphaEqual = true;
-		
+
 		boolean bAlphaInverted = false;
 		int nMapAlpha = 0;
-		
+
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
 		{
 			if(sh instanceof BasicSpots)
 			{
 				final BasicSpots spotsShape = (BasicSpots)sh;
-				
+
 				if(bFirstSpots)
 				{
 					nMapAlpha = spotsShape.getMapAlphaMode();
-				
+
 					if(nMapAlpha != 0)
 					{
 						range = spotsAlphaSetup.getMapRange( spotsShape, nMapAlpha - 1 );
@@ -249,26 +254,26 @@ public class SpotsOpacityPanel extends JPanel
 						{
 							range = spotsAlphaSetup.getMapRange( spotsShape, nMapAlpha - 1 );							
 						}
-						
+
 						allRangesEqual &= Misc.compareBoundedRanges(range, spotsAlphaSetup.getMapRange( spotsShape, nMapAlpha - 1) );
 						if(gamma == null )
 						{
 							gamma = spotsAlphaSetup.getMapGamma( spotsShape, nMapAlpha -1 );							
 						}
 						gammaEqual &= Misc.compareBoundedValues( gamma, spotsAlphaSetup.getMapGamma( spotsShape, nMapAlpha - 1 ) );
-						
+
 					}
 					bAlphaInvertedSame &= (bAlphaInverted == spotsShape.isInvertedAlpha()); 
 					extraAlphaEqual &= Misc.compareRelativeDouble(extraAlpha, spotsShape.getExtraAlphaCoefficient());					
 				}
 			}
 		}
-			
+
 		final int nMapAlphaFin = nMapAlpha;
 		final boolean bMapAlphaSameFin = bMapAlphaSame;
 		final boolean bAlphaInvertedSameFin = bAlphaInvertedSame;
 		final boolean bAlphaInvertedFin = bAlphaInverted;
-		
+
 		final BoundedRange finalRange = range;
 		final BoundedValueDoubleBVB finalGamma = gamma;
 		final float finalExtraAlpha = extraAlpha;
@@ -276,79 +281,89 @@ public class SpotsOpacityPanel extends JPanel
 		final boolean gammaEqualFin = gammaEqual;
 		final boolean extraAlphaEqualFin = extraAlphaEqual;
 
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( SpotsOpacityPanel.this )
+
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
+
+		blockUpdates = true;
+
+		try
+		{
+			pExtraAlpha.setConsistent( extraAlphaEqualFin );
+			nfExtraAlpha.setText(  df3.format(finalExtraAlpha) );
+			pMapAlpha.setConsistent( bMapAlphaSameFin );
+			pMapInverted.setConsistent( bAlphaInvertedSameFin );
+
+			cbInverted.setEnabled( true );
+			cbInverted.setSelected( bAlphaInvertedFin );
+			alphaRangePanel.setEnabled( true );
+			alphaRangePanel.setConsistent( allRangesEqualFin );
+
+			alphaGammaPanel.setEnabled( true );
+			alphaGammaPanel.setConsistent( gammaEqualFin );
+
+			if(finalRange != null)
 			{
-				
-				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-				symbols.setDecimalSeparator('.');
-				DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
-				blockUpdates = true;
-
-				pExtraAlpha.setConsistent( extraAlphaEqualFin );
-				nfExtraAlpha.setText(  df3.format(finalExtraAlpha) );
-				pMapAlpha.setConsistent( bMapAlphaSameFin );
-				pMapInverted.setConsistent( bAlphaInvertedSameFin );
-				
-				cbInverted.setEnabled( true );
-				cbInverted.setSelected( bAlphaInvertedFin );
-				alphaRangePanel.setEnabled( true );
-				alphaRangePanel.setConsistent( allRangesEqualFin );
-
-				alphaGammaPanel.setEnabled( true );
-				alphaGammaPanel.setConsistent( gammaEqualFin );
-				
-				if(finalRange != null)
-				{
-					alphaRangePanel.setRange( finalRange );
-				}
-				if(finalGamma != null)
-				{
-					alphaGammaPanel.setValue( finalGamma );
-				}
-
-				if(bMapAlphaSameFin)
-				{
-					cbMapAlpha.setSelectedIndex(nMapAlphaFin);
-					if(nMapAlphaFin == 0)
-					{
-						cbInverted.setEnabled( false );
-						alphaRangePanel.setEnabled( false );
-						alphaGammaPanel.setEnabled( false );
-						alphaRangePanel.setConsistent( true );
-						alphaGammaPanel.setConsistent( true );
-						alphaRangePanel.setRange( new BoundedRange(0,1,0,1) );
-
-					}
-				}				
-				
-				blockUpdates = false;
+				alphaRangePanel.setRange( finalRange );
 			}
-		} );
-		
+			if(finalGamma != null)
+			{
+				alphaGammaPanel.setValue( finalGamma );
+			}
+
+			if(bMapAlphaSameFin)
+			{
+				cbMapAlpha.setSelectedIndex(nMapAlphaFin);
+				if(nMapAlphaFin == 0)
+				{
+					cbInverted.setEnabled( false );
+					alphaRangePanel.setEnabled( false );
+					alphaGammaPanel.setEnabled( false );
+					alphaRangePanel.setConsistent( true );
+					alphaGammaPanel.setConsistent( true );
+					alphaRangePanel.setRange( new BoundedRange(0,1,0,1) );
+
+				}
+			}				
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(() -> setEnabled(bEnabled));
+			return;
+		}
+
 		if(blockUpdates)
 			return;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( SpotsOpacityPanel.this )
-			{				
-				blockUpdates = true;
-				for(final Component nC:allComp)
-				{
-					nC.setEnabled( bEnabled );
-				}
-				blockUpdates = false;
-			} });
+
+		blockUpdates = true;
+		try
+		{
+			for(final Component nC:allComp)
+			{
+				nC.setEnabled( bEnabled );
+			}
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
-	synchronized void updateAlphaMapping()
+	void updateAlphaMapping()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
+		
 		final int nMapAlphaMode = cbMapAlpha.getSelectedIndex();
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		for ( final BasicShape sh: shapeList)
@@ -367,7 +382,7 @@ public class SpotsOpacityPanel extends JPanel
 		updateGUI();
 	}
 	
-	synchronized void updateAlphaInversion()
+	void updateAlphaInversion()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -385,10 +400,11 @@ public class SpotsOpacityPanel extends JPanel
 
 	}
 	
-	public synchronized void updateAlphaMapRangeBounds()
+	public void updateAlphaMapRangeBounds()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
+		
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 
 		final BoundedRange rangeUI = alphaRangePanel.getRange();
@@ -414,7 +430,7 @@ public class SpotsOpacityPanel extends JPanel
 		updateGUI();
 	}
 	
-	public synchronized void updateAlphaMapGamma()
+	public void updateAlphaMapGamma()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;

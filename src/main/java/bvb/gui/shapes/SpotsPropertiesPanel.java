@@ -244,9 +244,14 @@ public class SpotsPropertiesPanel extends JPanel
 	    this.add( spotsTabPane, gbc );
 	}
 	
-	synchronized void updateGUI()
+	void updateGUI()
 	{
-		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
 		boolean bFirstMesh = true;
@@ -335,7 +340,7 @@ public class SpotsPropertiesPanel extends JPanel
 		final int nShapeFin = nShape;
 		final int nShadedFin = nShaded;
 		final int nRenderFin = nRender;			
-		
+
 		final boolean bColorSameFin = bColorSame;
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bSizeScaleSameFin = bSizeScaleSame;
@@ -344,111 +349,118 @@ public class SpotsPropertiesPanel extends JPanel
 		final boolean bRenderSameFin = bRenderSame;
 		final boolean bAllMultiColorFin = bAllMultiColor;
 
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( SpotsPropertiesPanel.this )
-			{
-				blockUpdates = true;
-				
-				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-				symbols.setDecimalSeparator('.');
-				DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
-					
-				pColor.setConsistent( bColorSameFin );
-				pPointSize.setConsistent( bPointSizeSameFin );
-				pSizeScale.setConsistent( bSizeScaleSameFin );
-				pShape.setConsistent( bShapeSameFin );
-				pRender.setConsistent( bRenderSameFin );
-				butColor.setEnabled( true );
-				pShaded.setConsistent( bShadedSameFin );
-				
-				if(bColorSameFin)
-				{
-					selectColors.setColor( cColorFin, 0 );
-					butColor.setIcon(  new ColorIcon( cColorFin ) );
-				}
-				
-				if(bAllMultiColorFin)
-				{
-					butColor.setIcon(  new ColorIcon( Color.GRAY ) );
-					butColor.setEnabled( false );
-				}
+		blockUpdates = true;
+		try 
+		{
 
-				if(fSizeScaleFin > 0)
-				{
-					nfSpSizeScale.setEnabled( true );
-					nfSpSizeScale.setText( df3.format( fSizeScaleFin ) );
-					//all panel is disabled
-					if(!cbShape.isEnabled())
-					{
-						nfSpSizeScale.setEnabled( false );
-					}
-				}
-				else
+			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+			symbols.setDecimalSeparator('.');
+			DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
+
+			pColor.setConsistent( bColorSameFin );
+			pPointSize.setConsistent( bPointSizeSameFin );
+			pSizeScale.setConsistent( bSizeScaleSameFin );
+			pShape.setConsistent( bShapeSameFin );
+			pRender.setConsistent( bRenderSameFin );
+			butColor.setEnabled( true );
+			pShaded.setConsistent( bShadedSameFin );
+
+			if(bColorSameFin)
+			{
+				selectColors.setColor( cColorFin, 0 );
+				butColor.setIcon(  new ColorIcon( cColorFin ) );
+			}
+
+			if(bAllMultiColorFin)
+			{
+				butColor.setIcon(  new ColorIcon( Color.GRAY ) );
+				butColor.setEnabled( false );
+			}
+
+			if(fSizeScaleFin > 0)
+			{
+				nfSpSizeScale.setEnabled( true );
+				nfSpSizeScale.setText( df3.format( fSizeScaleFin ) );
+				//all panel is disabled
+				if(!cbShape.isEnabled())
 				{
 					nfSpSizeScale.setEnabled( false );
-					nfSpSizeScale.setText( "none" );
-				}				
+				}
+			}
+			else
+			{
+				nfSpSizeScale.setEnabled( false );
+				nfSpSizeScale.setText( "none" );
+			}				
 
-				//all various sizes
-				if(fPointSizeFin < 0.0)
+			//all various sizes
+			if(fPointSizeFin < 0.0)
+			{
+				nfSpSize.setText( "various");
+				nfSpSize.setEnabled( false );
+			}
+			//all fixed sizes
+			else
+			{
+				nfSpSize.setEnabled( true );
+				nfSpSize.setText( df3.format( fPointSizeFin ));
+				//all panel is disabled
+				if(!cbShape.isEnabled())
 				{
-					nfSpSize.setText( "various");
 					nfSpSize.setEnabled( false );
 				}
-				//all fixed sizes
-				else
-				{
-					nfSpSize.setEnabled( true );
-					nfSpSize.setText( df3.format( fPointSizeFin ));
-					//all panel is disabled
-					if(!cbShape.isEnabled())
-					{
-						nfSpSize.setEnabled( false );
-					}
+			}				
 
-				}				
-
-				if(bRenderSameFin)
-				{
-					cbRender.setSelectedIndex( nRenderFin );
-				}
-
-				if(bShapeSameFin)
-				{
-					cbShape.setSelectedIndex( nShapeFin );
-				}
-				
-				if(bShadedSameFin)
-				{
-					cbShaded.setSelected( nShadedFin == 1 ? true :false );
-				}
-
-				colorCodePanel.updateGUI();
-				opacityPanel.updateGUI();
-				blockUpdates = false;
+			if(bRenderSameFin)
+			{
+				cbRender.setSelectedIndex( nRenderFin );
 			}
-		} );
 
+			if(bShapeSameFin)
+			{
+				cbShape.setSelectedIndex( nShapeFin );
+			}
+
+			if(bShadedSameFin)
+			{
+				cbShaded.setSelected( nShadedFin == 1 ? true :false );
+			}
+
+			colorCodePanel.updateGUI();
+			opacityPanel.updateGUI();
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> setEnabled(bEnabled));
+	        return;
+	    }
 		if(blockUpdates)
 			return;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( SpotsPropertiesPanel.this )
-			{				
-				blockUpdates = true;
-				for(final Component nC:allComp)
-				{
-					nC.setEnabled( bEnabled );
-				}
-				blockUpdates = false;
-			} });
+
+		blockUpdates = true;
+		try
+		{
+			for(final Component nC:allComp)
+			{
+				nC.setEnabled( bEnabled );
+			}
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
-	synchronized void updateColors()
+	void updateColors()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -467,7 +479,7 @@ public class SpotsPropertiesPanel extends JPanel
 		updateGUI();		
 	}
 	
-	synchronized void updatePointSize(final double v)
+	void updatePointSize(final double v)
 	{		
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -488,7 +500,7 @@ public class SpotsPropertiesPanel extends JPanel
 		updateGUI();		
 	}
 	
-	synchronized void updateSizeScale(final double v)
+	void updateSizeScale(final double v)
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -509,7 +521,7 @@ public class SpotsPropertiesPanel extends JPanel
 		updateGUI();		
 	}
 	
-	synchronized void updateShape()
+	void updateShape()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -544,12 +556,15 @@ public class SpotsPropertiesPanel extends JPanel
 		updateGUI();		
 	}
 	
-	synchronized void updateRoundShaded()
+	void updateRoundShaded()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
+		
 		final int nShaded = cbShaded.isSelected()? 1 : 0;
+		
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		
 		for ( final BasicShape sh: shapeList)
 		{
 			if(sh instanceof BasicSpots)

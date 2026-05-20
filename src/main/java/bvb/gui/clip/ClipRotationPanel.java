@@ -90,14 +90,24 @@ public class ClipRotationPanel extends JPanel
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> setEnabled(bEnabled));
+	        return;
+	    }
 		for(int d = 0; d < 3; d++)
 		{
 			clipRotationPanels[d].setEnabled( bEnabled );
 		}
 	}	
 	
-	public synchronized void updateGUI()
+	public void updateGUI()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;		
@@ -167,19 +177,20 @@ public class ClipRotationPanel extends JPanel
 			{
 				finalAngles[d] = Misc.angleToMinusPiPlusPi( finalAngles[d]  ); 
 			}
-			SwingUtilities.invokeLater( () -> {
-				synchronized ( ClipRotationPanel.this )
-				{					
-					blockUpdates = true;
-					
-					for (int d = 0; d < 3; d++)
-					{	
-						clipRotationPanels[d].setConsistent( isConsistent[d] );
-						clipRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
-					}
-					blockUpdates = false;
+			blockUpdates = true;
+			try
+			{
+
+				for (int d = 0; d < 3; d++)
+				{	
+					clipRotationPanels[d].setConsistent( isConsistent[d] );
+					clipRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
 				}
-			} );
+			}
+			finally
+			{
+				blockUpdates = false;
+			}
 		}
 	}
 	
@@ -197,11 +208,11 @@ public class ClipRotationPanel extends JPanel
 			final Clippable3D objCl = (Clippable3D)obj;
 			final double [] eAngles = clipSetups.clipRotation.getAngles( objCl );
 			final double [] prevAngles =  new double[3];
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
 				prevAngles[d] = eAngles[d];
 			}
-			eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+			eAngles[nAxis] = clipRotationPanels[nAxis].getValue().getCurrentValue() * Math.PI/180.;
 			if(clipSetups.bLocalCoordinates)
 			{
 				final double[] trAngles = clipSetups.bvb.bvbCards.transformPanel.transformSetups.transformRotation.getAngles( obj );

@@ -42,6 +42,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
@@ -208,13 +209,16 @@ public class TransformPanel extends JPanel
 	    colors[1] =  new Color( 67, 154,   0);
 	    colors[2] =  new Color(  0,  34, 213);
 
-	    this.setSliderColors( colors );
-	    
-
+	    this.setSliderColors( colors );	    
 	}
 	
-	public synchronized void updateGUI()
+	public void updateGUI()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
 		if(!transformSetups.selectedObjects.isAnythingSelected())
 		{
 			setPanelsEnabled(false);
@@ -232,6 +236,11 @@ public class TransformPanel extends JPanel
 	
 	private void setPanelsEnabled(boolean bEnabled)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> setPanelsEnabled(bEnabled));
+	        return;
+	    }
 		transformScalePanel.setEnabled( bEnabled );
 		transformCentersPanel.setEnabled( bEnabled );
 		transformRotationPanel.setEnabled( bEnabled );

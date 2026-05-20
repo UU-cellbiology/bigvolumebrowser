@@ -199,9 +199,14 @@ public class MeshesPropertiesPanel extends JPanel
 
 	}
 	
-	synchronized void updateGUI()
+	void updateGUI()
 	{
-		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
 		
@@ -274,93 +279,102 @@ public class MeshesPropertiesPanel extends JPanel
 		final boolean bSurfaceSameFin = bSurfaceSame;
 		final boolean bGridSameFin = bGridSame;
 
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( MeshesPropertiesPanel.this )
+		blockUpdates = true;
+		
+		try 
+		{
+			pRender.setConsistent( bRenderSameFin );
+			pColor.setConsistent( bColorSameFin );
+			if(bHasTextureFin)
 			{
-				blockUpdates = true;
-				
-				pRender.setConsistent( bRenderSameFin );
-				pColor.setConsistent( bColorSameFin );
-				if(bHasTextureFin)
+				pTexture.setConsistent( bTextureSameFin );
+				cbTexture.setEnabled( true );
+				cbTexture.setSelected( bTextureActiveFin );
+			}
+			else
+			{
+				pTexture.setConsistent( true );
+				cbTexture.setSelected( false );
+				cbTexture.setEnabled( false );
+			}
+			pPointSize.setConsistent( bPointSizeSameFin );
+			pSurface.setConsistent( bSurfaceSameFin );
+			pGrid.setConsistent( bGridSameFin );
+			nfMeshPointSize.setEnabled( true );
+			cbSurface.setEnabled( true );	
+			cbGrid.setEnabled( true );
+
+			if(bRenderSameFin)
+			{
+				cbRender.setSelectedIndex( nRenderFin );
+				//only shapes render
+				if(nRenderFin == 0)
 				{
-					pTexture.setConsistent( bTextureSameFin );
-					cbTexture.setEnabled( true );
-					cbTexture.setSelected( bTextureActiveFin );
+					pPointSize.setConsistent( true );	
+					nfMeshPointSize.setEnabled( false );	
 				}
 				else
 				{
-					pTexture.setConsistent( true );
-					cbTexture.setSelected( false );
-					cbTexture.setEnabled( false );
+					pSurface.setConsistent( true );
+					pGrid.setConsistent( true );
+					cbSurface.setEnabled( false );	
+					cbGrid.setEnabled( false );
 				}
-				pPointSize.setConsistent( bPointSizeSameFin );
-				pSurface.setConsistent( bSurfaceSameFin );
-				pGrid.setConsistent( bGridSameFin );
-				nfMeshPointSize.setEnabled( true );
-				cbSurface.setEnabled( true );	
-				cbGrid.setEnabled( true );
-
-				if(bRenderSameFin)
-				{
-					cbRender.setSelectedIndex( nRenderFin );
-					//only shapes render
-					if(nRenderFin == 0)
-					{
-						pPointSize.setConsistent( true );	
-						nfMeshPointSize.setEnabled( false );	
-					}
-					else
-					{
-						pSurface.setConsistent( true );
-						pGrid.setConsistent( true );
-						cbSurface.setEnabled( false );	
-						cbGrid.setEnabled( false );
-					}
-				}
-
-				if(bColorSameFin)
-				{
-					selectColors.setColor( cColorFin, 0 );
-					butColor.setIcon(  new ColorIcon( cColorFin ) );
-				}
-
-				if(bPointSizeSameFin)
-				{
-					nfMeshPointSize.setText( String.format("%.2f", fPointSizeFin));
-				}
-				if(bSurfaceSameFin)
-				{
-					cbSurface.setSelectedIndex( nSurfaceFin );
-				}
-
-				if(bGridSameFin)
-				{
-					cbGrid.setSelectedIndex( nGridFin );
-				}
-
-				blockUpdates = false;
 			}
-		} );
+
+			if(bColorSameFin)
+			{
+				selectColors.setColor( cColorFin, 0 );
+				butColor.setIcon(  new ColorIcon( cColorFin ) );
+			}
+
+			if(bPointSizeSameFin)
+			{
+				nfMeshPointSize.setText( String.format("%.2f", fPointSizeFin));
+			}
+			if(bSurfaceSameFin)
+			{
+				cbSurface.setSelectedIndex( nSurfaceFin );
+			}
+
+			if(bGridSameFin)
+			{
+				cbGrid.setSelectedIndex( nGridFin );
+			}
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(() -> setEnabled(bEnabled));
+			return;
+		}
+
 		if(blockUpdates)
 			return;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( MeshesPropertiesPanel.this )
-			{				
-				blockUpdates = true;
-				for(final Component nC:allComp)
-				{
-					nC.setEnabled( bEnabled );
-				}
-				blockUpdates = false;
-			} });
+
+		blockUpdates = true;
+		try
+		{
+			for(final Component nC:allComp)
+			{
+				nC.setEnabled( bEnabled );
+			}
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
-	synchronized void updateRender()
+	void updateRender()
 	{
 
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
@@ -379,7 +393,7 @@ public class MeshesPropertiesPanel extends JPanel
 		updateGUI();
 	}
 	
-	synchronized void updateColors()
+	void updateColors()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -397,7 +411,7 @@ public class MeshesPropertiesPanel extends JPanel
 		
 	}
 	
-	synchronized void updateUseOfTexture()
+	void updateUseOfTexture()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -415,7 +429,7 @@ public class MeshesPropertiesPanel extends JPanel
 		
 	}
 	
-	synchronized void updatePointSize(final double v)
+	void updatePointSize(final double v)
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -435,7 +449,7 @@ public class MeshesPropertiesPanel extends JPanel
 		updateGUI();
 	}
 	
-	synchronized void updateSurface()
+	void updateSurface()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
@@ -456,7 +470,7 @@ public class MeshesPropertiesPanel extends JPanel
 		
 	}
 	
-	synchronized void updateGrid()
+	void updateGrid()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;

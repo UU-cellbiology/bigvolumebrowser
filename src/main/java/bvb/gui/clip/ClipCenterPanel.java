@@ -109,145 +109,168 @@ public class ClipCenterPanel extends JPanel
 		}
 	}
 	
-	synchronized void updateGUI()
+	void updateGUI()
 	{
-		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		blockUpdates = true;
-		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
 		boolean bFirstCS = true;
 		boolean [] allCenterEqual = new boolean [3];
-		for (int d = 0; d < 3; d++)
+		BoundedValueDoubleBVB [] boundValue = new BoundedValueDoubleBVB[3];
+		try
 		{
-			allCenterEqual[d] = true;
-		}
-		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
-		for ( final Object obj: objList)
-		{
-			final Clippable3D objCl = (Clippable3D)obj;
-			if(objCl.getClipState() != 0)
+			for (int d = 0; d < 3; d++)
 			{
-				final Bounds3D bounds = new Bounds3D(clipSetups.clipCenterBounds.getBounds( objCl ));
-				final double [] minBound = bounds.getMinBound();
-				final double [] maxBound = bounds.getMaxBound();
-				
-				
-				final double [] centerIn = clipSetups.clipCenters.getCenters( objCl );
-				double [] center = new double [3];
-				
-				if(clipSetups.bLocalCoordinates)
+				allCenterEqual[d] = true;
+			}
+			final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+			for ( final Object obj: objList)
+			{
+				final Clippable3D objCl = (Clippable3D)obj;
+				if(objCl.getClipState() != 0)
 				{
-					final double [] objCenter = clipSetups.getCurrentObjectCenter( obj );
-					if(objCenter != null)
+					final Bounds3D bounds = new Bounds3D(clipSetups.clipCenterBounds.getBounds( objCl ));
+					final double [] minBound = bounds.getMinBound();
+					final double [] maxBound = bounds.getMaxBound();
+
+
+					final double [] centerIn = clipSetups.clipCenters.getCenters( objCl );
+					double [] center = new double [3];
+
+					if(clipSetups.bLocalCoordinates)
 					{
-						for(int d = 0; d < 3; d++)
+						final double [] objCenter = clipSetups.getCurrentObjectCenter( obj );
+						if(objCenter != null)
 						{
-							center[d] = centerIn[d] - objCenter[d];
-							minBound[d] -= objCenter[d];
-							maxBound[d] -= objCenter[d];
-						}						
+							for(int d = 0; d < 3; d++)
+							{
+								center[d] = centerIn[d] - objCenter[d];
+								minBound[d] -= objCenter[d];
+								maxBound[d] -= objCenter[d];
+							}						
+						}
 					}
-				}
-				else
-				{
-					center = centerIn;
-				}
-				for(int d = 0; d < 3; d++)
-				{
-					minBound[d] = Math.min(minBound[d], center[d]);
-					maxBound[d] = Math.max(maxBound[d], center[d]);
-				}
-				if(bFirstCS)
-				{
-					for (int d=0; d<3; d++)
+					else
 					{
-						boundValue[d] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						center = centerIn;
 					}
-					bFirstCS = false;
-				}
-				else
-				{
-					for (int d = 0; d < 3; d++)
+					for(int d = 0; d < 3; d++)
 					{
-						final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
-						allCenterEqual[d] &= Misc.compareBoundedValues( boundValue[d], centerRange );
-						boundValue[d] = boundValue[d].join( centerRange );
+						minBound[d] = Math.min(minBound[d], center[d]);
+						maxBound[d] = Math.max(maxBound[d], center[d]);
+					}
+					if(bFirstCS)
+					{
+						for (int d = 0; d < 3; d++)
+						{
+							boundValue[ d ] = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+						}
+						bFirstCS = false;
+					}
+					else
+					{
+						for (int d = 0; d < 3; d++)
+						{
+							final BoundedValueDoubleBVB centerRange = new BoundedValueDoubleBVB( minBound[d], maxBound[d], center[d]);
+							allCenterEqual[d] &= Misc.compareBoundedValues( boundValue[d], centerRange );
+							boundValue[d] = boundValue[d].join( centerRange );
+						}
 					}
 				}
 			}
 		}
-		
-		blockUpdates = false;
-
+		finally
+		{
+			blockUpdates = false;
+		}
 		//if anything is present and changed
 		if(!bFirstCS)
 		{
 			final BoundedValueDoubleBVB [] finalCenter = boundValue;
 			final boolean [] isConsistent = allCenterEqual;
-			SwingUtilities.invokeLater( () -> {
-				synchronized ( ClipCenterPanel.this )
+			blockUpdates = true;
+			try
+			{
+				for (int d = 0; d < 3; d++)
 				{
-					blockUpdates = true;
-					for (int d = 0; d < 3; d++)
-					{
-						clipCenterPanels[d].setConsistent( isConsistent[d] );
-						clipCenterPanels[d].setValue( finalCenter[d] );
-					}
-					blockUpdates = false;
+					clipCenterPanels[d].setConsistent( isConsistent[d] );
+					clipCenterPanels[d].setValue( finalCenter[d] );
 				}
-			} );
+			}
+			finally
+			{
+				blockUpdates = false;
+			}
 		}
 	}
 	
-	synchronized void updateClipCenter(int nAxis)
+	void updateClipCenter(int nAxis)
 	{
+		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(()->updateClipCenter(nAxis));
+	        return;
+	    }
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+
 		blockUpdates = true;
 		
-		double currValAbs = clipCenterPanels[nAxis].getValue().getCurrentValue();
-		double minBoundAbs = clipCenterPanels[nAxis].getValue().getRangeMin();
-		double maxBoundAbs = clipCenterPanels[nAxis].getValue().getRangeMax();
-		minBoundAbs = Math.min( currValAbs, minBoundAbs );
-		maxBoundAbs = Math.max( currValAbs, maxBoundAbs );
-		
-		
-		final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
-		for ( final Object obj: objList)
+		try
 		{
-			final Clippable3D objCl = (Clippable3D)obj;
-			double [] relShift  = new double[3];
-			
-			if(clipSetups.bLocalCoordinates)
-			{				
-				relShift = clipSetups.getCurrentObjectCenter( obj );
-			}
+			double currValAbs = clipCenterPanels[nAxis].getValue().getCurrentValue();
+			double minBoundAbs = clipCenterPanels[nAxis].getValue().getRangeMin();
+			double maxBoundAbs = clipCenterPanels[nAxis].getValue().getRangeMax();
+			minBoundAbs = Math.min( currValAbs, minBoundAbs );
+			maxBoundAbs = Math.max( currValAbs, maxBoundAbs );
 
-			double currVal = currValAbs + relShift[nAxis];
-			double minBound = minBoundAbs + relShift[nAxis];
-			double maxBound = maxBoundAbs + relShift[nAxis];
-			
-			final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( objCl );
-			
-			if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+
+			final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
+			for ( final Object obj: objList)
 			{
-				bounds.getMinBound()[nAxis] = minBound;
-				bounds.getMaxBound()[nAxis] = maxBound;
-				clipSetups.clipCenterBounds.setBounds( objCl, bounds );
+				final Clippable3D objCl = (Clippable3D)obj;
+				double [] relShift  = new double[3];
+
+				if(clipSetups.bLocalCoordinates)
+				{				
+					relShift = clipSetups.getCurrentObjectCenter( obj );
+				}
+
+				double currVal = currValAbs + relShift[nAxis];
+				double minBound = minBoundAbs + relShift[nAxis];
+				double maxBound = maxBoundAbs + relShift[nAxis];
+
+				final Bounds3D bounds = clipSetups.clipCenterBounds.getBounds( objCl );
+
+				if(minBound != bounds.getMinBound()[nAxis] || maxBound != bounds.getMaxBound()[nAxis])
+				{
+					bounds.getMinBound()[nAxis] = minBound;
+					bounds.getMaxBound()[nAxis] = maxBound;
+					clipSetups.clipCenterBounds.setBounds( objCl, bounds );
+				}
+
+				final double [] newCenter = clipSetups.clipCenters.getCenters( objCl );
+
+				newCenter[nAxis] = currVal;
+
+				clipSetups.clipCenters.setCenters( objCl, newCenter );
+				clipSetups.updateClipTransform( objCl, null );
 			}
-		
-			final double [] newCenter = clipSetups.clipCenters.getCenters( objCl );
-
-			newCenter[nAxis] = currVal;
-
-			clipSetups.clipCenters.setCenters( objCl, newCenter );
-			clipSetups.updateClipTransform( objCl, null );
+		}
+		finally
+		{
+			blockUpdates = false;
 		}
 		clipSetups.bvb.updateSceneRender();
-		blockUpdates = false;
 		updateGUI();
 	}
 	
@@ -257,7 +280,9 @@ public class ClipCenterPanel extends JPanel
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
+		
 		Bounds3D range3D = null;
+		
 		if(clipSetups.selectedObjects.areSourcesSelected())
 		{
 			final List< Object > objList = clipSetups.selectedObjects.getSelectedObjects();
@@ -305,11 +330,12 @@ public class ClipCenterPanel extends JPanel
 
 		updateGUI();
 	}
+	
 	void setSliderColors(Color [] colors)
 	{
-		for(int i=0;i<3;i++)
+		for(int d = 0; d < 3; d++)
 		{
-			clipCenterPanels[i].setSliderForeground( colors[i] );	
+			clipCenterPanels[ d ].setSliderForeground( colors[ d ] );	
 		}
 	}
 	

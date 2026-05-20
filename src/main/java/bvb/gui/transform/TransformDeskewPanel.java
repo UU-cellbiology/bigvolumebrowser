@@ -79,13 +79,18 @@ public class TransformDeskewPanel extends JPanel
 		
 		updateGUI();
 	}
-	
-	synchronized void updateGUI()
+
+	void updateGUI()
 	{
-		
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			SwingUtilities.invokeLater(this::updateGUI);
+			return;
+		}
+
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
-		
+
 		double angle = 90.;
 		boolean bFirstObj = true;
 		boolean allAnglesEqual = true;
@@ -106,38 +111,47 @@ public class TransformDeskewPanel extends JPanel
 		
 		final double finalAngle = angle;
 		final boolean isConsistent = allAnglesEqual;
-		
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( TransformDeskewPanel.this )
-			{
-				blockUpdates = true;
-	
-				trDeskewPanel.setConsistent( isConsistent );
-				trDeskewPanel.setValue( new BoundedValueDouble( bDeskewAngleBoundMax, bDeskewAngleBoundMin, finalAngle * 180/Math.PI) );
 
-				blockUpdates = false;
-			}
-		} );
+		blockUpdates = true;
+		try
+		{
+			trDeskewPanel.setConsistent( isConsistent );
+			trDeskewPanel.setValue( new BoundedValueDouble( bDeskewAngleBoundMax, bDeskewAngleBoundMin, finalAngle * 180/Math.PI) );
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
 	void updateDeskewAngle()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateDeskewAngle);
+	        return;
+	    }
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		blockUpdates = true;
-		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		double angle = trDeskewPanel.getValue().getCurrentValue();
-		angle = Math.max( angle, bDeskewAngleBoundMin );
-		angle = Math.min( angle, bDeskewAngleBoundMax );
-		angle *=  Math.PI / 180.;
-		for ( final Object obj: objList)
-		{	
-			transformSetups.transformDeskew.setAngle( obj, angle);
-			transformSetups.updateTransform( obj, null );
-
+		try
+		{
+			final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+			double angle = trDeskewPanel.getValue().getCurrentValue();
+			angle = Math.max( angle, bDeskewAngleBoundMin );
+			angle = Math.min( angle, bDeskewAngleBoundMax );
+			angle *=  Math.PI / 180.;
+			for ( final Object obj: objList)
+			{	
+				transformSetups.transformDeskew.setAngle( obj, angle);
+				transformSetups.updateTransform( obj, null );
+			}
 		}
-		blockUpdates = false;
+		finally
+		{
+			blockUpdates = false;
+		}
 		
 		updateGUI();
 	}
@@ -149,13 +163,19 @@ public class TransformDeskewPanel extends JPanel
 			return;
 		
 		blockUpdates = true;
-		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		for ( final Object obj: objList)
+		try
 		{
-			transformSetups.transformDeskew.setAngle( obj, 0.5 * Math.PI );
-			transformSetups.updateTransform( obj, null );		
+			final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+			for ( final Object obj: objList)
+			{
+				transformSetups.transformDeskew.setAngle( obj, 0.5 * Math.PI );
+				transformSetups.updateTransform( obj, null );		
+			}
 		}
-		blockUpdates = false;
+		finally
+		{
+			blockUpdates = false;
+		}
 		updateGUI();
 	}
 	
