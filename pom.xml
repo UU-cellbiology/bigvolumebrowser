@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>42.0.0</version>
+		<version>43.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -96,6 +96,11 @@
 		  <version>${bvv-playground.version}</version>
 		</dependency>
 		
+		<dependency>
+			<groupId>com.formdev</groupId>
+			<artifactId>flatlaf</artifactId>
+		</dependency>
+		
 		<!-- BIOFORMATS -->
 		<dependency>
 			<groupId>ome</groupId>
@@ -106,46 +111,56 @@
 					<artifactId>jhdf5</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency>			
 		
-		<dependency>
-		    <groupId>net.imglib2</groupId>
-		    <artifactId>imglib2-mesh</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.formdev</groupId>
-			<artifactId>flatlaf</artifactId>
-		</dependency>
-		
-		<!-- Bioformats opener -->
+		<!-- BDV Image Loaders -->
 		<dependency>
 			<groupId>ch.epfl.biop</groupId>
 			<artifactId>bigdataviewer-image-loaders</artifactId>
 			<version>${bdv-loaders.version}</version> 
 		</dependency>
 		
+		<!-- N5 Utils -->
+		<dependency>
+            <groupId>org.janelia.saalfeldlab</groupId>
+            <artifactId>n5</artifactId>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.janelia.saalfeldlab</groupId>
+            <artifactId>n5-universe</artifactId>
+        </dependency>
+        
+		<dependency>
+		  <groupId>org.janelia.saalfeldlab</groupId>
+		  <artifactId>n5-viewer_fiji</artifactId>
+		</dependency>
 		<!-- GLT format (mesh) reader -->
 		<dependency>
 		    <groupId>de.javagl</groupId>
 		    <artifactId>jgltf-model</artifactId>
 		    <version>${jgltf.version}</version>
 		</dependency>
+		
 		<!-- LAS Reader -->
 		<dependency>
 			<groupId>com.github.mreutegg</groupId>
   			<artifactId>laszip4j</artifactId>
   			<version>${laszip4j.version}</version>
 		</dependency>
+		
 		<!-- Animation timeline storage -->
   		<dependency>
 		 <groupId>com.fasterxml.jackson.core</groupId>
 		  <artifactId>jackson-core</artifactId>
 		</dependency>
+		
   		<dependency>
 		 <groupId>com.fasterxml.jackson.core</groupId>
 		  <artifactId>jackson-databind</artifactId>
 		</dependency>
+		
+		
 		<!-- ImgLib2 dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>
@@ -180,6 +195,11 @@
 			<artifactId>joml</artifactId>
 		</dependency>
 		
+		<dependency>
+		    <groupId>net.imglib2</groupId>
+		    <artifactId>imglib2-mesh</artifactId>
+		</dependency>
+		
 		<!-- BDV dependencies -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
@@ -195,7 +215,6 @@
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 		</dependency>
-
 	</dependencies>
 	
 	<repositories>		

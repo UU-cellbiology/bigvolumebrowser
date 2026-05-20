@@ -73,11 +73,13 @@ import mpicbg.spim.data.generic.sequence.BasicImgLoader;
 public class PanelAddSources extends JPanel
 {
 	
-	JButton butBioFormats;
+	final JButton butBioFormats;
+
+	final JButton butFIJI;
 	
-	JButton butBDVXML;
+	final JButton butBDVXML;
 	
-	JButton butFIJI;
+	final JButton butZarr;
 	
 	final BigVolumeBrowser bvb;
 	
@@ -108,6 +110,12 @@ public class PanelAddSources extends JPanel
 	    butBDVXML.setToolTipText("Load BDV XML/HDF5");
 	    butBDVXML.addActionListener( (e) ->	loadBDVXMLDialog());	
 	    
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "zarr-logo.png");
+	    tabIcon = new ImageIcon(icon_path);
+	    butZarr = new JButton(tabIcon);
+	    butZarr.setToolTipText("Load N5/Zarr/OME-NGFF");
+	    butZarr.addActionListener( (e) ->	loadZarrDialog());	
+	    
 	    gbc.insets = new Insets(4,3,4,3);
 
 	    gbc.gridx = 0;
@@ -120,7 +128,11 @@ public class PanelAddSources extends JPanel
 
 	    gbc.gridx++;
 	    this.add( butBDVXML,gbc);
+	    
+	    gbc.gridx++;
+	    this.add( butZarr,gbc);
 
+	    
 	}
 	
 	public void loadBDVXMLDialog()
@@ -196,6 +208,12 @@ public class PanelAddSources extends JPanel
 			    });
 			});
         }
+	}
+	
+	public void loadZarrDialog()
+	{
+		final N5OpenDialog dialog = new N5OpenDialog();
+		dialog.openBVB(bvb);
 	}
 	
 	public void loadImagePlus()

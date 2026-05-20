@@ -66,6 +66,8 @@ public class DataTreeModel implements TreeModel
 	
 	final ImageIcon iconMoBIE;
 	
+	final ImageIcon iconZarr;
+	
 	final ImageIcon iconDefaultData;
 	
 	final ImageIcon iconOneSource;
@@ -97,6 +99,7 @@ public class DataTreeModel implements TreeModel
 		iconBioFormats = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bioformats-small.png"));
 		iconFIJI = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "fiji-logo-small.png"));
 		iconMoBIE = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "mobie-logo-small.png"));		
+		iconZarr = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "zarr-logo-small.png"));
 		iconDefaultData = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "data-small-default.png"));
 		iconOneSource = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "source-small.png"));
 		iconShapeGroup = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "shapes-small.png"));
@@ -296,6 +299,11 @@ public class DataTreeModel implements TreeModel
 	public ImageIcon getIconMoBIE()
 	{
 		return iconMoBIE;
+	}
+	
+	public ImageIcon getIconZarr()
+	{
+		return iconZarr;
 	}
 	
 	public ImageIcon getIconDataDefault()

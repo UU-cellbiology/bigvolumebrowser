@@ -75,4 +75,5 @@ public class SpimDataWrapper
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(Misc.getSourceStyleName(sFilename),spimDataIcon);
 		return new ValuePair<>(spimData, info);
 	}
+	
 }

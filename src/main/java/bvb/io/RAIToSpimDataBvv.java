@@ -99,7 +99,7 @@ public class RAIToSpimDataBvv
 		final FinalVoxelDimensions voxelSize = new FinalVoxelDimensions("pixels", 1.0,
 				1.0, 1.0);
 		
-		for(int i=0;i<numSetups;i++)
+		for(int i = 0; i < numSetups; i++)
 		{
 			final BasicViewSetup setup = new BasicViewSetup( i, "channel_"+Integer.toString( i+1 ), size, voxelSize);			
 			setup.setAttribute(new Channel(i + 1));

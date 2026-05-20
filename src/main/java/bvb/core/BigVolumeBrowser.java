@@ -94,6 +94,7 @@ import bvb.gui.overlays.MultiBoxOverlayRendererBVB;
 import bvb.io.LUTNameFIJI;
 import bvb.io.RAIToSpimDataBvv;
 import bvb.io.SourceToSpimDataBvv;
+import bvb.io.SourcesToSpimDataBvv;
 import bvb.io.SpimDataWrapper;
 import bvb.io.dto.StoryDTO;
 import bvb.registry.ObjectHashStorage;
@@ -368,7 +369,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> loadBioFormats(String imageFileName)
 	{
-
 		return loadFromDiskBDVorBF(imageFileName, 1);
 	}
 	
@@ -388,6 +388,14 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(sourceName, icon);
 		return addSpimData(spimData, info);
 	}
+	
+	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addSourcesList(final List< Source< ? > > srcs, String groupName, List<String> sourceNames, final ImageIcon icon)
+	{
+		final AbstractSpimData<?> spimData = SourcesToSpimDataBvv.spimDataSourcesListWrap( srcs, sourceNames );
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(groupName, icon);
+		return addSpimData(spimData, info);
+	}
+	
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai, String raiName, final ImageIcon icon)
 	{
@@ -518,6 +526,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 	}
 
+//	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> loadZarr(String sLocation)
+//	{		
+//		final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = spimDataWrapper.createSpimDataZarr( sLocation );
+//		return null;
+//
+//	}
 	
 	public synchronized void addShape(final BasicShape shape)
 	{
@@ -861,6 +875,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 
 		
 		testBVB.startBVB("");
+		//testBVB.loadZarr( "/home/eugene/Desktop/projects/BVB/Zarr/smallsetv04.ome.zarr" );
+		//testBVB.loadZarr( "/home/eugene/Desktop/projects/BVB/Zarr/idr0079_images.zarr" );
 		//testBVB.run("");
 		
 		

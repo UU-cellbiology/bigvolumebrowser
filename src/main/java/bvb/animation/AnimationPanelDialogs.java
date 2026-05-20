@@ -158,7 +158,7 @@ public class AnimationPanelDialogs
 				Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
 			}
 			
-			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder.." );
+			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder..", false );
 			
 			if(aPanel.sRenderSavePath == null)
 			{

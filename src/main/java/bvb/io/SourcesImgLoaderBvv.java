@@ -28,6 +28,9 @@
  */
 package bvb.io;
 
+import java.util.HashMap;
+import java.util.List;
+
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.IterableInterval;
@@ -42,7 +45,6 @@ import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileFloatArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
-
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
@@ -54,132 +56,53 @@ import net.imglib2.view.Views;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
-import bdv.ViewerSetupImgLoader;
+
 import bdv.cache.CacheControl;
 import bdv.img.cache.CacheArrayLoader;
 import bdv.img.cache.VolatileCachedCellImg;
 import bdv.img.cache.VolatileGlobalCellCache;
 import bdv.viewer.Source;
 import bvb.utils.Misc;
+
 import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
+import mpicbg.spim.data.generic.sequence.TypedBasicImgLoader;
 
 
 /** **/
-public class SourceImgLoaderBvv < T extends RealType< T > & NativeType< T >, 
+public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >, 
 								  V extends Volatile< T > & NativeType < V >, 
 								  A extends DataAccess & VolatileAccess> 
-								  extends AbstractViewerSetupImgLoader< T, V > 
-								  implements ViewerImgLoader
+								  implements ViewerImgLoader, TypedBasicImgLoader<T>
 {
-	final Source<?> src;
-	
-	final int numScales;
-	
-	final AffineTransform3D [] mipmapTransforms;
-	
-	final double [][] mipmapResolutions; 
+	final List<Source<?>> srcs;
 	
 	private VolatileGlobalCellCache cache;
 	
-	private final CacheArrayLoader<A> loader;
+	private final HashMap<Integer, SourceSetupImgLoader> setupImgLoaders;	
 	
-	final private boolean bConvertSrc; 
-	
-	public SourceImgLoaderBvv(final Source< ? > source_, final T type, final V volatileType)
+	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType)
 	{
-		super( type, volatileType );
-		
-		src = source_;
-		
-		numScales = src.getNumMipmapLevels();
-		
-		cache = new VolatileGlobalCellCache( numScales + 1, 1 );
+		this.srcs = srcs;	
 
-		mipmapTransforms = new AffineTransform3D[numScales];
-
-		mipmapResolutions = new double[ numScales ][];
+		int nMaxScales = 1;
 		
-		AffineTransform3D transformSource = new AffineTransform3D();
-		src.getSourceTransform( 0, 0, transformSource );
-		
-		final double [] zeroScale = Misc.getScale( transformSource);
-
-		for(int i = 0; i < numScales; i++)
+		for(final Source<?> src:srcs)
 		{
-			AffineTransform3D transform = new AffineTransform3D();
-			src.getSourceTransform( 0, i, transform );			
-			mipmapTransforms[i] = transform;
-			
-			double [] currScale = Misc.getScale( transform );
-			mipmapResolutions[i] = new double [3];
-			for(int d = 0; d < 3; d++)
-			{
-				mipmapResolutions[i][d] = currScale[d]/zeroScale[d];
-			}		
+			nMaxScales = Math.max(nMaxScales, src.getNumMipmapLevels());
 		}
+		final int numFetcherThreads = Math.max(2,
+		        Runtime.getRuntime().availableProcessors() / 2);
+		cache = new VolatileGlobalCellCache( nMaxScales + 1, numFetcherThreads );
 		
-		bConvertSrc = SourceToSpimDataBvv.needsConvertion(type);
+		setupImgLoaders = new HashMap<>();
 		
-		loader = new SourceArrayLoader<>(src);
-	}
-
-	@Override
-	public int numMipmapLevels()
-	{
-		return numScales;
-	}
-	
-	@Override
-	public double[][] getMipmapResolutions()
-	{
-		return mipmapResolutions;
-	}
-
-	@Override
-	public AffineTransform3D[] getMipmapTransforms()
-	{
-		return mipmapTransforms;
+		for (int setupId = 0; setupId < srcs.size(); setupId++)
+		{
+			setupImgLoaders.put(setupId, new SourceSetupImgLoader(srcs.get( setupId ), 
+					setupId, type, volatileType));
+		}			
 	}
 	
-	
-	@SuppressWarnings( "hiding" )
-	protected <T extends NativeType<T>> VolatileCachedCellImg<T, A>
-	prepareCachedImage(final int timepointId, final int level, final int setupId,
-					   final LoadingStrategy loadingStrategy, final T typeCache)
-	{
-		final long[] dimensions = src.getSource( timepointId, level ).dimensionsAsLongArray();
-		
-		final int priority = numScales - 1 - level;
-		
-		final CacheHints cacheHints = new CacheHints( loadingStrategy, priority, false );
-		
-		final int[] cellDimensions = new int [] {32,32,32};
-		
-		final CellGrid grid = new CellGrid(dimensions, cellDimensions);
-		return cache.createImg(grid, timepointId, setupId, level, cacheHints,
-				loader, typeCache);
-	}
-	
-	@SuppressWarnings( { "unchecked", "rawtypes" } )
-	@Override
-	public RandomAccessibleInterval getImage( int timepointId, int level, ImgLoaderHint... hints )
-	{
-		final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
-		
-		if(!bConvertSrc)
-			return raiXYZ;
-		
-		return convertIntegerRAIToShort(raiXYZ);
-			
-	}
-	
-	@Override
-	public RandomAccessibleInterval< V > getVolatileImage( int timepointId, int level, ImgLoaderHint... hints )
-	{		
-		return prepareCachedImage(timepointId, level, 0, LoadingStrategy.VOLATILE, volatileType);
-	}
-	
-
 	@Override
 	public CacheControl getCacheControl()
 	{		
@@ -187,15 +110,118 @@ public class SourceImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	}
 	
 	@Override
-	public ViewerSetupImgLoader< ?, ? > getSetupImgLoader( int setupId )
+	public SourceSetupImgLoader getSetupImgLoader( int setupId )
 	{
-		return this;
+		return setupImgLoaders.get(setupId);
 	}
 	
-	public void setCache( final VolatileGlobalCellCache cache )
-	{
-		this.cache = cache;
-	}		
+	
+	public class SourceSetupImgLoader extends AbstractViewerSetupImgLoader<T, V> {
+
+		final Source<?> src;
+		
+		private final int setupId;
+		
+		final CacheArrayLoader<A> loader;
+		
+		final int numScales;
+		
+		final AffineTransform3D [] mipmapTransforms;
+		
+		final double [][] mipmapResolutions; 
+		
+		final private boolean bConvertSrc;
+
+		protected SourceSetupImgLoader(final Source<?> src_, final int setupId, final T type,
+								 final V volatileType)
+		{
+			super(type, volatileType);
+			this.src = src_; 
+			this.setupId = setupId;
+			loader = new SourceArrayLoader<>(this.src);
+			numScales = src.getNumMipmapLevels();
+			
+			mipmapTransforms = new AffineTransform3D[numScales];
+
+			mipmapResolutions = new double[ numScales ][];
+			
+			final AffineTransform3D transformSource = new AffineTransform3D();
+			src.getSourceTransform( 0, 0, transformSource );
+			
+			final double [] zeroScale = Misc.getScale( transformSource );
+
+			for(int i = 0; i < numScales; i++)
+			{
+				AffineTransform3D transform = new AffineTransform3D();
+				src.getSourceTransform( 0, i, transform );			
+				mipmapTransforms[ i ] = transform;
+				
+				double [] currScale = Misc.getScale( transform );
+				mipmapResolutions[i] = new double [3];
+				for(int d = 0; d < 3; d++)
+				{
+					mipmapResolutions[i][d] = currScale[d]/zeroScale[d];
+				}		
+			}
+			bConvertSrc = SourceToSpimDataBvv.needsConvertion(type);
+			
+		}
+
+		@Override
+		public RandomAccessibleInterval<V> getVolatileImage(final int timepointId,
+															final int level, final ImgLoaderHint... hints)
+		{
+			return prepareCachedImage(timepointId, level,
+					LoadingStrategy.VOLATILE, volatileType);
+		}
+		
+		@SuppressWarnings( { "unchecked", "rawtypes" } )
+		@Override
+		public RandomAccessibleInterval getImage(final int timepointId,
+													final int level, final ImgLoaderHint... hints)
+		{
+			final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
+			
+			if(!bConvertSrc)
+				return raiXYZ;
+			
+			return convertIntegerRAIToShort(raiXYZ);
+		}
+
+		@SuppressWarnings( "hiding" )
+		protected <T extends NativeType<T>> VolatileCachedCellImg<T, A>
+		prepareCachedImage(final int timepointId, final int level,
+						   final LoadingStrategy loadingStrategy, final T typeCache)
+		{
+			final long[] dimensions = src.getSource( timepointId, level ).dimensionsAsLongArray();
+			
+			final int priority = numScales - 1 - level;
+			
+			final CacheHints cacheHints = new CacheHints( loadingStrategy, priority, false );
+			
+			final int[] cellDimensions = new int [] {32,32,32};
+			
+			final CellGrid grid = new CellGrid(dimensions, cellDimensions);
+			return cache.createImg(grid, timepointId, setupId, level, cacheHints,
+					loader, typeCache);
+		}
+
+		@Override
+		public double[][] getMipmapResolutions() {
+			return mipmapResolutions;
+		}
+
+		@Override
+		public AffineTransform3D[] getMipmapTransforms() {
+			return mipmapTransforms;
+		}
+
+		@Override
+		public int numMipmapLevels() {
+			return numScales;
+		}
+	}
+	
 	
 	static class SourceArrayLoader <A extends DataAccess> implements CacheArrayLoader<A> 
 	{	

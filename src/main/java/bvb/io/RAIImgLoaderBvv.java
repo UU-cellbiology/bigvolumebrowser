@@ -149,13 +149,12 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 		public RandomAccessibleInterval< V > getVolatileImage( int timepointId, int level, ImgLoaderHint... hints )
 		{
 			return prepareCachedImage(timepointId, level, LoadingStrategy.VOLATILE, volatileType);
-
 		}
 
 		@Override
 		public RandomAccessibleInterval< T > getImage( int timepointId, int level, ImgLoaderHint... hints )
 		{
-				return Views.hyperSlice(Views.hyperSlice( raiXYZTC, 4, setupId), 3, timepointId);
+			return Views.hyperSlice(Views.hyperSlice( raiXYZTC, 4, setupId), 3, timepointId);
 		}
 		
 		@SuppressWarnings( "hiding" )
@@ -173,8 +172,6 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 			return cache.createImg(grid, timepointId, setupId, level, cacheHints,
 					loader, typeCache);
 		}
-		
-
 
 	}
 	
@@ -182,10 +179,11 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 	{
 		final RandomAccessibleInterval<T> rai;
 		
-		public RAIArrayLoader (final RandomAccessibleInterval<T> rai_)
+		public RAIArrayLoader(final RandomAccessibleInterval<T> rai_)
 		{
 			rai = rai_;
 		}
+		
 		@SuppressWarnings( "unchecked" )
 		@Override
 		public A loadArray( int timepoint, int setup, int level, int[] dimensions, long[] min ) throws InterruptedException
@@ -194,10 +192,10 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 						
 			final long[][] intRange = new long [2][3];
 			
-			for(int d=0;d<3;d++)
+			for(int d = 0; d < 3; d++)
 			{
-				intRange[0][d]= min[d];
-				intRange[1][d]= min[d]+dimensions[d]-1;
+				intRange[0][d] = min[d];
+				intRange[1][d] = min[d]+dimensions[d]-1;
 			}
 			
 			if(raiXYZ.getType() instanceof UnsignedShortType)
@@ -251,8 +249,7 @@ public class RAIImgLoaderBvv<T extends NativeType<T>, V extends Volatile<T> & Na
 	{
 		CacheControlOverride.Tools.shutdownCacheQueue(this.cache);
 		this.cache.clearCache();
-		this.cache = cache;
-		
+		this.cache = cache;		
 	}
 
 }
