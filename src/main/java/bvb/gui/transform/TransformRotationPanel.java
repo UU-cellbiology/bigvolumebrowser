@@ -86,9 +86,14 @@ public class TransformRotationPanel extends JPanel
 		updateGUI();
 	}
 	
-	synchronized void updateGUI()
+	void updateGUI()
 	{
-		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
@@ -126,81 +131,92 @@ public class TransformRotationPanel extends JPanel
 		{
 			finalAngles[d] = Misc.angleToMinusPiPlusPi( finalAngles[d]  ); 
 		}
-			
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( TransformRotationPanel.this )
-			{
-				blockUpdates = true;
-				for (int d = 0; d < 3; d++)
-				{
 
-					trRotationPanels[d].setConsistent( isConsistent[d] );
-					trRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
-				}
-				blockUpdates = false;
+		blockUpdates = true;
+		try
+		{
+			for (int d = 0; d < 3; d++)
+			{
+
+				trRotationPanels[d].setConsistent( isConsistent[d] );
+				trRotationPanels[d].setValue( new BoundedValueDouble( -dRange, dRange, finalAngles[d]*180/Math.PI ) );
 			}
-		} );
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
 	}
 	
 	void updateAxisRotation(int nAxis)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> updateAxisRotation(nAxis));
+	        return;
+	    }
+
 		if(!transformSetups.selectedObjects.isAnythingSelected() || blockUpdates)
 			return;
 		
 		blockUpdates = true;
-		final AffineTransform3D viewTr = transformSetups.bvb.bvvViewer.state().getViewerTransform();
-		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		for ( final Object obj: objList)
-		{			
-			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			final double [] prevAngles = new double[3];
-			for(int d = 0; d < 3; d++)
-			{
-				prevAngles[d] = eAngles[d];
+
+		try
+		{
+			final AffineTransform3D viewTr = transformSetups.bvb.bvvViewer.state().getViewerTransform();
+			final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+			for ( final Object obj: objList)
+			{			
+				final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
+				final double [] prevAngles = new double[3];
+				for(int d = 0; d < 3; d++)
+				{
+					prevAngles[d] = eAngles[d];
+				}
+
+				eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
+
+				transformSetups.transformRotation.setAngles( obj, eAngles );
+
+				if(!transformSetups.bLocalCoordinates)
+				{
+
+					//get new rotation center
+					double [] viewCenter = new double [] {transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getWidth()*0.5,
+							transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getHeight()*0.5,
+							0.0};
+
+					//new center of the FOV
+					viewTr.applyInverse( viewCenter, viewCenter );
+
+					final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
+					final double [] newCenters = new double [3];
+					for(int d = 0; d < 3; d++)
+					{
+						newCenters[d] = oldCenters[d] - viewCenter[d];
+					}
+
+					//build rotation transform
+					final AffineTransform3D rotationTr = new AffineTransform3D();
+					for(int d = 0; d < 3; d++)
+					{
+						rotationTr.rotate( d, eAngles[d] -  prevAngles[d]);
+					}
+					rotationTr.apply( newCenters, newCenters );
+					for(int d = 0; d < 3; d++)
+					{
+						newCenters[d] += viewCenter[d];
+					}
+
+					transformSetups.transformCenters.setCenters( obj, newCenters );	
+				}						
+				transformSetups.updateTransform( obj, prevAngles);
 			}
-			
-			eAngles[nAxis] = trRotationPanels[nAxis].getValue().getCurrentValue()*Math.PI/180.;
-
-			transformSetups.transformRotation.setAngles( obj, eAngles );
-			
-			if(!transformSetups.bLocalCoordinates)
-			{
-				
-				//get new rotation center
-				double [] viewCenter = new double [] {transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getWidth()*0.5,
-						transformSetups.bvb.bvvHandle.getViewerPanel().getDisplay().getHeight()*0.5,
-						0.0};
-				
-				//new center of the FOV
-				viewTr.applyInverse( viewCenter, viewCenter );
-				
-				final double [] oldCenters = transformSetups.transformCenters.getCenters( obj );
-				final double [] newCenters = new double [3];
-				for(int d = 0; d < 3; d++)
-				{
-					newCenters[d] = oldCenters[d] - viewCenter[d];
-				}
-				
-				//build rotation transform
-				final AffineTransform3D rotationTr = new AffineTransform3D();
-				for(int d = 0; d < 3; d++)
-				{
-					rotationTr.rotate( d, eAngles[d] -  prevAngles[d]);
-				}
-				rotationTr.apply( newCenters, newCenters );
-				for(int d = 0; d < 3; d++)
-				{
-					newCenters[d] += viewCenter[d];
-				}
-
-				transformSetups.transformCenters.setCenters( obj, newCenters );	
-			}			
-			
-			transformSetups.updateTransform( obj, prevAngles);
-
 		}
-		
-		blockUpdates = false;
+		finally
+		{
+			blockUpdates = false;
+		}
 		
 		updateGUI();
 		
@@ -217,42 +233,57 @@ public class TransformRotationPanel extends JPanel
 			return;
 		
 		blockUpdates = true;
-		final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
-		for ( final Object obj: objList)
+		try
 		{
-			final double [] prevAngles =  new double[3];
-			final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
-			for(int d = 0; d < 3; d++)
+			final List< Object > objList = transformSetups.selectedObjects.getSelectedObjects();
+			for ( final Object obj: objList)
 			{
-				prevAngles[ d ] = eAngles [ d ];
+				final double [] prevAngles =  new double[3];
+				final double [] eAngles = transformSetups.transformRotation.getAngles( obj );
+				for(int d = 0; d < 3; d++)
+				{
+					prevAngles[ d ] = eAngles [ d ];
+				}
+				transformSetups.transformRotation.setAngles( obj,  new double [3] );
+				transformSetups.updateTransform( obj, prevAngles );		
 			}
-			transformSetups.transformRotation.setAngles( obj,  new double [3] );
-			transformSetups.updateTransform( obj, prevAngles );		
 		}
-		blockUpdates = false;
+		finally
+		{
+			blockUpdates = false;
+		}
 		updateGUI();
 	}
 	
 	@Override
 	public void setEnabled(boolean bEnabled)
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(() -> setEnabled(bEnabled));
+	        return;
+	    }
+
 		if(blockUpdates)
 			return;
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( TransformRotationPanel.this )
-			{				
-				blockUpdates = true;
-				for(int d = 0; d < 3; d++)
-				{
-					trRotationPanels[ d ].setEnabled( bEnabled );
-				}
-				blockUpdates = false;
-			} });
+
+		blockUpdates = true;
+	    
+		try
+	    {
+	    	for(int d = 0; d < 3; d++)
+	    	{
+	    		trRotationPanels[ d ].setEnabled( bEnabled );
+	    	}
+	    }
+	    finally
+	    {
+	    	blockUpdates = false;
+	    }
 	}
 	
 	void setSliderColors(Color [] colors)
 	{
-
 		for(int d = 0; d < 3; d++)
 		{
 			trRotationPanels[ d ].setSliderForeground( colors[ d ] );	

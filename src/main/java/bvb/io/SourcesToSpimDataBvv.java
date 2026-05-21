@@ -31,6 +31,7 @@ package bvb.io;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.imglib2.FinalDimensions;
 import net.imglib2.Volatile;
@@ -52,51 +53,100 @@ import mpicbg.spim.data.registration.ViewRegistrations;
 import mpicbg.spim.data.sequence.TimePoint;
 import mpicbg.spim.data.sequence.TimePoints;
 
-public class SourceToSpimDataBvv
+public class SourcesToSpimDataBvv
 {
-	/** wraps UnsignedByte, UnsignedShort, UnsignedLong or Float type source to a cached spimdata 
+	/** wraps UnsignedByte, UnsignedShort, UnsignedLong or Float type list of source to a cached spimdata 
 	 * (of UnsignedShort type) to display in BVV, otherwise returns null **/
-	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	public static < T extends RealType< T > & NativeType< T >, V extends Volatile< T > & NativeType < V >> AbstractSpimData< ? > spimDataSourceWrap(final Source<?> src_)
+	@SuppressWarnings( { "rawtypes", "unchecked", "null" } )
+	public static < T extends RealType< T > & NativeType< T >, V extends Volatile< T > & NativeType < V >> AbstractSpimData< ? > 
+		spimDataSourcesListWrap(final List< Source<?>> srcs, final List< String > srcNames)
 	{		
-		final Object type = src_.getType() ;
-		
-		if(!(type instanceof RealType  && type instanceof NativeType))
-		{
-			System.err.println( "Sources with pixel type " + type.getClass().getName() + " currently not supported in BigVolumeBrowser.");
+		if(srcs.size() == 0)
 			return null;
+		
+		final int numSetups = srcs.size();
+		
+		final Object type = srcs.get( 0 ).getType() ;
+
+		for(final Source<?> src:srcs)
+		{
+			final Object typeS = src.getType();
+			if(!(typeS instanceof RealType  && typeS instanceof NativeType))
+			{
+				System.err.println( "Sources with pixel type " + typeS.getClass().getName() + " currently not supported in BigVolumeBrowser.");
+				return null;
+			}
+			//check if all sources are the same type
+			if(!typeS.getClass().equals( type.getClass()))
+			{
+				System.err.println( "Error during sources list import:\n"
+						+ "list should contain sources with the same type, but got " + typeS.getClass().getName() + " and " + type.getClass().getName() +".");
+				return null;	
+			}
 		}
 		Volatile volatileType = ( Volatile )VolatileTypeMatcher.getVolatileTypeForType(( T ) type);
-		final SourceImgLoaderBvv imgLoader;
+		
+		final SourcesImgLoaderBvv imgLoader;
+		
 		if( !needsConvertion(type) )
 		{
-			imgLoader = new SourceImgLoaderBvv(src_, (T) type,  volatileType );
+			imgLoader = new SourcesImgLoaderBvv(srcs, (T) type,  volatileType );
 		}
 		else
 		{
-			imgLoader = new SourceImgLoaderBvv(src_, new UnsignedShortType(), new VolatileUnsignedShortType());			
+			imgLoader = new SourcesImgLoaderBvv(srcs, new UnsignedShortType(), new VolatileUnsignedShortType());			
 		}
-		
+
+		final FinalDimensions size = new FinalDimensions( srcs.get( 0 ).getSource( 0, 0 ));
+
 		int numTimepoints = 0;
 		
-		final FinalDimensions size = new FinalDimensions( src_.getSource( 0, 0 ));
+		for(final Source<?> src:srcs)
+		{
+			int numTP = 0;
+			while(src.isPresent( numTP ))
+				numTP++;
+			numTimepoints = Math.max( numTP, numTimepoints);
+		}
 		
-		while(src_.isPresent( numTimepoints ))
-			numTimepoints++;
+		boolean bUseInternalSourceNames = false;
+		
+		if(srcNames != null)
+		{
+			if( srcNames.size() == numSetups )
+				bUseInternalSourceNames = true;
+		}
+		final List<String> srcNamesFin = new ArrayList<>();
 
-		final HashMap< Integer, BasicViewSetup > setups = new HashMap<>( 1 );
+		for(int setupId = 0; setupId < numSetups; setupId++)
+		{
+			if (!bUseInternalSourceNames)
+				srcNamesFin.add(srcs.get( setupId ).getName() );
+			else
+				srcNamesFin.add( srcNames.get( setupId ) );
+		}			
 		
-		final BasicViewSetup setup = new BasicViewSetup( 0, src_.getName(), size, src_.getVoxelDimensions() );
-		setups.put( 0, setup );
+		final HashMap< Integer, BasicViewSetup > setups = new HashMap<>( srcs.size() );
+		
+		for(int setupId = 0; setupId < numSetups; setupId++)
+		{
+			setups.put( setupId, new BasicViewSetup( setupId, srcNamesFin.get( setupId ), size, srcs.get( setupId ).getVoxelDimensions() ));
+		}
+		
 		final ArrayList< TimePoint > timepoints = new ArrayList<>( numTimepoints );
 		for ( int t = 0; t < numTimepoints; ++t )
 			timepoints.add( new TimePoint( t ) );
+		
 		final SequenceDescriptionMinimal seq = new SequenceDescriptionMinimal( new TimePoints( timepoints ), setups, imgLoader, null );
+		
 		final ArrayList< ViewRegistration > registrations = new ArrayList<>();
-		for ( int t = 0; t < numTimepoints; ++t )
+		for (int s = 0; s < numSetups; s++)
 		{
-			AffineTransform3D transform = new AffineTransform3D();
-			registrations.add( new ViewRegistration( t, 0, transform ) );
+			for ( int t = 0; t < numTimepoints; ++t )
+			{
+				final AffineTransform3D transform = new AffineTransform3D();
+				registrations.add( new ViewRegistration( t, s, transform ) );
+			}
 		}
 		File dummy = null;
 		return new AbstractSpimData<>( dummy, seq, new ViewRegistrations( registrations) );

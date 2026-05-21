@@ -100,7 +100,6 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		tabIcon = new ImageIcon(icon_path);
 		butRender[2] = new JToggleButton(tabIcon);
 		butRender[2].setToolTipText("Surface");
-
 		
 		icon_path = this.getClass().getResource(BVBSettings.sIconPath +"light_plain.png");
 		tabIcon = new ImageIcon(icon_path);
@@ -197,22 +196,29 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	    updateGUI();
 	}
 	
-	synchronized void updateGUI()
+	void updateGUI()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		if(blockUpdates)
 			return;
 		
 		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 		if(csList == null || csList.isEmpty())
 		{
-			SwingUtilities.invokeLater( () -> {
-				synchronized ( SourcesRenderPanel.this )
-				{
-					blockUpdates = true;
-					setChoicesEnabled(false);
-					blockUpdates = false;
-				}
-			});
+			blockUpdates = true;
+			try 
+			{
+				setChoicesEnabled(false);
+			}
+			finally
+			{
+				blockUpdates = false;
+			}	
 			return;
 		}
 			
@@ -245,47 +251,48 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 		final int nRenderFin = nRenderM;
 		final int nInterpFin = nInterpM;
 		final int nLightFin = nLightM;
-		
-		SwingUtilities.invokeLater( () -> {
-			synchronized ( SourcesRenderPanel.this )
+
+
+		blockUpdates = true;
+		try 
+		{
+			setChoicesEnabled(true);
+
+			panRender.setConsistent( bRenderFin );
+			if(bRenderFin)
 			{
-				blockUpdates = true;
-				
-				setChoicesEnabled(true);
-				
-				panRender.setConsistent( bRenderFin );
-				if(bRenderFin)
-				{
-					butRender[nRenderFin].setSelected( true );
-				}
-				else
-				{
-					renderMode.clearSelection();
-				}
-				
-				panLighting.setConsistent( bLightFin );
-				if(bLightFin)
-				{
-					butLight[nLightFin].setSelected( true );
-				}
-				else
-				{
-					lightMode.clearSelection();
-				}
-				
-				panInterpolation.setConsistent( bInterpFin );
-				if(bInterpFin)
-				{
-					butInter[nInterpFin].setSelected( true );					
-				}
-				else
-				{
-					interpolationMode.clearSelection();
-				}
-				blockUpdates = false;
+				butRender[nRenderFin].setSelected( true );
 			}
-			
-		} );
+			else
+			{
+				renderMode.clearSelection();
+			}
+
+			panLighting.setConsistent( bLightFin );
+			if(bLightFin)
+			{
+				butLight[nLightFin].setSelected( true );
+			}
+			else
+			{
+				lightMode.clearSelection();
+			}
+
+			panInterpolation.setConsistent( bInterpFin );
+			if(bInterpFin)
+			{
+				butInter[nInterpFin].setSelected( true );					
+			}
+			else
+			{
+				interpolationMode.clearSelection();
+			}
+		}
+		finally
+		{
+			blockUpdates = false;
+		}
+
 	}
 	
 	void setChoicesEnabled(boolean bEnabled)
@@ -302,11 +309,16 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 	}
 
 	@Override
-	public synchronized void actionPerformed( ActionEvent arg0 )
+	public void actionPerformed( ActionEvent arg0 )
 	{
+		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        throw new IllegalStateException("Must run on EDT");
+	    }
+	    
 		if(!selectedSources.areSourcesSelected() || blockUpdates)
 			return;
-
 
 		final List< ConverterSetup > csList = selectedSources.getSelectedConverterSetups();
 
@@ -314,43 +326,48 @@ public class SourcesRenderPanel extends JPanel implements ActionListener
 			return;
 		
 		blockUpdates = true;
-		
-		for(int i = 0; i < 2; i++)
+		try
 		{
-			if(arg0.getSource() == butInter[i])
+			for(int i = 0; i < 2; i++)
 			{
-				for ( final ConverterSetup cs: csList)
+				if(arg0.getSource() == butInter[i])
 				{
-					((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
+					for ( final ConverterSetup cs: csList)
+					{
+						((GammaConverterSetup)cs).setVoxelRenderInterpolation( i );
+					}
+					blockUpdates = false;
+					return;
 				}
-				blockUpdates = false;
-				return;
+			}
+			for(int i = 0; i < 3; i++)
+			{
+				if(arg0.getSource() == butRender[i])
+				{
+					for ( final ConverterSetup cs: csList)
+					{
+						((GammaConverterSetup)cs).setRenderType( i );
+					}
+					blockUpdates = false;
+					return;
+				}
+			}
+			for(int i = 0; i < 3; i++)
+			{
+				if(arg0.getSource() == butLight[i])
+				{
+					for ( final ConverterSetup cs: csList)
+					{
+						((GammaConverterSetup)cs).setLightingType( i );
+					}
+					blockUpdates = false;
+					return;
+				}
 			}
 		}
-		for(int i = 0; i < 3; i++)
+		finally
 		{
-			if(arg0.getSource() == butRender[i])
-			{
-				for ( final ConverterSetup cs: csList)
-				{
-					((GammaConverterSetup)cs).setRenderType( i );
-				}
-				blockUpdates = false;
-				return;
-			}
+			blockUpdates = false;
 		}
-		for(int i = 0; i < 3; i++)
-		{
-			if(arg0.getSource() == butLight[i])
-			{
-				for ( final ConverterSetup cs: csList)
-				{
-					((GammaConverterSetup)cs).setLightingType( i );
-				}
-				blockUpdates = false;
-				return;
-			}
-		}
-		blockUpdates = false;
 	}
 }

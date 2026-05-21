@@ -311,9 +311,10 @@ public class AnimationPanel extends JPanel implements ChangeListener
 				    KeyFrameScene kfScene = jlist.getSelectedValue();
 					updateScene(kfScene.fMovieTimePoint);
 					int nPos = Math.round( tsSpan*(kfScene.fMovieTimePoint/kfAnim.getTotalTime()));
+					final boolean bSaveSliderState = bUpdateSlider;
 					bUpdateSlider = false;
 					timeSlider.setValue( nPos );		
-					bUpdateSlider = true;		
+					bUpdateSlider = bSaveSliderState;		
 				} 
 				if (SwingUtilities.isRightMouseButton(evt))
 				{

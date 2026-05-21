@@ -28,6 +28,7 @@
  */
 package bvb.core;
 
+import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_RGBA8;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
@@ -52,6 +53,7 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.ValuePair;
 
+import org.janelia.saalfeldlab.control.mcu.XTouchMiniMCUControlPanel;
 import org.joml.Matrix4f;
 
 import bdv.util.Prefs;
@@ -92,7 +94,7 @@ import bvb.gui.overlays.AxesOverlayRenderer;
 import bvb.gui.overlays.MultiBoxOverlayRendererBVB;
 import bvb.io.LUTNameFIJI;
 import bvb.io.RAIToSpimDataBvv;
-import bvb.io.SourceToSpimDataBvv;
+import bvb.io.SourcesToSpimDataBvv;
 import bvb.io.SpimDataWrapper;
 import bvb.io.dto.StoryDTO;
 import bvb.registry.ObjectHashStorage;
@@ -102,6 +104,7 @@ import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
+import bvb.utils.MCUBVVControls;
 import bvb.utils.Misc;
 
 
@@ -318,6 +321,17 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
 		
+		//add midi panel controls
+		
+		try 
+		{
+			final XTouchMiniMCUControlPanel controlPanel = XTouchMiniMCUControlPanel.build();
+			new MCUBVVControls(
+				bvvHandle.getViewerPanel(),
+				controlPanel);
+		} 
+		catch (final Exception e) {}	 
+		
 		bvbActions = new BVBActions(this);
 		setCanvasBGColor(BVBSettings.canvasBGColor);
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar);
@@ -367,7 +381,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> loadBioFormats(String imageFileName)
 	{
-
 		return loadFromDiskBDVorBF(imageFileName, 1);
 	}
 	
@@ -383,10 +396,18 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, String sourceName, final ImageIcon icon)
 	{
-		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
+		final AbstractSpimData<?> spimData = SourcesToSpimDataBvv.spimDataSourcesListWrap( Collections.singletonList(src), Collections.singletonList( src.getName() ) );
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(sourceName, icon);
 		return addSpimData(spimData, info);
 	}
+	
+	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> addSourcesList(final List< Source< ? > > srcs, String groupName, List<String> sourceNames, final ImageIcon icon)
+	{
+		final AbstractSpimData<?> spimData = SourcesToSpimDataBvv.spimDataSourcesListWrap( srcs, sourceNames );
+		final BVBSpimDataInfo info = new BVBSpimDataInfo(groupName, icon);
+		return addSpimData(spimData, info);
+	}
+	
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addRAI(final RandomAccessibleInterval<?> rai, String raiName, final ImageIcon icon)
 	{
@@ -517,6 +538,12 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 	}
 
+//	public ValuePair<AbstractSpimData<?>, List< BvvStackSource< ? > >> loadZarr(String sLocation)
+//	{		
+//		final ValuePair< AbstractSpimData< ? >, BVBSpimDataInfo > spimDataInfo = spimDataWrapper.createSpimDataZarr( sLocation );
+//		return null;
+//
+//	}
 	
 	public synchronized void addShape(final BasicShape shape)
 	{
@@ -613,8 +640,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	public void renderTransparent(final GL3 gl, final RenderData data, final OffScreenFrameBufferWithDepth sceneVolBuffer)
 	{
 		
-		
-		//gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 		//get viewport size and transform matrices 
 		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
 		final Matrix4f pvm = new Matrix4f( data.getPv() );
@@ -624,14 +649,14 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
 
 		//to be able to change point size in shader
-		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
-		if(BVBSettings.bWeightedOIT)
+		gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
+		if( BVBSettings.bWeightedOIT )
 		{
 			sceneBufTransparent.bind( gl );
 			gl.glDepthMask(true);
 			sceneVolBuffer.drawQuadDepth( gl, true );
-			gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE); // Additive RGB + alpha
-			gl.glBlendEquation(GL.GL_FUNC_ADD);
+			gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE ); // Additive RGB + alpha
+			gl.glBlendEquation( GL.GL_FUNC_ADD );
 		}
 		int shapeN = shapes.size();
 		//disable depth writing
@@ -639,7 +664,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		for(int i = 0; i < shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
-			if(sh.isTransparent())
+			if( sh.isTransparent() )
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT  );
 		}
 		//draw boxes around volume
@@ -651,7 +676,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		if(BVBSettings.bWeightedOIT)
 		{
 			sceneBufTransparent.unbind( gl,false );
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+			gl.glDisable( GL_DEPTH_TEST );	
 			sceneBufTransparent.drawQuadAlpha( gl );
 		}
 	}
@@ -861,6 +887,8 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		BigVolumeBrowser testBVB = new BigVolumeBrowser(); 
 		
 		testBVB.startBVB("");
+		//testBVB.loadZarr( "/home/eugene/Desktop/projects/BVB/Zarr/smallsetv04.ome.zarr" );
+		//testBVB.loadZarr( "/home/eugene/Desktop/projects/BVB/Zarr/idr0079_images.zarr" );
 		//testBVB.run("");
 		
 		

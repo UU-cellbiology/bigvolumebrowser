@@ -66,7 +66,6 @@ import ij.io.SaveDialog;
 public class ViewPanel extends JPanel
 {	
 	final BigVolumeBrowser bvb;
-
 	
 	final JButton butToggleVisibility;
 
@@ -385,7 +384,7 @@ public class ViewPanel extends JPanel
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
-		pViewSettings.add(new JLabel("Show MultiBox"), gbc);
+		pViewSettings.add(new JLabel("Show MultiBox "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbShowMultiBox, gbc);
 		

@@ -38,15 +38,25 @@ import ij.Prefs;
 
 public class GetFolderDialog
 {
-	public static String getSelectedFolder(final String sTitle)
+	/** Folder choose dialog. bOpen shows open, otherwise Save **/
+	public static String getSelectedFolder(final String sTitle, boolean bOpen)
 	{
 		final JFileChooser fc = new JFileChooser();
 		
 		fc.setDialogTitle( sTitle );
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		fc.setCurrentDirectory( new File(BVBSettings.lastDir) );
+		fc.setApproveButtonText( "Open" );
 		
-		int returnVal = fc.showSaveDialog( null );
+		int returnVal;
+		if( bOpen )
+		{
+			returnVal = fc.showOpenDialog( null );
+		}
+		else
+		{
+			returnVal = fc.showSaveDialog( null );
+		}
 		
 		if(returnVal == JFileChooser.APPROVE_OPTION) 
 		{

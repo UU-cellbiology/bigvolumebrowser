@@ -46,6 +46,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.imglib2.FinalRealInterval;
@@ -252,8 +253,14 @@ public class ClipPanel extends JPanel
 	}
 	
 	
-	public synchronized void updateGUI()
+	public void updateGUI()
 	{
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(this::updateGUI);
+	        return;
+	    }
+	    
 		updateColors();
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected())
@@ -281,7 +288,6 @@ public class ClipPanel extends JPanel
 			}
 		}
 		
-		
 		if(bClipConsistent)
 		{
 			pClipState.setBackground( consistentBg );
@@ -300,9 +306,13 @@ public class ClipPanel extends JPanel
 		
 	}
 	
-	private void setPanelsEnabled(boolean bEnabled)
+	void setPanelsEnabled(boolean bEnabled)
 	{
-		
+	    if (!SwingUtilities.isEventDispatchThread())
+	    {
+	        SwingUtilities.invokeLater(()->setPanelsEnabled(bEnabled));
+	        return;
+	    }		
 		clipRangePanel.setEnabled(bEnabled);
 		clipRotationPanel.setEnabled(bEnabled);
 		clipCenterPanel.setEnabled( bEnabled );
@@ -317,7 +327,6 @@ public class ClipPanel extends JPanel
 	private void updateClipState()
 	{
 		int nClipState = cbClipState.getSelectedIndex();
-		
 		
 		if(!clipSetups.selectedObjects.isAnythingSelected())
 		{
