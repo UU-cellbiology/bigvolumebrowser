@@ -53,6 +53,7 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.ValuePair;
 
+import org.janelia.saalfeldlab.control.mcu.XTouchMiniMCUControlPanel;
 import org.joml.Matrix4f;
 
 import bdv.util.Prefs;
@@ -93,7 +94,6 @@ import bvb.gui.overlays.AxesOverlayRenderer;
 import bvb.gui.overlays.MultiBoxOverlayRendererBVB;
 import bvb.io.LUTNameFIJI;
 import bvb.io.RAIToSpimDataBvv;
-import bvb.io.SourceToSpimDataBvv;
 import bvb.io.SourcesToSpimDataBvv;
 import bvb.io.SpimDataWrapper;
 import bvb.io.dto.StoryDTO;
@@ -104,6 +104,7 @@ import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
+import bvb.utils.MCUBVVControls;
 import bvb.utils.Misc;
 
 
@@ -319,6 +320,17 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvViewer.setRenderSceneTransparent(this::renderTransparent);
 
 		bvvFrame = bvvHandle.getBigVolumeViewer().getViewerFrame();
+		
+		//add midi panel controls
+		
+		try 
+		{
+			final XTouchMiniMCUControlPanel controlPanel = XTouchMiniMCUControlPanel.build();
+			new MCUBVVControls(
+				bvvHandle.getViewerPanel(),
+				controlPanel);
+		} 
+		catch (final Exception e) {}	 
 		
 		bvbActions = new BVBActions(this);
 		setCanvasBGColor(BVBSettings.canvasBGColor);
