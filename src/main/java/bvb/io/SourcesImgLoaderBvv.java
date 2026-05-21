@@ -163,7 +163,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 					mipmapResolutions[i][d] = currScale[d]/zeroScale[d];
 				}		
 			}
-			bConvertSrc = SourceToSpimDataBvv.needsConvertion(type);
+			bConvertSrc = SourcesToSpimDataBvv.needsConvertion(type);
 			
 		}
 
@@ -233,7 +233,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		{
 			src = source_;
 			final Object type = src.getType();
-			bConvert = SourceToSpimDataBvv.needsConvertion(type);
+			bConvert = SourcesToSpimDataBvv.needsConvertion(type);
 			bytesPerElement = calculateBytesPerElement(type);				
 		}
 		

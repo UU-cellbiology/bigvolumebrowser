@@ -64,6 +64,7 @@ import bvb.core.BVVSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
+import bvb.io.N5OpenDialog;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;

@@ -1,4 +1,4 @@
-package bvb.gui.data;
+package bvb.io;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,7 +28,7 @@ import bvb.core.BigVolumeBrowser;
 public class N5ViewerBVB
 {
 
-	public static void addN5ViewerSelectionToBVB(final BigVolumeBrowser bvb, final DataSelection dataSelection)
+	public static void addN5ViewerSelectionToBVB(final BigVolumeBrowser bvb, final DataSelection dataSelection) throws IOException
 	{
 		final List<N5Metadata> selected = new ArrayList<>();
 		for (final N5Metadata meta : dataSelection.metadata) {
@@ -51,7 +51,7 @@ public class N5ViewerBVB
 		}
 	}
 	
-	public static <T extends NumericType<T> & NativeType<T>> void addN5MetadataToBVB(final BigVolumeBrowser bvb, final N5Reader n5, final N5Metadata metadata)
+	public static <T extends NumericType<T> & NativeType<T>> void addN5MetadataToBVB(final BigVolumeBrowser bvb, final N5Reader n5, final N5Metadata metadata) throws IOException
 	{
 		final DataSelection selection = new DataSelection(n5, Collections.singletonList(metadata));
 		final SharedQueue sharedQueue = new SharedQueue(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
@@ -59,7 +59,6 @@ public class N5ViewerBVB
 		final List<SourceAndConverter<T>> sourcesAndConverters = new ArrayList<>();
 		
 		final BdvOptions opts = BdvOptions.options();
-		try {
 			N5Viewer.buildN5Sources(
 					n5,
 					selection,
@@ -68,10 +67,6 @@ public class N5ViewerBVB
 					sourcesAndConverters,
 					opts);
 
-		} catch (final IOException e1) {
-			e1.printStackTrace();
-			return;
-		}
 		String rootPath = metadata.getPath();
 		if(!rootPath.equals( "" ))
 		{

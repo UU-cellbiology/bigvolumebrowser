@@ -43,12 +43,13 @@ Like it? Spread the word and give it a star on GitHub.
 Powered (and made possible) by a hard work of very talented people behind:   
 - [ImageJ](https://github.com/imagej) 
 - [FIJI](https://fiji.sc/) 
+- [BioFormats](https://github.com/ome/bioformats) 
 - [imglib2](https://github.com/imglib/imglib2) 
-- [BioFormats](https://github.com/ome/bioformats)
-- [JglTF](https://github.com/javagl/JglTF) 
 - [BigDataViewer (BDV)](https://github.com/bigdataviewer) 
-- [BDV-loaders](https://github.com/BIOP/bigdataviewer-image-loaders) 
 - [BigVolumeViewer](https://github.com/bigdataviewer/bigvolumeviewer-core) [(playground edition)](https://github.com/UU-cellbiology/bvv-playground). 
+- [BDV-loaders](https://github.com/BIOP/bigdataviewer-image-loaders) 
+- [N5 Viewer](https://github.com/saalfeldlab/n5-viewer) 
+- [JglTF](https://github.com/javagl/JglTF) 
 
  this application relies on components licensed under the [LGPL-2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html)
 - [laszip4j](https://github.com/mreutegg/laszip4j) v.0.20   

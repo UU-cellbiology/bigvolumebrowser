@@ -384,7 +384,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	public ValuePair<AbstractSpimData<?>,List< BvvStackSource< ? > >> addSource(final Source<?> src, String sourceName, final ImageIcon icon)
 	{
-		final AbstractSpimData<?> spimData = SourceToSpimDataBvv.spimDataSourceWrap( src );
+		final AbstractSpimData<?> spimData = SourcesToSpimDataBvv.spimDataSourcesListWrap( Collections.singletonList(src), Collections.singletonList( src.getName() ) );
 		final BVBSpimDataInfo info = new BVBSpimDataInfo(sourceName, icon);
 		return addSpimData(spimData, info);
 	}

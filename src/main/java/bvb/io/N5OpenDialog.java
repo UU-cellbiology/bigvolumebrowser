@@ -1,6 +1,7 @@
-package bvb.gui.data;
+package bvb.io;
 
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,18 +37,34 @@ public class N5OpenDialog extends N5ViewerCreator
 		dialogBVB.setLoaderExecutor(exec);
 		dialogBVB.setTreeRenderer(new N5ViewerTreeCellRenderer(false));
 		dialogBVB.setContainerPathUpdateCallback(x -> {});
+		try
+		{
 		dialogBVB.run(selection -> 
 		{
-			final URI uri = selection.n5.getURI();
-			if(uri.getScheme().equalsIgnoreCase( "file" ))
+			try 
 			{
-				//if file system, let's update last folder
-				final Path folderPath = Paths.get(uri).getParent();
-			    BVBSettings.lastDir = folderPath.toAbsolutePath().toString();
-			    Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+				final URI uri = selection.n5.getURI();
+				if(uri.getScheme().equalsIgnoreCase( "file" ))
+				{
+					//if file system, let's update last folder
+					final Path folderPath = Paths.get(uri).getParent();
+				    BVBSettings.lastDir = folderPath.toAbsolutePath().toString();
+				    Prefs.set( "BVB.lastDir", BVBSettings.lastDir );
+				}
+				N5ViewerBVB.addN5ViewerSelectionToBVB( bvb, selection );
 			}
-			N5ViewerBVB.addN5ViewerSelectionToBVB( bvb, selection );
+		 catch (final IOException e) {
+			 System.out.println("Got you!");
+			System.out.println(e.toString());
+		}
 		});
+		}
+		catch(final Exception e)
+		{
+			 System.out.println("Got you again!");
+			System.out.println(e.toString());
+			
+		}
 		//System.out.println( "done");
 	}
 }
