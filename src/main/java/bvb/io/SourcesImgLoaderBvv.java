@@ -52,6 +52,7 @@ import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
 
 import bdv.cache.CacheControl;
+import bdv.cache.SharedQueue;
 import bdv.util.volatiles.VolatileViews;
 import bdv.viewer.Source;
 import bvb.core.BVVSettings;
@@ -68,11 +69,18 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 {
 	final List<Source<?>> srcs;
 	
+	final SharedQueue queue; 
+	
 	private final HashMap<Integer, SourceSetupImgLoader> setupImgLoaders;	
 	
 	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType)
 	{
 		this.srcs = srcs;	
+		
+		int numThreads =
+		        Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
+		
+		queue = new SharedQueue(numThreads);
 		
 		setupImgLoaders = new HashMap<>();
 		
@@ -86,7 +94,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	@Override
 	public CacheControl getCacheControl()
 	{		
-		return new CacheControl.Dummy();
+		return queue;
 	}
 	
 	@Override
@@ -94,7 +102,6 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	{
 		return setupImgLoaders.get(setupId);
 	}
-	
 	
 	public class SourceSetupImgLoader extends AbstractViewerSetupImgLoader<T, V> {
 
@@ -149,7 +156,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		public RandomAccessibleInterval<V> getVolatileImage(final int timepointId,
 															final int level, final ImgLoaderHint... hints)
 		{
-			return VolatileViews.wrapAsVolatile( prepareCachedImage(timepointId, level));
+			return VolatileViews.wrapAsVolatile( prepareCachedImage(timepointId, level), queue);
 		}
 		
 		@SuppressWarnings( { "unchecked", "rawtypes" } )
@@ -221,23 +228,6 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 						o.setInteger(((IntegerType)i).getInteger());
 					},
 					new UnsignedShortType( ) );
-	}
-	
-	static int calculateBytesPerElement(Object type) 
-	{
-		//short or converted (clipped) integer
-		int n = 2;
-		//System.out.println( "LOADING " + type.getClass().getName() );
-
-		if(type instanceof UnsignedByteType)
-		{
-			n = 1;
-		}
-		if(type instanceof FloatType)
-		{
-			n = 4;
-		}		
-		return n;
 	}
 
 }
