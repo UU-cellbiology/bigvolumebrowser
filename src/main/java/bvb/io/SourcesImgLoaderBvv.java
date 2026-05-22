@@ -31,22 +31,28 @@ package bvb.io;
 import java.util.HashMap;
 import java.util.List;
 
+import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
-import net.imglib2.algorithm.blocks.BlockSupplier;
+import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
-import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
-import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
-
+import net.imglib2.cache.img.LoadedCellCacheLoader;
+import net.imglib2.cache.ref.WeakRefLoaderCache;
 import net.imglib2.converter.Converters;
+import net.imglib2.img.basictypeaccess.AccessFlags;
+import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.img.cell.Cell;
+import net.imglib2.img.cell.CellGrid;
+import net.imglib2.loops.LoopBuilder;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
@@ -64,14 +70,15 @@ import mpicbg.spim.data.generic.sequence.TypedBasicImgLoader;
 
 /** **/
 public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >, 
-								  V extends Volatile< T > & NativeType < V >> 
+								  V extends Volatile< T > & NativeType < V >,
+								  A extends ArrayDataAccess< A >> 
 								  implements ViewerImgLoader, TypedBasicImgLoader<T>
 {
 	final List<Source<?>> srcs;
 	
-	final SharedQueue queue; 
-	
 	private final HashMap<Integer, SourceSetupImgLoader> setupImgLoaders;	
+	
+	final SharedQueue queue; 
 	
 	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType)
 	{
@@ -81,9 +88,9 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		        Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
 		
 		queue = new SharedQueue(numThreads);
-		
+
 		setupImgLoaders = new HashMap<>();
-		
+
 		for (int setupId = 0; setupId < srcs.size(); setupId++)
 		{
 			setupImgLoaders.put(setupId, new SourceSetupImgLoader(srcs.get( setupId ), 
@@ -103,7 +110,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		return setupImgLoaders.get(setupId);
 	}
 	
-	public class SourceSetupImgLoader extends AbstractViewerSetupImgLoader<T, V> {
+	public class SourceSetupImgLoader extends AbstractViewerSetupImgLoader< T, V > {
 
 		final Source<?> src;
 		
@@ -115,14 +122,12 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		
 		final private boolean bConvertSrc;
 
-		protected SourceSetupImgLoader(final Source<?> src_, final T type,
+		protected SourceSetupImgLoader(final Source< ? > src_, final T type,
 								 final V volatileType)
 		{
 			super(type, volatileType);
 			
 			this.src = src_; 
-			
-			//loader = new SourceArrayLoader<>(this.src);
 			
 			numScales = src.getNumMipmapLevels();
 			
@@ -153,7 +158,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		}
 
 		@Override
-		public RandomAccessibleInterval<V> getVolatileImage(final int timepointId,
+		public RandomAccessibleInterval< V > getVolatileImage(final int timepointId,
 															final int level, final ImgLoaderHint... hints)
 		{
 			return VolatileViews.wrapAsVolatile( prepareCachedImage(timepointId, level), queue);
@@ -173,7 +178,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		}
 
 		@SuppressWarnings( "unchecked" )
-		protected CachedCellImg<T, ?>
+		protected CachedCellImg< T, ? >
 		prepareCachedImage(final int timepointId, final int level)
 		{
 			final RandomAccessibleInterval< T > rai;
@@ -181,17 +186,52 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 				rai = ( RandomAccessibleInterval< T > ) src.getSource( timepointId, level );
 			else
 				rai = ( RandomAccessibleInterval< T > ) convertIntegerRAIToShort(src.getSource( timepointId, level ));
-		    final long[] dimensions =
+		   
+			if(rai instanceof CachedCellImg)
+				return ( CachedCellImg< T, ? > ) rai;
+			
+			
+			final long[] dimensions =
 		            rai.dimensionsAsLongArray();
 
-		    final int[] cellDimensions = new int[] {BVVSettings.cacheBlockSize};
-		    BlockSupplier< T > blocks = BlockSupplier.of( rai );
+		    final int[] cellDimensions = new int[rai.numDimensions()];
+		    for ( int d = 0; d < cellDimensions.length; d++ )
+			{
+		    	cellDimensions[ d ] = BVVSettings.cacheBlockSize;
+			}
 
-		    return new ReadOnlyCachedCellImgFactory().create(
-					dimensions,
-					blocks.getType(),
-					cellLoader( blocks ),
-					ReadOnlyCachedCellImgOptions.options().cellDimensions( cellDimensions ) );
+	        final CellGrid grid =
+	                new CellGrid(dimensions, cellDimensions);
+
+	        final CellLoader<T> cellLoader = cell -> 
+	        { 
+	            final long[] min = cell.minAsLongArray();    
+
+	            final long[] max = cell.dimensionsAsLongArray();
+	            
+	            for (int d = 0; d < max.length; d++)
+	                max[d] = min[ d ] + cell.dimension( d ) - 1;
+
+	            LoopBuilder.setImages(cell, Views.interval(rai, FinalInterval.wrap(min, max)) )
+	            .forEachPixel( ( a, b ) -> a.set( b ));
+	        };
+	        
+	        final LoaderCache<Long, Cell< A >> cache =
+	                new WeakRefLoaderCache<>();
+	        
+	        CacheLoader< Long, Cell< A > > backingLoader = LoadedCellCacheLoader.get(
+			        grid,
+			        cellLoader,
+			        type,
+			        AccessFlags.setOf(AccessFlags.VOLATILE)
+			);
+	        
+	        return new CachedCellImg<>(
+	                grid,
+	                type,
+	                cache.withLoader(backingLoader),
+	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( AccessFlags.VOLATILE))
+	        );
 		}
 		
 
@@ -209,13 +249,6 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		public int numMipmapLevels() {
 			return numScales;
 		}
-	}
-	
-	public static < T extends NativeType< T > >
-	CellLoader< T > cellLoader( final BlockSupplier< T > blocks )
-	{
-		final BlockSupplier< T > ts = blocks.threadSafe();
-		return cell -> ts.copy( cell, cell.getStorageArray() );
 	}
 
 	@SuppressWarnings( { "rawtypes" } )
