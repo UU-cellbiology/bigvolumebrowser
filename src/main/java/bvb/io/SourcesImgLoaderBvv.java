@@ -31,7 +31,6 @@ package bvb.io;
 import java.util.HashMap;
 import java.util.List;
 
-import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
 import net.imglib2.cache.CacheLoader;
@@ -205,14 +204,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 
 	        final CellLoader<T> cellLoader = cell -> 
 	        { 
-	            final long[] min = cell.minAsLongArray();    
-
-	            final long[] max = cell.dimensionsAsLongArray();
-	            
-	            for (int d = 0; d < max.length; d++)
-	                max[d] = min[ d ] + cell.dimension( d ) - 1;
-
-	            LoopBuilder.setImages(cell, Views.interval(rai, FinalInterval.wrap(min, max)) )
+	            LoopBuilder.setImages(cell, Views.interval(rai, cell) )
 	            .forEachPixel( ( a, b ) -> a.set( b ));
 	        };
 	        
