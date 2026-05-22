@@ -33,6 +33,9 @@ import java.util.List;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
+import net.imglib2.algorithm.blocks.BlockAlgoUtils;
+import net.imglib2.algorithm.blocks.BlockSupplier;
+import net.imglib2.algorithm.blocks.convert.Convert;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.img.CachedCellImg;
@@ -187,8 +190,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 				rai = ( RandomAccessibleInterval< T > ) convertIntegerRAIToShort(src.getSource( timepointId, level ));
 		   
 			if(rai instanceof CachedCellImg)
-				return ( CachedCellImg< T, ? > ) rai;
-			
+				return ( CachedCellImg< T, ? > ) rai;			
 			
 			final long[] dimensions =
 		            rai.dimensionsAsLongArray();
@@ -202,11 +204,13 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	        final CellGrid grid =
 	                new CellGrid(dimensions, cellDimensions);
 
-	        final CellLoader<T> cellLoader = cell -> 
-	        { 
-	            LoopBuilder.setImages(cell, Views.interval(rai, cell) )
-	            .forEachPixel( ( a, b ) -> a.set( b ));
-	        };
+	        final CellLoader<T> cellLoader;
+	        if(!bConvertSrc)
+	        	cellLoader =  BlockAlgoUtils.cellLoader(BlockSupplier.of(rai));
+	        else
+	        	cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
+	        	        BlockSupplier.of(rai)
+	        	                     .andThen(Convert.convert(new UnsignedShortType())));
 	        
 	        final LoaderCache<Long, Cell< A >> cache =
 	                new WeakRefLoaderCache<>();
