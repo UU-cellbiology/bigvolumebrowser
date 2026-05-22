@@ -37,6 +37,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
 import bdv.spimdata.SequenceDescriptionMinimal;
@@ -58,7 +59,7 @@ public class RAIToSpimDataBvv
 		
 		Object type = rai.getType() ;
 		
-		if(!(type instanceof UnsignedShortType  || type instanceof UnsignedByteType))
+		if(!(type instanceof UnsignedShortType || type instanceof UnsignedByteType || type instanceof FloatType))
 		{
 			System.err.println( "Error: RAI import of type " + type + " is currently not supported.");
 			return null;
@@ -117,9 +118,9 @@ public class RAIToSpimDataBvv
 		final SequenceDescriptionMinimal seq = new SequenceDescriptionMinimal( new TimePoints( timepoints ), setups, imgLoader, null );
 
 		final ArrayList< ViewRegistration > registrations = new ArrayList<>();
-		for ( int t = 0; t < numTimepoints; ++t )
+		for ( int t = 0; t < numTimepoints; t++ )
 		{
-			for(int i=0;i<numSetups;i++)
+			for(int i = 0; i < numSetups;i++)
 			{
 				AffineTransform3D transform = new AffineTransform3D();
 				//scale transform already in the multires, no need
