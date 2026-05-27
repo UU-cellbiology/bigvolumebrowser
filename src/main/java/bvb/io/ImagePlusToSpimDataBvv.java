@@ -32,11 +32,12 @@ import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.imglib2.FinalDimensions;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +56,8 @@ import mpicbg.spim.data.registration.ViewRegistration;
 import mpicbg.spim.data.registration.ViewRegistrations;
 import mpicbg.spim.data.sequence.Channel;
 import mpicbg.spim.data.sequence.FinalVoxelDimensions;
-import mpicbg.spim.data.sequence.MissingViews;
 import mpicbg.spim.data.sequence.TimePoint;
 import mpicbg.spim.data.sequence.TimePoints;
-import mpicbg.spim.data.sequence.ViewId;
 import spimdata.util.Displaysettings;
 
 // modified version of
@@ -97,26 +96,25 @@ public class ImagePlusToSpimDataBvv {
 		final int h = imp.getHeight();
 		final int d = imp.getNSlices();
 		final FinalDimensions size = new FinalDimensions(w, h, d);
-
-		int originTimePoint = 0;
+		
 		final BasicImgLoader imgLoader;
-		{
-			switch (imp.getType()) {
-				case ImagePlus.GRAY8:
-					imgLoader = ImagePlusImageLoaderBvv.createUnsignedByteInstance(imp,
-							originTimePoint);
-					break;
-				case ImagePlus.GRAY16:
-					imgLoader = ImagePlusImageLoaderBvv.createUnsignedShortInstance(imp,
-							originTimePoint);
-					break;
-				case ImagePlus.GRAY32:
-					imgLoader = ImagePlusImageLoaderBvv.createFloatInstance(imp,
-							originTimePoint);
-					break;
-				default:
-					return null;
-			}
+
+		switch (imp.getType()) {
+		case ImagePlus.GRAY8:
+			
+			imgLoader = new ImagePlusImageLoaderWeakRefCache<>(imp, new UnsignedByteType());
+			//imgLoader = ImagePlusImageLoaderBvv.createUnsignedByteInstance(imp);
+			break;
+		case ImagePlus.GRAY16:
+			imgLoader = new ImagePlusImageLoaderWeakRefCache<>(imp, new UnsignedShortType());
+			//imgLoader = ImagePlusImageLoaderBvv.createUnsignedShortInstance(imp);
+			break;
+		case ImagePlus.GRAY32:
+			imgLoader = new ImagePlusImageLoaderWeakRefCache<>(imp, new FloatType());
+			//imgLoader = ImagePlusImageLoaderBvv.createFloatInstance(imp);
+			break;
+		default:
+			return null;
 		}
 
 		final int numTimepoints = imp.getNFrames();
@@ -124,17 +122,17 @@ public class ImagePlusToSpimDataBvv {
 		ViewSetupAttributes.registerManually(XmlIoLutNameFIJI.class);
 		// create setups from channels
 		final HashMap<Integer, BasicViewSetup> setups = new HashMap<>(numSetups);
-		for (int s = 0; s < numSetups; ++s) {
+		for (int s = 0; s < numSetups; ++s) 
+		{
 			final BasicViewSetup setup = new BasicViewSetup(s, String.format(imp
 					.getTitle() + " channel %d", s + 1), size, voxelSize);
-			
-			
+						
 			setup.setAttribute(new Channel(s + 1));
 			Displaysettings ds = new Displaysettings(s + 1);
-			imp.setPositionWithoutUpdate(s+1,1,1);
+			imp.setPositionWithoutUpdate(s + 1, 1, 1);
 			ds.min = imp.getDisplayRangeMin();
 			ds.max = imp.getDisplayRangeMax();
-			LUTNameFIJI lutName = new LUTNameFIJI(s+1);
+			LUTNameFIJI lutName = new LUTNameFIJI(s + 1);
 			
 			if (imp.getType() == ImagePlus.COLOR_RGB) {
 				ds.isSet = false;
@@ -143,7 +141,7 @@ public class ImagePlusToSpimDataBvv {
 			else {
 				ds.isSet = true;
 				LUT[] luts = imp.getLuts();
-				LUT lut = luts.length>s ? luts[s]:luts[0];
+				LUT lut = luts.length > s ? luts[s]:luts[0];
 				ds.color = new int[] { lut.getRed(255), lut.getGreen(255), lut.getBlue(
 						255), lut.getAlpha(255) };				
 				
@@ -162,30 +160,16 @@ public class ImagePlusToSpimDataBvv {
 		// create timepoints
 		final ArrayList<TimePoint> timepoints = new ArrayList<>(numTimepoints);
 
-		MissingViews mv = null;
-
-		if (originTimePoint > 0) {
-
-			Set<ViewId> missingViewIds = new HashSet<>();
-			for (int t = 0; t < originTimePoint; t++) {
-				for (int s = 0; s < numSetups; ++s) {
-					ViewId vId = new ViewId(t, s);
-					missingViewIds.add(vId);
-				}
-			}
-			mv = new MissingViews(missingViewIds);
-		}
-
-		for (int t = 0; t < numTimepoints + originTimePoint; ++t)
+		for (int t = 0; t < numTimepoints; ++t)
 			timepoints.add(new TimePoint(t));
 		final SequenceDescriptionMinimal seq = new SequenceDescriptionMinimal(
-				new TimePoints(timepoints), setups, imgLoader, mv);
+				new TimePoints(timepoints), setups, imgLoader, null);
 
 		// create ViewRegistrations from the images calibration
 		final AffineTransform3D sourceTransform = getMatrixFromImagePlus(imp);
 		
 		final ArrayList<ViewRegistration> registrations = new ArrayList<>();
-		for (int t = 0; t < numTimepoints + originTimePoint; ++t)
+		for (int t = 0; t < numTimepoints; ++t)
 			for (int s = 0; s < numSetups; ++s)
 				registrations.add(new ViewRegistration(t, s, sourceTransform));
 
@@ -218,15 +202,15 @@ public class ImagePlusToSpimDataBvv {
 	
 	/** this is pretty complicated method to get proper LUT name,
 	 * but I could not find anything more simple **/
-	public static String getProperLUTName(LUT lut)
+	public static String getProperLUTName(final LUT lut)
 	{
 		String[] allLuts = IJ.getLuts();
-		for(int i=0; i<allLuts.length; i++)
+		for(int i = 0; i < allLuts.length; i++)
 		{
 			IndexColorModel icm = LutLoader.getLut(allLuts[i]);
 			if(icm.equals( lut.getColorModel() ))
 			{
-				if(compareICM(icm,lut.getColorModel()))
+				if(compareICM(icm, lut.getColorModel()))
 				{
 					return allLuts[i];
 				}
@@ -234,7 +218,7 @@ public class ImagePlusToSpimDataBvv {
 		}
 		return null;
 	}
-	public static boolean compareICM(IndexColorModel icm1, IndexColorModel icm2)
+	public static boolean compareICM(final IndexColorModel icm1, final IndexColorModel icm2)
 	{
 		if(icm1.getMapSize() != icm2.getMapSize())
 			return false;
@@ -245,9 +229,9 @@ public class ImagePlusToSpimDataBvv {
 
 		icm1.getRGBs( all1 );
 		icm2.getRGBs( all2 );
-		for(int i=0; i<size;i++)
+		for(int i = 0; i < size; i++)
 		{
-			if(all1[i]!=all2[i])
+			if(all1[ i ] != all2[ i ])
 				return false;
 		}
 		return true;

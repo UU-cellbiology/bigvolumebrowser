@@ -48,7 +48,7 @@ public class BVVSettings
 	public static int renderWidth = (int)Prefs.get("BVB.renderWidth", 800.);	
 	public static int renderHeight = (int)Prefs.get("BVB.renderHeight", 600.);
 	static int numDitherSamples = (int)Prefs.get("BVB.numDitherSamples", 3.);
-	static int cacheBlockSize = (int)Prefs.get("BVB.cacheBlockSize", 32.);
+	public static int cacheBlockSize = (int)Prefs.get("BVB.cacheBlockSize", 32.);
 	static public int maxCacheSizeInMB = (int)Prefs.get("BVB.maxCacheSizeInMB", 500.);
 	static int ditherWidth =(int)Prefs.get("BVB.ditherWidth", 3.);
 

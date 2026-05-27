@@ -63,7 +63,7 @@
     <scm>
         <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
         <developerConnection>scm:git:git@github.com:UU-cellbiology/bigvolumebrowser</developerConnection>
-        <tag>bigvolumebrowser-0.1.1</tag>
+        <tag>bigvolumebrowser-0.1.2</tag>
         <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
@@ -80,7 +80,7 @@
 		<license.licenseName>bsd_2</license.licenseName>
         <license.copyrightOwners>Cell Biology, Neurobiology and Biophysics Department of Utrecht University.</license.copyrightOwners>  			
 		<license.excludes>**/resources/**</license.excludes>
-		<bvv-playground.version>0.5.5</bvv-playground.version>
+		<bvv-playground.version>0.5.6</bvv-playground.version>
 		<bdv-loaders.version>0.10.0</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
 		<laszip4j.version>0.20</laszip4j.version>

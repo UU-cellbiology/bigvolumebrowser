@@ -28,40 +28,48 @@
  */
 package bvb.io;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
-import net.imglib2.Cursor;
-import net.imglib2.FinalInterval;
-import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
-import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.LoadingStrategy;
+import net.imglib2.algorithm.blocks.BlockAlgoUtils;
+import net.imglib2.algorithm.blocks.BlockSupplier;
+import net.imglib2.algorithm.blocks.DefaultUnaryBlockOperator;
+import net.imglib2.algorithm.blocks.UnaryBlockOperator;
+import net.imglib2.algorithm.blocks.convert.Convert;
+import net.imglib2.blocks.PrimitiveBlocks;
+import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.LoaderCache;
+import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.cache.img.CellLoader;
+import net.imglib2.cache.img.LoadedCellCacheLoader;
+import net.imglib2.cache.ref.WeakRefLoaderCache;
 import net.imglib2.converter.Converters;
-import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.img.basictypeaccess.DataAccess;
-import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
-import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
-import net.imglib2.img.basictypeaccess.volatiles.array.VolatileFloatArray;
-import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
+import net.imglib2.img.basictypeaccess.AccessFlags;
+import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.Views;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
 
 import bdv.cache.CacheControl;
-import bdv.img.cache.CacheArrayLoader;
-import bdv.img.cache.VolatileCachedCellImg;
-import bdv.img.cache.VolatileGlobalCellCache;
+import bdv.cache.SharedQueue;
+import bdv.util.volatiles.VolatileViews;
 import bdv.viewer.Source;
+import bvb.core.BVVSettings;
+import bvb.io.SourcesToSpimDataBvv.ConvertMode;
 import bvb.utils.Misc;
 
 import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
@@ -70,43 +78,42 @@ import mpicbg.spim.data.generic.sequence.TypedBasicImgLoader;
 
 /** **/
 public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >, 
-								  V extends Volatile< T > & NativeType < V >, 
-								  A extends DataAccess & VolatileAccess> 
+								  V extends Volatile< T > & NativeType < V >,
+								  A extends ArrayDataAccess< A >> 
 								  implements ViewerImgLoader, TypedBasicImgLoader<T>
 {
 	final List<Source<?>> srcs;
 	
-	private VolatileGlobalCellCache cache;
-	
 	private final HashMap<Integer, SourceSetupImgLoader> setupImgLoaders;	
 	
-	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType)
+	final SharedQueue queue; 
+	
+	final ConvertMode convertMode;
+	
+	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType, final ConvertMode convertMode)
 	{
 		this.srcs = srcs;	
+		
+		this.convertMode = convertMode;
+		
+		int numThreads =
+		        Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
+		
+		queue = new SharedQueue(numThreads);
 
-		int nMaxScales = 1;
-		
-		for(final Source<?> src:srcs)
-		{
-			nMaxScales = Math.max(nMaxScales, src.getNumMipmapLevels());
-		}
-		final int numFetcherThreads = Math.max(2,
-		        Runtime.getRuntime().availableProcessors() / 2);
-		cache = new VolatileGlobalCellCache( nMaxScales + 1, numFetcherThreads );
-		
 		setupImgLoaders = new HashMap<>();
-		
+
 		for (int setupId = 0; setupId < srcs.size(); setupId++)
 		{
 			setupImgLoaders.put(setupId, new SourceSetupImgLoader(srcs.get( setupId ), 
-					setupId, type, volatileType));
+					type, volatileType));
 		}			
 	}
 	
 	@Override
 	public CacheControl getCacheControl()
 	{		
-		return cache;
+		return queue;
 	}
 	
 	@Override
@@ -115,14 +122,9 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		return setupImgLoaders.get(setupId);
 	}
 	
-	
-	public class SourceSetupImgLoader extends AbstractViewerSetupImgLoader<T, V> {
+	public class SourceSetupImgLoader extends AbstractViewerSetupImgLoader< T, V > {
 
 		final Source<?> src;
-		
-		private final int setupId;
-		
-		final CacheArrayLoader<A> loader;
 		
 		final int numScales;
 		
@@ -130,15 +132,13 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		
 		final double [][] mipmapResolutions; 
 		
-		final private boolean bConvertSrc;
-
-		protected SourceSetupImgLoader(final Source<?> src_, final int setupId, final T type,
+		protected SourceSetupImgLoader(final Source< ? > src_, final T type,
 								 final V volatileType)
 		{
 			super(type, volatileType);
+			
 			this.src = src_; 
-			this.setupId = setupId;
-			loader = new SourceArrayLoader<>(this.src);
+			
 			numScales = src.getNumMipmapLevels();
 			
 			mipmapTransforms = new AffineTransform3D[numScales];
@@ -163,16 +163,13 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 					mipmapResolutions[i][d] = currScale[d]/zeroScale[d];
 				}		
 			}
-			bConvertSrc = SourcesToSpimDataBvv.needsConvertion(type);
-			
 		}
 
 		@Override
-		public RandomAccessibleInterval<V> getVolatileImage(final int timepointId,
+		public RandomAccessibleInterval< V > getVolatileImage(final int timepointId,
 															final int level, final ImgLoaderHint... hints)
 		{
-			return prepareCachedImage(timepointId, level,
-					LoadingStrategy.VOLATILE, volatileType);
+			return VolatileViews.wrapAsVolatile( prepareCachedImage(timepointId, level), queue);
 		}
 		
 		@SuppressWarnings( { "unchecked", "rawtypes" } )
@@ -182,29 +179,83 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		{
 			final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
 			
-			if(!bConvertSrc)
+			if(convertMode == ConvertMode.NO)
 				return raiXYZ;
 			
 			return convertIntegerRAIToShort(raiXYZ);
 		}
 
-		@SuppressWarnings( "hiding" )
-		protected <T extends NativeType<T>> VolatileCachedCellImg<T, A>
-		prepareCachedImage(final int timepointId, final int level,
-						   final LoadingStrategy loadingStrategy, final T typeCache)
+		@SuppressWarnings( "unchecked" )
+		protected CachedCellImg< T, ? >
+		prepareCachedImage(final int timepointId, final int level)
 		{
-			final long[] dimensions = src.getSource( timepointId, level ).dimensionsAsLongArray();
+			final RandomAccessibleInterval< T > rai = ( RandomAccessibleInterval< T > ) src.getSource( timepointId, level );
+		   
+			if(rai instanceof CachedCellImg)
+			{
+				//not sure if this will ever work
+				@SuppressWarnings( "rawtypes" )
+				final CachedCellImg< T, ? > raiCached = (CachedCellImg)rai;
+				final Set< AccessFlags > flags = AccessFlags.ofAccess( raiCached );
+				if ( flags.contains( VOLATILE ) )
+				{
+					return ( CachedCellImg< T, ? > ) rai;
+				}
+			}
 			
-			final int priority = numScales - 1 - level;
-			
-			final CacheHints cacheHints = new CacheHints( loadingStrategy, priority, false );
-			
-			final int[] cellDimensions = new int [] {32,32,32};
-			
-			final CellGrid grid = new CellGrid(dimensions, cellDimensions);
-			return cache.createImg(grid, timepointId, setupId, level, cacheHints,
-					loader, typeCache);
+			final long[] dimensions =
+		            rai.dimensionsAsLongArray();
+
+		    final int[] cellDimensions = new int[rai.numDimensions()];
+		    for ( int d = 0; d < cellDimensions.length; d++ )
+			{
+		    	cellDimensions[ d ] = BVVSettings.cacheBlockSize;
+			}
+
+	        final CellGrid grid =
+	                new CellGrid(dimensions, cellDimensions);
+
+	        final CellLoader<T> cellLoader;
+	        
+	        switch(convertMode)
+	        {
+	        //supported types
+	        case NO:
+	        	cellLoader =  BlockAlgoUtils.cellLoader(BlockSupplier.of(rai));
+	        	break;
+	        // UnsignedLongType -> trimmed to 65535
+	        case CONVERT64:
+	        	final DefaultUnaryBlockOperator< UnsignedLongType, UnsignedShortType > map = new DefaultUnaryBlockOperator<>(new UnsignedLongType(), 
+	        			new UnsignedShortType(), 0, 0, new U64ToU32BlockProcessor<>( new UnsignedLongType()));
+	        	cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
+	        			BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT )
+	        			.andThen(( UnaryBlockOperator< T, ? > ) map));
+	        	break;
+	        //use PrimitiveBlocks convert
+	        default:
+        		cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
+        				BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT )
+        				.andThen(Convert.convert(new UnsignedShortType())));
+	        }
+	        
+	        final LoaderCache<Long, Cell< A >> cache =
+	                new WeakRefLoaderCache<>();
+	        
+	        CacheLoader< Long, Cell< A > > backingLoader = LoadedCellCacheLoader.get(
+			        grid,
+			        cellLoader,
+			        type,
+			        AccessFlags.setOf(AccessFlags.VOLATILE)
+			);
+	        
+	        return new CachedCellImg<>(
+	                grid,
+	                type,
+	                cache.withLoader(backingLoader),
+	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( AccessFlags.VOLATILE))
+	        );
 		}
+		
 
 		@Override
 		public double[][] getMipmapResolutions() {
@@ -221,96 +272,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 			return numScales;
 		}
 	}
-	
-	
-	static class SourceArrayLoader <A extends DataAccess> implements CacheArrayLoader<A> 
-	{	
-		final Source<?> src;
-		final boolean bConvert;
-		int bytesPerElement;
-		
-		public SourceArrayLoader (final Source<?> source_)
-		{
-			src = source_;
-			final Object type = src.getType();
-			bConvert = SourcesToSpimDataBvv.needsConvertion(type);
-			bytesPerElement = calculateBytesPerElement(type);				
-		}
-		
-		@Override
-		public int getBytesPerElement() {
-			return bytesPerElement;
-		}
 
-		@SuppressWarnings( { "unchecked" } )
-		@Override
-		public A loadArray( int timepoint, int setup, int level, int[] dimensions, long[] min ) throws InterruptedException
-		{
-			final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepoint, level );
-			
-			final int numElements = dimensions[0] * dimensions[1] * dimensions[2];
-				
-			final long[][] intRange = new long [2][3];
-			
-			for(int d = 0; d < 3; d++)
-			{
-				intRange[0][d]= min[d];
-				intRange[1][d]= min[d] + dimensions[d] - 1;
-			}
-
-			final IterableInterval< ? > iterRAI;
-			if(!bConvert)
-			{
-				iterRAI = Views.flatIterable( Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1])));				
-			}
-			else
-			{
-				iterRAI = Views.flatIterable( convertIntegerRAIToShort(Views.interval( raiXYZ, new FinalInterval(intRange[0],intRange[1]))));				
-			}
-			
-			if(raiXYZ.getType() instanceof UnsignedByteType )
-			{
-				final byte[] data = new byte[numElements];
-				int nCount = 0;
-				Cursor< UnsignedByteType > cur = ( Cursor< UnsignedByteType > ) iterRAI.cursor();
-				while (cur.hasNext())
-				{
-					cur.fwd();
-					data[nCount] = cur.get().getByte();
-					nCount++;
-				}
-				return ( A ) new VolatileByteArray(data,true);
-			}
-			else if(raiXYZ.getType() instanceof FloatType )
-			{
-				final float[] data = new float[numElements];
-				int nCount = 0;
-				Cursor< FloatType > cur = ( Cursor< FloatType > ) iterRAI.cursor();
-				while (cur.hasNext())
-				{
-					cur.fwd();
-					data[nCount] = cur.get().getRealFloat();
-					nCount++;
-				}
-				return ( A ) new VolatileFloatArray(data,true);
-			}
-			else
-			{
-				final short[] data = new short[numElements];
-				int nCount = 0;
-				Cursor< UnsignedShortType > cur = ( Cursor< UnsignedShortType > ) iterRAI.cursor();
-				while (cur.hasNext())
-				{
-					cur.fwd();
-					data[nCount] = cur.get().getShort();
-					nCount++;
-				}
-				return ( A ) new VolatileShortArray(data, true);
-			}
-		}
-
-
-	}
 	@SuppressWarnings( { "rawtypes" } )
 	public static RandomAccessibleInterval< UnsignedShortType > convertIntegerRAIToShort(RandomAccessibleInterval< ? > raiXYZ)
 	{
@@ -321,23 +283,6 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 						o.setInteger(((IntegerType)i).getInteger());
 					},
 					new UnsignedShortType( ) );
-	}
-	
-	static int calculateBytesPerElement(Object type) 
-	{
-		//short or converted (clipped) integer
-		int n = 2;
-		//System.out.println( "LOADING " + type.getClass().getName() );
-
-		if(type instanceof UnsignedByteType)
-		{
-			n = 1;
-		}
-		if(type instanceof FloatType)
-		{
-			n = 4;
-		}		
-		return n;
 	}
 
 }

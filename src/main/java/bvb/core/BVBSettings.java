@@ -35,7 +35,7 @@ import ij.Prefs;
 public class BVBSettings
 {
 	
-	public static String sVersion = "0.1.1";
+	public static String sVersion = "0.1.2";
 	
 	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
