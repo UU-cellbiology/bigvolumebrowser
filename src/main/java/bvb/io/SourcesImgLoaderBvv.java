@@ -60,6 +60,7 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.util.Cast;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
@@ -185,17 +186,16 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 			return convertIntegerRAIToShort(raiXYZ);
 		}
 
-		@SuppressWarnings( "unchecked" )
+	
 		protected CachedCellImg< T, ? >
 		prepareCachedImage(final int timepointId, final int level)
 		{
-			final RandomAccessibleInterval< T > rai = ( RandomAccessibleInterval< T > ) src.getSource( timepointId, level );
+			final RandomAccessibleInterval< T > rai = Cast.unchecked( src.getSource( timepointId, level ));
 		   
 			if(rai instanceof CachedCellImg)
 			{
 				//not sure if this will ever work
-				@SuppressWarnings( "rawtypes" )
-				final CachedCellImg< T, ? > raiCached = (CachedCellImg)rai;
+				final CachedCellImg< T, ? > raiCached = Cast.unchecked( rai);
 				final Set< AccessFlags > flags = AccessFlags.ofAccess( raiCached );
 				if ( flags.contains( VOLATILE ) )
 				{
@@ -225,17 +225,18 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	        	break;
 	        // UnsignedLongType -> trimmed to 65535
 	        case CONVERT64:
-	        	final DefaultUnaryBlockOperator< UnsignedLongType, UnsignedShortType > map = new DefaultUnaryBlockOperator<>(new UnsignedLongType(), 
-	        			new UnsignedShortType(), 0, 0, new U64ToU32BlockProcessor<>( new UnsignedLongType()));
-	        	cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
+	        	final  UnaryBlockOperator< T, ? > map =
+	        			 Cast.unchecked(new DefaultUnaryBlockOperator<>(new UnsignedLongType(), 
+	        			new UnsignedShortType(), 0, 0, new U64ToU32BlockProcessor<>( new UnsignedLongType())));
+	        	cellLoader =  Cast.unchecked( BlockAlgoUtils.cellLoader(
 	        			BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT )
-	        			.andThen(( UnaryBlockOperator< T, ? > ) map));
+	        			.andThen( map)));
 	        	break;
 	        //use PrimitiveBlocks convert
 	        default:
-        		cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
+        		cellLoader = Cast.unchecked( BlockAlgoUtils.cellLoader(
         				BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT )
-        				.andThen(Convert.convert(new UnsignedShortType())));
+        				.andThen(Convert.convert(new UnsignedShortType()))));
 	        }
 	        
 	        final LoaderCache<Long, Cell< A >> cache =
