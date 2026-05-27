@@ -28,14 +28,20 @@
  */
 package bvb.io;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
 import net.imglib2.algorithm.blocks.BlockAlgoUtils;
 import net.imglib2.algorithm.blocks.BlockSupplier;
+import net.imglib2.algorithm.blocks.DefaultUnaryBlockOperator;
+import net.imglib2.algorithm.blocks.UnaryBlockOperator;
 import net.imglib2.algorithm.blocks.convert.Convert;
+import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.img.CachedCellImg;
@@ -52,6 +58,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import bdv.AbstractViewerSetupImgLoader;
@@ -62,6 +69,7 @@ import bdv.cache.SharedQueue;
 import bdv.util.volatiles.VolatileViews;
 import bdv.viewer.Source;
 import bvb.core.BVVSettings;
+import bvb.io.SourcesToSpimDataBvv.ConvertMode;
 import bvb.utils.Misc;
 
 import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
@@ -80,9 +88,13 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	
 	final SharedQueue queue; 
 	
-	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType)
+	final ConvertMode convertMode;
+	
+	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType, final ConvertMode convertMode)
 	{
 		this.srcs = srcs;	
+		
+		this.convertMode = convertMode;
 		
 		int numThreads =
 		        Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
@@ -120,8 +132,6 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		
 		final double [][] mipmapResolutions; 
 		
-		final private boolean bConvertSrc;
-
 		protected SourceSetupImgLoader(final Source< ? > src_, final T type,
 								 final V volatileType)
 		{
@@ -153,8 +163,6 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 					mipmapResolutions[i][d] = currScale[d]/zeroScale[d];
 				}		
 			}
-			bConvertSrc = SourcesToSpimDataBvv.needsConvertion(type);
-			
 		}
 
 		@Override
@@ -171,7 +179,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		{
 			final RandomAccessibleInterval< ? > raiXYZ = src.getSource( timepointId, level );
 			
-			if(!bConvertSrc)
+			if(convertMode == ConvertMode.NO)
 				return raiXYZ;
 			
 			return convertIntegerRAIToShort(raiXYZ);
@@ -181,14 +189,19 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		protected CachedCellImg< T, ? >
 		prepareCachedImage(final int timepointId, final int level)
 		{
-			final RandomAccessibleInterval< T > rai;
-			if(!bConvertSrc)
-				rai = ( RandomAccessibleInterval< T > ) src.getSource( timepointId, level );
-			else
-				rai = ( RandomAccessibleInterval< T > ) convertIntegerRAIToShort(src.getSource( timepointId, level ));
+			final RandomAccessibleInterval< T > rai = ( RandomAccessibleInterval< T > ) src.getSource( timepointId, level );
 		   
 			if(rai instanceof CachedCellImg)
-				return ( CachedCellImg< T, ? > ) rai;			
+			{
+				//not sure if this will ever work
+				@SuppressWarnings( "rawtypes" )
+				final CachedCellImg< T, ? > raiCached = (CachedCellImg)rai;
+				final Set< AccessFlags > flags = AccessFlags.ofAccess( raiCached );
+				if ( flags.contains( VOLATILE ) )
+				{
+					return ( CachedCellImg< T, ? > ) rai;
+				}
+			}
 			
 			final long[] dimensions =
 		            rai.dimensionsAsLongArray();
@@ -203,12 +216,27 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	                new CellGrid(dimensions, cellDimensions);
 
 	        final CellLoader<T> cellLoader;
-	        if(!bConvertSrc)
+	        
+	        switch(convertMode)
+	        {
+	        //supported types
+	        case NO:
 	        	cellLoader =  BlockAlgoUtils.cellLoader(BlockSupplier.of(rai));
-	        else
+	        	break;
+	        // UnsignedLongType -> trimmed to 65535
+	        case CONVERT64:
+	        	final DefaultUnaryBlockOperator< UnsignedLongType, UnsignedShortType > map = new DefaultUnaryBlockOperator<>(new UnsignedLongType(), 
+	        			new UnsignedShortType(), 0, 0, new U64ToU32BlockProcessor<>( new UnsignedLongType()));
 	        	cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
-	        	        BlockSupplier.of(rai)
-	        	                     .andThen(Convert.convert(new UnsignedShortType())));
+	        			BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT )
+	        			.andThen(( UnaryBlockOperator< T, ? > ) map));
+	        	break;
+	        //use PrimitiveBlocks convert
+	        default:
+        		cellLoader = ( CellLoader< T > ) BlockAlgoUtils.cellLoader(
+        				BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT )
+        				.andThen(Convert.convert(new UnsignedShortType())));
+	        }
 	        
 	        final LoaderCache<Long, Cell< A >> cache =
 	                new WeakRefLoaderCache<>();

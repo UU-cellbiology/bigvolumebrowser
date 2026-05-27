@@ -28,12 +28,16 @@
  */
 package bvb.io;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+
 import java.util.HashMap;
+import java.util.Set;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
 import net.imglib2.algorithm.blocks.BlockAlgoUtils;
 import net.imglib2.algorithm.blocks.BlockSupplier;
+import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.img.CachedCellImg;
@@ -108,6 +112,7 @@ public class RAIImgLoaderBvv<T extends NativeType<T>,
 			default:
 				raiXYZTC = null;
 		}
+		//TODO maybe check if it is multires
 
 		numScales = 1;
 		setupImgLoaders = new HashMap<>();
@@ -164,11 +169,14 @@ public class RAIImgLoaderBvv<T extends NativeType<T>,
 		protected CachedCellImg< T, ? >
 		prepareCachedImage(final int timepointId, @SuppressWarnings( "unused" ) final int level)
 		{
-
-			//TODO maybe check if it is multires
 			RandomAccessibleInterval< T > rai =  Views.hyperSlice(Views.hyperSlice( raiXYZTC, 4, setupId), 3, timepointId);
 			if(rai instanceof CachedCellImg)
-				return ( CachedCellImg< T, ? > ) rai;			
+			{
+				@SuppressWarnings( { "rawtypes", "unchecked" } )
+				final CachedCellImg< T, ? > raiCached = (CachedCellImg)rai;
+				final Set< AccessFlags > flags = AccessFlags.ofAccess( raiCached );
+				if ( flags.contains( VOLATILE ) )
+					return ( CachedCellImg< T, ? > ) rai;				}
 			
 			final long[] dimensions =
 		            rai.dimensionsAsLongArray();
@@ -182,7 +190,7 @@ public class RAIImgLoaderBvv<T extends NativeType<T>,
 	        final CellGrid grid =
 	                new CellGrid(dimensions, cellDimensions);
 
-	        final CellLoader<T> cellLoader =  BlockAlgoUtils.cellLoader(BlockSupplier.of(rai));
+	        final CellLoader<T> cellLoader =  BlockAlgoUtils.cellLoader(BlockSupplier.of(rai, PrimitiveBlocks.OnFallback.ACCEPT ));
 
 	        
 	        final LoaderCache<Long, Cell< A >> cache =

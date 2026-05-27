@@ -39,6 +39,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
@@ -87,15 +88,16 @@ public class SourcesToSpimDataBvv
 		Volatile volatileType = ( Volatile )VolatileTypeMatcher.getVolatileTypeForType(( T ) type);
 		
 		final SourcesImgLoaderBvv imgLoader;
-		
-		if( !needsConvertion(type) )
+		final ConvertMode convertMode = needsConvertion(type);
+		switch (convertMode)
 		{
-			imgLoader = new SourcesImgLoaderBvv(srcs, (T) type,  volatileType );
+		case NO:
+			imgLoader = new SourcesImgLoaderBvv(srcs, (T) type,  volatileType, convertMode);
+			break;
+		default:
+			imgLoader = new SourcesImgLoaderBvv(srcs, new UnsignedShortType(), new VolatileUnsignedShortType(), convertMode);			
 		}
-		else
-		{
-			imgLoader = new SourcesImgLoaderBvv(srcs, new UnsignedShortType(), new VolatileUnsignedShortType());			
-		}
+
 
 		final FinalDimensions size = new FinalDimensions( srcs.get( 0 ).getSource( 0, 0 ));
 
@@ -152,12 +154,24 @@ public class SourcesToSpimDataBvv
 		return new AbstractSpimData<>( dummy, seq, new ViewRegistrations( registrations) );
 	}
 	
-	public static boolean needsConvertion (Object type)
+	public enum ConvertMode {
+	    NO,
+	    CONVERT,
+	    CONVERT64
+	}
+	
+	public static ConvertMode needsConvertion (Object type)
 	{
 		if(type instanceof UnsignedByteType || 
 				type instanceof UnsignedShortType ||
 				type instanceof FloatType )
-			{return false;}
-		  return true;
+		{
+			return ConvertMode.NO;
+		}
+		if(type instanceof UnsignedLongType)
+		{
+			return ConvertMode.CONVERT64;
+		}
+		return ConvertMode.CONVERT;
 	}
 }
