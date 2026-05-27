@@ -47,6 +47,7 @@ import bvb.gui.shapes.SpotsMapSetups;
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
+import bvb.shapes.MultiMeshShape;
 import bvb.utils.Bounds3D;
 import bvb.utils.clip.ClipSetups;
 import bvb.utils.transform.TransformSetups;
@@ -119,7 +120,10 @@ public class PropertyRegistry
 			if(obj instanceof BasicMeshShape)
 			{
 				final BasicMeshShape mesh = (BasicMeshShape) obj;
-				properties.add( "mesh_color" );
+				if(!(mesh instanceof MultiMeshShape))
+				{
+					properties.add( "mesh_color" );
+				}
 				if(mesh.hasTexture())
 				{
 					properties.add( "mesh_useTexture" );					
