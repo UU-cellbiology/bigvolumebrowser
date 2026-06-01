@@ -18,7 +18,6 @@ import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.array.ArrayRandomAccess;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -106,16 +105,14 @@ public class ColoredLODLoader  implements ViewerImgLoader
 		
 		RandomAccessibleInterval< UnsignedShortType > getRAI(int level)
 		{
-			final long [] currDims = new long[3];
-			for(int d = 0; d < 3; d++)
-				currDims [d] = ( long ) ( zeroDims[d] /Math.pow(2,level) );
 			
 			final long [][] minmax = new long[2][3];
-			for(int d = 0; d < 3; d++)
-				minmax[1][d] = ( long ) ( zeroDims[d] /Math.pow(2,level) -1);
-		    ArrayImg< UnsignedShortType, ShortArray > center = ArrayImgs.unsignedShorts(new long [] {1,1,1 });
+			for(int d = 0; d < 3; d++)				
+				minmax[ 1 ][ d ] = ( long ) ( zeroDims[d] /Math.pow(2,level) -1);
 		    
-		    int value = (int)Math.round( 65535.0 - (1+level)*(65535.0/(numScales + 1.0)));
+			ArrayImg< UnsignedShortType, ShortArray > center = ArrayImgs.unsignedShorts(new long [] {1,1,1 });
+		    
+		    int value = (int)Math.round( 65535.0 - (level)*(65535.0/(numScales)));
 		    ArrayCursor< UnsignedShortType > cursor = center.cursor();// .localizingCursor();
 		    cursor.fwd();
 		    cursor.get().set( value );

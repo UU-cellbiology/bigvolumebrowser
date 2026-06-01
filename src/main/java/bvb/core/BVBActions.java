@@ -79,6 +79,7 @@ import bvb.gui.CenterZoomBVV;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.TransformHandlerBVB;
 import bvb.gui.overlays.TransformModeOverlayRenderer;
+import bvb.illustration.ShowLOD;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.shapes.BasicShape;
 import ij.Prefs;
@@ -158,6 +159,7 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(1, false), "rotate 90 y axis wrld", ROTATE_Y_AXIS_WORLD);
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
 		actions.runnableAction(() -> bvb.bvbCards.animationPanel.makeSnapshot(), "make snapshot", "ctrl S" );
+		actions.runnableAction(() -> ShowLOD.runLODDemo(bvb), "LOD demo", "ctrl F" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
 		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
 		
