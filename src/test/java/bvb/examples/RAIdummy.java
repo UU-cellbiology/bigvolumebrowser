@@ -46,7 +46,7 @@ public class RAIdummy
 		double [] min = interval.minAsDoubleArray();
 		double [] max = interval.maxAsDoubleArray();
 		long [][] minmax = new long[2][3];
-		for(int d=0; d<3;d++)
+		for(int d = 0; d < 3; d++)
 		{
 			minmax[0][d] = Math.round( Math.floor( min[d] ) );
 			minmax[1][d] = Math.round( Math.ceil( max[d] ) );

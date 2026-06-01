@@ -43,11 +43,14 @@ public class ShowLOD
 		BigVolumeBrowser bvb = new BigVolumeBrowser(); 		
 		bvb.startBVB("");
 		long [] dims = new long[3];
-		for(int d = 0; d < 3; d++)
-		{
-			dims[d] = 512;
-		}
-		AbstractSpimData< ? > spimData = ColoredLODSpimData.getLODSpimData( dims, 7 ) ;
+		dims[0] = 256;
+		dims[1] = 256;
+		dims[2] = 2048;
+//		for(int d = 0; d < 3; d++)
+//		{
+//			dims[d] = 512;
+//		}
+		AbstractSpimData< ? > spimData = ColoredLODSpimData.getLODSpimData( dims, 6 ) ;
 		bvb.addSpimData( spimData, new BVBSpimDataInfo("LOD_test", bvb.dataTreeModel.getIconOneSource()) );
 		
 //		final ProgressWriter progressWriter = new ProgressWriterIJ();

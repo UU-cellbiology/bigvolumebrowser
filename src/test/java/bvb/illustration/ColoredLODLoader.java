@@ -15,14 +15,18 @@ import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
-
+import net.imglib2.img.array.ArrayCursor;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-
+import net.imglib2.img.array.ArrayRandomAccess;
+import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
 
 
 public class ColoredLODLoader  implements ViewerImgLoader
@@ -105,9 +109,17 @@ public class ColoredLODLoader  implements ViewerImgLoader
 			final long [] currDims = new long[3];
 			for(int d = 0; d < 3; d++)
 				currDims [d] = ( long ) ( zeroDims[d] /Math.pow(2,level) );
-			final RandomAccessibleInterval< UnsignedShortType > rai = ArrayImgs.unsignedShorts(  currDims );
-	        int value = (int)Math.round( 65535.0 - (1+level)*(65535.0/(numScales + 1.0)));
-	        rai.forEach( t -> t.set( value ) );
+			
+			final long [][] minmax = new long[2][3];
+			for(int d = 0; d < 3; d++)
+				minmax[1][d] = ( long ) ( zeroDims[d] /Math.pow(2,level) -1);
+		    ArrayImg< UnsignedShortType, ShortArray > center = ArrayImgs.unsignedShorts(new long [] {1,1,1 });
+		    
+		    int value = (int)Math.round( 65535.0 - (1+level)*(65535.0/(numScales + 1.0)));
+		    ArrayCursor< UnsignedShortType > cursor = center.cursor();// .localizingCursor();
+		    cursor.fwd();
+		    cursor.get().set( value );
+		    IntervalView< UnsignedShortType > rai = Views.interval( Views.extendValue( center, value ), minmax[0], minmax[1] );
 	        return rai;
 		}
 		
@@ -119,7 +131,6 @@ public class ColoredLODLoader  implements ViewerImgLoader
 		            rai.dimensionsAsLongArray();
 			 final int[] cellDimensions = new int[] {BVVSettings.cacheBlockSize};
 			    BlockSupplier< UnsignedShortType > blocks = BlockSupplier.of( rai );
-
 			    return new ReadOnlyCachedCellImgFactory().create(
 						dimensions,
 						blocks.getType(),
