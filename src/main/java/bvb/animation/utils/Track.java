@@ -169,7 +169,16 @@ public class Track< T >
     		final KeyFrameScene kfScene = kfMap.get( kfDTO.kfsId );
     		if( kfScene != null)
     		{
-    			out.addKeyframe(Keyframe.fromDTO( kfDTO, kfScene ));
+    			try
+    			{
+    				Keyframe< T > keyF = Keyframe.fromDTO( kfDTO, kfScene );
+    				out.addKeyframe(keyF);
+    			}
+    			catch(IllegalStateException e)
+    			{
+    				//do nothing for now
+    			}
+    			
     		}
     		else
     		{

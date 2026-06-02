@@ -28,6 +28,8 @@
  */
 package bvb.animation.utils;
 
+import java.awt.image.IndexColorModel;
+
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.util.LinAlgHelpers;
@@ -44,6 +46,7 @@ public interface Interpolator <T>
 	public static final Interpolator<Integer> integerRound  =  (a, b, t) -> Math.round(a + (b - a) * t);
 	public static final Interpolator<double []> quatSLerp  =  (a, b, t) -> slerp( a, b, t);
 	public static final Interpolator<String> stringStep = (a, b, t) -> t < 1.0f ? a : b;
+	public static final Interpolator<IndexColorModel> icmStep = (a, b, t) -> t < 1.0f ? a : b;
 
 	public static Interpolator<float [][]> floatIndexArrayLerp = (a, b, t) -> floatIndexArrayLerp( a, b, t );
 
