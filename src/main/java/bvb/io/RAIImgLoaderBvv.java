@@ -91,7 +91,7 @@ public class RAIImgLoaderBvv<T extends NativeType<T>,
 		int numThreads =
 		        Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
 		
-		queue = new SharedQueue(numThreads);
+		queue = new SharedQueue(numThreads, 5);
 		
 		dimensions = dims_;
 		

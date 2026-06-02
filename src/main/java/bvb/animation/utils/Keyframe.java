@@ -50,7 +50,7 @@ public class Keyframe< T >
     }
     
     @SuppressWarnings( "unchecked" )
-	public static <T> Keyframe<T> fromDTO(final KeyframeDTO dto, final KeyFrameScene parentKF_)
+	public static <T> Keyframe<T> fromDTO(final KeyframeDTO dto, final KeyFrameScene parentKF_) throws IllegalStateException
     {
     	
     	final ValueCodec<T> codec = BigVolumeBrowser.registry.getById(dto.valueType);
@@ -67,7 +67,10 @@ public class Keyframe< T >
 	public KeyframeDTO toGTO()
     {
     	@SuppressWarnings( "unchecked" )
-		final ValueCodec<T> codec = BigVolumeBrowser.registry.getByClass( (Class<T>) this.value.getClass() );
+
+    	final ValueCodec<T> codec = BigVolumeBrowser.registry.getByClass( (Class<T>) this.value.getClass() );
+
+    	
     	if (codec == null)
    	        throw new IllegalStateException("No codec for " + this.value.getClass());
     	
