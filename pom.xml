@@ -11,7 +11,7 @@
 
 	<groupId>nl.uu.science.cellbiology</groupId>
 	<artifactId>bigvolumebrowser</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.4-SNAPSHOT</version>
 
 	<name>BigVolumeBrowser</name>
 	<description>browsing large volumetric data</description>
