@@ -30,6 +30,8 @@ package bvb.io;
 
 import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -91,6 +93,8 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	
 	final ConvertMode convertMode;
 	
+	final CaffeineLoaderCache caffeineCache;// = new CaffeineLoaderCache();
+	
 	public SourcesImgLoaderBvv(final  List<Source< ? >> srcs, final T type, final V volatileType, final ConvertMode convertMode)
 	{
 		this.srcs = srcs;	
@@ -103,6 +107,8 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		queue = new SharedQueue(numThreads);
 
 		setupImgLoaders = new HashMap<>();
+		
+		caffeineCache = new CaffeineLoaderCache();
 
 		for (int setupId = 0; setupId < srcs.size(); setupId++)
 		{
@@ -239,8 +245,8 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
         				.andThen(Convert.convert(new UnsignedShortType()))));
 	        }
 	        
-	        final LoaderCache<Long, Cell< A >> cache =
-	                new WeakRefLoaderCache<>();
+//	        final LoaderCache<Long, Cell< A >> cache =
+//	        		new WeakRefLoaderCache<>();
 	        
 	        CacheLoader< Long, Cell< A > > backingLoader = LoadedCellCacheLoader.get(
 			        grid,
@@ -252,7 +258,9 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	        return new CachedCellImg<>(
 	                grid,
 	                type,
-	                cache.withLoader(backingLoader),
+	                //cache.withLoader( backingLoader ),
+	                caffeineCache.withLoader( backingLoader, timepointId, level ),
+	                //CaffeineLoaderCache.withLoader(backingLoader),
 	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( AccessFlags.VOLATILE))
 	        );
 		}
