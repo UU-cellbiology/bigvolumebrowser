@@ -27,7 +27,7 @@ public class CaffeineLoaderCache < V>
                         	
                         	return BVVSettings.cacheBlockSize *
                         			BVVSettings.cacheBlockSize *
-                        			BVVSettings.cacheBlockSize * 2;
+                        			BVVSettings.cacheBlockSize * 2; //assume unsignedshort for now
                         	} )
                 		//.maximumSize(10_000) // simple safe default
                         .build(key -> {
