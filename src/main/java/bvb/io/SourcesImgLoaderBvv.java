@@ -258,9 +258,10 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	        return new CachedCellImg<>(
 	                grid,
 	                type,
-	                //cache.withLoader( backingLoader ),
-	                caffeineCache.withLoader( backingLoader, timepointId, level ),
-	                //CaffeineLoaderCache.withLoader(backingLoader),
+	                //single cache per source
+	                //caffeineCache.withLoader( backingLoader, timepointId, level ),
+	                //single cache per timepoint/level variant
+	                CaffeineLoaderCache.withLoader(backingLoader),
 	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( AccessFlags.VOLATILE))
 	        );
 		}
