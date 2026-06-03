@@ -8,6 +8,8 @@ import java.util.function.Predicate;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 
+import bvb.core.BVVSettings;
+
 
 public class CaffeineLoaderCache < V>
 {
@@ -16,9 +18,18 @@ public class CaffeineLoaderCache < V>
 	public final LoadingCache<TimeLevelCellKey, V> caffeine;
 	public CaffeineLoaderCache()
 	{
+		long maxHeap = Runtime.getRuntime().maxMemory();
+		long cacheBudget = (long) (maxHeap * 0.1);
 		caffeine =
                 Caffeine.newBuilder()
-                        .maximumSize(10_000) // simple safe default
+                        .maximumWeight( cacheBudget )
+                        .weigher( (k, cell)-> {
+                        	
+                        	return BVVSettings.cacheBlockSize *
+                        			BVVSettings.cacheBlockSize *
+                        			BVVSettings.cacheBlockSize * 2;
+                        	} )
+                		//.maximumSize(10_000) // simple safe default
                         .build(key -> {
                             try
                             {

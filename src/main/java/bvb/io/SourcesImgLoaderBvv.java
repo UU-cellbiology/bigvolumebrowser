@@ -259,9 +259,9 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 	                grid,
 	                type,
 	                //single cache per source
-	                //caffeineCache.withLoader( backingLoader, timepointId, level ),
+	                caffeineCache.withLoader( backingLoader, timepointId, level ),
 	                //single cache per timepoint/level variant
-	                CaffeineLoaderCache.withLoader(backingLoader),
+	                //CaffeineLoaderCache.withLoader(backingLoader),
 	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( AccessFlags.VOLATILE))
 	        );
 		}
