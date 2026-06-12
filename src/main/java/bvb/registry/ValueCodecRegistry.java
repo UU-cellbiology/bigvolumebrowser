@@ -41,6 +41,7 @@ import bvb.io.codecs.Float2DArrayCodec;
 import bvb.io.codecs.FloatArrayCodec;
 import bvb.io.codecs.FloatCodec;
 import bvb.io.codecs.IntegerCodec;
+import bvb.io.codecs.ICMCodec;
 import bvb.io.codecs.StringCodec;
 import bvb.io.codecs.ValueCodec;
 
@@ -55,6 +56,7 @@ public class ValueCodecRegistry
     {
     	initializeAll();
     }
+    
     public <T> void register(ValueCodec<T> codec) {
         byId.put(codec.getTypeId(), codec);
         byClass.put(codec.getValueClass(), codec);
@@ -83,6 +85,7 @@ public class ValueCodecRegistry
 		register( new ColorCodec() );
 		register( new AffineTransformCodec() );
 		register( new FinalRealIntervalCodec() );
+		register( new ICMCodec() );
 
     }
 }

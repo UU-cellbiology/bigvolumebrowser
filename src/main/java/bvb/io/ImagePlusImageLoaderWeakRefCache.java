@@ -88,7 +88,7 @@ public class ImagePlusImageLoaderWeakRefCache < T extends RealType< T > & Native
 		int numThreads =
 		        Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
 		
-		queue = new SharedQueue(numThreads);
+		queue = new SharedQueue(numThreads, 5);
 		
 		
 		final int numSetups = imp.getNChannels();

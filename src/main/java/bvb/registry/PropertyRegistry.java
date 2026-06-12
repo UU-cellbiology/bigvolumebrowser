@@ -29,6 +29,7 @@
 package bvb.registry;
 
 import java.awt.Color;
+import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +55,8 @@ import bvb.utils.transform.TransformSetups;
 import bvvpg.core.VolumeViewerPanel;
 import bvvpg.source.converters.Clippable3D;
 import bvvpg.source.converters.GammaConverterSetup;
+import ij.IJ;
+import ij.plugin.LutLoader;
 
 public class PropertyRegistry
 {
@@ -68,6 +71,8 @@ public class PropertyRegistry
 	SpotsMapSetups spotsMapSetups;
 	
 	SpotsMapSetups spotsAlphaSetup;
+	
+	boolean bLUTWarning = true;
 	
 	public PropertyRegistry()
 	{	
@@ -110,7 +115,7 @@ public class PropertyRegistry
 			properties.add( "cs_lightingType" );
 			properties.add( "cs_voxelInterpolation" );
 			properties.add( "cs_color" );
-			properties.add( "cs_LUT" );
+			properties.add( "cs_LUTICM" );
 			
 		}
 		
@@ -508,7 +513,7 @@ public class PropertyRegistry
 			binding.interpolator = new HSBColorInterpolator();
 			return ( PropertyBinding< T > ) binding;
 		}
-		
+		//keep for compartibility for now
 		if (propertyName.equals( "cs_LUT" ))
 		{
 	    	final Property<String> pLUT = new Property<String>() {
@@ -520,11 +525,66 @@ public class PropertyRegistry
 			    	return lut;
 					}
 			    @Override
-				public void set(String v) { if(!v.equals( "" )) {cs.setLUT( v );}}
+			    public void set(String v) 
+			    {
+			    	if(bLUTWarning)
+			    	{
+			    		bLUTWarning = false;
+			    		IJ.log( "BigVolumeBrowser UPDATE NOTICE\n"
+			    				+ "Starting from 0.1.3 version, in BVB animation module LUTs are stored differently.\n"
+			    				+ "There is some backwards compartibility, but adding new keyframes with different LUTS\n"
+			    				+ "to existing animation timeline gonna break previous LUTs.\n"
+			    				+ "So it is better to redo the timeline in the new version and re-save it.\n"
+			    				+ "Apologies for inconvenience.");
+			    	}
+			    	if(!v.equals( "" ))
+			    	if(!v.equals( cs.getLUTName() ))
+			    	{
+			    		//check if this LUT name is present in FIJI
+			    		//and if not, fail for now
+			    		if(LutLoader.getLut(v) != null)
+			    		{
+			    			cs.setLUT( v );
+			    		}
+			    		else
+			    		{
+			    			System.out.println("BVB animation: cannot find "+ v + " LUT in current FIJI.");
+			    		}
+			    	}
+			    }
 			};
 			final PropertyBinding<String> binding = new PropertyBinding<>();
 			binding.property = pLUT;
 			binding.interpolator = Interpolator.stringStep;
+			return ( PropertyBinding< T > ) binding;
+		}
+		
+		if (propertyName.equals( "cs_LUTICM" ))
+		{
+	    	final Property<IndexColorModel> pLUTICM = new Property<IndexColorModel>() {
+			    @Override
+				public IndexColorModel get() { 
+			    	//cannot return null, since storing will be affected
+			    	//let's put a stub of ICM size null and consider it empty
+			    	final IndexColorModel icm = cs.getLutICM();
+			    	if(icm == null)
+			    	{
+			    		return new IndexColorModel(1, 1, new byte[] {0}, new byte[] {0}, new byte[] {0});
+			    	}
+			    	return icm;
+					}
+			    @Override
+			    public void set(final IndexColorModel v) { 
+			    	if (v != null)
+			    	{
+			    		if(v.getMapSize() !=1 )
+			    			cs.setLUT( v, Integer.toString( v.hashCode()));
+			    	}
+			    }
+			};
+			final PropertyBinding<IndexColorModel> binding = new PropertyBinding<>();
+			binding.property = pLUTICM;
+			binding.interpolator = Interpolator.icmStep;
 			return ( PropertyBinding< T > ) binding;
 		}
 		

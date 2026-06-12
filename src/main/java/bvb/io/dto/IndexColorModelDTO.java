@@ -26,59 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package bvb.animation.utils;
+package bvb.io.dto;
 
-import bvb.animation.KeyFrameScene;
-import bvb.core.BigVolumeBrowser;
-import bvb.io.codecs.ValueCodec;
-import bvb.io.dto.KeyframeDTO;
+import java.util.Arrays;
 
-public class Keyframe< T >
+public class IndexColorModelDTO
 {
-    public final T value;
-    public final KeyFrameScene parentKF;    
+    // Metadata
+    public int bits;
+    public int size;
+    public boolean hasAlpha;
+    public int transparentPixel = -1;
 
-    public Keyframe(final T value, final KeyFrameScene parentKF) 
-    {
-    	this.parentKF = parentKF;
-        this.value = value;
-    }
-    
-    public float getTime()
-    {
-    	return parentKF.getMovieTimePoint();
-    }
-    
-    @SuppressWarnings( "unchecked" )
-	public static <T> Keyframe<T> fromDTO(final KeyframeDTO dto, final KeyFrameScene parentKF_) throws IllegalStateException
-    {
-    	
-    	final ValueCodec<T> codec = BigVolumeBrowser.registry.getById(dto.valueType);
-    	
-    	if (codec == null)
-    		 throw new IllegalStateException(
-    	                "Unknown valueType: " + dto.valueType);
-    	
-    	Object decoded = codec.decode(dto.value);
-    	
-    	return new Keyframe<>( (T)decoded, parentKF_);
+    // Color tables (0–255 values)
+    public int[] r;
+    public int[] g;
+    public int[] b;
+    public int[] a; // nullable if hasAlpha == false
+
+    public IndexColorModelDTO() {
     }
 
-	public KeyframeDTO toGTO()
-    {
-    	@SuppressWarnings( "unchecked" )
+    // Optional convenience constructor
+    public IndexColorModelDTO(int bits, int size, boolean hasAlpha) {
+        this.bits = bits;
+        this.size = size;
+        this.hasAlpha = hasAlpha;
 
-    	final ValueCodec<T> codec = BigVolumeBrowser.registry.getByClass( (Class<T>) this.value.getClass() );
+        this.r = new int[size];
+        this.g = new int[size];
+        this.b = new int[size];
 
-    	
-    	if (codec == null)
-   	        throw new IllegalStateException("No codec for " + this.value.getClass());
-    	
-    	final KeyframeDTO out = new KeyframeDTO();
-    	out.kfsId = parentKF.getCurrentID();
-    	out.valueType = codec.getTypeId();
-    	out.value = codec.encode( this.value );
-    	
-    	return out;
+        if (hasAlpha) {
+            this.a = new int[size];
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "IndexColorModelDTO{" +
+                "bits=" + bits +
+                ", size=" + size +
+                ", hasAlpha=" + hasAlpha +
+                ", transparentPixel=" + transparentPixel +
+                ", r=" + Arrays.toString(r) +
+                ", g=" + Arrays.toString(g) +
+                ", b=" + Arrays.toString(b) +
+                ", a=" + Arrays.toString(a) +
+                '}';
     }
 }
