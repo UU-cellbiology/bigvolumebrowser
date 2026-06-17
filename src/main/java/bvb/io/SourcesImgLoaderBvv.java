@@ -176,6 +176,7 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		public RandomAccessibleInterval< V > getVolatileImage(final int timepointId,
 															final int level, final ImgLoaderHint... hints)
 		{
+			//caffeineCache.printStats();
 			return VolatileViews.wrapAsVolatile( prepareCachedImage(timepointId, level), queue);
 		}
 		

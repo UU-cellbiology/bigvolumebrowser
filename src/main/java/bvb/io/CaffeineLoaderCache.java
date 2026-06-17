@@ -2,6 +2,7 @@ package bvb.io;
 
 import com.github.benmanes.caffeine.cache.*;
 
+import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -11,7 +12,7 @@ import net.imglib2.cache.CacheLoader;
 import bvb.core.BVVSettings;
 
 
-public class CaffeineLoaderCache < V>
+public class CaffeineLoaderCache < V> 
 {
 	final ConcurrentHashMap< String, CacheLoader< Long, V> > map = new ConcurrentHashMap<>();
 	
@@ -23,12 +24,14 @@ public class CaffeineLoaderCache < V>
 		caffeine =
                 Caffeine.newBuilder()
                         .maximumWeight( cacheBudget )
+                        .expireAfterAccess(Duration.ofSeconds( 10 ) )
                         .weigher( (k, cell)-> {
                         	
                         	return BVVSettings.cacheBlockSize *
                         			BVVSettings.cacheBlockSize *
                         			BVVSettings.cacheBlockSize * 2; //assume unsignedshort for now
                         	} )
+                        .recordStats()
                 		//.maximumSize(10_000) // simple safe default
                         .build(key -> {
                             try
@@ -107,6 +110,10 @@ public class CaffeineLoaderCache < V>
 				caffeine.invalidateAll();				
 			}
         };
+	}
+	public void printStats()
+	{
+		System.out.print(  caffeine.stats());
 	}
 	
     public static <K, V> Cache<K, V> withLoader(CacheLoader< K, V> loader)
