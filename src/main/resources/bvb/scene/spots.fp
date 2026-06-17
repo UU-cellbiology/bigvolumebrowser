@@ -162,7 +162,7 @@ void main()
 		switch (renderType)
 		{
 			case 0:
-			if(pointShade>0)
+			if(pointShade > 0)
 			{
 				float z = sqrt(1 - norm);
 				vec3 n = - vec3(coord.x * sqrt( ellipseAxes.x), coord.y * sqrt( ellipseAxes.y), z);
@@ -207,7 +207,7 @@ void main()
 		
 	}
 	
-	if(wOIT>0)
+	if(wOIT > 0)
 	{
 		colorout.a = colorout.a * exp( - gl_FragCoord.z * 0.8);
 		colorout.xyz = colorout.xyz * colorout.a;
