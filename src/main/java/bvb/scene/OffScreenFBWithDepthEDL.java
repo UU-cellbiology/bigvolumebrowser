@@ -38,16 +38,11 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.numeric.real.FloatType;
 
-import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 
 import bvb.core.BVBSettings;
+import bvb.core.BVVSettings;
 import bvvpg.core.backend.Texture2D;
-import bvvpg.core.backend.Texture.InternalFormat;
-import bvvpg.core.backend.Texture.MagFilter;
-import bvvpg.core.backend.Texture.MinFilter;
-import bvvpg.core.backend.Texture.Wrap;
 import bvvpg.core.backend.jogl.JoglGpuContext;
 
 import bvvpg.core.shadergen.DefaultShader;
@@ -118,7 +113,7 @@ public class OffScreenFBWithDepthEDL
 	 * Use {@code GL_RGB32F} as internalFormat.
 	 * @param fbWidth width of offscreen framebuffer
 	 * @param fbHeight height of offscreen framebuffer
-	 * @param flipY whether to flip the Y axis when {@link #drawQuad drawing the texture}
+	 * @param flipY whether to flip the Y axis when 
 	 */
 	public OffScreenFBWithDepthEDL( final int fbWidth, final int fbHeight, final boolean flipY )
 	{
@@ -129,7 +124,7 @@ public class OffScreenFBWithDepthEDL
 	 * @param fbWidth width of offscreen framebuffer
 	 * @param fbHeight height of offscreen framebuffer
 	 * @param internalFormat internal texture format
-	 * @param flipY whether to flip the Y axis when {@link #drawQuad drawing the texture}
+	 * @param flipY whether to flip the Y axis when
 	 */
 	public OffScreenFBWithDepthEDL( final int fbWidth, final int fbHeight, final int internalFormat, final boolean flipY )
 	{
@@ -332,21 +327,12 @@ public class OffScreenFBWithDepthEDL
 	
 
 
-	/** draws only current stored depth component, optionally flipping it **/
-	public void drawQuadEDL( GL3 gl, final Matrix4f invPV, final Matrix4f vtm, float f, final Vector2f screenSize)
+	/** re-draws buffers using EDL lighting **/
+	public void drawQuadEDL( GL3 gl, int nRadius, float fStrength)
 	{
 		initQuad( gl );
 		JoglGpuContext context = JoglGpuContext.get( gl );
-//		float m22 = pvtm.m22();
-//		float m23 = pvtm.m23();
-//
-//		float near = m23 / (m22 - 1.0f);
-//		float far  = m23 / (m22 + 1.0f);
-		Vector3f camPos = new Vector3f();
-		vtm.invert().transformPosition(new Vector3f(0,0,0), camPos);
 
-		float far = camPos.length();
-		float near = far * 0.001f;
 		gl.glActiveTexture( GL_TEXTURE0 );
 		gl.glBindTexture( GL_TEXTURE_2D, texColorBuffer);
 		gl.glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,  GL_LINEAR);
@@ -362,11 +348,11 @@ public class OffScreenFBWithDepthEDL
 		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		progQuadEDL.getUniform1i( "depthTex" ).set( 1 );
 		progQuadEDL.use( context );
-		progQuadEDL.getUniformMatrix4f( "invPV" ).set( invPV );
-		progQuadEDL.getUniform2f( "screenSize").set( screenSize );
-		progQuadEDL.getUniform1f( "near").set( near );
-		progQuadEDL.getUniform1f( "far").set( far);
-		progQuadEDL.getUniform1f( "xf").set(f);
+		Vector2f texel = new Vector2f ((1.0f) / fbWidth, (1.0f) / fbHeight); 
+		progQuadEDL.getUniform2f( "texel").set( texel );
+		progQuadEDL.getUniform1f( "fnratio").set( BVVSettings.fnratio );
+		progQuadEDL.getUniform1f( "strength").set( fStrength );
+		progQuadEDL.getUniform1i( "radius").set( nRadius );
 		progQuadEDL.setUniforms( context );
 		gl.glBindVertexArray( vaoQuad );
 		gl.glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );

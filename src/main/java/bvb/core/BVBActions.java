@@ -355,6 +355,8 @@ public class BVBActions
 			BVVSettings.dClipNear = ((Double)dClipNear.getValue()).doubleValue();
 			Prefs.set("BVB.dClipNear", BVVSettings.dClipNear);
 			
+			BVVSettings.setFNratio();
+			
 			int nTempInt =  ((Integer)renderWidth.getValue()).intValue();
 			if(BVVSettings.renderWidth != nTempInt)
 			{

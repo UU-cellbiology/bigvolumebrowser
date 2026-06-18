@@ -48,7 +48,6 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import bvvpg.core.backend.jogl.JoglGpuContext;
-import bvvpg.core.offscreen.OffScreenFrameBufferWithDepth;
 import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
@@ -578,23 +577,8 @@ public class VisSpots extends AbstractClipTransformVis
 		//add transform
 		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
 		final Matrix4f pvtm = new Matrix4f();
-		final Matrix4f vtm = new Matrix4f();
 		pvm.mul( trM, pvtm );
-		vm.mul( trM, vtm );
-		final Matrix4f invPV = pvtm.invert( new Matrix4f() );
-		
-		final Matrix4f ipv = pvm.invert( new Matrix4f() );
-		
-		final Vector4f a = ipv.transform( new Vector4f( 0, 0, -1, 1 ) );
-		final Vector4f c = ipv.transform( new Vector4f( 0, 0,  1, 1 ) );
-		final Vector4f b = ipv.transform( new Vector4f( 0, 0,  0, 1 ) );
-		a.div( a.w() );
-		b.div( b.w() );
-		c.div( c.w() );
-		final double ab = b.sub( a, new Vector4f() ).length();
-		final double ac = c.sub( a ).length();
-		final float f = ( float ) ( ab / ac );
-		//Matrix4f invPV = new Matrix4f(pvtm).invert();
+
 		
 		JoglGpuContext context = JoglGpuContext.get( gl );
 		
@@ -706,7 +690,7 @@ public class VisSpots extends AbstractClipTransformVis
 				gl.glBindTexture( GL_TEXTURE_2D, 0 );
 		}
 		sceneBufEDL.unbind( gl,false );
-		sceneBufEDL.drawQuadEDL( gl, invPV,vtm, f, window_sizef );
+		sceneBufEDL.drawQuadEDL( gl, 5, 3 );
 	}
 
 }
