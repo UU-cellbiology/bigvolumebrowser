@@ -610,13 +610,14 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		JoglGpuContext context = JoglGpuContext.get( gl );
 	
+		//geometry
 		prog.getUniformMatrix4f( "vm" ).set( vtm );
-		prog.getUniformMatrix4f( "pm" ).set( pureProj );
-		
+		prog.getUniformMatrix4f( "pm" ).set( pureProj );		
 		prog.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
+		prog.getUniform2f( "pScale" ).set( pScale );
+		
 		prog.getUniform1f( "depthDecay" ).set( BVBSettings.fOITDepthDecay );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
-		prog.getUniform2f( "pScale" ).set( pScale );
 		
 		if(fSpotSize < 0.0)
 		{

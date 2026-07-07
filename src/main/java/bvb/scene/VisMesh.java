@@ -414,8 +414,6 @@ public class VisMesh extends AbstractClipTransformVis
 
 		JoglGpuContext context = JoglGpuContext.get( gl );
 
-		//gl.glDepthFunc( GL.GL_LESS);
-
 		//add transform
 		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
 		final Matrix4f pvtm = new Matrix4f();
@@ -424,7 +422,6 @@ public class VisMesh extends AbstractClipTransformVis
 		pvm.mul( trM, pvtm );
 		vm.mul( trM, vtm );
 		
-
 		if(renderType == MESH)
 		{
 			final Matrix4f itvm = vtm.invert( new Matrix4f() ).transpose();
@@ -487,7 +484,7 @@ public class VisMesh extends AbstractClipTransformVis
 		}
 		else
 		{
-
+			//older code, just for convenience
 			Vector2f window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
 			
 			Vector2f ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
@@ -518,7 +515,7 @@ public class VisMesh extends AbstractClipTransformVis
 				progPoints.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 			
-			progPoints.getUniform1i("wOIT").set(bWeightedOIT?1:0);
+			progPoints.getUniform1i("wOIT").set(bWeightedOIT ? 1:0);
 			progPoints.setUniforms( context );			
 			progPoints.use( context );
 			
@@ -527,7 +524,6 @@ public class VisMesh extends AbstractClipTransformVis
 			gl.glBindVertexArray( 0 );
 
 		}
-
 	}
 	
 	public static int[] IntBuffertoArray(IntBuffer b) {
