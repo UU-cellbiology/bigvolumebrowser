@@ -434,6 +434,7 @@ public class VisMesh extends AbstractClipTransformVis
 			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
 			progMesh.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
 			
+			progMesh.getUniform1f( "depthDecay" ).set( BVBSettings.fOITDepthDecay );
 			progMesh.getUniform4f("colorMesh").set(l_color);
 			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
 			progMesh.getUniform1i("gridType").set(gridType);
@@ -451,7 +452,6 @@ public class VisMesh extends AbstractClipTransformVis
 				final AffineTransform3D t = new AffineTransform3D();
 				t.set( transform );
 				t.preConcatenate( clipTransform.inverse() );
-				//t.set( clipTransform.inverse() );
 		
 				progMesh.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
@@ -459,9 +459,6 @@ public class VisMesh extends AbstractClipTransformVis
 			progMesh.getUniform1i("bUseTexture").set(bUseTexture?1:0);
 			progMesh.setUniforms( context );
 			progMesh.use( context );
-
-//			gl.glEnable(GL.GL_BLEND);
-//			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			
 			if(bHasTexture && bUseTexture)
 			{

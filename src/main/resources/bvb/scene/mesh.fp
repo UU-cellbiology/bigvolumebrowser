@@ -16,6 +16,8 @@ uniform vec4 colorMesh;
 uniform int bUseTexture;
 uniform sampler2D texture1;
 
+uniform float depthDecay;
+
 uniform int surfaceRender;
 uniform float silDecay;
 uniform int silType;
@@ -136,6 +138,7 @@ void main()
 	//silhouette surface
 	else
 	{
+	
 		float alphax = min(1.0, 1.0 - pow( abs( dot(norm, viewDir)), silDecay));
 		if(silType < 1)
 		{
@@ -156,7 +159,7 @@ void main()
 	{
 		float z = linearizeDepth(gl_FragCoord.z); // 0.0 to 1.0
 		float baseAlpha = colorout.a;
-		float weight = exp(- 3.0 * z );
+		float weight = exp(- depthDecay * z );
 		colorout.xyz = colorout.xyz * baseAlpha * weight;
 		colorout.a = baseAlpha * weight;
 	}

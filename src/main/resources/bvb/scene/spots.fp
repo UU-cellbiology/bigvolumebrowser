@@ -31,6 +31,8 @@ uniform float mapMin;
 uniform float mapRange;
 uniform float mapGamma;
 
+uniform float depthDecay;
+
 uniform int nMapAlphaMode;
 uniform int bInvAlpha;
 uniform float alphaMin;
@@ -217,7 +219,7 @@ void main()
 	{
 		float z = linearizeDepth(gl_FragCoord.z); // 0.0 to 1.0
 		float baseAlpha = colorout.a;
-		float weight = exp(- 3.0 * z );
+		float weight = exp(- depthDecay * z );
 		colorout.xyz = colorout.xyz * baseAlpha * weight;
 		colorout.a = baseAlpha * weight;
 	}

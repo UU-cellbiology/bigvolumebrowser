@@ -614,7 +614,7 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniformMatrix4f( "pm" ).set( pureProj );
 		
 		prog.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
-		
+		prog.getUniform1f( "depthDecay" ).set( BVBSettings.fOITDepthDecay );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform2f( "pScale" ).set( pScale );
 		

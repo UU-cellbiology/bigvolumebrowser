@@ -69,14 +69,14 @@ public class BVBSettings
 	
 	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", true ); 
 	
+	/**wOIT depth decay parameter **/
+	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
+	
 	/** whether to highlight selected boxes/clipboxes **/
 	public static boolean bHighlightSelectedBoxes = Prefs.get( "BVB.bHighlightSelectedBoxes", true ); 
 	
 	/** highlight color of boxes/clipboxes **/
 	public static Color boxHighlightColor = new Color((int)Prefs.get( "BVB.boxHighlightColor", new Color(0,153,255,255).getRGB() ));
-	
-	/** angle for lattice-light sheet data deskew in degrees**/
-	public static double dLLSAngle = Prefs.get("BVB.dLLSAngle", 30.);
 	
 	public static int nDefaultWidthControlPanel = 400;
 	
