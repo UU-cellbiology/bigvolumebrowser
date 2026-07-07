@@ -649,8 +649,6 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
 
-		//to be able to change point size in shader
-		gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
 		if( BVBSettings.bWeightedOIT )
 		{
 			sceneBufTransparent.bind( gl );

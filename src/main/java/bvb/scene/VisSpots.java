@@ -33,7 +33,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import bvb.core.BVBSettings;
-import bvb.core.BVVSettings;
 
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -147,7 +146,6 @@ public class VisSpots extends AbstractClipTransformVis
 		spotShape = nShape_;
 		
 		vertices = new float [nSpotsN*3];//assume 3D
-
 	}
 	
 	void setVertices( ArrayList< RealPoint > points)
@@ -164,8 +162,7 @@ public class VisSpots extends AbstractClipTransformVis
 			{
 				vertices[i*3+j] = points.get(i).getFloatPosition(j);
 			}			
-		}
-		
+		}		
 		initialized = false;
 	}
 
@@ -321,6 +318,7 @@ public class VisSpots extends AbstractClipTransformVis
 	{
 		return fExtraAlpha;
 	}
+	
 	public void setSizeScale(final float fSizeScale_)
 	{
 		fSizeScale = fSizeScale_;
@@ -419,14 +417,30 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		bLocked = true;		
 
+		//quad per point 
+		float[] quadVertices = {
+			    -0.5f, -0.5f,
+			     0.5f, -0.5f,
+			    -0.5f,  0.5f,
+			     0.5f,  0.5f
+			};
+
 		// reserve buffers
 
-		final int[] tmp = new int[ 4 ];
-		gl.glGenBuffers( 4, tmp, 0 );
-		final int posVbo = tmp[ 0 ];
-		final int sizeVbo = tmp[ 1 ];
-		final int propertyVbo = tmp[ 2 ];
-		colorsVbo = tmp[ 3 ];
+		final int[] tmp = new int[ 5 ];
+		gl.glGenBuffers( 5, tmp, 0 );
+		final int quadVBO = tmp [ 0 ];
+		final int posVbo = tmp[ 1 ];
+		final int sizeVbo = tmp[ 2 ];
+		final int propertyVbo = tmp[ 3 ];
+		colorsVbo = tmp[ 4 ];
+		
+		
+		// ..:: QUAD BUFFER ::..
+		
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, quadVBO);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, quadVertices.length * Float.BYTES, FloatBuffer.wrap(quadVertices), GL.GL_STATIC_DRAW);
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 		
 		// ..:: VERTEX BUFFER ::..
 
@@ -467,35 +481,42 @@ public class VisSpots extends AbstractClipTransformVis
 		gl.glGenVertexArrays( 1, tmp, 0 );
 		vao = tmp[ 0 ];
 		gl.glBindVertexArray( vao );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, quadVBO );
+		gl.glVertexAttribPointer(0, 2, GL.GL_FLOAT, false, 2 * Float.BYTES, 0);
+		gl.glEnableVertexAttribArray(0);
 
+		
 		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
-		gl.glVertexAttribPointer( 0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-		gl.glEnableVertexAttribArray( 0 );
+		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 1 );
+		gl.glVertexAttribDivisor(1, 1);
 		
 		if( fSpotSize < 0.0f )
 		{
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
-			gl.glVertexAttribPointer( 1, 1, GL_FLOAT, false, Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 1 );
+			gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 2 );
+			gl.glVertexAttribDivisor(2, 1);
 		}
 		if( property != null )
 		{		
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
-			gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 2 );
+			gl.glVertexAttribPointer( 3, 1, GL_FLOAT, false, Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 3 );
+			gl.glVertexAttribDivisor(3, 1);
 		}
 		
 		if( colors != null )
 		{		
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
-			gl.glVertexAttribPointer( 3, 4, GL_FLOAT, false, 4*Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 3 );
+			gl.glVertexAttribPointer( 4, 4, GL_FLOAT, false, 4 * Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 4 );
+			gl.glVertexAttribDivisor(4, 1);
 		}
 		
 		gl.glBindVertexArray( 0 );
 		
-		//make sure we can adjust the spot size
-		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		initialized = true;
 		bLocked  = false;
 
@@ -569,62 +590,41 @@ public class VisSpots extends AbstractClipTransformVis
 			
 		}
 		
+		//let's extract pure projection matrix
+		final Matrix4f pureProj = new Matrix4f(pvm);
+		final Matrix4f invView = new Matrix4f(vm);
+		invView.invert();
+		pureProj.mul(invView);
+		
+		
+		//full view transform + object transform
+		final Matrix4f vtm = new Matrix4f();
 		//add transform
 		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
-		final Matrix4f pvtm = new Matrix4f();
-		//final Matrix4f vtm = new Matrix4f();
-
-		pvm.mul( trM, pvtm );
-		//vm.mul( trM, vtm );
+		vm.mul( trM, vtm );
+		
+		// point scale factor in the view space
+		// taking into account possible shear
+		final Vector2f pScale = getScaleFactorNoShear(vtm);
 		
 		JoglGpuContext context = JoglGpuContext.get( gl );
-		
-		//scale disk with viewport transform
-		Vector2f window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
-		
-		//The whole story behind the code below is that
-		//the size of the OpenGL sprite corresponding to a point is
-		//changing depending on the actual window size and the render window size parameters.
-		//Basically it scales with coefficient screen_size[0]/renderParams.nRenderW (in each dimension).
-		//To compensate for that, we have to enlarge (shrink) effective point size
-		//(it is done in the vertex shader, we enabled gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE))
-		//and then render the point as nice circle by painting it as an ellipse (in the fragment shader)
-		//that will scale into the circle %)
-		//
-		
-		Vector2f ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
-		
-		//scale of viewport vs render
-		//we enlarge/shrink to minimum dimension scale
-		//and in the ellipse the other dimension will be cropped
-		//(maybe this part can be moved to GPU? seems not critical right now)
-		
-		float fPointScale = Math.min(ellipse_axes.x,ellipse_axes.y);
-		ellipse_axes.mul(1.0f/fPointScale);
-		
-		//actually it is not true ellipse axes,
-		//but rather inverse squared values
-		ellipse_axes.x = ellipse_axes.x * ellipse_axes.x;
-		ellipse_axes.y = ellipse_axes.y * ellipse_axes.y;
-				
-
-		
-		prog.getUniformMatrix4f( "pvm" ).set( pvtm );
+	
+		prog.getUniformMatrix4f( "vm" ).set( vtm );
+		prog.getUniformMatrix4f( "pm" ).set( pureProj );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
-		prog.getUniform1f( "pointScale" ).set( fPointScale );
+		prog.getUniform2f( "pScale" ).set( pScale );
+		
 		if(fSpotSize < 0.0)
 		{
 			prog.getUniform1f( "fSizeScale" ).set( fSizeScale );			
 		}
 		else
 		{
-			prog.getUniform1f( "fSizeScale" ).set( 1.0f);			
+			prog.getUniform1f( "fSizeScale" ).set( 1.0f );			
 		}
 
 		prog.getUniform4f( "colorin" ).set( l_color );
-		prog.getUniform1i("nHasColors").set( colors == null ? 0:1 );
-		prog.getUniform2f( "windowSize" ).set( window_sizef );
-		prog.getUniform2f( "ellipseAxes" ).set( ellipse_axes );
+		prog.getUniform1i( "nHasColors" ).set( colors == null ? 0:1 );
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		prog.getUniform1i( "pointShade" ).set( spotShade );
@@ -677,13 +677,49 @@ public class VisSpots extends AbstractClipTransformVis
 		}
 		
 		gl.glBindVertexArray( vao );
-		gl.glDrawArrays( GL.GL_POINTS, 0, nSpotsN);
+		gl.glDrawArraysInstanced( GL.GL_TRIANGLE_STRIP, 0, 4, nSpotsN );
 		gl.glBindVertexArray( 0 );		
 		if(nMapLUTMode > 0)
 		{
-			if(lutGPU.getTextureID()>0)
+			if(lutGPU.getTextureID() > 0)
 				gl.glBindTexture( GL_TEXTURE_2D, 0 );
 		}
 	}
+	
+	Vector2f getScaleFactorNoShear(final Matrix4f vtm)
+	{
+		final float[] m = new float[16];
+		vtm.get( m ); // raw, sheared view matrix
+		
+		//Extract the basis vectors
+		// Column 0: Basis X (Right vector)
+		float rx = m[0];
+		float ry = m[1];
+		float rz = m[2];
 
+		// Column 1: Basis Y (Up vector)
+		float ux = m[4];
+		float uy = m[5];
+		float uz = m[6];
+		
+		// Extract the clean X-scale factor (represents true zoom)
+		float trueZoomScale = (float) Math.sqrt(rx * rx + ry * ry + rz * rz);
+
+		// Normalize the Right vector to strip its scale, leaving pure direction
+		float invScaleX = (trueZoomScale > 0.0f) ? 1.0f / trueZoomScale : 1.0f;
+		float normRx = rx * invScaleX;
+		float normRy = ry * invScaleX;
+		float normRz = rz * invScaleX;
+
+		//Remove any shear component (projection of Right onto Up) from the Up vector
+		float dotRU = normRx * ux + normRy * uy + normRz * uz;
+		float cleanUx = ux - dotRU * normRx;
+		float cleanUy = uy - dotRU * normRy;
+		float cleanUz = uz - dotRU * normRz;
+
+		//Calculate the clean Y-scale factor just in case zoom/scale is non-uniform
+		float trueScaleY = (float) Math.sqrt(cleanUx * cleanUx + cleanUy * cleanUy + cleanUz * cleanUz);
+		
+		return new Vector2f(trueZoomScale, trueScaleY);
+	}
 }

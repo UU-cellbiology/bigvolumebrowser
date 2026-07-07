@@ -1,15 +1,21 @@
 out vec4 fragColor;
 
-uniform vec4 colorin;
-uniform int nHasColors;
-uniform vec2 ellipseAxes;
-uniform int renderType;
-uniform int pointShape;
-uniform int pointShade;
 in vec3 posW;
+in vec2 vTexCoord;
 in float fDiamfp;
 in float fPropertyfp;
 in vec4 fColorsfp;
+in vec4 vViewSpaceCenter;
+in float scaledPointSize;
+
+uniform vec4 colorin;
+uniform int nHasColors;
+uniform int renderType;
+uniform int pointShape;
+uniform int pointShade;
+
+uniform mat4 pm;
+
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
@@ -23,7 +29,6 @@ uniform int bInvLUT;
 uniform float mapMin;
 uniform float mapRange;
 uniform float mapGamma;
-
 
 uniform int nMapAlphaMode;
 uniform int bInvAlpha;
@@ -39,7 +44,7 @@ void checkClipping()
     //ROI clipping
 	if(clipactive > 0)
 	{
-		vec3 posclip = ( cliptransform * vec4(posW,1.0) ).xyz;
+		vec3 posclip = ( cliptransform * vec4(posW, 1.0) ).xyz;
 		vec3 s = step(clipmin, posclip) - step(clipmax, posclip);
 		if(s.x * s.y * s.z == clipactive - 1)
 		{
@@ -71,19 +76,19 @@ vec4 getInputColor()
 			val = fPropertyfp;			
 		}
 
-		val = pow(clamp((val-mapMin)/mapRange,0.0,1.0), mapGamma);
+		val = pow(clamp((val - mapMin) / mapRange, 0.0, 1.0), mapGamma);
 		
 		if(bInvLUT != 0)
 		{
 			val = 1.0 - val;
 		}
 		
-		val = 0.5 + (sizeLUT-1)*val;
+		val = 0.5 + (sizeLUT - 1) * val;
 		
 		//2D texture with fixed width of 256
 		vec2 q = vec2(0);
 		q.y = floor(val / 256.0);
-		q.x = (val / 256.0)- q.y;
+		q.x = (val / 256.0) - q.y;
 		q.y = (q.y + 0.5) / ceil(sizeLUT / 256.0);
 		return texture(lutTexture, q);
 		
@@ -124,7 +129,7 @@ float getInputAlpha()
 			val = fPropertyfp;			
 		}
 		
-		val = pow(clamp((val-alphaMin)/alphaRange,0.0,1.0), alphaGamma);
+		val = pow(clamp((val - alphaMin) / alphaRange, 0.0, 1.0), alphaGamma);
 		
 		if(bInvAlpha != 0)
 		{
@@ -143,76 +148,71 @@ float getInputAlpha()
 void main()
 {
 	checkClipping();
-	
-    //transform coordinates to NDC
-	vec2 coord = 2.0 * gl_PointCoord - 1.0;
-	
 	vec4 colorout = getInputColor();
 	colorout.a = extraAlpha * getInputAlpha();
-	
+	gl_FragDepth = gl_FragCoord.z;
+	// round point
 	if(pointShape == 0)
 	{
-	
-		//ellipse taking into account stretched render window	
-		float norm = (coord.x*coord.x*ellipseAxes.x)+(coord.y*coord.y*ellipseAxes.y);		
-		
-		//cut off everything outside the ellipse
-		if ( norm > 1) discard;
-		
-		switch (renderType)
+		float r2 = vTexCoord.x * vTexCoord.x + vTexCoord.y * vTexCoord.y;
+    	if (r2 > 0.25) discard;
+    	
+    	switch (renderType)
 		{
 			case 0:
-			if(pointShade>0)
-			{
-				float z = sqrt(1 - norm);
-				vec3 n = - vec3(coord.x * sqrt( ellipseAxes.x), coord.y * sqrt( ellipseAxes.y), z);
-				float diff =  abs(dot(n, lightDir));
-				colorout.rgb = colorout.rgb * (diff + ambient);
-			}
+				//add shading + depth
+				if(pointShade > 0)
+				{
+					float z = sqrt(1.0 - 4.0 * r2);
+					vec3 n = - vec3(2.0 * vTexCoord.x,  2.0 * vTexCoord.y, z);
+					float diff =  abs(dot(n, lightDir));
+					colorout.rgb = colorout.rgb * (diff + ambient);
+					
+					//depth
+					float zSphere = sqrt(0.25 - r2);
+					vec4 pixelViewPos = vViewSpaceCenter;
+					pixelViewPos.z -= zSphere * scaledPointSize;					
+					vec4 clipPos = pm * pixelViewPos;
+					gl_FragDepth = (clipPos.z / clipPos.w)* 0.5 + 0.5;		
+				}
 				break;
+			//outline/border only
 			case 1:
-				//draw only outline,
-				//i.e. discard inside
-				if ( norm < 0.6) 
-					discard;
+				if ( r2 < 0.16) discard;
 				break;
-			case 2:	
-					colorout.a = exp(-4.5 * norm) * colorout.a; //i.e. 4.5= (-1)/(2.0*0.333*0.333);  
+			//gaussian
+			case 2:
+				colorout.a = exp(- 18. * r2) * colorout.a; //i.e. 18= (-1)/(2.0*(0.333/2)*(0.333/2)); 
 				break;
 		}
-	}
-	else
-	{
-		//rectangle 
-		float norm = step(1/sqrt(ellipseAxes.x),abs(coord.x)) + step(1/sqrt(ellipseAxes.y),abs(coord.y)); 
-		
-		//cut off everything outside the rectangle
-		if ( norm > 0.5) discard;
-		
-		//draw only outline
+    }
+    //square points shape
+    else
+    {
+    	//draw only outline
 		//i.e. discard inside
 		if(renderType == 1)
 		{
-			float norm2 = step(0.8/sqrt(ellipseAxes.x),abs(coord.x)) + step(0.8/sqrt(ellipseAxes.y),abs(coord.y)); 
+			float norm2 = step(0.4, abs(vTexCoord.x)) + step(0.4, abs(vTexCoord.y)); 
 			if ( norm2 < 0.5) discard;
-		}	
+		}
 		else
 		{
 			if(renderType >= 2)
 			{
-				vec2 fade = abs(( 1 /sqrt(ellipseAxes)) - abs(coord));
+				vec2 fade = 2.0 * abs( 0.5  - abs(vTexCoord));
 				colorout.a = fade.x * fade.y * colorout.a; 
 			}
 		}
-		
-	}
-	
-	if(wOIT>0)
+    }
+    
+    //transparency rendering
+    if(wOIT > 0)
 	{
 		colorout.a = colorout.a * exp( - gl_FragCoord.z * 0.8);
 		colorout.xyz = colorout.xyz * colorout.a;
-
 	}
-    fragColor = colorout; 
+	
+	fragColor = colorout;
     
 }
