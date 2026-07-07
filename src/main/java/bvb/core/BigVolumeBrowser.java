@@ -71,6 +71,7 @@ import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
+import bvvpg.core.offscreen.MultisampleGeometryBuffer;
 import bvvpg.core.offscreen.OffScreenFrameBufferWithDepth;
 import bvvpg.core.render.RenderData;
 import bvvpg.core.util.MatrixMath;
@@ -132,7 +133,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	final public VolumeBBoxes volumeBoxes;
 	
 	/** separate framebuffer for the transparent rendering **/
-	OffScreenFrameBufferWithDepth sceneBufTransparent = null;
+	MultisampleGeometryBuffer sceneBufTransparent = null;
 	
 	/** clipping boxes **/	
 	public final VolumeBBoxes clipBoxes;
@@ -313,7 +314,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bvvViewer = bvvHandle.getViewerPanel();
 		
-		sceneBufTransparent = new OffScreenFrameBufferWithDepth( BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
+		sceneBufTransparent = new MultisampleGeometryBuffer( BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
 
 		//get renderScene
 		bvvViewer.setRenderScene(this::renderOpaque);
@@ -675,7 +676,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		gl.glDepthMask(true);
 		if(BVBSettings.bWeightedOIT)
 		{
-			sceneBufTransparent.unbind( gl,false );
+			sceneBufTransparent.unbind( gl, false );
 			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
 			gl.glDisable( GL_DEPTH_TEST );	
 			sceneBufTransparent.drawQuadAlpha( gl );

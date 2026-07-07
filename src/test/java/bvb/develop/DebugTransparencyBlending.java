@@ -72,15 +72,15 @@ public class DebugTransparencyBlending
 		
 		int nTotNumber = 30;
 		
-		double nScale = nDiameter*2.0;
+		double nScale = nDiameter * 2.0;
 		
 		float [] diameters = new float[nTotNumber];
 		
-		for(int i=0;i<nTotNumber; i++)
+		for(int i = 0; i < nTotNumber; i++)
 		{
 			verticesSame.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
 			verticesDiff.add( new RealPoint(new double[] {Math.random()*nScale, Math.random()*nScale, Math.random()*nScale}));
-			diameters[i] = ( float ) ( 0.2*(nDiameter + Math.random()*nDiameter));
+			diameters[i] = ( float ) ( 0.2 * (nDiameter + Math.random()*nDiameter));
 		}
 		//do not provide radius
 		samePoints.setPoints( verticesSame, null, null );
