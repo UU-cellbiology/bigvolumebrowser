@@ -33,6 +33,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import bvb.core.BVBSettings;
+import bvb.core.BVVSettings;
 
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -611,6 +612,9 @@ public class VisSpots extends AbstractClipTransformVis
 	
 		prog.getUniformMatrix4f( "vm" ).set( vtm );
 		prog.getUniformMatrix4f( "pm" ).set( pureProj );
+		
+		prog.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
+		
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		prog.getUniform2f( "pScale" ).set( pScale );
 		
@@ -628,7 +632,7 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniform1i( "renderType" ).set( renderType );
 		prog.getUniform1i( "pointShape" ).set( spotShape );
 		prog.getUniform1i( "pointShade" ).set( spotShade );
-		prog.getUniform1i("clipactive").set(0);
+		prog.getUniform1i( "clipactive" ).set(0);
 		
 		if(clipState != 0 && clipInt != null)
 		{

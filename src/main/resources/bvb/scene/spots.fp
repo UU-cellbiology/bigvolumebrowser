@@ -15,6 +15,7 @@ uniform int pointShape;
 uniform int pointShade;
 
 uniform mat4 pm;
+uniform float fnratio;
 
 uniform int clipactive;
 uniform vec3 clipmin;
@@ -145,6 +146,11 @@ float getInputAlpha()
 	}
 }
 
+float linearizeDepth(float z)
+{
+	return z/(z - fnratio*z + fnratio);
+}
+
 void main()
 {
 	checkClipping();
@@ -209,8 +215,11 @@ void main()
     //transparency rendering
     if(wOIT > 0)
 	{
-		colorout.a = colorout.a * exp( - gl_FragCoord.z * 0.8);
-		colorout.xyz = colorout.xyz * colorout.a;
+		float z = linearizeDepth(gl_FragCoord.z); // 0.0 to 1.0
+		float baseAlpha = colorout.a;
+		float weight = exp(- 3.0 * z );
+		colorout.xyz = colorout.xyz * baseAlpha * weight;
+		colorout.a = baseAlpha * weight;
 	}
 	
 	fragColor = colorout;

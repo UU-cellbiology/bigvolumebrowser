@@ -1,20 +1,22 @@
 out vec4 fragColor;
 
-uniform vec4 colorMesh;
-uniform int surfaceRender;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 posW;
 in vec2 texCoord;
 
-uniform sampler2D texture1;
-
-uniform int bUseTexture;
+uniform float fnratio;
 
 uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
 uniform mat4 cliptransform;
+
+uniform vec4 colorMesh;
+uniform int bUseTexture;
+uniform sampler2D texture1;
+
+uniform int surfaceRender;
 uniform float silDecay;
 uniform int silType;
 uniform int gridType;
@@ -86,6 +88,11 @@ void checkClipping()
 	}
 }
 
+float linearizeDepth(float z)
+{
+	return z/(z - fnratio*z + fnratio);
+}
+
 void main()
 {
 
@@ -105,7 +112,7 @@ void main()
 	
 
 	//plain, shaded or shiny surface
-	if(surfaceRender<3)
+	if(surfaceRender < 3)
 	{
 		//old code from Tobias
 		//vec3 l1 = phong( norm, viewDir, lightDir1, lightColor1, 1.0, 1.0 );
@@ -121,7 +128,7 @@ void main()
 		else
 		{			
 			vec3 diff = diffuse(norm,  lightDir1, lightColor1);
-			vec3 spec = specular( norm, viewDir, lightDir1, lightColor1, 16.0, 1.0 )*(surfaceRender-1);
+			vec3 spec = specular( norm, viewDir, lightDir1, lightColor1, 16.0, 1.0 ) * (surfaceRender-1);
 			colorout = vec4((ambient + diff ) * colorin.rgb + spec, colorin.a);
 			colorout = getGridColor(colorout);
 		}	
@@ -129,26 +136,29 @@ void main()
 	//silhouette surface
 	else
 	{
-		float alphax = min(1.0, 1.0-pow(abs(dot(norm,viewDir)),silDecay));
-		if(silType<1)
+		float alphax = min(1.0, 1.0 - pow( abs( dot(norm, viewDir)), silDecay));
+		if(silType < 1)
 		{
 			//all transparent
-			colorout = vec4(colorin.rgb, colorin.a*alphax);
+			colorout = vec4(colorin.rgb, colorin.a * alphax);
 			colorout = getGridColor(colorout);
 		}
 		else
 		{			
 			//front culling
-			if(dot(norm,viewDir)>0)
+			if(dot(norm,viewDir) > 0)
 				discard;
-			colorout = vec4(colorin.rgb*alphax, colorin.a);	
+			colorout = vec4(colorin.rgb * alphax, colorin.a);	
 			colorout = getGridColor(colorout);				
 		}
 	}
-	if(wOIT>0)
+	if(wOIT > 0)
 	{
-		colorout.a = colorout.a*exp(-gl_FragCoord.z*0.8);
-		colorout.xyz = colorout.xyz*colorout.a;
+		float z = linearizeDepth(gl_FragCoord.z); // 0.0 to 1.0
+		float baseAlpha = colorout.a;
+		float weight = exp(- 3.0 * z );
+		colorout.xyz = colorout.xyz * baseAlpha * weight;
+		colorout.a = baseAlpha * weight;
 	}
     fragColor = colorout; 
 }

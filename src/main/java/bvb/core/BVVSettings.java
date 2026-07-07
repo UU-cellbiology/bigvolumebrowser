@@ -51,5 +51,16 @@ public class BVVSettings
 	public static int cacheBlockSize = (int)Prefs.get("BVB.cacheBlockSize", 32.);
 	static public int maxCacheSizeInMB = (int)Prefs.get("BVB.maxCacheSizeInMB", 500.);
 	static int ditherWidth =(int)Prefs.get("BVB.ditherWidth", 3.);
+	public static float fnratio = getFNratio(dCam, dClipNear, dClipFar);
 
+	public static float getFNratio(final double dCamIn, final double dNear, final double dFar)
+	{
+		return ( float ) ((dCamIn + dFar)/(dCamIn - dNear));
+	}
+
+	public static void setFNratio()
+	{
+		fnratio = ( float ) ((dCam + dClipFar)/(dCam - dClipNear));
+		return;
+	}
 }

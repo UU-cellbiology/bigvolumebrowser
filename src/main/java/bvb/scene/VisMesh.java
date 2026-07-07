@@ -432,6 +432,8 @@ public class VisMesh extends AbstractClipTransformVis
 			progMesh.getUniformMatrix4f( "pvm" ).set( pvtm );
 			progMesh.getUniformMatrix4f( "vm" ).set( vtm );
 			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
+			progMesh.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
+			
 			progMesh.getUniform4f("colorMesh").set(l_color);
 			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
 			progMesh.getUniform1i("gridType").set(gridType);
