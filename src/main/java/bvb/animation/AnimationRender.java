@@ -57,9 +57,11 @@ public class AnimationRender extends SwingWorker<Void, String>
 {
 	final BigVolumeBrowser bvb;
 	final AnimationPanel aPanel;
+	final RenderSettings renderParams;
 	public JPanel glass = null;
 	
 	boolean bSliderUpdate;
+	
 	int nSliderValue;
 	
 	public final BVVWindowState bvvWindowState;
@@ -68,6 +70,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 	{
 		this.bvb = bvb_;
 		this.aPanel = aPanel_;
+		this.renderParams = aPanel.renderSettings;
 		bvvWindowState = new BVVWindowState(bvb);
 		bvvWindowState.saveBvvWindowState();	
 	}
@@ -89,19 +92,19 @@ public class AnimationRender extends SwingWorker<Void, String>
 	@Override
 	protected Void doInBackground() throws Exception
 	{
-		final int nTotFrames = aPanel.kfAnim.nTotalTime * aPanel.nRenderFPS;
+		final int nTotFrames = aPanel.kfAnim.nTotalTime * renderParams.nRenderFPS;
 		final float dT = aPanel.kfAnim.nTotalTime / (float)( nTotFrames - 1 );		
 
-		if(aPanel.sRenderSavePath == null)
+		if(renderParams.sRenderSavePath == null)
 		{
 			return null;
 		}		
 
 		bvb.bvbActions.turnOffManualTransform(false);
-		bvb.multiBoxOverlayBVB.setEnabled( aPanel.bRenderMultiBox );
-		Prefs.showScaleBar(aPanel.bRenderScaleBar);
-		Prefs.showScaleBarInMovie( aPanel.bRenderScaleBar );
-		bvb.axisOverlay.setEnabled( aPanel.bRenderAxesGizmo );
+		bvb.multiBoxOverlayBVB.setEnabled( renderParams.bRenderMultiBox );
+		Prefs.showScaleBar(renderParams.bRenderScaleBar);
+		Prefs.showScaleBarInMovie( renderParams.bRenderScaleBar );
+		bvb.axisOverlay.setEnabled( renderParams.bRenderAxesGizmo );
 
 		Prefs.showTextOverlay(false);
 		bvb.bvvViewer.setRenderMode( true );
@@ -110,7 +113,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 		
 		aPanel.bUpdateSlider = false;
 		
-		if(!aPanel.bRenderCurrentWindowSize)
+		if(!renderParams.bRenderCurrentWindowSize)
 		{
 			bvb.bvvFrame.setExtendedState(Frame.NORMAL);
 
@@ -122,7 +125,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 				splitPanel.setCollapsed( true );
 			}
 					
-			int nHeight = aPanel.nRenderHeight;
+			int nHeight = renderParams.nRenderHeight;
 			
 			//check if there is time slider => +25 in height
 			if(bvb.bvvViewer.state().getNumTimepoints() > 1)
@@ -130,7 +133,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 				nHeight += 25;
 			}
 			
-			Dimension nRenderDim = new Dimension(aPanel.nRenderWidth, nHeight);
+			Dimension nRenderDim = new Dimension(renderParams.nRenderWidth, nHeight);
 	
 			bvb.bvvFrame.getContentPane().setPreferredSize( null );
 			final Point bvv_p = bvb.bvvFrame.getLocation();
@@ -159,9 +162,9 @@ public class AnimationRender extends SwingWorker<Void, String>
                                     BufferedImage.TYPE_INT_ARGB);
 		
 		boolean bResize = false;
-		if(!aPanel.bRenderCurrentWindowSize)
+		if(!renderParams.bRenderCurrentWindowSize)
 		{
-			if(aPanel.nRenderWidth != rect.width || aPanel.nRenderHeight != rect.height)
+			if(renderParams.nRenderWidth != rect.width || renderParams.nRenderHeight != rect.height)
 			{
 				bResize = true;
 			}
@@ -188,7 +191,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 
 			long nTotalTime = 0;
 			final long nWaitTime = 30;
-			final long nTimeLimitmS = aPanel.nRenderFrameTimeLimit * 1000;
+			final long nTimeLimitmS = renderParams.nRenderFrameTimeLimit * 1000;
 			boolean bWait = (bvb.bvvViewer.getRepaintStatus() != RepaintType.NONE);
 
 			while(bWait)
@@ -221,9 +224,9 @@ public class AnimationRender extends SwingWorker<Void, String>
 	        }
 	        else
 	        {
-	        	biOut = resizeCenterCrop(bi,aPanel.nRenderWidth, aPanel.nRenderHeight);
+	        	biOut = resizeCenterCrop(bi, renderParams.nRenderWidth, renderParams.nRenderHeight);
 	        }			
-			ImageIO.write( biOut, "png", new File( aPanel.sRenderSavePath + 
+			ImageIO.write( biOut, "png", new File( renderParams.sRenderSavePath + 
 			String.format("%0" + String.valueOf(nTotFrames).length() + "d", nFr + 1) + ".png") );
 	        
 			if(isCancelled())
@@ -285,7 +288,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 
     	IJ.log( "BVB: rendering is finished." );
         //restore the panel
-    	if(!aPanel.bRenderCurrentWindowSize)
+    	if(!renderParams.bRenderCurrentWindowSize)
         	bvvWindowState.restoreBvvWindowState();
     	else
         	bvvWindowState.setViewerTransformAfterResizeIsDone();

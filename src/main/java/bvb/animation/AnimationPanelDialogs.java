@@ -64,13 +64,14 @@ import ij.io.SaveDialog;
 public class AnimationPanelDialogs
 {
 	final BigVolumeBrowser bvb;
-	
 	final AnimationPanel aPanel;
+	final RenderSettings renderParams;
 	
 	public AnimationPanelDialogs(	final BigVolumeBrowser bvb_, final AnimationPanel aPanel_)
 	{
 		bvb = bvb_;
 		aPanel = aPanel_;
+		renderParams = aPanel.renderSettings;
 	}
 
 	boolean dialRenderSettings()
@@ -83,15 +84,15 @@ public class AnimationPanelDialogs
 		
 		final NumberField nfFPS = new NumberField(4);
 		nfFPS.setIntegersOnly( true );
-		nfFPS.setText(Integer.toString( aPanel.nRenderFPS ));
+		nfFPS.setText(Integer.toString( renderParams.nRenderFPS ));
 		
 		final NumberField nfWidth = new NumberField(4);
 		nfWidth.setIntegersOnly( true );
-		nfWidth.setText(Integer.toString( aPanel.nRenderWidth ));
+		nfWidth.setText(Integer.toString( renderParams.nRenderWidth ));
 		
 		final NumberField nfHeight = new NumberField(4);
 		nfHeight.setIntegersOnly( true );
-		nfHeight.setText(Integer.toString( aPanel.nRenderHeight));
+		nfHeight.setText(Integer.toString( renderParams.nRenderHeight));
 		
 		final JCheckBox cbCurrentWindow = new JCheckBox("");
 		
@@ -101,7 +102,7 @@ public class AnimationPanelDialogs
 			nfWidth.setEnabled( bNFState );
 			nfHeight.setEnabled( bNFState );
 		});
-		cbCurrentWindow.setSelected( aPanel.bRenderCurrentWindowSize );
+		cbCurrentWindow.setSelected( renderParams.bRenderCurrentWindowSize );
 
 		final Dimension currDimensionsWindow = bvb.bvvViewer.getSize();
 		
@@ -143,24 +144,24 @@ public class AnimationPanelDialogs
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (reply == JOptionPane.OK_OPTION) 
 		{
-			aPanel.nRenderFPS = Integer.parseInt( nfFPS.getText());
-			Prefs.set("BVB.nRenderFPS", (double)aPanel.nRenderFPS);
+			renderParams.nRenderFPS = Integer.parseInt( nfFPS.getText());
+			Prefs.set("BVB.nRenderFPS", (double)renderParams.nRenderFPS);
 			
-			aPanel.bRenderCurrentWindowSize = cbCurrentWindow.isSelected();
-			Prefs.set("BVB.bRenderCurrentWindowSize", aPanel.bRenderCurrentWindowSize);
+			renderParams.bRenderCurrentWindowSize = cbCurrentWindow.isSelected();
+			Prefs.set("BVB.bRenderCurrentWindowSize", renderParams.bRenderCurrentWindowSize);
 			
-			if(!aPanel.bRenderCurrentWindowSize)
+			if(!renderParams.bRenderCurrentWindowSize)
 			{
-				aPanel.nRenderWidth = Integer.parseInt( nfWidth.getText());
-				Prefs.set("BVB.nRenderWidth", (double)aPanel.nRenderWidth);
+				renderParams.nRenderWidth = Integer.parseInt( nfWidth.getText());
+				Prefs.set("BVB.nRenderWidth", (double)renderParams.nRenderWidth);
 				
-				aPanel.nRenderHeight = Integer.parseInt( nfHeight.getText());
-				Prefs.set("BVB.nRenderHeight", (double)aPanel.nRenderHeight);
+				renderParams.nRenderHeight = Integer.parseInt( nfHeight.getText());
+				Prefs.set("BVB.nRenderHeight", (double)renderParams.nRenderHeight);
 			}
 			
-			aPanel.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder..", false );
+			renderParams.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder..", false );
 			
-			if(aPanel.sRenderSavePath == null)
+			if(renderParams.sRenderSavePath == null)
 			{
 				IJ.showStatus( "animation aborted.");
 				return false;
@@ -343,17 +344,17 @@ public class AnimationPanelDialogs
 		pAnimSettings.setLayout(new GridBagLayout());
 		
 		JCheckBox cbMultiBox = new JCheckBox();
-		cbMultiBox.setSelected( aPanel.bRenderMultiBox);
+		cbMultiBox.setSelected( renderParams.bRenderMultiBox);
 		
 		JCheckBox cbScaleBar = new JCheckBox();
-		cbScaleBar.setSelected( aPanel.bRenderScaleBar);
+		cbScaleBar.setSelected( renderParams.bRenderScaleBar);
 
 		JCheckBox cbAxesGizmo = new JCheckBox();
-		cbAxesGizmo.setSelected( aPanel.bRenderAxesGizmo);
+		cbAxesGizmo.setSelected( renderParams.bRenderAxesGizmo);
 		
 		NumberField nfFrameRenderMax = new NumberField(4);
 		nfFrameRenderMax.setIntegersOnly(true);
-		nfFrameRenderMax.setText(Integer.toString(aPanel.nRenderFrameTimeLimit));
+		nfFrameRenderMax.setText(Integer.toString(renderParams.nRenderFrameTimeLimit));
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
@@ -393,19 +394,19 @@ public class AnimationPanelDialogs
 		if (reply == JOptionPane.OK_OPTION) 
 		{
 			//multibox
-			aPanel.bRenderMultiBox = cbMultiBox.isSelected();
-			Prefs.set("BVB.bRenderMultiBox", aPanel.bRenderMultiBox );
+			renderParams.bRenderMultiBox = cbMultiBox.isSelected();
+			Prefs.set("BVB.bRenderMultiBox", renderParams.bRenderMultiBox );
 
 			//scale bar
-			aPanel.bRenderScaleBar = cbScaleBar.isSelected();
-			Prefs.set("BVB.bRenderScaleBar", aPanel.bRenderScaleBar );
+			renderParams.bRenderScaleBar = cbScaleBar.isSelected();
+			Prefs.set("BVB.bRenderScaleBar", renderParams.bRenderScaleBar );
 			
 			//axes gizmo
-			aPanel.bRenderAxesGizmo = cbAxesGizmo.isSelected();
-			Prefs.set("BVB.bRenderAxesGizmo", aPanel.bRenderAxesGizmo );
+			renderParams.bRenderAxesGizmo = cbAxesGizmo.isSelected();
+			Prefs.set("BVB.bRenderAxesGizmo", renderParams.bRenderAxesGizmo );
 			
-			aPanel.nRenderFrameTimeLimit = Integer.parseInt(nfFrameRenderMax.getText());
-			Prefs.set("BVB.nRenderFrameTimeLimit", aPanel.nRenderFrameTimeLimit);
+			renderParams.nRenderFrameTimeLimit = Integer.parseInt(nfFrameRenderMax.getText());
+			Prefs.set("BVB.nRenderFrameTimeLimit", renderParams.nRenderFrameTimeLimit);
 		}
 	
 	}
