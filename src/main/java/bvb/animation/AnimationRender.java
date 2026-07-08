@@ -37,6 +37,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -45,13 +46,26 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+
+import net.imglib2.Cursor;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.cache.img.DiskCachedCellImgFactory;
+import net.imglib2.cache.img.DiskCachedCellImgOptions;
+import net.imglib2.img.Img;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
+
 import bdv.ui.splitpanel.SplitPanel;
 import bdv.util.Prefs;
 import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.BVVWindowState;
+import bvb.io.dto.SerializationIO;
 import bvvpg.core.render.VolumeRenderer.RepaintType;
 import ij.IJ;
+import ij.ImagePlus;
 
 public class AnimationRender extends SwingWorker<Void, String>
 {
@@ -66,13 +80,37 @@ public class AnimationRender extends SwingWorker<Void, String>
 	
 	public final BVVWindowState bvvWindowState;
 	
+	final Img<ARGBType> animStack;
+	
+	final int nTotFrames;
+	
 	public AnimationRender(final BigVolumeBrowser bvb_, AnimationPanel aPanel_)
 	{
 		this.bvb = bvb_;
 		this.aPanel = aPanel_;
 		this.renderParams = aPanel.renderSettings;
 		bvvWindowState = new BVVWindowState(bvb);
-		bvvWindowState.saveBvvWindowState();	
+		bvvWindowState.saveBvvWindowState();
+		
+		nTotFrames = aPanel.kfAnim.nTotalTime * renderParams.nRenderFPS;
+		// generate stack, if needed
+		if(renderParams.nRenderOutput == 0)
+		{ 
+			if(renderParams.bRenderCurrentWindowSize)
+			{
+				final Rectangle rect = bvb.bvvViewer.getDisplayComponent().getBounds();
+				animStack = createCachedStack(rect.width, rect.height, nTotFrames);
+			}
+			else
+			{
+				animStack = createCachedStack(renderParams.nRenderWidth, renderParams.nRenderHeight, nTotFrames);
+				
+			}
+		}
+		else
+		{
+			animStack = null;
+		}
 	}
 	
 	@Override
@@ -92,10 +130,16 @@ public class AnimationRender extends SwingWorker<Void, String>
 	@Override
 	protected Void doInBackground() throws Exception
 	{
-		final int nTotFrames = aPanel.kfAnim.nTotalTime * renderParams.nRenderFPS;
+		//final int nTotFrames = aPanel.kfAnim.nTotalTime * renderParams.nRenderFPS;
 		final float dT = aPanel.kfAnim.nTotalTime / (float)( nTotFrames - 1 );		
 
-		if(renderParams.sRenderSavePath == null)
+		//check just in case
+		if(renderParams.nRenderOutput == 0 && animStack == null)
+		{
+			return null;
+		}		
+
+		if(renderParams.nRenderOutput == 1 && renderParams.sRenderSavePath == null)
 		{
 			return null;
 		}		
@@ -225,10 +269,16 @@ public class AnimationRender extends SwingWorker<Void, String>
 	        else
 	        {
 	        	biOut = resizeCenterCrop(bi, renderParams.nRenderWidth, renderParams.nRenderHeight);
-	        }			
-			ImageIO.write( biOut, "png", new File( renderParams.sRenderSavePath + 
-			String.format("%0" + String.valueOf(nTotFrames).length() + "d", nFr + 1) + ".png") );
-	        
+	        }	
+	        if(renderParams.nRenderOutput == 0)
+	        {
+	        	copyFrameToStack(biOut, animStack, nFr);
+	        }
+	        else
+	        {
+	        	ImageIO.write( biOut, "png", new File( renderParams.sRenderSavePath + 
+	        					String.format("%0" + String.valueOf(nTotFrames).length() + "d", nFr + 1) + ".png") );
+	        }
 			if(isCancelled())
 			{
 				return null;	
@@ -285,6 +335,17 @@ public class AnimationRender extends SwingWorker<Void, String>
 		Prefs.showScaleBar( BVBSettings.bShowScaleBar );
 		Prefs.showScaleBarInMovie( BVBSettings.bShowScaleBar );
 		Prefs.showTextOverlay(true);
+		if(renderParams.nRenderOutput == 0 && animStack != null)
+		{
+			//imagej ordered stack
+			IntervalView< ARGBType > out = Views.permute(
+						Views.addDimension(  Views.addDimension(animStack, 0, 0), 0, 0),
+						2, 4);
+			final ImagePlus imp = ImageJFunctions.show( out, "BVB_Animation_" + SerializationIO.getTimestamp() );
+			imp.getCalibration().fps = renderParams.nRenderFPS;
+			imp.getCalibration().frameInterval = 1./renderParams.nRenderFPS;
+			imp.getCalibration().setTimeUnit( "sec" );
+		}
 
     	IJ.log( "BVB: rendering is finished." );
         //restore the panel
@@ -386,5 +447,40 @@ public class AnimationRender extends SwingWorker<Void, String>
         int y = (scaledH - targetHeight) / 2;
 
         return scaled.getSubimage(x, y, targetWidth, targetHeight);
+    }
+    
+    public static Img<ARGBType> createCachedStack(final int width, final int height, final int frames)
+    {
+    	// Define the dimensions of the entire 3D stack
+        long[] dimensions = new long[]{ width, height, frames };
+        
+        // Define cell dimensions: One full XY frame per cell slice
+        // This ensures disk writing happens cleanly per frame/block
+        int[] cellDimensions = new int[]{ width, height, 1 }; 
+
+        DiskCachedCellImgOptions options = DiskCachedCellImgOptions.options().cellDimensions( cellDimensions );
+        DiskCachedCellImgFactory<ARGBType> factory = new DiskCachedCellImgFactory<>(new ARGBType(), options);
+
+        // Create an empty, lazily allocated, disk-cached image stack
+        return factory.create(dimensions);
+    }
+    
+    public static void copyFrameToStack(final BufferedImage frame, final Img<ARGBType> stack, final int nFrame) 
+    {
+        
+        final RandomAccessibleInterval< ARGBType > slice = Views.flatIterable( Views.hyperSlice(stack, 2, nFrame));
+               
+        if (frame.getType() != BufferedImage.TYPE_INT_ARGB && frame.getType() != BufferedImage.TYPE_INT_RGB) {
+            throw new IllegalArgumentException("BufferedImage must be INT_ARGB or INT_RGB");
+        }
+        int[] framePixels = ((DataBufferInt) frame.getRaster().getDataBuffer()).getData();     
+
+        int i = 0;
+        Cursor<ARGBType> cursor = slice.cursor();
+        while (cursor.hasNext()) {
+            cursor.fwd();
+            // Grab the packed ARGB int and set it directly into the ImgLib2 pixel
+            cursor.get().set(framePixels[i++]);
+        }
     }
 }

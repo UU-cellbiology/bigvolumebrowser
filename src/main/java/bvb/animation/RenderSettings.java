@@ -20,5 +20,8 @@ public class RenderSettings
 	
 	int nRenderFrameTimeLimit = (int)Prefs.get("BVB.nRenderFrameTimeLimit", 60);
 	
+	/** 0 - show in Fiji, 1 - save as PNG **/
+	int nRenderOutput = (int)Prefs.get("BVB.nRenderOutput", 0);
+	
 	String sRenderSavePath = null;
 }

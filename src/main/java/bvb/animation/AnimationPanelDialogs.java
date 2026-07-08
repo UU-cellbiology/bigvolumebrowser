@@ -82,6 +82,10 @@ public class AnimationPanelDialogs
 		GridBagConstraints gbc = new GridBagConstraints();
 		GBCHelper.alighLeft(gbc);
 		
+		final String[] sOutput  = { "Show in Fiji window", "Save as PNG sequence"};
+		final JComboBox<String> cbOutput = new JComboBox<>(sOutput);
+		cbOutput.setSelectedIndex(renderParams.nRenderOutput);
+
 		final NumberField nfFPS = new NumberField(4);
 		nfFPS.setIntegersOnly( true );
 		nfFPS.setText(Integer.toString( renderParams.nRenderFPS ));
@@ -110,10 +114,16 @@ public class AnimationPanelDialogs
 				" x " + Integer.toString( currDimensionsWindow.height );
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
+		panRenderSettings.add(new JLabel("Output:"),gbc);
+		gbc.gridx++;
+		panRenderSettings.add(cbOutput, gbc);	
+		
+		
+		gbc.gridx = 0;
+		gbc.gridy++;	
 		panRenderSettings.add(new JLabel("Render FPS:"),gbc);
 		gbc.gridx++;
 		panRenderSettings.add(nfFPS, gbc);	
-		
 		
 		gbc.gridx = 0;
 		gbc.gridy++;	
@@ -144,6 +154,9 @@ public class AnimationPanelDialogs
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (reply == JOptionPane.OK_OPTION) 
 		{
+			renderParams.nRenderOutput = cbOutput.getSelectedIndex();
+			Prefs.set("BVB.nRenderOutput", (double)renderParams.nRenderOutput);
+			
 			renderParams.nRenderFPS = Integer.parseInt( nfFPS.getText());
 			Prefs.set("BVB.nRenderFPS", (double)renderParams.nRenderFPS);
 			
@@ -158,13 +171,15 @@ public class AnimationPanelDialogs
 				renderParams.nRenderHeight = Integer.parseInt( nfHeight.getText());
 				Prefs.set("BVB.nRenderHeight", (double)renderParams.nRenderHeight);
 			}
-			
-			renderParams.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder..", false );
-			
-			if(renderParams.sRenderSavePath == null)
+			if(renderParams.nRenderOutput == 1)
 			{
-				IJ.showStatus( "animation aborted.");
-				return false;
+				renderParams.sRenderSavePath = GetFolderDialog.getSelectedFolder( "Save animation frames to folder..", false );
+				
+				if(renderParams.sRenderSavePath == null)
+				{
+					IJ.showStatus( "animation aborted.");
+					return false;
+				}
 			}
 			return true;
 		}
