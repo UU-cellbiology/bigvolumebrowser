@@ -276,7 +276,7 @@ public class MultiSpots extends AbstractClipTransformMulti implements BasicSpots
 	@Override
 	public int getPointShade()
 	{
-		return pointShape;
+		return pointShade;
 	}
 
 	/** returns maximum timepoint value (integer) **/

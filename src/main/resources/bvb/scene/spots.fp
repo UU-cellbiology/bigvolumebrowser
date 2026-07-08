@@ -171,17 +171,20 @@ void main()
 				//add shading + depth
 				if(pointShade > 0)
 				{
-					float z = sqrt(1.0 - 4.0 * r2);
-					vec3 n = - vec3(2.0 * vTexCoord.x,  2.0 * vTexCoord.y, z);
-					float diff =  abs(dot(n, lightDir));
-					colorout.rgb = colorout.rgb * (diff + ambient);
-					
-					//depth
+					//depth always
 					float zSphere = sqrt(0.25 - r2);
 					vec4 pixelViewPos = vViewSpaceCenter;
 					pixelViewPos.z -= zSphere * scaledPointSize;					
 					vec4 clipPos = pm * pixelViewPos;
 					gl_FragDepth = (clipPos.z / clipPos.w)* 0.5 + 0.5;		
+					//individual shades
+					if(pointShade == 1)
+					{
+						float z = sqrt(1.0 - 4.0 * r2);
+						vec3 n = - vec3(2.0 * vTexCoord.x,  2.0 * vTexCoord.y, z);
+						float diff =  abs(dot(n, lightDir));
+						colorout.rgb = colorout.rgb * (diff + ambient);
+					}
 				}
 				break;
 			//outline/border only

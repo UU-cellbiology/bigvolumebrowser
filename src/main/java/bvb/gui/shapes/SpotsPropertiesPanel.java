@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -84,7 +83,7 @@ public class SpotsPropertiesPanel extends JPanel
 	
 	final public SpotsOpacityPanel opacityPanel;
 	
-	public final JCheckBox cbShaded = new JCheckBox();
+	public final JComboBox<String> cbShaded;
 	
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
@@ -150,9 +149,11 @@ public class SpotsPropertiesPanel extends JPanel
 			//String.format("%.2f", in);
 		} );
 		pSizeScale = new JPanelConsistent(new GridBagLayout());
+		
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pSizeScale.add( new JLabel("Size scale: "), gbc );
+		pSizeScale.add( new JLabel(" Scale: "), gbc );
 		gbc.gridx++;
 		pSizeScale.add( nfSpSizeScale, gbc );
 		
@@ -162,16 +163,24 @@ public class SpotsPropertiesPanel extends JPanel
 			updateShape();				
 			});
 		pShape = new JPanelConsistent(new GridBagLayout());
-		pShaded = new JPanelConsistent(new GridBagLayout());
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		pShape.add( new JLabel("Shape: "), gbc );
 		gbc.gridx++;
 		pShape.add( cbShape, gbc );
+		
+		pShaded = new JPanelConsistent(new GridBagLayout());		
+		String[] sShade = {"None", "Individual", "EDL"};
+		cbShaded =  new JComboBox< >(sShade);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pShaded.add( new JLabel("Shading: "), gbc );
+		gbc.gridx++;
 		pShaded.add( cbShaded );
-		cbShaded.setToolTipText( "Round shaded" );
-		pShaded.setToolTipText( "Round shaded" );
-		cbShaded.addItemListener( (e)-> updateRoundShaded());
+		cbShaded.setToolTipText( "Points shading" );
+		pShaded.setToolTipText( "Points shading" );
+		cbShaded.addItemListener( (e)-> updateShading());
 		
 		
 		String[] sRender = {"Filled", "Outline", "Gauss"};
@@ -184,10 +193,7 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		
-		pRender.add( new JLabel("Render: "), gbc );
-		gbc.gridx++;
-		pRender.add( cbRender, gbc );	
-		
+		pRender.add( cbRender, gbc );			
 		allComp.add( butColor );
 		allComp.add( nfSpSize );
 		allComp.add( nfSpSizeScale );
@@ -200,13 +206,11 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		//GBCHelper.alighLoose(gbc);
-		//GBCHelper.alighLeft(gbc);
 		gbc.insets = new Insets(0,0,0,0);
 					
 		//Shape Panel
 		shapePanel = new JPanel(new GridBagLayout());
-		gbc.gridwidth = 2;
+		gbc.gridwidth = 1;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
 		shapePanel.add(pColor, gbc );
@@ -214,19 +218,18 @@ public class SpotsPropertiesPanel extends JPanel
 		gbc.gridy ++;	
 		shapePanel.add(pPointSize, gbc );
 		
-		gbc.gridy ++;	
+		gbc.gridx ++;	
 		shapePanel.add(pSizeScale, gbc );
-	
+		
+		gbc.gridx = 0;
 		gbc.gridwidth = 1;	
 		gbc.gridy ++;		
-		shapePanel.add(pShape, gbc );
-		gbc.gridx ++;		
-		shapePanel.add(pShaded, gbc );
-		
-		gbc.gridwidth = 2;
+		shapePanel.add(pShape, gbc);
+		gbc.gridx++;
+		shapePanel.add(pRender, gbc);
 		gbc.gridx = 0;
-		gbc.gridy++;
-		shapePanel.add(pRender, gbc );
+		gbc.gridy ++;
+		shapePanel.add(pShaded, gbc);
 
 		spotsTabPane = new JTabbedPane(SwingConstants.TOP);		
 		spotsTabPane.addTab( "Shape", shapePanel);
@@ -423,7 +426,7 @@ public class SpotsPropertiesPanel extends JPanel
 
 			if(bShadedSameFin)
 			{
-				cbShaded.setSelected( nShadedFin == 1 ? true :false );
+				cbShaded.setSelectedIndex(  nShadedFin );
 			}
 
 			colorCodePanel.updateGUI();
@@ -556,12 +559,12 @@ public class SpotsPropertiesPanel extends JPanel
 		updateGUI();		
 	}
 	
-	void updateRoundShaded()
+	void updateShading()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
 			return;
 		
-		final int nShaded = cbShaded.isSelected()? 1 : 0;
+		final int nShaded = cbShaded.getSelectedIndex();
 		
 		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
 		

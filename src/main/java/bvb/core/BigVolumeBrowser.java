@@ -101,9 +101,11 @@ import bvb.io.dto.StoryDTO;
 import bvb.registry.ObjectHashStorage;
 import bvb.registry.PropertyRegistry;
 import bvb.registry.ValueCodecRegistry;
+import bvb.scene.OffScreenFBWithEDL;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
+import bvb.shapes.BasicSpots;
 import bvb.shapes.VolumeBox;
 import bvb.utils.MCUBVVControls;
 import bvb.utils.Misc;
@@ -134,6 +136,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	/** separate framebuffer for the transparent rendering **/
 	MultisampleGeometryBuffer sceneBufTransparent = null;
+	
+	/** separate framebuffer for the Eye Dome Lighting rendering **/
+	OffScreenFBWithEDL sceneBufEDL = null;
 	
 	/** clipping boxes **/	
 	public final VolumeBBoxes clipBoxes;
@@ -314,8 +319,9 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bvvViewer = bvvHandle.getViewerPanel();
 		
-		sceneBufTransparent = new MultisampleGeometryBuffer( BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
+		sceneBufTransparent = new MultisampleGeometryBuffer(BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
 
+		sceneBufEDL = new OffScreenFBWithEDL(BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false);
 		//get renderScene
 		bvvViewer.setRenderScene(this::renderOpaque);
 		bvvViewer.setRenderSceneTransparent(this::renderTransparent);
@@ -611,11 +617,48 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	//	clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 
 		int shapeN = shapes.size();
+		//see if we have EDL
+		final ArrayList<BasicShape> shapesEDL = new ArrayList<>();
+		final ArrayList<BasicShape> shapesNonEDL = new ArrayList<>();
 		for(int i = 0; i < shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
 			if(!sh.isTransparent())
+			{
+				boolean isEDL = false;
+				if(sh instanceof BasicSpots)
+				{
+					final BasicSpots spots = ( BasicSpots ) sh;
+					if(spots.getPointShade() == 2 && spots.getRenderType() < 2)//&& spots.getPointShape() == 0 && spots.getRenderType() == 0)
+					{
+						isEDL = true;
+						shapesEDL.add( sh );
+					}					
+				}
+				if(!isEDL)
+				{
+					shapesNonEDL.add( sh );
+				}
+			}
+		}
+		//draw to EDL framebuffer
+		if(shapesEDL.size() > 0)
+		{
+			sceneBufEDL.bind( gl );
+			for(int i = 0; i < shapesEDL.size(); i++)
+			{
+				final BasicShape sh = shapesEDL.get( i );			
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false  );
+			}
+			sceneBufEDL.unbind( gl, false );
+			sceneBufEDL.drawQuadEDL( gl, 5, 3 );
+		}
+		
+		//drawing the rest
+		for(int i = 0; i < shapesNonEDL.size(); i++)
+		{
+			final BasicShape sh = shapesNonEDL.get( i );			
+			sh.draw( gl, pvm, vm, screen_size, nTimePoint, false  );
 		}
 
 		//BG
