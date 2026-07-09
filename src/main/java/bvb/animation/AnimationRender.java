@@ -36,6 +36,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
@@ -49,6 +51,8 @@ import javax.swing.SwingWorker;
 
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.cache.img.DiskCachedCellImg;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.img.Img;
@@ -66,6 +70,7 @@ import bvb.io.dto.SerializationIO;
 import bvvpg.core.render.VolumeRenderer.RepaintType;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.ImageWindow;
 
 public class AnimationRender extends SwingWorker<Void, String>
 {
@@ -80,7 +85,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 	
 	public final BVVWindowState bvvWindowState;
 	
-	final Img<ARGBType> animStack;
+	final DiskCachedCellImg< ARGBType, ? > animStack;
 	
 	final int nTotFrames;
 	
@@ -360,6 +365,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 //    	bt.setLockMode(false);
 
     }
+    
     public static BufferedImage resize(BufferedImage original, int width, int height) {
         BufferedImage resized = new BufferedImage(width, height, original.getType());
         Graphics2D g = resized.createGraphics();
@@ -449,7 +455,7 @@ public class AnimationRender extends SwingWorker<Void, String>
         return scaled.getSubimage(x, y, targetWidth, targetHeight);
     }
     
-    public static Img<ARGBType> createCachedStack(final int width, final int height, final int frames)
+    public static DiskCachedCellImg< ARGBType, ? > createCachedStack(final int width, final int height, final int frames)
     {
     	// Define the dimensions of the entire 3D stack
         long[] dimensions = new long[]{ width, height, frames };
@@ -482,5 +488,27 @@ public class AnimationRender extends SwingWorker<Void, String>
             // Grab the packed ARGB int and set it directly into the ImgLib2 pixel
             cursor.get().set(framePixels[i++]);
         }
+    }
+    
+    public void displayAndRegisterCleanup()
+    {
+    	//imagej ordered stack
+    	IntervalView< ARGBType > out = Views.permute(
+    			Views.addDimension(  Views.addDimension(animStack, 0, 0), 0, 0),
+    			2, 4);
+    	final ImagePlus imp = ImageJFunctions.show( out, "BVB_Animation_" + SerializationIO.getTimestamp() );
+    	imp.getCalibration().fps = renderParams.nRenderFPS;
+    	imp.getCalibration().frameInterval = 1./renderParams.nRenderFPS;
+    	imp.getCalibration().setTimeUnit( "sec" );
+    	ImageWindow window = imp.getWindow();
+    	if (window != null) {
+    		window.addWindowListener(new WindowAdapter() {
+    			@Override
+    			public void windowClosed(WindowEvent e) {
+    				//Shuts down the internal IoSync and releases disk resources safely
+    				animStack.shutdown();
+    			}
+    		});
+    	}
     }
 }
