@@ -69,9 +69,6 @@ public class BVBSettings
 	
 	public static boolean bShowRandomShader = Prefs.get( "BVB.bShowRandomShader", true ); 
 	
-	/**wOIT depth decay parameter **/
-	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
-	
 	/** whether to highlight selected boxes/clipboxes **/
 	public static boolean bHighlightSelectedBoxes = Prefs.get( "BVB.bHighlightSelectedBoxes", true ); 
 	
@@ -84,13 +81,27 @@ public class BVBSettings
 	
 	public static int nAddedRAINumber = 1;
 	
+	//3D rendering tweaks
+	
+	/** use weighted OIT for transparent part rendering **/
 	public static boolean bWeightedOIT = Prefs.get( "BVB.bWeightedOIT", true );
+	
+	/** wOIT depth decay parameter **/
+	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
+	
+	/** radius for Eye Dome Lighting **/
+	public static float fEDLRadius = (float)Prefs.get("BVB.fEDLRadius", 5.0);
+	
+	/** strength for Eye Dome Lighting **/	
+	public static float fEDLStrength = (float)Prefs.get("BVB.fEDLStrength", 3.0);
+
 	
 	public static String sIconPath = "/bvb/icons/";
 	
 	public static String sShaderPath = "/bvb/scene/";
 	
 	public static String sUITheme = "";
+	
 	//warnings
 	/** first start warning, set up BVB **/
 	public static boolean bFirstStart = Prefs.get( "BVB.bFirstStart", true );

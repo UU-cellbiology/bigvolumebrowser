@@ -49,6 +49,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import bdv.tools.brightness.ColorIcon;
+import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorUserSettings;
 import bvb.gui.GBCHelper;
@@ -56,6 +57,7 @@ import bvb.gui.JPanelConsistent;
 import bvb.gui.NumberField;
 import bvb.shapes.BasicShape;
 import bvb.shapes.BasicSpots;
+import ij.Prefs;
 
 public class SpotsPropertiesPanel extends JPanel
 {
@@ -75,6 +77,9 @@ public class SpotsPropertiesPanel extends JPanel
 	final JComboBox<String> cbShape;
 	final JComboBox<String> cbRender;
 	
+	final NumberField nfEDLRadius;
+	final NumberField nfEDLStrength;
+
 	final JTabbedPane spotsTabPane;
 		
 	final JPanel shapePanel;
@@ -103,6 +108,9 @@ public class SpotsPropertiesPanel extends JPanel
 		setLayout(new GridBagLayout());	
 		
 		GridBagConstraints gbc = new GridBagConstraints();		
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat df3 = new DecimalFormat ("#.######", symbols);
 
 		butColor = new JButton( new ColorIcon( Color.WHITE ) );
 		butColor.addActionListener( e -> {
@@ -150,6 +158,25 @@ public class SpotsPropertiesPanel extends JPanel
 		} );
 		pSizeScale = new JPanelConsistent(new GridBagLayout());
 		
+		nfEDLRadius = new NumberField(5);
+		nfEDLRadius.setLimits( 0.0, Double.MAX_VALUE );
+		nfEDLRadius.setText(df3.format(BVBSettings.fEDLRadius));
+		nfEDLRadius.addListener( (v)->
+		{
+			double in = Math.max( Math.abs(v), 0.0001 );
+			updateEDLRadius(Math.abs( in ));
+			//String.format("%.2f", in);
+		} );
+		
+		nfEDLStrength = new NumberField(5);
+		nfEDLStrength.setLimits( 0.0, Double.MAX_VALUE );
+		nfEDLStrength.setText(df3.format(BVBSettings.fEDLStrength));
+		nfEDLStrength.addListener( (v)->
+		{
+			double in = Math.max( Math.abs(v), 0.0001 );
+			updateEDLStrength(Math.abs( in ));
+			//String.format("%.2f", in);
+		} );
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -227,9 +254,18 @@ public class SpotsPropertiesPanel extends JPanel
 		shapePanel.add(pShape, gbc);
 		gbc.gridx++;
 		shapePanel.add(pRender, gbc);
+		
 		gbc.gridx = 0;
 		gbc.gridy ++;
 		shapePanel.add(pShaded, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy ++;
+		shapePanel.add(nfEDLRadius, gbc);
+		gbc.gridx++;
+		shapePanel.add(nfEDLStrength, gbc);
+		
+
 
 		spotsTabPane = new JTabbedPane(SwingConstants.TOP);		
 		spotsTabPane.addTab( "Shape", shapePanel);
@@ -578,5 +614,20 @@ public class SpotsPropertiesPanel extends JPanel
 		bvb.repaintBVV();
 		updateGUI();				
 	}
-
+	
+	void updateEDLRadius(final double v)
+	{
+		BVBSettings.fEDLRadius = (float)v;
+		Prefs.set("BVB.fEDLRadius", BVBSettings.fEDLRadius);
+		bvb.repaintBVV();
+		
+	}
+	
+	void updateEDLStrength(final double v)
+	{
+		BVBSettings.fEDLStrength = (float)v;
+		Prefs.set("BVB.fEDLStrength", BVBSettings.fEDLStrength);
+		bvb.repaintBVV();
+		
+	}
 }
