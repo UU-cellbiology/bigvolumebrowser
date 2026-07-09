@@ -111,7 +111,7 @@ public class MeshesPropertiesPanel extends JPanel
 		pTexture = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pTexture.add( new JLabel("Texture"), gbc );
+		pTexture.add( new JLabel("  Texture"), gbc );
 		gbc.gridx++;
 		pTexture.add( cbTexture, gbc );
 
@@ -155,7 +155,7 @@ public class MeshesPropertiesPanel extends JPanel
 		gbc.gridx++;
 		pSurface.add( cbSurface, gbc );
 		
-		String[] sGrid = {"Filled", "Wire", "Cartesian"};
+		String[] sGrid = {"Solid", "Wireframe"};
 		cbGrid = new JComboBox< >(sGrid);
 		cbGrid.addActionListener( (e)->{
 			updateGrid();				
@@ -163,8 +163,8 @@ public class MeshesPropertiesPanel extends JPanel
 		pGrid = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pGrid.add( new JLabel("Grid: "), gbc );
-		gbc.gridx++;
+//		pGrid.add( new JLabel("Grid: "), gbc );
+//		gbc.gridx++;
 		pGrid.add( cbGrid, gbc );		
 		
 		allComp.add( butColor );
@@ -183,18 +183,21 @@ public class MeshesPropertiesPanel extends JPanel
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		this.add( pColor, gbc );
 
-		gbc.gridy ++;	
+		gbc.gridx ++;	
 		this.add( pTexture, gbc );
+		gbc.gridx = 0;
 		gbc.gridy ++;	
+		gbc.gridwidth = 2;
 		this.add( pRender, gbc );
-
+		
 		gbc.gridy ++;	
 		this.add( pPointSize, gbc );
 		
+		gbc.gridwidth = 1;
 		gbc.gridy ++;	
 		this.add( pSurface, gbc );
 		
-		gbc.gridy ++;	
+		gbc.gridx ++;	
 		this.add( pGrid, gbc );
 
 	}

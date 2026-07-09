@@ -114,10 +114,6 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	int gridType = GRID_FILLED;
 	
-	float cartesianGridStep = 2.0f;
-	
-	float cartesianFraction = 0.2f;
-	
 	float fWireLineWidth = 1.0f;
 	
 	volatile boolean bLocked = false;
@@ -232,11 +228,6 @@ public class VisMesh extends AbstractClipTransformVis
 		return fWireLineWidth;
 	}
 	
-	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
-	{
-		cartesianGridStep = cartesianGridStep_;		
-		cartesianFraction = cartesianFraction_;
-	}
 	
 	public void setPointsSize(final float fPointSize_)
 	{
@@ -435,8 +426,6 @@ public class VisMesh extends AbstractClipTransformVis
 			progMesh.getUniform4f("colorMesh").set(l_color);
 			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
 			progMesh.getUniform1i("gridType").set(gridType);
-			progMesh.getUniform1f("cartesianGridStep").set(cartesianGridStep);
-			progMesh.getUniform1f("cartesianFraction").set(cartesianFraction);
 			
 			progMesh.getUniform1i("silType").set(silhouetteRender);
 			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
@@ -484,6 +473,7 @@ public class VisMesh extends AbstractClipTransformVis
 		}
 		else
 		{
+			gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 			//older code, just for convenience
 			Vector2f window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
 			

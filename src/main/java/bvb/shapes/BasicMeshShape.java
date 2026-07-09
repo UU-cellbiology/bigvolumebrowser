@@ -32,6 +32,7 @@ import java.awt.Color;
 
 public interface BasicMeshShape
 {
+	
 	public void setColor(final Color colorin);
 	
 	public Color getColor();
@@ -58,17 +59,15 @@ public interface BasicMeshShape
 	/** Surface render style 0 - plain, 1 - shaded, 2 - shiny, 3 - silhouette **/ 
 	public int getSurfaceRender();
 	
-	/** Surface grid type 0 - no grid, 1 - wire, 2 - cartesian **/
+	/** Surface grid type 0 - no grid, 1 - wire **/
 	public void setSurfaceGrid(final int nSurfaceGridType);
 
-	/** Surface grid type 0 - no grid, 1 - wire, 2 - cartesian **/
+	/** Surface grid type 0 - no grid, 1 - wire **/
 	public int getSurfaceGrid();
 
 	public void setWireLineWidth(final float fThickness);
 	
 	public float getWireLineWidth();
-	
-	public void setCartesianGrid(final float cartesianGridStep, final float cartesianFraction);
 	
 	public void setSilhouetteDecay(final float silhouetteDecay);
 	

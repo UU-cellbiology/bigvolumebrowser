@@ -53,9 +53,6 @@ public class GeneralPropertiesPanel extends JPanel
 	final JComboBox<String> cbBlending;
 	final NumberField nfDepthDecay;
 	final NumberField nfSilhouetteDecay;
-	final NumberField nfWireLineWidth;
-	final NumberField nfCartesianStep;
-	final NumberField nfCartesianFraction;
 	
 	public GeneralPropertiesPanel(final BigVolumeBrowser bvb_)
 	{
@@ -95,30 +92,6 @@ public class GeneralPropertiesPanel extends JPanel
 			updateSilhouetteDecay(Math.abs( v ));
 		} );
 		
-		nfWireLineWidth = new NumberField(3);
-		nfWireLineWidth.setIntegersOnly( true );
-		nfWireLineWidth.setText( "1.0" );
-		nfWireLineWidth.setLimits( 0.0, Double.MAX_VALUE );
-		nfWireLineWidth.addListener( (v)->
-		{
-			updateWireLineWidth();
-		} );
-		
-		nfCartesianStep = new NumberField(nDigitsFloatTextField);		
-		nfCartesianStep.setText( "2.0" );
-		nfCartesianStep.setLimits( 0.0, Double.MAX_VALUE );
-		nfCartesianStep.addListener( (v)->
-		{
-			updateCartesianGrid();
-		} );
-		
-		nfCartesianFraction = new NumberField(nDigitsFloatTextField);		
-		nfCartesianFraction.setText( "0.2" );
-		nfCartesianFraction.setLimits( 0.0, Double.MAX_VALUE );
-		nfCartesianFraction.addListener( (v)->
-		{
-			updateCartesianGrid();
-		} );
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -128,7 +101,7 @@ public class GeneralPropertiesPanel extends JPanel
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
-		this.add( new JLabel("wOIT depth decay: "), gbc );
+		this.add( new JLabel("Weighted OIT depth decay: "), gbc );
 		gbc.gridx++;
 		this.add( nfDepthDecay, gbc);
 
@@ -137,28 +110,9 @@ public class GeneralPropertiesPanel extends JPanel
 		this.add( new JLabel("Mesh silhouette decay: "), gbc );
 		gbc.gridx++;
 		this.add( nfSilhouetteDecay, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add( new JLabel("Mesh wire line width: "), gbc );
-		gbc.gridx++;
-		this.add( nfWireLineWidth, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add( new JLabel("Mesh cartesian step: "), gbc );
-		gbc.gridx++;
-		this.add( nfCartesianStep, gbc);
-		
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add( new JLabel("Mesh cartesian fraction: "), gbc );
-		gbc.gridx++;
-		this.add( nfCartesianFraction, gbc);
-		
+			
 		//filler
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		gbc.weightx = 0.01;
 		gbc.weighty = 0.01;
@@ -206,36 +160,4 @@ public class GeneralPropertiesPanel extends JPanel
 
 	}
 	
-	synchronized void updateWireLineWidth()
-	{
-		final List< BasicShape> shapeList = bvb.shapes;
-		final float valWidth = Math.abs(Float.parseFloat( nfWireLineWidth.getText()));
-		
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				((BasicMeshShape)sh).setWireLineWidth( valWidth );
-			}
-		}
-		bvb.repaintBVV();
-
-	}
-	
-	synchronized void updateCartesianGrid()
-	{
-		final List< BasicShape> shapeList = bvb.shapes;
-		final float valFr = Math.max(Math.min(Math.abs(Float.parseFloat( nfCartesianFraction.getText())),1.0f), 0.0f);
-		final float valStep = Math.abs(Float.parseFloat(nfCartesianStep.getText()));
-		
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				((BasicMeshShape)sh).setCartesianGrid( valStep,valFr );
-			}
-		}
-		bvb.repaintBVV();
-
-	}
 }

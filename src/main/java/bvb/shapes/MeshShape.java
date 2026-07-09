@@ -336,16 +336,7 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 	{
 		return ((VisMesh)visRender).getSurfaceGridType();
 	}
-	
-	@Override
-	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
-	{
-		if(visRender != null )
-		{
-			((VisMesh)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
-		}
-	}
-	
+		
 	@Override
 	public void setColor(final Color colorin)
 	{
