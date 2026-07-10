@@ -94,7 +94,6 @@ public class BVBSettings
 	
 	/** strength for Eye Dome Lighting **/	
 	public static float fEDLStrength = (float)Prefs.get("BVB.fEDLStrength", 3.0);
-
 	
 	public static String sIconPath = "/bvb/icons/";
 	

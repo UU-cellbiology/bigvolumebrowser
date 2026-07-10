@@ -136,8 +136,9 @@ public class OffScreenFBWithEDL
 		final Segment quadvp = new SegmentTemplate( OffScreenFBWithEDL.class, BVBSettings.sShaderPath +"edlfbquad.vp" ).instantiate();
 
 		final Segment quadfpEDL = new SegmentTemplate( OffScreenFBWithEDL.class, BVBSettings.sShaderPath +"edlfbquad.fp" ).instantiate();
-		
+
 		progQuadEDL = new DefaultShader( quadvp.getCode(), quadfpEDL.getCode() );
+		
 		depthTexture = new DepthTexture( fbWidth, fbHeight );
 	}
 
@@ -343,6 +344,7 @@ public class OffScreenFBWithEDL
 		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
 		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		
 		progQuadEDL.getUniform1i( "depthTex" ).set( 1 );
 		progQuadEDL.use( context );
 		Vector2f texel = new Vector2f ((1.0f) / fbWidth, (1.0f) / fbHeight); 
@@ -351,12 +353,13 @@ public class OffScreenFBWithEDL
 		progQuadEDL.getUniform1f( "strength").set( fStrength );
 		progQuadEDL.getUniform1f( "radius").set( fRadius );
 		progQuadEDL.setUniforms( context );
+
 		gl.glBindVertexArray( vaoQuad );
 		gl.glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
 		gl.glBindTexture( GL_TEXTURE_2D, 0 );
 	}
-
+	
 	public void getTexture( GL3 gl )
 	{
 		if ( imgValid )

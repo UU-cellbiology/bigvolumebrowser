@@ -651,7 +651,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false  );
 			}
 			sceneBufEDL.unbind( gl, false );
-			sceneBufEDL.drawQuadEDL( gl, BVBSettings.fEDLRadius, BVBSettings.fEDLStrength );
+			sceneBufEDL.drawQuadEDL( gl, BVBSettings.fEDLRadius, BVBSettings.fEDLStrength);
 		}
 		
 		//drawing the rest

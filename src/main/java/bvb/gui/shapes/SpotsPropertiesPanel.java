@@ -77,6 +77,7 @@ public class SpotsPropertiesPanel extends JPanel
 	final JComboBox<String> cbShape;
 	final JComboBox<String> cbRender;
 	
+	final JPanel pEDL;
 	final NumberField nfEDLRadius;
 	final NumberField nfEDLStrength;
 
@@ -139,7 +140,6 @@ public class SpotsPropertiesPanel extends JPanel
 		{
 			double in = Math.max( Math.abs(v), 0.0001 );
 			updatePointSize(Math.abs( in ));
-			//String.format("%.2f", in);
 		} );
 		pPointSize = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
@@ -154,29 +154,41 @@ public class SpotsPropertiesPanel extends JPanel
 		{
 			double in = Math.max( Math.abs(v), 0.0001 );
 			updateSizeScale(Math.abs( in ));
-			//String.format("%.2f", in);
 		} );
 		pSizeScale = new JPanelConsistent(new GridBagLayout());
 		
-		nfEDLRadius = new NumberField(5);
+		nfEDLRadius = new NumberField(3);
 		nfEDLRadius.setLimits( 0.0, Double.MAX_VALUE );
 		nfEDLRadius.setText(df3.format(BVBSettings.fEDLRadius));
+		nfEDLRadius.setToolTipText( "Radius of Eye Dome Lighting effect (px)" );
+
 		nfEDLRadius.addListener( (v)->
 		{
 			double in = Math.max( Math.abs(v), 0.0001 );
 			updateEDLRadius(Math.abs( in ));
-			//String.format("%.2f", in);
 		} );
 		
-		nfEDLStrength = new NumberField(5);
+		nfEDLStrength = new NumberField(3);
 		nfEDLStrength.setLimits( 0.0, Double.MAX_VALUE );
+		nfEDLStrength.setToolTipText( "Strength of Eye Dome Lighting effect" );
 		nfEDLStrength.setText(df3.format(BVBSettings.fEDLStrength));
 		nfEDLStrength.addListener( (v)->
 		{
 			double in = Math.max( Math.abs(v), 0.0001 );
 			updateEDLStrength(Math.abs( in ));
-			//String.format("%.2f", in);
 		} );
+		
+		
+		pEDL = new JPanelConsistent(new GridBagLayout());
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pEDL.add( new JLabel("EDL  Radius"), gbc );
+		gbc.gridx ++;
+		pEDL.add( nfEDLRadius, gbc );
+		gbc.gridx ++;
+		pEDL.add( new JLabel("Strength"), gbc );
+		gbc.gridx ++;
+		pEDL.add( nfEDLStrength, gbc );
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -227,6 +239,8 @@ public class SpotsPropertiesPanel extends JPanel
 		allComp.add( cbShape );
 		allComp.add( cbShaded );
 		allComp.add( cbRender );
+		allComp.add( nfEDLRadius );
+		allComp.add( nfEDLStrength );	
 		allComp.add( colorCodePanel );
 		allComp.add( opacityPanel );
 		
@@ -261,9 +275,9 @@ public class SpotsPropertiesPanel extends JPanel
 		
 		gbc.gridx = 0;
 		gbc.gridy ++;
-		shapePanel.add(nfEDLRadius, gbc);
-		gbc.gridx++;
-		shapePanel.add(nfEDLStrength, gbc);
+		gbc.gridwidth = 2;	
+		shapePanel.add(pEDL, gbc);
+
 		
 
 
