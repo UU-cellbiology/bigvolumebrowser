@@ -177,7 +177,7 @@ public class MeshesPropertiesPanel extends JPanel
 		pSilDecay = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pSilDecay.add( new JLabel("Silhouette decay "), gbc );
+		pSilDecay.add( new JLabel("Silhouette decay: "), gbc );
 		gbc.gridx++;
 		pSilDecay.add( nfSilDecay, gbc );
 		

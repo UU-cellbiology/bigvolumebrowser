@@ -176,15 +176,15 @@ public class SpotsParser extends SwingWorker<Void, String>
 					vertices.add( new RealPoint(xyz));
 					if(parseSize)
 					{
-						sizesList.add( new Float(size_f[0] ));					
+						sizesList.add( Float.valueOf( size_f[0] ));					
 					}
 					if(parseTime)
 					{
-						timesList.add( new Float(time_f[0] ));					
+						timesList.add( Float.valueOf( time_f[0] ));					
 					}
 					if(parseProperty)
 					{
-						propertyList.add( new Float(property_f[0] ));	
+						propertyList.add( Float.valueOf( property_f[0] ));	
 					}
 				}
 			}

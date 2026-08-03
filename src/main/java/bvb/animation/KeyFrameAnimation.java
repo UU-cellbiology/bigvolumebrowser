@@ -80,7 +80,7 @@ public class KeyFrameAnimation
 			return;
 		
 		keyFrameList.add( keyFrames.get( 0 ) );
-		timeIntervals.add( new Float(0.0f) );
+		timeIntervals.add( Float.valueOf( 0.0f ) );
 		for (int i = 0; i < keyFrames.size(); i++)
 		{
 			keyFrameList.add( keyFrames.get( i ) );

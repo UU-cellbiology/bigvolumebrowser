@@ -709,7 +709,7 @@ public class AnimationPanel extends JPanel implements ChangeListener
 		for(int i = 0; i <= kfAnim.getTotalTime(); i += nTickTime)
 		{
 			int kk = i * tsSpan / kfAnim.getTotalTime();
-			labelTable.put( new Integer(kk ), new JLabel(Integer.toString( i )) );	
+			labelTable.put( Integer.valueOf( kk ), new JLabel(Integer.toString( i )) );	
 		}
 		timeSlider.setLabelTable( labelTable );
 	}
