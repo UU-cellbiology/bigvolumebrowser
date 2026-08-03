@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>43.0.0</version>
+		<version>45.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -63,7 +63,7 @@
     <scm>
         <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
         <developerConnection>scm:git:git@github.com:UU-cellbiology/bigvolumebrowser</developerConnection>
-        <tag>bigvolumebrowser-0.1.4</tag>
+        <tag>bigvolumebrowser-0.2.0</tag>
         <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
@@ -80,8 +80,8 @@
 		<license.licenseName>bsd_2</license.licenseName>
         <license.copyrightOwners>Cell Biology, Neurobiology and Biophysics Department of Utrecht University.</license.copyrightOwners>  			
 		<license.excludes>**/resources/**</license.excludes>
-		<bvv-playground.version>0.5.8</bvv-playground.version>
-		<bdv-loaders.version>0.10.0</bdv-loaders.version>
+		<bvv-playground.version>0.5.9-SNAPSHOT</bvv-playground.version>
+		<bdv-loaders.version>0.22.0</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
 		<laszip4j.version>0.20</laszip4j.version>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->

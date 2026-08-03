@@ -42,6 +42,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 public class NumberField extends JPanel {
 
@@ -105,7 +106,7 @@ public class NumberField extends JPanel {
 		});
 		//nf.setTFEnabled(false);
 		JFrame frame = new JFrame("");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.getContentPane().add(nf);
 		frame.pack();
 		frame.setVisible(true);
