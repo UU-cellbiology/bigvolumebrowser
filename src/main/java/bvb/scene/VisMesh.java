@@ -110,7 +110,7 @@ public class VisMesh extends AbstractClipTransformVis
 
 	float silhouetteDecay = 1.0f;
 	
-	public static final int GRID_FILLED = 0, GRID_WIRE = 1, GRID_CARTESIAN = 2;
+	public static final int GRID_FILLED = 0, GRID_WIRE = 1;
 	
 	int gridType = GRID_FILLED;
 	

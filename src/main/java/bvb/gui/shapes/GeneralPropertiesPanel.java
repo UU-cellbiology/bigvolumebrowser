@@ -32,7 +32,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -43,8 +42,6 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.NumberField;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
-import bvb.shapes.BasicMeshShape;
-import bvb.shapes.BasicShape;
 import ij.Prefs;
 
 public class GeneralPropertiesPanel extends JPanel
@@ -52,7 +49,6 @@ public class GeneralPropertiesPanel extends JPanel
 	final BigVolumeBrowser bvb;
 	final JComboBox<String> cbBlending;
 	final NumberField nfDepthDecay;
-	final NumberField nfSilhouetteDecay;
 	
 	public GeneralPropertiesPanel(final BigVolumeBrowser bvb_)
 	{
@@ -84,15 +80,7 @@ public class GeneralPropertiesPanel extends JPanel
 			updateDepthDecay(Math.abs( v ));
 		} );
 		
-		nfSilhouetteDecay = new NumberField(nDigitsFloatTextField);		
-		nfSilhouetteDecay.setText( "1.00" );
-		nfSilhouetteDecay.setLimits( 0.0, Double.MAX_VALUE );
-		nfSilhouetteDecay.addListener( (v)->
-		{
-			updateSilhouetteDecay(Math.abs( v ));
-		} );
-		
-		
+			
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		this.add( new JLabel("Transparency: "), gbc );
@@ -105,12 +93,6 @@ public class GeneralPropertiesPanel extends JPanel
 		gbc.gridx++;
 		this.add( nfDepthDecay, gbc);
 
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add( new JLabel("Mesh silhouette decay: "), gbc );
-		gbc.gridx++;
-		this.add( nfSilhouetteDecay, gbc);
-			
 		//filler
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -140,22 +122,6 @@ public class GeneralPropertiesPanel extends JPanel
 		BVBSettings.fOITDepthDecay = (float)Math.max( 0.01, Math.abs( v ));
 		
 		Prefs.set("BVB.fOITDepthDecay", BVBSettings.fOITDepthDecay);
-		bvb.repaintBVV();
-
-	}
-	
-	synchronized void updateSilhouetteDecay(final double v)
-	{
-
-		final float fv = (float)v;
-		final List< BasicShape> shapeList = bvb.shapes;
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				((BasicMeshShape)sh).setSilhouetteDecay( fv );
-			}
-		}
 		bvb.repaintBVV();
 
 	}
