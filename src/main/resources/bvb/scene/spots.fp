@@ -21,7 +21,6 @@ uniform int clipactive;
 uniform vec3 clipmin;
 uniform vec3 clipmax;
 uniform mat4 cliptransform;
-uniform int wOIT;
 
 uniform sampler2D lutTexture;
 uniform int nMapLUTMode;
@@ -217,16 +216,8 @@ void main()
 		}
     }
     
-    //transparency rendering
-    if(wOIT > 0)
-	{
-		float z = linearizeDepth(gl_FragCoord.z); // 0.0 to 1.0
-		float baseAlpha = colorout.a;
-		float weight = exp(- depthDecay * z );
-		colorout.xyz = colorout.xyz * baseAlpha * weight;
-		colorout.a = baseAlpha * weight;
-	}
-	
-	fragColor = colorout;
+ //$insert{wOIT}
+
+    fragColor = colorout;
     
 }

@@ -171,7 +171,7 @@ public class SpotsParser extends SwingWorker<Void, String>
 				{
 					bAllParsedOK &= parseColumn(la, 7, "property", property_f);					
 				}
-				if(bAllParsedOK)
+				if( bAllParsedOK )
 				{
 					vertices.add( new RealPoint(xyz));
 					if(parseSize)

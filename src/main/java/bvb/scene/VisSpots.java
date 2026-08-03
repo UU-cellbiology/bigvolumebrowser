@@ -52,6 +52,8 @@ import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
+import bvvpg.core.shadergen.generate.SegmentedShader;
+import bvvpg.core.shadergen.generate.SegmentedShaderBuilder;
 import bvvpg.core.util.MatrixMath;
 
 import static com.jogamp.opengl.GL.GL_FLOAT;
@@ -121,16 +123,34 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	boolean reInitColors = false;
 	
+	boolean bCurrentwOIT = false;
+	
+	boolean bRebuildShader = true;
+
+	
 	public VisSpots()
 	{
-		initShader();
+
 	}
 	
-	void initShader()
+	void buildShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots.fp" ).instantiate();		
-		prog = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
+		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
+		
+		builder.vertex( ShaderSegmentsMaps.staticSegments.get( SegmentTypeStatic.VertexSpots ) );
+		final Segment pointFp = ShaderSegmentsMaps.getDefaultCompositeSTemplates()
+								.get( SegmentTypeComposite.FragmentSpots ).instantiate();
+
+		if(bCurrentwOIT)
+			pointFp.insert( "wOIT", ShaderSegmentsMaps.staticSegments.get( SegmentTypeStatic.wOIT ) );
+		else
+			pointFp.insert( "wOIT", ShaderSegmentsMaps.emptySeg );
+		
+		builder.fragment( pointFp );
+		prog = builder.build();
+		final StringBuilder fragmentShaderCode = prog.getFragmentShaderCode();
+		System.out.println( "fragmentShaderCode = " + fragmentShaderCode );
+		System.out.println( "\n\n--------------------------------\n\n" );
 	}
 	
 	/** constructor with multiple vertices **/
@@ -557,7 +577,7 @@ public class VisSpots extends AbstractClipTransformVis
 	@Override
 	public void reload()
 	{
-		initShader();
+		bRebuildShader = true;
 		initialized = false;
 	}
 
@@ -581,6 +601,16 @@ public class VisSpots extends AbstractClipTransformVis
 			{
 				exc.printStackTrace();
 			}
+		}
+		if(bWeightedOIT != bCurrentwOIT)
+		{
+			bRebuildShader = true;
+			bCurrentwOIT = bWeightedOIT;
+		}
+		if(bRebuildShader)
+		{
+			buildShader();
+			bRebuildShader = false;
 		}
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
@@ -646,7 +676,7 @@ public class VisSpots extends AbstractClipTransformVis
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 		}	
 		
-		prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
+		//prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
 		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
 		prog.getUniform1f("mapGamma").set(fMapLUTGamma);
 		prog.getUniform1i("bInvLUT").set( bInvertLUT?1:0 );
@@ -680,7 +710,7 @@ public class VisSpots extends AbstractClipTransformVis
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
 			}
 		}
-		
+
 		gl.glBindVertexArray( vao );
 		gl.glDrawArraysInstanced( GL.GL_TRIANGLE_STRIP, 0, 4, nSpotsN );
 		gl.glBindVertexArray( 0 );		
@@ -689,6 +719,7 @@ public class VisSpots extends AbstractClipTransformVis
 			if(lutGPU.getTextureID() > 0)
 				gl.glBindTexture( GL_TEXTURE_2D, 0 );
 		}
+		
 	}
 	
 	Vector2f getScaleFactorNoShear(final Matrix4f vtm)
