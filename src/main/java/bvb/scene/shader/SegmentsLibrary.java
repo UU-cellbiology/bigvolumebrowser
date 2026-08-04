@@ -10,7 +10,7 @@ import bvvpg.core.shadergen.generate.SegmentTemplate;
 
 public class SegmentsLibrary
 {
-	public static final Map< SegmentTypeComposite, SegmentTemplate > compositeSTemplate = getDefaultCompositeSTemplates();
+	public static final Map< SegmentTypeComposite, SegmentTemplate > compositeSegments = getDefaultCompositeSTemplates();
 	public static final Map< SegmentTypeStatic, Segment> staticSegments = getDefaultStaticSegments();
 
 	public static final Segment emptySeg = new SegmentTemplate( BVBSettings.sShaderPath + "empty.txt" ).instantiate();
@@ -21,7 +21,7 @@ public class SegmentsLibrary
 		
 		segments.put( SegmentTypeComposite.FragmentSpots, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/spots.fp", 
-						"preClip", "mClip", "spotsShape", "preOIT","wOIT" ));
+						"preColorLUT", "preOIT", "preClip", "mClip", "spotsColor", "spotsShape", "wOIT" ));
 
 		return segments;
 	}

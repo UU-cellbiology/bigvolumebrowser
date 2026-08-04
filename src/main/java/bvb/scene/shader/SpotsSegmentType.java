@@ -5,10 +5,19 @@ public enum SpotsSegmentType
 	//composite
 	SpotsRound,
 	SpotsRoundDepth,
+	SpotsColorLUTMode,
 	//static
 	SpotsRoundGauss,
 	SpotsRoundOutline,
 	SpotsRoundShaded,
 	SpotsSquareGauss,
 	SpotsSquareOutline,
+	preColorLUT,
+	NoLutNoColors,
+	NoLutColors,
+	LutAxis,
+	LutSize,
+	LutProperty,
+	LutInvert
+	
 }

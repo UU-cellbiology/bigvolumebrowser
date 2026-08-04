@@ -9,26 +9,17 @@ in vec4 vViewSpaceCenter;
 in float scaledPointSize;
 
 uniform vec4 colorin;
-uniform int nHasColors;
-uniform int renderType;
-uniform int pointShape;
-uniform int pointShade;
 
 uniform mat4 pm;
 
-uniform sampler2D lutTexture;
-uniform int nMapLUTMode;
-uniform int sizeLUT;
-uniform int bInvLUT;
-uniform float mapMin;
-uniform float mapRange;
-uniform float mapGamma;
+//$insert{preColorLUT}
 
 uniform int nMapAlphaMode;
 uniform int bInvAlpha;
 uniform float alphaMin;
 uniform float alphaRange;
 uniform float alphaGamma;
+
 uniform float extraAlpha;
 const vec3 lightDir = normalize(vec3(0, -0.2, -1));
 const vec3 ambient = vec3(0.1, 0.1, 0.1);
@@ -37,63 +28,8 @@ const vec3 ambient = vec3(0.1, 0.1, 0.1);
 
 //$insert{preOIT}
 
-
-vec4 getInputColor()
-{
-	if(nMapLUTMode > 0)
-	{
-		float val = 0.0;
-		
-		if(nMapLUTMode < 4)
-		{
-			vec3 axis = vec3(0);
-			axis[nMapLUTMode - 1] = 1;
-			val = dot(axis, posW);
-		}
-
-		if(nMapLUTMode == 4)
-		{
-			val = fDiamfp;			
-		}
-		
-		if(nMapLUTMode == 5)
-		{
-			val = fPropertyfp;			
-		}
-
-		val = pow(clamp((val - mapMin) / mapRange, 0.0, 1.0), mapGamma);
-		
-		if(bInvLUT != 0)
-		{
-			val = 1.0 - val;
-		}
-		
-		val = 0.5 + (sizeLUT - 1) * val;
-		
-		//2D texture with fixed width of 256
-		vec2 q = vec2(0);
-		q.y = floor(val / 256.0);
-		q.x = (val / 256.0) - q.y;
-		q.y = (q.y + 0.5) / ceil(sizeLUT / 256.0);
-		return texture(lutTexture, q);
-		
-	}
-	else
-	{
-		if(nHasColors > 0)
-		{
-			return fColorsfp;
-		}
-		else
-		{
-	 		return colorin;
-	 	}
-	}
-}
-
 float getInputAlpha()
 {
-
 	if(nMapAlphaMode > 0)
 	{
 		float val = 0.0;
@@ -109,7 +45,7 @@ float getInputAlpha()
 			val = fDiamfp;			
 		}
 		
-		if(nMapLUTMode == 5)
+		if(nMapAlphaMode == 5)
 		{
 			val = fPropertyfp;			
 		}
@@ -132,10 +68,15 @@ float getInputAlpha()
 
 void main()
 {
+//--- clipping, if active  ------
 //$insert{mClip}
-    vec4 colorout = getInputColor();
+//--- color of the spot ------
+//$insert{spotsColor}
+
     colorout.a = extraAlpha * getInputAlpha();
+//--- spot shape and render type ------
 //$insert{spotsShape}	
+//--- transparency mode, if active ------
 //$insert{wOIT}
     fragColor = colorout;
     

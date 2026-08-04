@@ -72,6 +72,8 @@ public class VisSpots extends AbstractClipTransformVis
 
 	public static final int SHAPE_ROUND = 0, SHAPE_SQUARE = 1; 
 	
+	public static final int SHADE_PLANE = 0, SHADE_INDIVIDUAL = 1, SHADE_EDL = 2;
+	
 	private Shader prog;
 
 	private int vao;
@@ -139,7 +141,7 @@ public class VisSpots extends AbstractClipTransformVis
 		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
 		
 		builder.vertex( SegmentsLibrary.staticSegments.get( SegmentTypeStatic.VertexSpots ) );
-		final Segment pointFp = SegmentsLibrary.compositeSTemplate
+		final Segment pointFp = SegmentsLibrary.compositeSegments
 								.get( SegmentTypeComposite.FragmentSpots ).instantiate();
 		//clipping
 		if(clipState != 0 && clipInt != null)
@@ -153,8 +155,62 @@ public class VisSpots extends AbstractClipTransformVis
 			pointFp.insert( "mClip", SegmentsLibrary.emptySeg );
 		}
 
+		//spots color
+		if(nMapLUTMode > 0)
+		{
+			//add variables
+			pointFp.insert( "preColorLUT", (Segment)SpotsSegmentLibrary.spotSegments.
+					get( SpotsSegmentType.preColorLUT) );
+			final Segment colorLutMode = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
+					.get( SpotsSegmentType.SpotsColorLUTMode )).instantiate();
+			
+			//axis mapping
+			if(nMapLUTMode < 4)
+			{
+				colorLutMode.insert( "shaderMapLUTMode", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.LutAxis) );
+			}
+			else
+			{
+				if(nMapLUTMode == 4)
+				{
+					colorLutMode.insert( "shaderMapLUTMode", (Segment)SpotsSegmentLibrary.spotSegments.
+							get( SpotsSegmentType.LutSize) );
+				}
+				if(nMapLUTMode == 5)
+				{
+					colorLutMode.insert( "shaderMapLUTMode", (Segment)SpotsSegmentLibrary.spotSegments.
+							get( SpotsSegmentType.LutProperty) );
+				}
+			}
+			if(bInvertLUT)
+			{
+				colorLutMode.insert( "invertColorLUT", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.LutInvert) );
+			}
+			else
+			{
+				colorLutMode.insert( "invertColorLUT", SegmentsLibrary.emptySeg );
+			}
+			pointFp.insert("spotsColor", colorLutMode);
+		}
+		else
+		{
+			pointFp.insert( "preColorLUT", SegmentsLibrary.emptySeg );
+			if(colors == null)
+			{
+				pointFp.insert("spotsColor", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.NoLutNoColors));
+			}
+			else
+			{
+				pointFp.insert("spotsColor",(Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.NoLutColors));
+			}
+		}
+		
 		//spots shape
-		//SpotsSegmentLibrary.spotSegments.get( pointFp )
+		//
 		if(spotShape == SHAPE_ROUND)
 		{
 			final Segment roundShape = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
@@ -163,11 +219,11 @@ public class VisSpots extends AbstractClipTransformVis
 			switch(renderType)
 			{
 			case RENDER_FILLED:	
-				if(spotShade > 0)
+				if(spotShade != SHADE_PLANE)
 				{
 					final Segment roundDepth = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
 							.get( SpotsSegmentType.SpotsRoundDepth )).instantiate();
-					if(spotShade == 1)
+					if(spotShade == SHADE_INDIVIDUAL)
 					{
 						roundDepth.insert( "spotsRoundShade", (Segment)SpotsSegmentLibrary.spotSegments.
 								get( SpotsSegmentType.SpotsRoundShaded) );
@@ -181,9 +237,7 @@ public class VisSpots extends AbstractClipTransformVis
 				else
 				{
 					roundShape.insert( "roundRenderType", SegmentsLibrary.emptySeg  );
-				}
-				
-				
+				}				
 				break;
 			case RENDER_OUTLINE:
 				roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
@@ -329,7 +383,7 @@ public class VisSpots extends AbstractClipTransformVis
 			return;
 		}
 		
-		if(vertices.length/3 != property_.length)
+		if(vertices.length / 3 != property_.length)
 		{
 			System.err.println( "Number of spots is not equal to number of provided property items");
 			return;
@@ -381,12 +435,15 @@ public class VisSpots extends AbstractClipTransformVis
 	public void setMapLUTMode(final int nMapLUTMode_)
 	{
 		nMapLUTMode = nMapLUTMode_;
+		requestShaderRebuild();
 	}
 	
 	public void setInvertedLUT(boolean bInv)
 	{
 		bInvertLUT = bInv;
+		requestShaderRebuild();
 	}
+	
 	public boolean isInvertedLUT()
 	{
 		return bInvertLUT;
@@ -397,6 +454,7 @@ public class VisSpots extends AbstractClipTransformVis
 		fMapLUTMinRange[0] = fMin;
 		fMapLUTMinRange[1] = fMax - fMin;
 	}
+	
 	public void setInvertedAlpha(boolean bInv)
 	{
 		bInvertAlpha = bInv;
@@ -459,7 +517,7 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	public Color getColor() 
 	{
-		return new Color(l_color.x,l_color.y,l_color.z,l_color.w);
+		return new Color(l_color.x, l_color.y, l_color.z, l_color.w);
 	}
 	
 	public void setSize(float fSpotSize_)
@@ -746,11 +804,6 @@ public class VisSpots extends AbstractClipTransformVis
 		}
 
 		prog.getUniform4f( "colorin" ).set( l_color );
-		prog.getUniform1i( "nHasColors" ).set( colors == null ? 0:1 );
-		prog.getUniform1i( "renderType" ).set( renderType );
-		prog.getUniform1i( "pointShape" ).set( spotShape );
-		prog.getUniform1i( "pointShade" ).set( spotShade );
-		prog.getUniform1i( "clipactive" ).set(0);
 		
 		if(clipState != 0 && clipInt != null)
 		{
@@ -763,29 +816,25 @@ public class VisSpots extends AbstractClipTransformVis
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 		}	
 		
-		//prog.getUniform1i("wOIT").set(bWeightedOIT?1:0);
-		prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
-		prog.getUniform1f("mapGamma").set(fMapLUTGamma);
-		prog.getUniform1i("bInvLUT").set( bInvertLUT?1:0 );
-		
 		prog.getUniform1i("nMapAlphaMode").set(nMapAlphaMode);
 		prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
 		prog.getUniform1i("bInvAlpha").set( bInvertAlpha?1:0 );
 		prog.getUniform1f("extraAlpha").set(fExtraAlpha);
-		
-
+		if(nMapAlphaMode > 0 )
+		{
+			prog.getUniform1f("alphaMin").set(fMapAlphaMinRange[0]);
+			prog.getUniform1f("alphaRange").set(fMapAlphaMinRange[1]);		
+		}		
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
+			prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
+			prog.getUniform1f("mapGamma").set(fMapLUTGamma);
 			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
 			prog.getUniform1f("mapMin").set(fMapLUTMinRange[0]);
 			prog.getUniform1f("mapRange").set(fMapLUTMinRange[1]);	
 		}
 		
-		if(nMapAlphaMode > 0 )
-		{
-			prog.getUniform1f("alphaMin").set(fMapAlphaMinRange[0]);
-			prog.getUniform1f("alphaRange").set(fMapAlphaMinRange[1]);		
-		}
+
 		prog.setUniforms( context );		
 		prog.use( context );
 		
