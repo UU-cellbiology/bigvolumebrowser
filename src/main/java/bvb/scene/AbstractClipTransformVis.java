@@ -42,6 +42,8 @@ public abstract class AbstractClipTransformVis implements BasicVis
 	
 	AffineTransform3D transform = new AffineTransform3D();
 	
+	boolean bRebuildShader = true;
+	
 	public int getClipState() 
 	{		
 		return clipState;
@@ -52,6 +54,7 @@ public abstract class AbstractClipTransformVis implements BasicVis
 		if(clipState != nClipType )
 		{
 			clipState = nClipType;
+			requestShaderRebuild();
 		}
 	}
 	
@@ -85,6 +88,11 @@ public abstract class AbstractClipTransformVis implements BasicVis
 	public void setTransform(final AffineTransform3D t) 
 	{
 		transform.set( t );
+	}
+	
+	void requestShaderRebuild()
+	{
+		bRebuildShader = true;
 	}
 
 }

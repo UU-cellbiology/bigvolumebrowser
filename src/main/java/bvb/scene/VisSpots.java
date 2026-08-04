@@ -34,6 +34,11 @@ import com.jogamp.opengl.GL3;
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
+import bvb.scene.shader.SegmentTypeComposite;
+import bvb.scene.shader.SegmentTypeStatic;
+import bvb.scene.shader.SegmentsLibrary;
+import bvb.scene.shader.SpotsSegmentLibrary;
+import bvb.scene.shader.SpotsSegmentType;
 
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -48,11 +53,9 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import bvvpg.core.backend.jogl.JoglGpuContext;
-import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
-import bvvpg.core.shadergen.generate.SegmentedShader;
 import bvvpg.core.shadergen.generate.SegmentedShaderBuilder;
 import bvvpg.core.util.MatrixMath;
 
@@ -125,32 +128,111 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	boolean bCurrentwOIT = false;
 	
-	boolean bRebuildShader = true;
-
 	
 	public VisSpots()
 	{
 
 	}
-	
+
 	void buildShader()
 	{
 		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
 		
-		builder.vertex( ShaderSegmentsMaps.staticSegments.get( SegmentTypeStatic.VertexSpots ) );
-		final Segment pointFp = ShaderSegmentsMaps.getDefaultCompositeSTemplates()
+		builder.vertex( SegmentsLibrary.staticSegments.get( SegmentTypeStatic.VertexSpots ) );
+		final Segment pointFp = SegmentsLibrary.compositeSTemplate
 								.get( SegmentTypeComposite.FragmentSpots ).instantiate();
-
-		if(bCurrentwOIT)
-			pointFp.insert( "wOIT", ShaderSegmentsMaps.staticSegments.get( SegmentTypeStatic.wOIT ) );
+		//clipping
+		if(clipState != 0 && clipInt != null)
+		{
+			pointFp.insert( "preClip", SegmentsLibrary.staticSegments.get( SegmentTypeStatic.preClip) );
+			pointFp.insert( "mClip", SegmentsLibrary.staticSegments.get( SegmentTypeStatic.mClip ) );			
+		}
 		else
-			pointFp.insert( "wOIT", ShaderSegmentsMaps.emptySeg );
+		{
+			pointFp.insert( "preClip", SegmentsLibrary.emptySeg );
+			pointFp.insert( "mClip", SegmentsLibrary.emptySeg );
+		}
+
+		//spots shape
+		//SpotsSegmentLibrary.spotSegments.get( pointFp )
+		if(spotShape == SHAPE_ROUND)
+		{
+			final Segment roundShape = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
+					.get( SpotsSegmentType.SpotsRound )).instantiate();
+			
+			switch(renderType)
+			{
+			case RENDER_FILLED:	
+				if(spotShade > 0)
+				{
+					final Segment roundDepth = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
+							.get( SpotsSegmentType.SpotsRoundDepth )).instantiate();
+					if(spotShade == 1)
+					{
+						roundDepth.insert( "spotsRoundShade", (Segment)SpotsSegmentLibrary.spotSegments.
+								get( SpotsSegmentType.SpotsRoundShaded) );
+					}
+					else
+					{
+						roundDepth.insert( "spotsRoundShade", SegmentsLibrary.emptySeg );
+					}
+					roundShape.insert( "roundRenderType", roundDepth );	
+				}
+				else
+				{
+					roundShape.insert( "roundRenderType", SegmentsLibrary.emptySeg  );
+				}
+				
+				
+				break;
+			case RENDER_OUTLINE:
+				roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.SpotsRoundOutline));
+				break;				
+			case RENDER_GAUSS:
+				roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.SpotsRoundGauss));
+				break;			
+			}		
+			pointFp.insert( "spotsShape", roundShape );
+
+		}//square shape
+		else
+		{
+			switch(renderType)
+			{
+			case RENDER_FILLED:
+				pointFp.insert( "spotsShape", SegmentsLibrary.emptySeg );
+				break;
+			case RENDER_OUTLINE:
+				pointFp.insert( "spotsShape", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.SpotsSquareOutline ));
+				break;				
+			case RENDER_GAUSS:
+				pointFp.insert( "spotsShape", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.SpotsSquareGauss ));
+				break;			
+			}
+			
+		}
+		
+		//weighted OIT
+		if(bCurrentwOIT)
+		{
+			pointFp.insert( "preOIT", SegmentsLibrary.staticSegments.get( SegmentTypeStatic.preOIT ) );
+			pointFp.insert( "wOIT", SegmentsLibrary.staticSegments.get( SegmentTypeStatic.wOIT ) );
+		}
+		else
+		{
+			pointFp.insert( "preOIT", SegmentsLibrary.emptySeg );
+			pointFp.insert( "wOIT", SegmentsLibrary.emptySeg );
+		}
 		
 		builder.fragment( pointFp );
 		prog = builder.build();
-		final StringBuilder fragmentShaderCode = prog.getFragmentShaderCode();
-		System.out.println( "fragmentShaderCode = " + fragmentShaderCode );
-		System.out.println( "\n\n--------------------------------\n\n" );
+//		final StringBuilder fragmentShaderCode = prog.getFragmentShaderCode();
+//		System.out.println( "fragmentShaderCode = " + fragmentShaderCode );
+//		System.out.println( "\n\n--------------------------------\n\n" );
 	}
 	
 	/** constructor with multiple vertices **/
@@ -166,7 +248,7 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		spotShape = nShape_;
 		
-		vertices = new float [nSpotsN*3];//assume 3D
+		vertices = new float [nSpotsN * 3]; //assume 3D
 	}
 	
 	void setVertices( ArrayList< RealPoint > points)
@@ -390,7 +472,7 @@ public class VisSpots extends AbstractClipTransformVis
 	public void setRenderType(int nRenderType_)
 	{
 		renderType = nRenderType_;
-		
+		requestShaderRebuild();
 	}
 	
 	public int getRenderType()
@@ -401,7 +483,8 @@ public class VisSpots extends AbstractClipTransformVis
 	/** 0 - round, 1 - square **/
 	public void setShape(int nShape_)
 	{
-		spotShape = nShape_;		
+		spotShape = nShape_;	
+		requestShaderRebuild();
 	}
 	
 	public int getShape()
@@ -413,7 +496,8 @@ public class VisSpots extends AbstractClipTransformVis
 	 * 0 - plain, 1 - shaded **/
 	public void setShade(int nShade_)
 	{
-		spotShade = nShade_;		
+		spotShade = nShade_;	
+		requestShaderRebuild();
 	}
 	
 	public int getShade()
@@ -643,10 +727,13 @@ public class VisSpots extends AbstractClipTransformVis
 		//geometry
 		prog.getUniformMatrix4f( "vm" ).set( vtm );
 		prog.getUniformMatrix4f( "pm" ).set( pureProj );		
-		prog.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
 		prog.getUniform2f( "pScale" ).set( pScale );
+		if(bWeightedOIT)
+		{
+			prog.getUniform1f( "depthDecay" ).set( BVBSettings.fOITDepthDecay );
+			prog.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
+		}
 		
-		prog.getUniform1f( "depthDecay" ).set( BVBSettings.fOITDepthDecay );
 		prog.getUniform1f( "pointSizeReal" ).set( fSpotSize );
 		
 		if(fSpotSize < 0.0)

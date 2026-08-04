@@ -15,12 +15,6 @@ uniform int pointShape;
 uniform int pointShade;
 
 uniform mat4 pm;
-uniform float fnratio;
-
-uniform int clipactive;
-uniform vec3 clipmin;
-uniform vec3 clipmax;
-uniform mat4 cliptransform;
 
 uniform sampler2D lutTexture;
 uniform int nMapLUTMode;
@@ -29,8 +23,6 @@ uniform int bInvLUT;
 uniform float mapMin;
 uniform float mapRange;
 uniform float mapGamma;
-
-uniform float depthDecay;
 
 uniform int nMapAlphaMode;
 uniform int bInvAlpha;
@@ -41,19 +33,10 @@ uniform float extraAlpha;
 const vec3 lightDir = normalize(vec3(0, -0.2, -1));
 const vec3 ambient = vec3(0.1, 0.1, 0.1);
 
-void checkClipping()
-{
-    //ROI clipping
-	if(clipactive > 0)
-	{
-		vec3 posclip = ( cliptransform * vec4(posW, 1.0) ).xyz;
-		vec3 s = step(clipmin, posclip) - step(clipmax, posclip);
-		if(s.x * s.y * s.z == clipactive - 1)
-		{
-			discard;
-		}
-	}
-}
+//$insert{preClip}
+
+//$insert{preOIT}
+
 
 vec4 getInputColor()
 {
@@ -147,77 +130,13 @@ float getInputAlpha()
 	}
 }
 
-float linearizeDepth(float z)
-{
-	return z/(z - fnratio*z + fnratio);
-}
-
 void main()
 {
-	checkClipping();
-	vec4 colorout = getInputColor();
-	colorout.a = extraAlpha * getInputAlpha();
-	gl_FragDepth = gl_FragCoord.z;
-	// round point
-	if(pointShape == 0)
-	{
-		float r2 = vTexCoord.x * vTexCoord.x + vTexCoord.y * vTexCoord.y;
-    	if (r2 > 0.25) discard;
-    	
-    	switch (renderType)
-		{
-			case 0:
-				//add shading + depth
-				if(pointShade > 0)
-				{
-					//depth always
-					float zSphere = sqrt(0.25 - r2);
-					vec4 pixelViewPos = vViewSpaceCenter;
-					pixelViewPos.z -= zSphere * scaledPointSize;					
-					vec4 clipPos = pm * pixelViewPos;
-					gl_FragDepth = (clipPos.z / clipPos.w)* 0.5 + 0.5;		
-					//individual shades
-					if(pointShade == 1)
-					{
-						float z = sqrt(1.0 - 4.0 * r2);
-						vec3 n = - vec3(2.0 * vTexCoord.x,  2.0 * vTexCoord.y, z);
-						float diff =  abs(dot(n, lightDir));
-						colorout.rgb = colorout.rgb * (diff + ambient);
-					}
-				}
-				break;
-			//outline/border only
-			case 1:
-				if ( r2 < 0.16) discard;
-				break;
-			//gaussian
-			case 2:
-				colorout.a = exp(- 18. * r2) * colorout.a; //i.e. 18= (-1)/(2.0*(0.333/2)*(0.333/2)); 
-				break;
-		}
-    }
-    //square points shape
-    else
-    {
-    	//draw only outline
-		//i.e. discard inside
-		if(renderType == 1)
-		{
-			float norm2 = step(0.4, abs(vTexCoord.x)) + step(0.4, abs(vTexCoord.y)); 
-			if ( norm2 < 0.5) discard;
-		}
-		else
-		{
-			if(renderType >= 2)
-			{
-				vec2 fade = 2.0 * abs( 0.5  - abs(vTexCoord));
-				colorout.a = fade.x * fade.y * colorout.a; 
-			}
-		}
-    }
-    
- //$insert{wOIT}
-
+//$insert{mClip}
+    vec4 colorout = getInputColor();
+    colorout.a = extraAlpha * getInputAlpha();
+//$insert{spotsShape}	
+//$insert{wOIT}
     fragColor = colorout;
     
 }
