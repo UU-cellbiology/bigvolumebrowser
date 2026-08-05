@@ -133,9 +133,9 @@ public class OffScreenFBWithEDL
 		this.internalFormat = internalFormat;
 		this.flipY = flipY;
 
-		final Segment quadvp = new SegmentTemplate( OffScreenFBWithEDL.class, BVBSettings.sShaderPath +"edlfbquad.vp" ).instantiate();
+		final Segment quadvp = new SegmentTemplate( OffScreenFBWithEDL.class, BVBSettings.sShaderPath +"edl/edlfbquad.vp" ).instantiate();
 
-		final Segment quadfpEDL = new SegmentTemplate( OffScreenFBWithEDL.class, BVBSettings.sShaderPath +"edlfbquad.fp" ).instantiate();
+		final Segment quadfpEDL = new SegmentTemplate( OffScreenFBWithEDL.class, BVBSettings.sShaderPath +"edl/edlfbquad.fp" ).instantiate();
 
 		progQuadEDL = new DefaultShader( quadvp.getCode(), quadfpEDL.getCode() );
 		

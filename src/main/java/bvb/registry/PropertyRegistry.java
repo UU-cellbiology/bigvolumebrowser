@@ -223,7 +223,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "transform_center" ))
 		{
-	    	final Property<double []> pTrCenter = new Property<>() {
+	    	final Property<double []> pTrCenter = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -244,7 +244,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "transform_rotation" ))
 		{
-	    	final Property<double []> pTrRotation = new Property<>() {
+	    	final Property<double []> pTrRotation = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -265,7 +265,7 @@ public class PropertyRegistry
 		}
 		if (propertyName.equals( "transform_scale" ))
 		{
-	    	final Property<double []> pTrScale = new Property<>() {
+	    	final Property<double []> pTrScale = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -286,7 +286,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "transform_deskew" ))
 		{
-	    	final Property<Double> pTrDeskew = new Property<>() {
+	    	final Property<Double> pTrDeskew = new Property<Double>() {
 			    @Override
 				public Double get() { return transformSetups.transformDeskew.getAngle( obj ); }
 			    @Override
@@ -302,7 +302,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "clip_type" ))
 		{
-	    	final Property<Integer> pClipType = new Property<>() {
+	    	final Property<Integer> pClipType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return obj.getClipState(); }
 			    @Override
@@ -316,7 +316,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "clip_range" ))
 		{
-	    	final Property<RealInterval> pClipRange = new Property<>() {
+	    	final Property<RealInterval> pClipRange = new Property<RealInterval>() {
 			    @Override
 				public RealInterval get() { 
 				    	RealInterval interval = obj.getClipInterval();
@@ -340,7 +340,7 @@ public class PropertyRegistry
 		}
 		if (propertyName.equals( "clip_center" ))
 		{
-	    	final Property<double []> pClipCenter = new Property<>() {
+	    	final Property<double []> pClipCenter = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -361,7 +361,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "clip_rotation" ))
 		{
-	    	final Property<double []> pClipRotation = new Property<>() {
+	    	final Property<double []> pClipRotation = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -390,7 +390,7 @@ public class PropertyRegistry
 	    	final SourceAndConverter< ? > sac = transformSetups.converterSetups.getSource( cs );
 	    	
 	    	//visibility
-	    	final Property<Boolean> pDisplayVisible = new Property<>() {
+	    	final Property<Boolean> pDisplayVisible = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return bvvViewer.state().isSourceVisible(sac);  }
 			    @Override
@@ -404,7 +404,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_displayRange" ))
 		{
-	    	final Property<double[]> pDisplayRange = new Property<>() {
+	    	final Property<double[]> pDisplayRange = new Property<double[]>() {
 			    @Override
 				public double[] get() { return new double[] {cs.getDisplayRangeMin(), cs.getDisplayRangeMax()}; }
 			    @Override
@@ -418,7 +418,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_gamma" ))
 		{
-	    	final Property<Double> pAlpha = new Property<>() {
+	    	final Property<Double> pAlpha = new Property<Double>() {
 			    @Override
 				public Double get() { return cs.getDisplayGamma(); }
 			    @Override
@@ -432,7 +432,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_alphaRange" ))
 		{
-	    	final Property<double[]> pAlphaRange = new Property<>() {
+	    	final Property<double[]> pAlphaRange = new Property<double[]>() {
 			    @Override
 				public double[] get() { return new double[] {cs.getAlphaRangeMin(), cs.getAlphaRangeMax()}; }
 			    @Override
@@ -446,7 +446,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_alphaGamma" ))
 		{
-	    	final Property<Double> pAlphaGamma = new Property<>() {
+	    	final Property<Double> pAlphaGamma = new Property<Double>() {
 			    @Override
 				public Double get() { return cs.getAlphaGamma(); }
 			    @Override
@@ -460,7 +460,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_renderType" ))
 		{
-	    	final Property<Integer> pRenderType = new Property<>() {
+	    	final Property<Integer> pRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return cs.getRenderType(); }
 			    @Override
@@ -474,7 +474,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_lightingType" ))
 		{
-	    	final Property<Integer> pRenderLight = new Property<>() {
+	    	final Property<Integer> pRenderLight = new Property<Integer>() {
 			    @Override
 				public Integer get() { return cs.getLightingType(); }
 			    @Override
@@ -488,7 +488,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_voxelInterpolation" ))
 		{
-	    	final Property<Integer> pVoxelInterpolation = new Property<>() {
+	    	final Property<Integer> pVoxelInterpolation = new Property<Integer>() {
 			    @Override
 				public Integer get() { return cs.getVoxelRenderInterpolation(); }
 			    @Override
@@ -502,7 +502,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_color" ))
 		{
-	    	final Property<Color> pColor = new Property<>() {
+	    	final Property<Color> pColor = new Property<Color>() {
 			    @Override
 				public Color get() { return new Color(cs.getColor().get(),true ); }
 			    @Override
@@ -516,7 +516,7 @@ public class PropertyRegistry
 		//keep for compartibility for now
 		if (propertyName.equals( "cs_LUT" ))
 		{
-	    	final Property<String> pLUT = new Property<>() {
+	    	final Property<String> pLUT = new Property<String>() {
 			    @Override
 				public String get() { 
 			    	String lut = cs.getLUTName(); 
@@ -561,7 +561,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "cs_LUTICM" ))
 		{
-	    	final Property<IndexColorModel> pLUTICM = new Property<>() {
+	    	final Property<IndexColorModel> pLUTICM = new Property<IndexColorModel>() {
 			    @Override
 				public IndexColorModel get() { 
 			    	//cannot return null, since storing will be affected
@@ -596,7 +596,7 @@ public class PropertyRegistry
 	{
 		if (propertyName.equals( "bs_visible" ))
 		{
-	    	final Property<Boolean> pVisible = new Property<>() {
+	    	final Property<Boolean> pVisible = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isVisible(); }
 			    @Override
@@ -624,7 +624,7 @@ public class PropertyRegistry
 	{
 		if (propertyName.equals( "mesh_color" ))
 		{
-	    	final Property<Color> pColor = new Property<>() {
+	    	final Property<Color> pColor = new Property<Color>() {
 			    @Override
 				public Color get() { return shape.getColor(); }
 			    @Override
@@ -638,7 +638,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_useTexture" ))
 		{
-	    	final Property<Boolean> pTexture = new Property<>() {
+	    	final Property<Boolean> pTexture = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isTextureUsed(); }
 			    @Override
@@ -652,7 +652,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_renderType" ))
 		{
-	    	final Property<Integer> pRenderType = new Property<>() {
+	    	final Property<Integer> pRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getRenderType(); }
 			    @Override
@@ -666,7 +666,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_pointSize" ))
 		{
-	    	final Property<Float> pPointSize = new Property<>() {
+	    	final Property<Float> pPointSize = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getPointSize(); }
 			    @Override
@@ -680,7 +680,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_surfaceRenderType" ))
 		{
-	    	final Property<Integer> pSurfaceRenderType = new Property<>() {
+	    	final Property<Integer> pSurfaceRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getSurfaceRender(); }
 			    @Override
@@ -694,7 +694,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_surfaceGrid" ))
 		{
-	    	final Property<Integer> pSurfaceGrid = new Property<>() {
+	    	final Property<Integer> pSurfaceGrid = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getSurfaceGrid(); }
 			    @Override
@@ -708,7 +708,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_wireWidth" ))
 		{
-	    	final Property<Float> pWireWidth = new Property<>() {
+	    	final Property<Float> pWireWidth = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getWireLineWidth(); }
 			    @Override
@@ -722,7 +722,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_silDecay" ))
 		{
-	    	final Property<Float> pSilhouetteDecay = new Property<>() {
+	    	final Property<Float> pSilhouetteDecay = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getSilhouetteDecay(); }
 			    @Override
@@ -742,7 +742,7 @@ public class PropertyRegistry
 	{
 		if (propertyName.equals( "spots_pointSize" ))
 		{
-        	final Property<Float> pPointSize = new Property<>() {
+        	final Property<Float> pPointSize = new Property<Float>() {
     		    @Override
     			public Float get() { return shape.getPointSize(); }
     		    @Override
@@ -756,7 +756,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_pointSizeScale" ))
 		{
-        	final Property<Float> pPointScale = new Property<>() {
+        	final Property<Float> pPointScale = new Property<Float>() {
     		    @Override
     			public Float get() { return shape.getSizeScale(); }
     		    @Override
@@ -770,7 +770,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_color" ))
 		{
-        	final Property<Color> pSpotColor = new Property<>() {
+        	final Property<Color> pSpotColor = new Property<Color>() {
     		    @Override
     			public Color get() { return shape.getColor(); }
     		    @Override
@@ -784,7 +784,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_extraAlpha" ))
 		{
-	    	final Property<Float> pExtraAlpha = new Property<>() {
+	    	final Property<Float> pExtraAlpha = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getExtraAlphaCoefficient(); }
 			    @Override
@@ -798,7 +798,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_renderType" ))
 		{
-	    	final Property<Integer> pRenderType = new Property<>() {
+	    	final Property<Integer> pRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getRenderType(); }
 			    @Override
@@ -812,7 +812,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_shape" ))
 		{
-	    	final Property<Integer> pShape = new Property<>() {
+	    	final Property<Integer> pShape = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getPointShape(); }
 			    @Override
@@ -826,7 +826,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_shade" ))
 		{
-	    	final Property<Integer> pShade = new Property<>() {
+	    	final Property<Integer> pShade = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getPointShade(); }
 			    @Override
@@ -840,7 +840,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_mapLUTMode" ))
 		{
-	    	final Property<Integer> pLUTMapMode = new Property<>() {
+	    	final Property<Integer> pLUTMapMode = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getMapLUTMode(); }
 			    @Override
@@ -854,7 +854,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUT" ))
 		{
-	    	final Property<String> pLUT = new Property<>() {
+	    	final Property<String> pLUT = new Property<String>() {
 			    @Override
 				public String get() { return shape.getLUTName(); }
 			    @Override
@@ -868,7 +868,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUTInverse" ))
 		{
-	    	final Property<Boolean> pLUTInv = new Property<>() {
+	    	final Property<Boolean> pLUTInv = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isInvertedLUT(); }
 			    @Override
@@ -882,7 +882,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUTRange" ))
 		{
-	    	final Property<float[][]> pLUTRange = new Property<>() {
+	    	final Property<float[][]> pLUTRange = new Property<float[][]>() {
 			    @Override
 				public float[][] get() { 
 			    	final float [][] range = spotsMapSetups.getMapAllFloat( shape );
@@ -909,7 +909,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_alphaMapMode" ))
 		{
-	    	final Property<Integer> pAlphaMapMode = new Property<>() {
+	    	final Property<Integer> pAlphaMapMode = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getMapAlphaMode(); }
 			    @Override
@@ -923,7 +923,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_alphaInverse" ))
 		{
-	    	final Property<Boolean> pAlphaInv = new Property<>() {
+	    	final Property<Boolean> pAlphaInv = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isInvertedAlpha(); }
 			    @Override
@@ -937,7 +937,7 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_alphaRange" ))
 		{
-	    	final Property<float[][]> pLUTRange = new Property<>() {
+	    	final Property<float[][]> pLUTRange = new Property<float[][]>() {
 			    @Override
 				public float[][] get() { 
 			    	final float [][] range = spotsAlphaSetup.getMapAllFloat( shape );
