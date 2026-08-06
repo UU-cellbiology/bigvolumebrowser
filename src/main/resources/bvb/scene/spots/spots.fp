@@ -14,11 +14,7 @@ uniform mat4 pm;
 
 //$insert{preColorLUT}
 
-uniform int nMapAlphaMode;
-uniform int bInvAlpha;
-uniform float alphaMin;
-uniform float alphaRange;
-uniform float alphaGamma;
+//$insert{preAlphaMap}
 
 uniform float extraAlpha;
 const vec3 lightDir = normalize(vec3(0, -0.2, -1));
@@ -28,52 +24,17 @@ const vec3 ambient = vec3(0.1, 0.1, 0.1);
 
 //$insert{preOIT}
 
-float getInputAlpha()
-{
-	if(nMapAlphaMode > 0)
-	{
-		float val = 0.0;
-		if(nMapAlphaMode < 4)
-		{
-			vec3 axis = vec3(0);
-			axis[nMapAlphaMode - 1] = 1;
-			val = dot(axis, posW);
-		}
-
-		if(nMapAlphaMode == 4)
-		{
-			val = fDiamfp;			
-		}
-		
-		if(nMapAlphaMode == 5)
-		{
-			val = fPropertyfp;			
-		}
-		
-		val = pow(clamp((val - alphaMin) / alphaRange, 0.0, 1.0), alphaGamma);
-		
-		if(bInvAlpha != 0)
-		{
-			val = 1.0 - val;
-		}
-		
-		return val * colorin.a;
-		
-	}
-	else
-	{
-	 	return colorin.a;
-	}
-}
-
 void main()
 {
 //--- clipping, if active  ------
 //$insert{mClip}
-//--- color of the spot ------
+//--- color of the spots ------
 //$insert{spotsColor}
+//--- alpha channel of the spots ------
+    float fAlpha = colorout.a;
+//$insert{spotsAlpha}
 
-    colorout.a = extraAlpha * getInputAlpha();
+    colorout.a = extraAlpha * fAlpha;
 //--- spot shape and render type ------
 //$insert{spotsShape}	
 //--- transparency mode, if active ------

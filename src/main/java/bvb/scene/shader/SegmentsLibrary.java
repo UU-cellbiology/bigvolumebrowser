@@ -19,9 +19,14 @@ public class SegmentsLibrary
 	{
 		final HashMap< SegmentTypeComposite, SegmentTemplate > segments = new HashMap<>();
 		
+		segments.put( SegmentTypeComposite.VertexSpots, 
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/spots.vp", 
+						"spotsScaling" ));
+		
 		segments.put( SegmentTypeComposite.FragmentSpots, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/spots.fp", 
-						"preColorLUT", "preOIT", "preClip", "mClip", "spotsColor", "spotsShape", "wOIT" ));
+						"preColorLUT", "preAlphaMap", "preOIT", "preClip", "mClip", 
+						"spotsColor", "spotsAlpha", "spotsShape", "wOIT" ));
 
 		return segments;
 	}
@@ -29,8 +34,6 @@ public class SegmentsLibrary
 	public static Map< SegmentTypeStatic, Segment> getDefaultStaticSegments()
 	{
 		final HashMap< SegmentTypeStatic, Segment > segments = new HashMap<>();
-		segments.put( SegmentTypeStatic.VertexSpots, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/spots.vp" ).instantiate());
 		segments.put( SegmentTypeStatic.preClip, new SegmentTemplate( BVBSettings.sShaderPath + "preClip.fp" ).instantiate());
 		segments.put( SegmentTypeStatic.mClip, new SegmentTemplate( BVBSettings.sShaderPath + "mClip.fp" ).instantiate());
 		segments.put( SegmentTypeStatic.preOIT, new SegmentTemplate( BVBSettings.sShaderPath + "preOIT.fp" ).instantiate());

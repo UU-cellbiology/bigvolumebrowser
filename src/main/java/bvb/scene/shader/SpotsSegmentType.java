@@ -6,6 +6,7 @@ public enum SpotsSegmentType
 	SpotsRound,
 	SpotsRoundDepth,
 	SpotsColorLUTMode,
+	SpotsAlphaMapMode,
 	//static
 	SpotsRoundGauss,
 	SpotsRoundOutline,
@@ -13,8 +14,8 @@ public enum SpotsSegmentType
 	SpotsSquareGauss,
 	SpotsSquareOutline,
 	preColorLUT,
-	NoLutNoColors,
-	NoLutColors,
-	LutAxis
+	LutAxis,
+	preAlphaMap,
+	alphaAxis
 	
 }

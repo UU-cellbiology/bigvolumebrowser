@@ -139,8 +139,19 @@ public class VisSpots extends AbstractClipTransformVis
 	void buildShader()
 	{
 		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
+		//vertex
+		final Segment spVertex = SegmentsLibrary.compositeSegments.get( SegmentTypeComposite.VertexSpots ).instantiate();
+		if(fSpotSize < 0.0)
+		{
+			spVertex.insert( "spotsScaling", SegmentTemplate.fromCode("    fDiamfp = fDiam * fSizeScale;").instantiate());
+		}
+		else
+		{
+			spVertex.insert( "spotsScaling", SegmentTemplate.fromCode("    fDiamfp = pointSizeReal;").instantiate());
+		}
+		builder.vertex( spVertex );
 		
-		builder.vertex( SegmentsLibrary.staticSegments.get( SegmentTypeStatic.VertexSpots ) );
+		//fragment
 		final Segment pointFp = SegmentsLibrary.compositeSegments
 								.get( SegmentTypeComposite.FragmentSpots ).instantiate();
 		//clipping
@@ -185,7 +196,8 @@ public class VisSpots extends AbstractClipTransformVis
 			}
 			if(bInvertLUT)
 			{
-				colorLutMode.insert( "invertColorLUT", SegmentTemplate.fromCode("    val = 1.0 - val;").instantiate() );
+				colorLutMode.insert( "invertColorLUT", 
+  				  SegmentTemplate.fromCode("    val = 1.0 - val;").instantiate() );
 			}
 			else
 			{
@@ -198,16 +210,60 @@ public class VisSpots extends AbstractClipTransformVis
 			pointFp.insert( "preColorLUT", SegmentsLibrary.emptySeg );
 			if(colors == null)
 			{
-				pointFp.insert("spotsColor", (Segment)SpotsSegmentLibrary.spotSegments.
-						get( SpotsSegmentType.NoLutNoColors));
+				pointFp.insert("spotsColor", 
+						SegmentTemplate.fromCode("    vec4 colorout = colorin;").instantiate());
 			}
 			else
 			{
-				pointFp.insert("spotsColor",(Segment)SpotsSegmentLibrary.spotSegments.
-						get( SpotsSegmentType.NoLutColors));
+				pointFp.insert("spotsColor",
+						SegmentTemplate.fromCode("    vec4 colorout = fColorsfp;").instantiate());
 			}
 		}
 		
+		//spots alpha
+		if(nMapAlphaMode > 0)
+		{
+			pointFp.insert( "preAlphaMap", (Segment)SpotsSegmentLibrary.spotSegments.
+					get( SpotsSegmentType.preAlphaMap) );
+			final Segment alphaMapMode = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
+					.get( SpotsSegmentType.SpotsAlphaMapMode )).instantiate();
+			
+			//axis mapping
+			if(nMapAlphaMode < 4)
+			{
+				alphaMapMode.insert( "alphaMapMode", (Segment)SpotsSegmentLibrary.spotSegments.
+						get( SpotsSegmentType.alphaAxis) );
+			}
+			else
+			{
+				if(nMapAlphaMode == 4)
+				{
+					alphaMapMode.insert( "alphaMapMode", 
+					 SegmentTemplate.fromCode("    fAlpha = fDiamfp;").instantiate()  );
+				}
+				if(nMapAlphaMode == 5)
+				{
+					alphaMapMode.insert( "alphaMapMode", 
+							SegmentTemplate.fromCode("        fAlpha = fPropertyfp;").instantiate()  );
+				}
+			}
+			
+			if(bInvertAlpha)
+			{
+				alphaMapMode.insert( "invertAlphaMap", 
+  				  SegmentTemplate.fromCode("    fAlpha = 1.0 - fAlpha;").instantiate() );
+			}
+			else
+			{
+				alphaMapMode.insert( "invertAlphaMap", SegmentsLibrary.emptySeg );
+			}
+			pointFp.insert("spotsAlpha", alphaMapMode);
+		}
+		else
+		{
+			pointFp.insert("preAlphaMap",  SegmentsLibrary.emptySeg );
+			pointFp.insert("spotsAlpha",  SegmentsLibrary.emptySeg );
+		}
 		//spots shape
 		//
 		if(spotShape == SHAPE_ROUND)
@@ -424,6 +480,7 @@ public class VisSpots extends AbstractClipTransformVis
 	public void setMapAlphaMode(int nMapAlphaMode_)
 	{
 		nMapAlphaMode = nMapAlphaMode_;
+		requestShaderRebuild();
 	}
 	
 	public int getMapAlphaMode()
@@ -457,7 +514,9 @@ public class VisSpots extends AbstractClipTransformVis
 	public void setInvertedAlpha(boolean bInv)
 	{
 		bInvertAlpha = bInv;
+		requestShaderRebuild();
 	}
+	
 	public boolean isInvertedAlpha()
 	{
 		return bInvertAlpha;
@@ -814,16 +873,16 @@ public class VisSpots extends AbstractClipTransformVis
 			t.preConcatenate( clipTransform.inverse() );
 			prog.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 		}	
-		
-		prog.getUniform1i("nMapAlphaMode").set(nMapAlphaMode);
-		prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
-		prog.getUniform1i("bInvAlpha").set( bInvertAlpha?1:0 );
+
 		prog.getUniform1f("extraAlpha").set(fExtraAlpha);
 		if(nMapAlphaMode > 0 )
 		{
+			prog.getUniform1i("nMapAlphaMode").set(nMapAlphaMode);
+			prog.getUniform1f("alphaGamma").set(fMapAlphaGamma);
 			prog.getUniform1f("alphaMin").set(fMapAlphaMinRange[0]);
 			prog.getUniform1f("alphaRange").set(fMapAlphaMinRange[1]);		
 		}		
+		
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
 			prog.getUniform1i("nMapLUTMode").set(nMapLUTMode);
@@ -831,8 +890,7 @@ public class VisSpots extends AbstractClipTransformVis
 			prog.getUniform1i("sizeLUT").set(lutGPU.getLUTSize());
 			prog.getUniform1f("mapMin").set(fMapLUTMinRange[0]);
 			prog.getUniform1f("mapRange").set(fMapLUTMinRange[1]);	
-		}
-		
+		}	
 
 		prog.setUniforms( context );		
 		prog.use( context );

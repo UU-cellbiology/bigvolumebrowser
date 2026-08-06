@@ -26,6 +26,9 @@ public class SpotsSegmentLibrary
 		segments.put( SpotsSegmentType.SpotsColorLUTMode,
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/lutmode.fp", 
 						"shaderMapLUTMode", "invertColorLUT" ));
+		segments.put( SpotsSegmentType.SpotsAlphaMapMode,
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/alpha/alphamode.fp", 
+						"alphaMapMode", "invertAlphaMap" ));
 		
 		//static
 		segments.put( SpotsSegmentType.SpotsRoundGauss, 
@@ -43,15 +46,13 @@ public class SpotsSegmentLibrary
 
 		segments.put( SpotsSegmentType.preColorLUT, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/preColorLUT.fp" ).instantiate());
-		
-		segments.put( SpotsSegmentType.NoLutColors, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/nolutcolors.fp" ).instantiate());
-		segments.put( SpotsSegmentType.NoLutNoColors, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/nolutnocolors.fp" ).instantiate());
 		segments.put( SpotsSegmentType.LutAxis, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/lutAxis.fp" ).instantiate());
-
 		
+		segments.put( SpotsSegmentType.preAlphaMap, 
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/alpha/preAlphaMap.fp" ).instantiate());
+		segments.put( SpotsSegmentType.alphaAxis, 
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/alpha/alphaAxis.fp" ).instantiate());		
 		return segments;
 	}
 }

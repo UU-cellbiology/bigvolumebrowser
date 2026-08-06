@@ -19,34 +19,27 @@ out vec4 vViewSpaceCenter;
 
 void main()
 {
-	//point size	
-	if(pointSizeReal >= 0.0)
-	{
- 		fDiamfp = pointSizeReal;
- 	}
- 	else
- 	{
- 		fDiamfp = fDiam * fSizeScale;		
- 	}	
+
+//$insert{spotsScaling}
  	
- 	//transform center view
- 	vec4 viewSpaceCenter = vm * vec4(aPos, 1.0);
+    //transform center view
+    vec4 viewSpaceCenter = vm * vec4(aPos, 1.0);
  	
- 	//scale point size
- 	vec2 vScaledPointSize = fDiamfp * pScale;
+    //scale point size
+    vec2 vScaledPointSize = fDiamfp * pScale;
  	
- 	scaledPointSize = 0.5 * (vScaledPointSize.x + vScaledPointSize.y);
+    scaledPointSize = 0.5 * (vScaledPointSize.x + vScaledPointSize.y);
  	
- 	vec4 viewSpacePos = viewSpaceCenter;
+    vec4 viewSpacePos = viewSpaceCenter;
  	
- 	//add width now (avoids shearing, if present)
- 	viewSpacePos.xy += aQuadVertex.xy * vScaledPointSize;
- 	vViewSpaceCenter = viewSpacePos;
+    //add width now (avoids shearing, if present)
+    viewSpacePos.xy += aQuadVertex.xy * vScaledPointSize;
+    vViewSpaceCenter = viewSpacePos;
  	
- 	gl_Position = pm * viewSpacePos;
+    gl_Position = pm * viewSpacePos;
 	    
     posW = aPos;
     fPropertyfp = fProperty;
-	fColorsfp = fColors;
+    fColorsfp = fColors;
     vTexCoord = aQuadVertex;
 }
