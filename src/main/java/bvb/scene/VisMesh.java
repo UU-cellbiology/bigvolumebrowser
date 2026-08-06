@@ -55,6 +55,7 @@ import org.joml.Vector4f;
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
+import bvb.scene.shader.MeshSegmentLibrary;
 import bvb.scene.shader.SegmentTypeComposite;
 import bvb.scene.shader.SegmentTypeStatic;
 import bvb.scene.shader.SegmentsLibrary;
@@ -110,7 +111,7 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
 	
-	int silhouetteRender = silhouette_TRANSPARENT;	
+	//int silhouetteRender = silhouette_TRANSPARENT;	
 
 	float silhouetteDecay = 1.0f;
 	
@@ -130,9 +131,9 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	public VisMesh()
 	{
-		initShader();
+		initSpotShader();
 	}
-	void buildShader()
+	void buildMeshShader()
 	{
 		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
 		//vertex
@@ -154,6 +155,25 @@ public class VisMesh extends AbstractClipTransformVis
 			meshFp.insert( "preClip", SegmentsLibrary.emptySeg );
 			meshFp.insert( "mClip", SegmentsLibrary.emptySeg );
 		}
+		
+		//surface render
+		switch(surfaceRender)
+		{
+		case SURFACE_PLAIN:
+			meshFp.insert("meshSurfaceRender", SegmentsLibrary.emptySeg); 
+			break;
+		case SURFACE_SHADE:
+			meshFp.insert("meshSurfaceRender", MeshSegmentLibrary.meshSegments.get( "shaded" )); 
+			break;
+		case SURFACE_SHINY:
+			meshFp.insert("meshSurfaceRender", MeshSegmentLibrary.meshSegments.get( "shiny" )); 
+			break;
+		case SURFACE_SILHOUETTE:
+			meshFp.insert("meshSurfaceRender", MeshSegmentLibrary.meshSegments.get( "silh" )); 
+			break;
+
+		}
+		
 		//weighted OIT
 		if(bCurrentwOIT)
 		{
@@ -171,10 +191,10 @@ public class VisMesh extends AbstractClipTransformVis
 //		System.out.println( "fragmentShaderCode MESH = " + fragmentShaderCode );
 //		System.out.println( "\n\n--------------------------------\n\n" );
 	}
-	void initShader()
+	void initSpotShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "scaled_point.fp" ).instantiate();		
+		final Segment pointVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
 	}
 	
@@ -196,7 +216,7 @@ public class VisMesh extends AbstractClipTransformVis
 	public VisMesh(final BufferedImage imageTexture)
 	{
 		this.imageTexture = imageTexture;
-		initShader();
+		initSpotShader();
 	}
 	
 	public Color getColor()
@@ -239,7 +259,8 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	public void setSurfaceRenderType(final int surfaceRender_)
 	{
-		surfaceRender = surfaceRender_;		
+		surfaceRender = surfaceRender_;
+		requestShaderRebuild();
 	}
 	
 	public int getSurfaceRenderType()
@@ -408,7 +429,7 @@ public class VisMesh extends AbstractClipTransformVis
 	@Override
 	public void reload()
 	{
-		initShader();		
+		initSpotShader();		
 		initialized = false;
 	}
 
@@ -460,7 +481,7 @@ public class VisMesh extends AbstractClipTransformVis
 			}
 			if(bRebuildShader)
 			{
-				buildShader();
+				buildMeshShader();
 				bRebuildShader = false;
 			}
 			final Matrix4f itvm = vtm.invert( new Matrix4f() ).transpose();
@@ -470,10 +491,8 @@ public class VisMesh extends AbstractClipTransformVis
 			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
 			
 			progMesh.getUniform4f("colorMesh").set(l_color);
-			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
-			progMesh.getUniform1i("gridType").set(gridType);
 			
-			progMesh.getUniform1i("silType").set(silhouetteRender);
+			//progMesh.getUniform1i("silType").set(silhouetteRender);
 			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
 
 			if(clipState !=0 && clipInt != null)

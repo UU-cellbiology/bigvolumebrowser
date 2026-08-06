@@ -29,7 +29,7 @@ public class SegmentsLibrary
 						"spotsColor", "spotsAlpha", "spotsShape", "wOIT" ));
 		segments.put( SegmentTypeComposite.FragmentMesh, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "mesh/mesh.fp", 
-						 "preOIT", "preClip", "mClip", "wOIT" ));
+						 "preOIT", "preClip", "meshSurfaceRender", "mClip", "wOIT" ));
 
 		return segments;
 	}
