@@ -50,12 +50,6 @@ public class SpotsSegmentLibrary
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/nolutnocolors.fp" ).instantiate());
 		segments.put( SpotsSegmentType.LutAxis, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/lutAxis.fp" ).instantiate());
-		segments.put( SpotsSegmentType.LutSize, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/lutSize.fp" ).instantiate());
-		segments.put( SpotsSegmentType.LutProperty, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/lutProperty.fp" ).instantiate());
-		segments.put( SpotsSegmentType.LutInvert, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/colors/lutInvert.fp" ).instantiate());
 
 		
 		return segments;

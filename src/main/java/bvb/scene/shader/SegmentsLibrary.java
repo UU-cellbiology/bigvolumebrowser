@@ -13,7 +13,7 @@ public class SegmentsLibrary
 	public static final Map< SegmentTypeComposite, SegmentTemplate > compositeSegments = getDefaultCompositeSTemplates();
 	public static final Map< SegmentTypeStatic, Segment> staticSegments = getDefaultStaticSegments();
 
-	public static final Segment emptySeg = new SegmentTemplate( BVBSettings.sShaderPath + "empty.txt" ).instantiate();
+	public static final Segment emptySeg = SegmentTemplate.fromCode("").instantiate();
 	
 	public static Map< SegmentTypeComposite, SegmentTemplate > getDefaultCompositeSTemplates()
 	{

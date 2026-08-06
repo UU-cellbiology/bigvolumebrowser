@@ -174,19 +174,18 @@ public class VisSpots extends AbstractClipTransformVis
 			{
 				if(nMapLUTMode == 4)
 				{
-					colorLutMode.insert( "shaderMapLUTMode", (Segment)SpotsSegmentLibrary.spotSegments.
-							get( SpotsSegmentType.LutSize) );
+					colorLutMode.insert( "shaderMapLUTMode", 
+					 SegmentTemplate.fromCode("    val = fDiamfp;").instantiate()  );
 				}
 				if(nMapLUTMode == 5)
 				{
-					colorLutMode.insert( "shaderMapLUTMode", (Segment)SpotsSegmentLibrary.spotSegments.
-							get( SpotsSegmentType.LutProperty) );
+					colorLutMode.insert( "shaderMapLUTMode", 
+							SegmentTemplate.fromCode("        val = fPropertyfp;").instantiate()  );
 				}
 			}
 			if(bInvertLUT)
 			{
-				colorLutMode.insert( "invertColorLUT", (Segment)SpotsSegmentLibrary.spotSegments.
-						get( SpotsSegmentType.LutInvert) );
+				colorLutMode.insert( "invertColorLUT", SegmentTemplate.fromCode("    val = 1.0 - val;").instantiate() );
 			}
 			else
 			{

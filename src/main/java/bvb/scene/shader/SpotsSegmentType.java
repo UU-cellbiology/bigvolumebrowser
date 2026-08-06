@@ -15,9 +15,6 @@ public enum SpotsSegmentType
 	preColorLUT,
 	NoLutNoColors,
 	NoLutColors,
-	LutAxis,
-	LutSize,
-	LutProperty,
-	LutInvert
+	LutAxis
 	
 }
