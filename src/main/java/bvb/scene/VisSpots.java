@@ -130,7 +130,6 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	boolean bCurrentwOIT = false;
 	
-	
 	public VisSpots()
 	{
 
