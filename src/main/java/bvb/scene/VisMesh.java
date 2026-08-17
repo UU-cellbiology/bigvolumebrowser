@@ -133,11 +133,22 @@ public class VisMesh extends AbstractClipTransformVis
 	{
 		initSpotShader();
 	}
+	
 	void buildMeshShader()
 	{
 		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
 		//vertex
-		final Segment meshVertex = SegmentsLibrary.staticSegments.get( SegmentTypeStatic.VertexMesh );
+		final Segment meshVertex = SegmentsLibrary.compositeSegments.get( SegmentTypeComposite.VertexMesh ).instantiate();
+
+		if(bUseTexture)
+		{
+			meshVertex.insert( "useTexture", SegmentTemplate.fromCode("    texCoord = vec2( aTexCoord.x, aTexCoord.y );").instantiate() );
+		}
+		else
+		{
+			meshVertex.insert( "useTexture", SegmentTemplate.fromCode("    texCoord = vec2( 0, 0 );").instantiate() );			
+		}
+		
 		builder.vertex( meshVertex );
 		
 		//fragment
@@ -154,6 +165,16 @@ public class VisMesh extends AbstractClipTransformVis
 		{
 			meshFp.insert( "preClip", SegmentsLibrary.emptySeg );
 			meshFp.insert( "mClip", SegmentsLibrary.emptySeg );
+		}
+		
+		//usage of texture
+		if(bUseTexture)
+		{
+			meshFp.insert( "useTexture", SegmentTemplate.fromCode("    vec4 colorout = texture( texture1, texCoord );").instantiate());
+		}
+		else
+		{
+			meshFp.insert( "useTexture", SegmentTemplate.fromCode("    vec4 colorout = colorMesh;").instantiate());
 		}
 		
 		//surface render
@@ -239,6 +260,7 @@ public class VisMesh extends AbstractClipTransformVis
 		if(bHasTexture)
 		{
 			bUseTexture = bUseTexture_;
+			requestShaderRebuild();
 		}
 	}
 	
@@ -512,7 +534,6 @@ public class VisMesh extends AbstractClipTransformVis
 				progMesh.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
 				progMesh.getUniform1f("depthDecay").set( BVBSettings.fOITDepthDecay );
 			}
-			progMesh.getUniform1i("bUseTexture").set(bUseTexture?1:0);
 			progMesh.setUniforms( context );
 			progMesh.use( context );
 			

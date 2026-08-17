@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import bvb.core.BVBSettings;
+import bvb.scene.VisMesh;
 import bvb.scene.VisSpots;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
@@ -27,9 +28,15 @@ public class SegmentsLibrary
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/spots.fp", 
 						"preColorLUT", "preAlphaMap", "preOIT", "preClip", "mClip", 
 						"spotsColor", "spotsAlpha", "spotsShape", "wOIT" ));
+		
+		
+		segments.put( SegmentTypeComposite.VertexMesh, 
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "mesh/mesh.vp", 
+						"useTexture" ));
+		
 		segments.put( SegmentTypeComposite.FragmentMesh, 
-				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "mesh/mesh.fp", 
-						 "preOIT", "preClip", "meshSurfaceRender", "mClip", "wOIT" ));
+				new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh/mesh.fp", 
+						 "preOIT", "preClip", "meshSurfaceRender", "mClip", "useTexture", "wOIT" ));
 
 		return segments;
 	}
@@ -37,7 +44,6 @@ public class SegmentsLibrary
 	public static Map< SegmentTypeStatic, Segment> getDefaultStaticSegments()
 	{
 		final HashMap< SegmentTypeStatic, Segment > segments = new HashMap<>();
-		segments.put( SegmentTypeStatic.VertexMesh, new SegmentTemplate( BVBSettings.sShaderPath + "mesh/mesh.vp" ).instantiate());
 		segments.put( SegmentTypeStatic.mClip, new SegmentTemplate( BVBSettings.sShaderPath + "mClip.fp" ).instantiate());
 		segments.put( SegmentTypeStatic.preClip, new SegmentTemplate( BVBSettings.sShaderPath + "preClip.fp" ).instantiate());
 		segments.put( SegmentTypeStatic.mClip, new SegmentTemplate( BVBSettings.sShaderPath + "mClip.fp" ).instantiate());

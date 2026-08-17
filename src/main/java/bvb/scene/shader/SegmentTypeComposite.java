@@ -4,5 +4,6 @@ public enum SegmentTypeComposite
 {	
 	VertexSpots,
 	FragmentSpots,
+	VertexMesh,
 	FragmentMesh
 }

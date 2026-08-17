@@ -8,7 +8,6 @@ in vec2 texCoord;
 //$insert{preClip}
 
 uniform vec4 colorMesh;
-uniform int bUseTexture;
 uniform sampler2D texture1;
 
 uniform float silDecay;
@@ -44,22 +43,14 @@ void main()
 
 //--- clipping, if active  ------
 //$insert{mClip}
-	
-	vec4 colorin = colorMesh;
-
-	if(bUseTexture > 0)
-	{
-		colorin = texture( texture1, texCoord );
-	}
-		
-	vec4 colorout = colorin;	
-
+//--- texture usage ------
+//$insert{useTexture}
 //--- surface render ------
 //$insert{meshSurfaceRender}
 		
 //--- transparency mode, if active ------
 //$insert{wOIT}
-   fragColor = colorout; 
+    fragColor = colorout; 
 }
 
 
