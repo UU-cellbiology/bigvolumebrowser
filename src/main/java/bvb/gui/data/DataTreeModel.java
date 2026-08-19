@@ -91,7 +91,6 @@ public class DataTreeModel implements TreeModel
 		dataParentChildren =  new ConcurrentHashMap<>();
 		dataChildParent =  new ConcurrentHashMap<>();
 
-		
 		rootNode = new DataTreeNode(this);
 		listeners = new ArrayList<>();
 
