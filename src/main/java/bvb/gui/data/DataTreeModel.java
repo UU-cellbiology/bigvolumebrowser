@@ -96,10 +96,10 @@ public class DataTreeModel implements TreeModel
 		listeners = new ArrayList<>();
 
 		iconBDV = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bdv-small.png"));
-		iconBioFormats = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "bioformats-small.png"));
+		iconBioFormats = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "bvb-small.png"));
 		iconFIJI = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "fiji-logo-small.png"));
 		iconMoBIE = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "mobie-logo-small.png"));		
-		iconZarr = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + "zarr-logo-small.png"));
+		iconZarr = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "zarr-logo-small.png"));
 		iconDefaultData = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "data-small-default.png"));
 		iconOneSource = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "source-small.png"));
 		iconShapeGroup = new ImageIcon(this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "shapes-small.png"));

@@ -92,7 +92,7 @@ public class PanelAddSources extends JPanel
 		//this.setBorder(new PanelTitle(" Add data "));
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
-		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "bioformats.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "bvb.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butBioFormats = new JButton(tabIcon);
 	    butBioFormats.setToolTipText("Load TIF/BioFormats");
@@ -111,27 +111,27 @@ public class PanelAddSources extends JPanel
 	    butBDVXML.setToolTipText("Load BDV XML/HDF5");
 	    butBDVXML.addActionListener( (e) ->	loadBDVXMLDialog());	
 	    
-		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "zarr-logo.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "zarr-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butZarr = new JButton(tabIcon);
 	    butZarr.setToolTipText("Load N5/Zarr/OME-NGFF");
-	    butZarr.addActionListener( (e) ->	loadZarrDialog());	
+	    butZarr.addActionListener( (e) -> loadZarrDialog());	
 	    
-	    gbc.insets = new Insets(4,3,4,3);
+	    gbc.insets = new Insets(4, 3, 4, 3);
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
 
-	    this.add( butBioFormats,gbc);
+	    this.add(butBioFormats, gbc);
 
 	    gbc.gridx++;
-	    this.add( butFIJI,gbc);
-
-	    gbc.gridx++;
-	    this.add( butBDVXML,gbc);
+	    this.add(butBDVXML, gbc);
 	    
 	    gbc.gridx++;
-	    this.add( butZarr,gbc);
+	    this.add(butFIJI, gbc);
+	    
+	    gbc.gridx++;
+	    this.add(butZarr, gbc);
 
 	    
 	}
