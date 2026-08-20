@@ -59,7 +59,7 @@ public class RenderSorter
 		{
 			for(final BasicShape sh : shOpaqueRegular)
 			{
-				sh.draw( gl, pvm, pvm, screen_size, nTimePoint, false );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 			}
 		}
 		if(!shOpaqueMSAA.isEmpty())
@@ -69,7 +69,7 @@ public class RenderSorter
 
 			for(final BasicShape sh : shOpaqueMSAA)
 			{
-				sh.draw( gl, pvm, pvm, screen_size, nTimePoint, false );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 			}			
 			flexibleFBO.unbind( gl, false );
 			flexibleFBO.drawQuadColorDepth( gl );
@@ -82,7 +82,7 @@ public class RenderSorter
 
 			for(final BasicShape sh : shOpaqueEDL)
 			{
-				sh.draw( gl, pvm, pvm, screen_size, nTimePoint, false );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false );
 			}			
 			flexibleFBO.unbind( gl, false );
 			flexibleFBO.drawQuadEDL( gl, BVVSettings.fnratio, BVBSettings.fEDLRadius, BVBSettings.fEDLStrength );

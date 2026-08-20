@@ -338,8 +338,12 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		builder.fragment( pointFp );
 		prog = builder.build();
+//		final StringBuilder vertexShaderCode = prog.getVertexShaderCode();
+//		System.out.println( "vertexShaderCode  = \n" + vertexShaderCode  );
+//		System.out.println( "\n\n--------------------------------\n\n" );
+//
 //		final StringBuilder fragmentShaderCode = prog.getFragmentShaderCode();
-//		System.out.println( "fragmentShaderCode = " + fragmentShaderCode );
+//		System.out.println( "fragmentShaderCode = \n" + fragmentShaderCode );
 //		System.out.println( "\n\n--------------------------------\n\n" );
 	}
 	
@@ -764,7 +768,7 @@ public class VisSpots extends AbstractClipTransformVis
 			gl.glBufferData( GL.GL_ARRAY_BUFFER, colors.length * Float.BYTES, FloatBuffer.wrap( colors ), GL.GL_STATIC_DRAW );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
-			gl.glVertexAttribPointer( 3, 4, GL_FLOAT, false, 4*Float.BYTES, 0 );
+			gl.glVertexAttribPointer( 3, 4, GL_FLOAT, false, 4 * Float.BYTES, 0 );
 			gl.glEnableVertexAttribArray( 3 );
 
 		}
@@ -836,7 +840,6 @@ public class VisSpots extends AbstractClipTransformVis
 		// point scale factor in the view space
 		// taking into account possible shear
 		final Vector2f pScale = getScaleFactorNoShear(vtm);
-		
 		JoglGpuContext context = JoglGpuContext.get( gl );
 	
 		//geometry
