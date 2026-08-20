@@ -89,6 +89,12 @@ public class BVBSettings
 	/** wOIT depth decay parameter **/
 	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
 	
+	/** render meshes via multisample buffer **/
+	public static boolean bMultiSampleMesh = Prefs.get( "bMultiSampleMesh", true );
+
+	/** render spots via multisample buffer **/
+	public static boolean bMultiSampleSpots = Prefs.get( "bMultiSampleSpots", true );
+
 	/** radius for Eye Dome Lighting **/
 	public static float fEDLRadius = (float)Prefs.get("BVB.fEDLRadius", 5.0);
 	

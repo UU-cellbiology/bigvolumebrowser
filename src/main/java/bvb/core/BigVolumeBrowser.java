@@ -28,12 +28,8 @@
  */
 package bvb.core;
 
-import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
-import static com.jogamp.opengl.GL.GL_RGBA8;
-
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import java.awt.Color;
@@ -54,7 +50,6 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.ValuePair;
 
 import org.janelia.saalfeldlab.control.mcu.XTouchMiniMCUControlPanel;
-import org.joml.Matrix4f;
 
 import bdv.util.Prefs;
 import bdv.viewer.Source;
@@ -71,10 +66,8 @@ import ij.plugin.PlugIn;
 
 import bvvpg.core.VolumeViewerFrame;
 import bvvpg.core.VolumeViewerPanel;
-import bvvpg.core.offscreen.MultisampleGeometryBuffer;
 import bvvpg.core.offscreen.OffScreenFrameBufferWithDepth;
 import bvvpg.core.render.RenderData;
-import bvvpg.core.util.MatrixMath;
 import bvvpg.vistools.Bvv;
 import bvvpg.vistools.BvvFunctions;
 import bvvpg.vistools.BvvHandleFrame;
@@ -101,11 +94,9 @@ import bvb.io.dto.StoryDTO;
 import bvb.registry.ObjectHashStorage;
 import bvb.registry.PropertyRegistry;
 import bvb.registry.ValueCodecRegistry;
-import bvb.scene.OffScreenFBWithEDL;
 import bvb.scene.VisPolyLineAA;
 import bvb.scene.VisQuad;
 import bvb.shapes.BasicShape;
-import bvb.shapes.BasicSpots;
 import bvb.shapes.VolumeBox;
 import bvb.utils.MCUBVVControls;
 import bvb.utils.Misc;
@@ -131,14 +122,11 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	/** actions and behaviors **/
 	public BVBActions bvbActions;
 	
+	/** geometry objects sorter and renderer **/
+	RenderSorter renderSorter;
+	
 	/** boxes around volume **/	
 	final public VolumeBBoxes volumeBoxes;
-	
-	/** separate framebuffer for the transparent rendering **/
-	MultisampleGeometryBuffer sceneBufTransparent = null;
-	
-	/** separate framebuffer for the Eye Dome Lighting rendering **/
-	OffScreenFBWithEDL sceneBufEDL = null;
 	
 	/** clipping boxes **/	
 	public final VolumeBBoxes clipBoxes;
@@ -318,10 +306,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		bvvHandle = ( BvvHandleFrame ) bvv.getBvvHandle();
 		
 		bvvViewer = bvvHandle.getViewerPanel();
-		
-		sceneBufTransparent = new MultisampleGeometryBuffer(BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
 
-		sceneBufEDL = new OffScreenFBWithEDL(BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false);
+		renderSorter = new RenderSorter(this);
+		renderSorter.initBuffer();
+
 		//get renderScene
 		bvvViewer.setRenderScene(this::renderOpaque);
 		bvvViewer.setRenderSceneTransparent(this::renderTransparent);
@@ -597,69 +585,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		{
 			gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);			
 		}
-		//clear buffer with color
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-		gl.glDepthFunc( GL.GL_LESS);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		
-		//get viewport size and transform matrices 
-		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
-		final Matrix4f pvm = new Matrix4f( data.getPv() );
-		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
-		
-		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
-		
-		//draw boxes around volume
-//		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
-		//draw clip boxes
-	//	clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, false );
-
-		int shapeN = shapes.size();
-		//see if we have EDL
-		final ArrayList<BasicShape> shapesEDL = new ArrayList<>();
-		final ArrayList<BasicShape> shapesNonEDL = new ArrayList<>();
-		for(int i = 0; i < shapeN; i++)
-		{
-			final BasicShape sh = shapes.get( i );			
-			if(!sh.isTransparent())
-			{
-				boolean isEDL = false;
-				if(sh instanceof BasicSpots)
-				{
-					final BasicSpots spots = ( BasicSpots ) sh;
-					if(spots.getPointShade() == 2 && spots.getRenderType() < 2)//&& spots.getPointShape() == 0 && spots.getRenderType() == 0)
-					{
-						isEDL = true;
-						shapesEDL.add( sh );
-					}					
-				}
-				if(!isEDL)
-				{
-					shapesNonEDL.add( sh );
-				}
-			}
-		}
-		//draw to EDL framebuffer
-		if(shapesEDL.size() > 0)
-		{
-			sceneBufEDL.bind( gl );
-			for(int i = 0; i < shapesEDL.size(); i++)
-			{
-				final BasicShape sh = shapesEDL.get( i );			
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false  );
-			}
-			sceneBufEDL.unbind( gl, false );
-			sceneBufEDL.drawQuadEDL( gl, BVBSettings.fEDLRadius, BVBSettings.fEDLStrength);
-		}
-		
-		//drawing the rest
-		for(int i = 0; i < shapesNonEDL.size(); i++)
-		{
-			final BasicShape sh = shapesNonEDL.get( i );			
-			sh.draw( gl, pvm, vm, screen_size, nTimePoint, false  );
-		}
+		renderSorter.drawOpaque( gl, data );
 
 		//BG
 		if(bShowBGShader)
@@ -681,47 +607,48 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 //		System.out.println(gl.glGetString( GL.GL_RENDERER ));
 	}
 	
+	@SuppressWarnings( "unused" )
 	public void renderTransparent(final GL3 gl, final RenderData data, final OffScreenFrameBufferWithDepth sceneVolBuffer)
 	{
-		
-		//get viewport size and transform matrices 
-		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
-		final Matrix4f pvm = new Matrix4f( data.getPv() );
-		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
-
-		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
-
-		if( BVBSettings.bWeightedOIT )
-		{
-			sceneBufTransparent.bind( gl );
-			gl.glDepthMask(true);
-			sceneVolBuffer.drawQuadDepth( gl, true );
-			gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE ); // Additive RGB + alpha
-			gl.glBlendEquation( GL.GL_FUNC_ADD );
-		}
-		int shapeN = shapes.size();
-		//disable depth writing
-		gl.glDepthMask(false);
-		for(int i = 0; i < shapeN; i++)
-		{
-			final BasicShape sh = shapes.get( i );			
-			if( sh.isTransparent() )
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT  );
-		}
-		//draw boxes around volume
-		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
-		//draw clip boxes
-		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
-		
-		gl.glDepthMask(true);
-		if(BVBSettings.bWeightedOIT)
-		{
-			sceneBufTransparent.unbind( gl, false );
-			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-			gl.glDisable( GL_DEPTH_TEST );	
-			sceneBufTransparent.drawQuadAlpha( gl );
-		}
+		renderSorter.drawTransparent(gl, sceneVolBuffer);
+//		//get viewport size and transform matrices 
+//		int [] screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
+//		final Matrix4f pvm = new Matrix4f( data.getPv() );
+//		final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+//		final Matrix4f vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
+//
+//		final int nTimePoint = bvvViewer.state().getCurrentTimepoint();
+//
+//		if( BVBSettings.bWeightedOIT )
+//		{
+//			fboTransparent.bind( gl );
+//			gl.glDepthMask(true);
+//			sceneVolBuffer.drawQuadOnlyDepth( gl, true );
+//			gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE ); // Additive RGB + alpha
+//			gl.glBlendEquation( GL.GL_FUNC_ADD );
+//		}
+//		int shapeN = shapes.size();
+//		//disable depth writing
+//		gl.glDepthMask(false);
+//		for(int i = 0; i < shapeN; i++)
+//		{
+//			final BasicShape sh = shapes.get( i );			
+//			if( sh.isTransparent() )
+//				sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT  );
+//		}
+//		//draw boxes around volume
+//		volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+//		//draw clip boxes
+//		clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+//		
+//		gl.glDepthMask(true);
+//		if(BVBSettings.bWeightedOIT)
+//		{
+//			fboTransparent.unbind( gl, false );
+//			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+//			gl.glDisable( GL_DEPTH_TEST );	
+//			fboTransparent.drawQuadAlpha( gl );
+//		}
 	}
 	
 	public void showVolumeBoxes(boolean bShow)

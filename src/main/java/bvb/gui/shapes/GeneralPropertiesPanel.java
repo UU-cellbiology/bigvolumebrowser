@@ -30,9 +30,11 @@ package bvb.gui.shapes;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,6 +51,9 @@ public class GeneralPropertiesPanel extends JPanel
 	final BigVolumeBrowser bvb;
 	final JComboBox<String> cbBlending;
 	final NumberField nfDepthDecay;
+	final JCheckBox cbMultiMesh;
+	final JCheckBox cbMultiSpots;
+
 	
 	public GeneralPropertiesPanel(final BigVolumeBrowser bvb_)
 	{
@@ -80,7 +85,13 @@ public class GeneralPropertiesPanel extends JPanel
 			updateDepthDecay(Math.abs( v ));
 		} );
 		
-			
+		cbMultiMesh = new JCheckBox("Meshes");
+		cbMultiMesh.setSelected( BVBSettings.bMultiSampleMesh );
+		cbMultiMesh.addItemListener( (e) -> updateMSAAMeshes() );
+		cbMultiSpots = new JCheckBox("Spots");
+		cbMultiSpots.setSelected( BVBSettings.bMultiSampleSpots );
+		cbMultiSpots.addItemListener( (e) -> updateMSAASpots() );
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		this.add( new JLabel("Transparency: "), gbc );
@@ -92,7 +103,29 @@ public class GeneralPropertiesPanel extends JPanel
 		this.add( new JLabel("Weighted OIT depth decay: "), gbc );
 		gbc.gridx++;
 		this.add( nfDepthDecay, gbc);
+		
+		JPanel pMSAA = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc2 = new GridBagConstraints();
+		gbc2.gridx = 0;
+		gbc2.gridy = 0;
+		gbc2.insets = new Insets(0, 2, 0, 2);
+		
+		final JLabel lMSAA = new JLabel("MSAA: ");
+		lMSAA.setToolTipText( "Multisample Anti-Aliasing" ); 
+		pMSAA.add( lMSAA, gbc2 );
+		gbc2.gridx ++;
+		pMSAA.add(cbMultiMesh, gbc2 );
+		gbc2.gridx++;
+		pMSAA.add( cbMultiSpots, gbc2);
 
+		gbc.gridwidth = 2;
+		gbc.insets = new Insets(10, 0, 5, 0);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		this.add( pMSAA, gbc );
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		
 		//filler
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -116,14 +149,25 @@ public class GeneralPropertiesPanel extends JPanel
 		}
 	}
 	
-	synchronized void updateDepthDecay(final double v)
+	void updateDepthDecay(final double v)
 	{
-
-		BVBSettings.fOITDepthDecay = (float)Math.max( 0.01, Math.abs( v ));
-		
+		BVBSettings.fOITDepthDecay = (float)Math.max( 0.01, Math.abs( v ));		
 		Prefs.set("BVB.fOITDepthDecay", BVBSettings.fOITDepthDecay);
 		bvb.repaintBVV();
-
 	}
+	
+	void updateMSAAMeshes()
+	{
+		BVBSettings.bMultiSampleMesh = cbMultiMesh.isSelected();		
+		Prefs.set("BVB.bMultiSampleMesh", BVBSettings.bMultiSampleMesh);
+		bvb.repaintBVV();
+	}	
+	
+	void updateMSAASpots()
+	{
+		BVBSettings.bMultiSampleSpots = cbMultiSpots.isSelected();		
+		Prefs.set("BVB.bMultiSampleSpots", BVBSettings.bMultiSampleSpots);
+		bvb.repaintBVV();
+	}	
 	
 }
