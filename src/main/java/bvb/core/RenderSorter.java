@@ -172,13 +172,16 @@ public class RenderSorter
 		for(int i = 0; i < shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );	
-			if(!sh.isTransparent())
+			if(sh.isVisible())
 			{
-				shOpaque.add( sh );
-			}
-			else
-			{
-				shTransparent.add( sh );
+				if(!sh.isTransparent())
+				{
+					shOpaque.add( sh );
+				}
+				else
+				{
+					shTransparent.add( sh );
+				}
 			}
 		}
 
