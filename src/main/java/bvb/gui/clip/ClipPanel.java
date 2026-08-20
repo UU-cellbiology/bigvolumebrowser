@@ -307,12 +307,7 @@ public class ClipPanel extends JPanel
 	}
 	
 	void setPanelsEnabled(boolean bEnabled)
-	{
-	    if (!SwingUtilities.isEventDispatchThread())
-	    {
-	        SwingUtilities.invokeLater(()->setPanelsEnabled(bEnabled));
-	        return;
-	    }		
+	{	
 		clipRangePanel.setEnabled(bEnabled);
 		clipRotationPanel.setEnabled(bEnabled);
 		clipCenterPanel.setEnabled( bEnabled );

@@ -451,7 +451,8 @@ public class VisMesh extends AbstractClipTransformVis
 	@Override
 	public void reload()
 	{
-		initSpotShader();		
+		initSpotShader();	
+		bRebuildShader = true;
 		initialized = false;
 	}
 

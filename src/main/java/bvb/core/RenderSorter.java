@@ -135,6 +135,8 @@ public class RenderSorter
 			final BasicShape sh = shapes.get( i );			
 			sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
 		}
+
+
 	
 		gl.glDepthMask(true);
 		if(BVBSettings.bWeightedOIT)

@@ -9,22 +9,10 @@ in vec2 v_uv;
 uniform int wOIT;
 
 in vec3 posW;
-uniform vec3 clipmin;
-uniform vec3 clipmax;
-uniform int clipactive;
 out vec4 fragColor;
 
 void main()
 {
-    //ROI clipping
-	if(clipactive > 0)
-	{
-		vec3 s = step(clipmin, posW) - step(clipmax, posW);
-		if(s.x * s.y * s.z == clipactive - 1)
-		{
-			discard;
-		}
-	}
 	
 	// drawing of antialiased 3D lines
 	// taken and adapted from 
@@ -71,7 +59,7 @@ void main()
 		{
 			discard;
 		}
-		float val = min(0.25,thickness/spacing);
+		float val = min(0.25, thickness / spacing);
 		center = abs(center-0.25) - 0.25 + val;
 		
 		if(center > 0.0)
@@ -88,7 +76,7 @@ void main()
 
 	}
     vec4 colorout; 
-    if( d < 0) 
+    if( d < 0 ) 
     {
        colorout = vec4(color);     
     } 
@@ -98,7 +86,7 @@ void main()
         colorout = vec4(color.xyz, color.a*exp(-d*d));
     }
     
-    if(wOIT>0)
+    if(wOIT > 0)
 	{
 		//no depth effect
 		//colorout.a = colorout.a * exp( - gl_FragCoord.z * 0.9);

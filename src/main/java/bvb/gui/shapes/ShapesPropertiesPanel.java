@@ -94,12 +94,6 @@ public class ShapesPropertiesPanel extends JPanel
 	        SwingUtilities.invokeLater(this::updateGUI);
 	        return;
 	    }
-	    
-		if(!bvb.selectedObjects.areShapesSelected())
-		{
-			setPanelsEnabled(false);
-			return;
-		}
 		
 		boolean bSpotsUpdate = true;
 		boolean bMeshUpdate = true;
@@ -126,17 +120,5 @@ public class ShapesPropertiesPanel extends JPanel
 			panelMeshesProperties.setEnabled( false );
 
 	}
-	
-	void setPanelsEnabled(boolean bEnabled)
-	{
-	    if (!SwingUtilities.isEventDispatchThread())
-	    {
-	        SwingUtilities.invokeLater(() -> setPanelsEnabled(bEnabled));
-	        return;
-	    }
-		panelSpotsProperties.setEnabled( bEnabled );
-		panelMeshesProperties.setEnabled( bEnabled );
-	}
-	
 	
 }

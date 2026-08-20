@@ -236,11 +236,6 @@ public class TransformPanel extends JPanel
 	
 	private void setPanelsEnabled(boolean bEnabled)
 	{
-	    if (!SwingUtilities.isEventDispatchThread())
-	    {
-	        SwingUtilities.invokeLater(() -> setPanelsEnabled(bEnabled));
-	        return;
-	    }
 		transformScalePanel.setEnabled( bEnabled );
 		transformCentersPanel.setEnabled( bEnabled );
 		transformRotationPanel.setEnabled( bEnabled );

@@ -820,8 +820,7 @@ public class VisSpots extends AbstractClipTransformVis
 			if(!lutGPU.initTexture(gl))
 			{
 				nMapLUTMode = 0;
-			}
-			
+			}		
 		}
 		
 		//let's extract pure projection matrix
@@ -829,7 +828,6 @@ public class VisSpots extends AbstractClipTransformVis
 		final Matrix4f invView = new Matrix4f(vm);
 		invView.invert();
 		pureProj.mul(invView);
-		
 		
 		//full view transform + object transform
 		final Matrix4f vtm = new Matrix4f();
