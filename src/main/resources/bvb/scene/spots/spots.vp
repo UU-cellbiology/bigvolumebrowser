@@ -33,7 +33,7 @@ void main()
     vec4 viewSpacePos = viewSpaceCenter;
  	
     //add width now (avoids shearing, if present)
-    viewSpacePos.xy += aQuadVertex.xy * vScaledPointSize;
+    viewSpacePos.xy += (aQuadVertex.xy) * vScaledPointSize;
     vViewSpaceCenter = viewSpacePos;
  	
     gl_Position = pm * viewSpacePos;

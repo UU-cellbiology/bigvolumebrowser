@@ -20,6 +20,9 @@ public class SpotsSegmentLibrary
 		segments.put( SpotsSegmentType.SpotsRound, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/round.fp", 
 						"roundRenderType" ));
+		segments.put( SpotsSegmentType.SpotsRoundMSAA, 
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/roundMSAA.fp", 
+						"roundRenderType" ));
 		segments.put( SpotsSegmentType.SpotsRoundDepth, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/round_depth.fp", 
 						"spotsRoundShade" ));
@@ -35,6 +38,8 @@ public class SpotsSegmentLibrary
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/round_gauss.fp" ).instantiate());
 		segments.put( SpotsSegmentType.SpotsRoundOutline, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/round_outline.fp" ).instantiate());
+		segments.put( SpotsSegmentType.SpotsRoundOutlineMSAA, 
+				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/round_outlineMSAA.fp" ).instantiate());
 
 		segments.put( SpotsSegmentType.SpotsRoundShaded, 
 				new SegmentTemplate( VisSpots.class, BVBSettings.sShaderPath + "spots/round_shade.fp" ).instantiate());

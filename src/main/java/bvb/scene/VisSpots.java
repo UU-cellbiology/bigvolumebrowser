@@ -130,6 +130,8 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	boolean bCurrentwOIT = false;
 	
+	boolean bCurrMSAA = BVBSettings.bMultiSampleSpots;
+	
 	public VisSpots()
 	{
 
@@ -267,8 +269,17 @@ public class VisSpots extends AbstractClipTransformVis
 		//
 		if(spotShape == SHAPE_ROUND)
 		{
-			final Segment roundShape = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
-					.get( SpotsSegmentType.SpotsRound )).instantiate();
+			final Segment roundShape;
+			if(BVBSettings.bMultiSampleSpots)
+			{
+				roundShape = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
+						.get( SpotsSegmentType.SpotsRoundMSAA )).instantiate();
+			}
+			else
+			{
+				roundShape = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
+						.get( SpotsSegmentType.SpotsRound )).instantiate();
+			}
 			
 			switch(renderType)
 			{
@@ -294,8 +305,16 @@ public class VisSpots extends AbstractClipTransformVis
 				}				
 				break;
 			case RENDER_OUTLINE:
-				roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
-						get( SpotsSegmentType.SpotsRoundOutline));
+				if(BVBSettings.bMultiSampleSpots)
+				{
+					roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
+							get( SpotsSegmentType.SpotsRoundOutlineMSAA));
+				}
+				else
+				{
+					roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
+							get( SpotsSegmentType.SpotsRoundOutline));					
+				}
 				break;				
 			case RENDER_GAUSS:
 				roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
@@ -810,6 +829,12 @@ public class VisSpots extends AbstractClipTransformVis
 			bRebuildShader = true;
 			bCurrentwOIT = bWeightedOIT;
 		}
+		if(bCurrMSAA != BVBSettings.bMultiSampleSpots)
+		{
+			bCurrMSAA = BVBSettings.bMultiSampleSpots;
+			bRebuildShader = true;
+		}
+		
 		if(bRebuildShader)
 		{
 			buildShader();
@@ -903,6 +928,12 @@ public class VisSpots extends AbstractClipTransformVis
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
 			}
 		}
+		if(BVBSettings.bMultiSampleSpots && spotShape == SHAPE_ROUND && !bCurrentwOIT)
+		{
+			gl.glEnable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE);
+			gl.glEnable(GL.GL_SAMPLE_COVERAGE);
+			gl.glDisable(GL.GL_BLEND);
+		}
 
 		gl.glBindVertexArray( vao );
 		gl.glDrawArraysInstanced( GL.GL_TRIANGLE_STRIP, 0, 4, nSpotsN );
@@ -912,7 +943,12 @@ public class VisSpots extends AbstractClipTransformVis
 			if(lutGPU.getTextureID() > 0)
 				gl.glBindTexture( GL_TEXTURE_2D, 0 );
 		}
-		
+		if(BVBSettings.bMultiSampleSpots && spotShape == SHAPE_ROUND && !bCurrentwOIT)
+		{
+			gl.glDisable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE);
+			gl.glDisable(GL.GL_SAMPLE_COVERAGE);
+			gl.glEnable(GL.GL_BLEND);
+		}
 	}
 	
 	Vector2f getScaleFactorNoShear(final Matrix4f vtm)

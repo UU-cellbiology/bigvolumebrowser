@@ -9,7 +9,6 @@ in vec4 vViewSpaceCenter;
 in float scaledPointSize;
 
 uniform vec4 colorin;
-
 uniform mat4 pm;
 
 //$insert{preColorLUT}
