@@ -45,11 +45,12 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import java.awt.Color;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import bvvpg.core.backend.jogl.JoglGpuContext;
@@ -77,6 +78,14 @@ public class VisSpots extends AbstractClipTransformVis
 	private Shader prog;
 
 	private int vao;
+	int quadVBO;
+	int posVbo ;
+	int sizeVbo ;
+	int propertyVbo;
+	
+	int colorsVbo;
+	
+	private boolean bBuffersGenerated = false;
 	
 	private Vector4f l_color;
 	
@@ -122,15 +131,15 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	float fMapAlphaGamma = 1.0f;
 	
-	float fExtraAlpha = 1.0f;
-	
-	int colorsVbo;
+	float fExtraAlpha = 1.0f;	
 	
 	boolean reInitColors = false;
 	
 	boolean bCurrentwOIT = false;
 	
 	boolean bCurrMSAA = BVBSettings.bMultiSampleSpots;
+	
+	FastCpuSplatSorter splatSorter = new FastCpuSplatSorter();
 	
 	public VisSpots()
 	{
@@ -382,7 +391,7 @@ public class VisSpots extends AbstractClipTransformVis
 		vertices = new float [nSpotsN * 3]; //assume 3D
 	}
 	
-	void setVertices( ArrayList< RealPoint > points)
+	void setVertices( List< RealPoint > points)
 	{
 		int i,j;	
 		
@@ -397,12 +406,14 @@ public class VisSpots extends AbstractClipTransformVis
 				vertices[i*3+j] = points.get(i).getFloatPosition(j);
 			}			
 		}		
+		
+		splatSorter.allocate( nSpotsN );
 		initialized = false;
 	}
 
 	
 	/** any of the last two arguments can be null **/
-	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_, final float [] property_)
+	public void setVertices( final List< RealPoint > points, final float [] spotSizes_, final float [] property_)
 	{	
 		setVertices(points);
 
@@ -643,6 +654,62 @@ public class VisSpots extends AbstractClipTransformVis
 		return spotShade;
 	}	
 	
+	private void generateBuffers(final GL3 gl )
+	{
+		
+		final int[] tmp = new int[ 5 ];
+		gl.glGenBuffers( 5, tmp, 0 );
+		quadVBO = tmp [ 0 ];
+		posVbo = tmp[ 1 ];
+		sizeVbo = tmp[ 2 ];
+		propertyVbo = tmp[ 3 ];
+		colorsVbo = tmp[ 4 ];
+		
+		gl.glGenVertexArrays( 1, tmp, 0 );
+		vao = tmp[ 0 ];
+		
+		//this can be done once
+		
+		gl.glBindVertexArray( vao );
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, quadVBO );
+		gl.glVertexAttribPointer(0, 2, GL.GL_FLOAT, false, 2 * Float.BYTES, 0);
+		gl.glEnableVertexAttribArray(0);
+
+		
+		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
+		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
+		gl.glEnableVertexAttribArray( 1 );
+		gl.glVertexAttribDivisor(1, 1);
+		
+		if( fSpotSize < 0.0f )
+		{
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
+			gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 2 );
+			gl.glVertexAttribDivisor(2, 1);
+		}
+		if( property != null )
+		{		
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
+			gl.glVertexAttribPointer( 3, 1, GL_FLOAT, false, Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 3 );
+			gl.glVertexAttribDivisor(3, 1);
+		}
+		
+		if( colors != null )
+		{		
+			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
+			gl.glVertexAttribPointer( 4, 4, GL_FLOAT, false, 4 * Float.BYTES, 0 );
+			gl.glEnableVertexAttribArray( 4 );
+			gl.glVertexAttribDivisor(4, 1);
+		}
+		
+		gl.glBindVertexArray( 0 );
+		
+		bBuffersGenerated = true;
+	}
+	
 	private void init( final GL3 gl )
 	{
 		
@@ -668,17 +735,14 @@ public class VisSpots extends AbstractClipTransformVis
 			     0.5f,  0.5f
 			};
 
-		// reserve buffers
+		// ..:: VERTEX BUFFERS & ARRAY OBJECTS ::..
 
-		final int[] tmp = new int[ 5 ];
-		gl.glGenBuffers( 5, tmp, 0 );
-		final int quadVBO = tmp [ 0 ];
-		final int posVbo = tmp[ 1 ];
-		final int sizeVbo = tmp[ 2 ];
-		final int propertyVbo = tmp[ 3 ];
-		colorsVbo = tmp[ 4 ];
+		if(!bBuffersGenerated)
+		{
+			generateBuffers( gl );
+		}	
 		
-		
+		//upload data to GPU
 		// ..:: QUAD BUFFER ::..
 		
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, quadVBO);
@@ -717,48 +781,6 @@ public class VisSpots extends AbstractClipTransformVis
 			gl.glBufferData( GL.GL_ARRAY_BUFFER, colors.length * Float.BYTES, FloatBuffer.wrap( colors ), GL.GL_STATIC_DRAW );
 			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
 		}
-		
-		
-		// ..:: VERTEX ARRAY OBJECT ::..
-
-		gl.glGenVertexArrays( 1, tmp, 0 );
-		vao = tmp[ 0 ];
-		gl.glBindVertexArray( vao );
-		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, quadVBO );
-		gl.glVertexAttribPointer(0, 2, GL.GL_FLOAT, false, 2 * Float.BYTES, 0);
-		gl.glEnableVertexAttribArray(0);
-
-		
-		gl.glBindBuffer( GL.GL_ARRAY_BUFFER, posVbo );
-		gl.glVertexAttribPointer( 1, 3, GL_FLOAT, false, 3 * Float.BYTES, 0 );
-		gl.glEnableVertexAttribArray( 1 );
-		gl.glVertexAttribDivisor(1, 1);
-		
-		if( fSpotSize < 0.0f )
-		{
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, sizeVbo );
-			gl.glVertexAttribPointer( 2, 1, GL_FLOAT, false, Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 2 );
-			gl.glVertexAttribDivisor(2, 1);
-		}
-		if( property != null )
-		{		
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, propertyVbo );
-			gl.glVertexAttribPointer( 3, 1, GL_FLOAT, false, Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 3 );
-			gl.glVertexAttribDivisor(3, 1);
-		}
-		
-		if( colors != null )
-		{		
-			gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorsVbo );
-			gl.glVertexAttribPointer( 4, 4, GL_FLOAT, false, 4 * Float.BYTES, 0 );
-			gl.glEnableVertexAttribArray( 4 );
-			gl.glVertexAttribDivisor(4, 1);
-		}
-		
-		gl.glBindVertexArray( 0 );
 		
 		initialized = true;
 		bLocked  = false;
@@ -806,7 +828,12 @@ public class VisSpots extends AbstractClipTransformVis
 	@Override
 	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final int nTimePoint, final boolean bWeightedOIT)
 	{
-	
+		float zx = vm.m02();
+		float zy = vm.m12();
+		float zz = vm.m22();
+		float zOffset = vm.m32();
+		splatSorter.sortBackToFront( nSpotsN, vertices, spotSizes, colors, zx, zy, zz, zOffset);
+		initialized = false;
 		if ( !initialized )
 			init( gl );
 		
@@ -824,6 +851,7 @@ public class VisSpots extends AbstractClipTransformVis
 				exc.printStackTrace();
 			}
 		}
+		
 		if(bWeightedOIT != bCurrentwOIT)
 		{
 			bRebuildShader = true;
@@ -847,7 +875,8 @@ public class VisSpots extends AbstractClipTransformVis
 				nMapLUTMode = 0;
 			}		
 		}
-		
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 		//let's extract pure projection matrix
 		final Matrix4f pureProj = new Matrix4f(pvm);
 		final Matrix4f invView = new Matrix4f(vm);

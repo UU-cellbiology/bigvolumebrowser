@@ -89,16 +89,14 @@ public class LASImport extends SwingWorker<Void, String>
 	        // read coordinates from point
 			vertices.add( new RealPoint(new double[] {p.getX(), p.getY(), p.getZ()}));
 			
-			colors[nCount*4] = p.getRed()/255f;
-			colors[nCount*4 + 1] = p.getGreen()/255f;
-			colors[nCount*4 + 2] = p.getBlue()/255f;
-			colors[nCount*4 + 3] = 1.0f;
+			colors[nCount * 4] = p.getRed()/255f;
+			colors[nCount * 4 + 1] = p.getGreen()/255f;
+			colors[nCount * 4 + 2] = p.getBlue()/255f;
+			colors[nCount * 4 + 3] = 1.0f;
 	    	nCount++;
 	    	publish("Progress " + Double.toString( (double)nCount/((double)nMaxRecords)));
 	    	//IJ.showProgress(  );
-
 	    }
-
 	    spotsLAS.setPoints( vertices, null, null );
 	    spotsLAS.setColors( colors );
 	    return null;

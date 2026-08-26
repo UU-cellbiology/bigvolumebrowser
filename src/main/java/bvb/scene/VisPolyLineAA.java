@@ -220,7 +220,7 @@ public class VisPolyLineAA
 		vaos = new int[ 4 ];
 		
 		gl.glGenBuffers( 4, vbos, 0 );
-		for(int i=0;i<4;i++)
+		for(int i = 0; i < 4; i++)
 			vaos[i] = vbos[i];
 		gl.glGenVertexArrays( 1, vaos, 0 );
 		vao = vaos[ 0 ];

@@ -63,6 +63,7 @@ import bvb.gui.GBCHelper;
 import bvb.gui.NumberField;
 import bvb.io.shapes.GltfImporter;
 import bvb.io.shapes.LASImport;
+import bvb.io.shapes.PLYImport;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
@@ -121,13 +122,17 @@ public class PanelAddShapes extends JPanel
 		//get the values
 		if(dialSpots.bAllSuccess)
 		{
-			if(!dialSpots.bLAZfile)
+			if(dialSpots.bLAZfile)
 			{
-				parseSpots(dialSpots);
+				importLAS(dialSpots.fileSpots);
+			}
+			else if(dialSpots.bPLYfile)
+			{
+				importPLY(dialSpots.fileSpots);
 			}
 			else
 			{
-				importLAS(dialSpots.fileSpots);
+				parseSpots(dialSpots);
 			}
 		}
 	}
@@ -177,6 +182,27 @@ public class PanelAddShapes extends JPanel
 			importLAS.execute();
 			
 		}
+	}
+	
+	void importPLY (final File filein)
+	{
+
+		PLYImport importPLY = new PLYImport();
+		importPLY.filein = filein;
+		importPLY.addPropertyChangeListener( (e)->
+		{			
+			if(importPLY.getState() == StateValue.DONE)
+			{
+				if(!importPLY.bSpotsRead )
+				{
+					importPLY.bSpotsRead = true; 
+					final Spots importedSpots = importPLY.spotsPLY;
+					importedSpots.setName( Misc.getSourceStyleName( filein ) );
+					bvb.addShape( importedSpots );
+				}
+			}
+		});
+		importPLY.execute();
 	}
 	
 	void parseSpots(final SpotsLoadDialog dialSpots)

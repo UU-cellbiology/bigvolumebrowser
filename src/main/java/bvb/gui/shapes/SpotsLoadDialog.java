@@ -111,6 +111,8 @@ public class SpotsLoadDialog
     
 	public boolean bLAZfile = false;
 	
+	public boolean bPLYfile = false;
+	
 	public SpotsLoadDialog(BigVolumeBrowser bvb_)
 	{
 		bvb = bvb_;
@@ -503,17 +505,16 @@ public class SpotsLoadDialog
 	{
 		if (fileSpots != null)
 		{
-			//check if it is LAS LAZ file
-			
+			//check if it is LAS LAZ file			
 			String fileName = fileSpots.getName();
 			if(fileName.toLowerCase().endsWith( "las" )||fileName.toLowerCase().endsWith( "laz" ))
 			{
 				bLAZfile = true;
 				jStatus.setText( "Ready to load LAS/LAZ dataset");
 				butOk.setEnabled( true );
-				for(int i = 0; i<cbColumnsAssign.size(); i++ )
+				for(int i = 0; i < cbColumnsAssign.size(); i++ )
 				{
-					cbColumnsAssign.get( i).setEnabled( false );	
+					cbColumnsAssign.get( i ).setEnabled( false );	
 				}
 				table.setEnabled( false );
 				table.setModel(dummyTableModel());
@@ -522,8 +523,27 @@ public class SpotsLoadDialog
 				cbUnits.setEnabled( false );
 				cbSize.setEnabled( false );
 			}
-			else
+			if(fileName.toLowerCase().endsWith( "ply" ))
 			{
+				bPLYfile = true;
+				jStatus.setText( "Ready to load PLY dataset");
+				butOk.setEnabled( true );
+				for(int i = 0; i < cbColumnsAssign.size(); i++ )
+				{
+					cbColumnsAssign.get( i ).setEnabled( false );	
+				}
+				table.setEnabled( false );
+				table.setModel(dummyTableModel());
+				cbHasHeader.setEnabled( false );
+				cbSeparator.setEnabled( false );
+				cbUnits.setEnabled( false );
+				cbSize.setEnabled( false );
+			}
+			
+			if(!bLAZfile && !bPLYfile )
+			{
+				bLAZfile = false;
+				bPLYfile = false;
 				cbHasHeader.setEnabled( true );
 				cbSeparator.setEnabled( true );
 				cbUnits.setEnabled( true );
