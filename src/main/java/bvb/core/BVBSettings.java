@@ -91,16 +91,18 @@ public class BVBSettings
 	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
 	
 	/** render meshes via multisample buffer **/
-	public static boolean bMultiSampleMesh = Prefs.get( "bMultiSampleMesh", true );
+	public static boolean bMultiSampleMesh = Prefs.get( "BVB.bMultiSampleMesh", true );
 
 	/** render spots via multisample buffer **/
-	public static boolean bMultiSampleSpots = Prefs.get( "bMultiSampleSpots", true );
+	public static boolean bMultiSampleSpots = Prefs.get( "BVB.bMultiSampleSpots", true );
 
 	/** radius for Eye Dome Lighting **/
 	public static float fEDLRadius = (float)Prefs.get("BVB.fEDLRadius", 5.0);
 	
 	/** strength for Eye Dome Lighting **/	
 	public static float fEDLStrength = (float)Prefs.get("BVB.fEDLStrength", 3.0);
+	
+	public static boolean bSortSpotsAlphaMode = Prefs.get( "BVB.bSortSpotsAlphaMode", true );
 	
 	public static String sIconPath = "/bvb/icons/";
 	

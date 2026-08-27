@@ -75,13 +75,13 @@ public class LASImport extends SwingWorker<Void, String>
 		
 		final ArrayList<RealPoint> vertices = new ArrayList<>();
 		
-		spotsLAS = new Spots(fPointSize, new Color(255,0,0,255), VisSpots.SHAPE_ROUND, VisSpots.RENDER_FILLED);
+		spotsLAS = new Spots(fPointSize, new Color(255, 0, 0, 255), VisSpots.SHAPE_ROUND, VisSpots.RENDER_FILLED);
 		
 		long nRecords = reader.getHeader().getNumberOfPointRecords();
 		
 		int nMaxRecords = (int)nRecords;
 		//System.out.println(nRecords);
-		float [] colors = new float[(nMaxRecords)*4];
+		float [] colors = new float[(nMaxRecords) * 4];
 		for (LASPoint p : reader.getPoints()) 
 	    {
 	    	if(nCount >= nMaxRecords)
@@ -89,10 +89,10 @@ public class LASImport extends SwingWorker<Void, String>
 	        // read coordinates from point
 			vertices.add( new RealPoint(new double[] {p.getX(), p.getY(), p.getZ()}));
 			
-			colors[nCount*4] = p.getRed()/255f;
-			colors[nCount*4 + 1] = p.getGreen()/255f;
-			colors[nCount*4 + 2] = p.getBlue()/255f;
-			colors[nCount*4 + 3] = 1.0f;
+			colors[nCount * 4] = p.getRed()/255f;
+			colors[nCount * 4 + 1] = p.getGreen()/255f;
+			colors[nCount * 4 + 2] = p.getBlue()/255f;
+			colors[nCount * 4 + 3] = 1.0f;
 	    	nCount++;
 	    	publish("Progress " + Double.toString( (double)nCount/((double)nMaxRecords)));
 	    	//IJ.showProgress(  );

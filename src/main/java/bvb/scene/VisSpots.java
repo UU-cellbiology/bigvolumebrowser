@@ -41,7 +41,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import java.awt.Color;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -130,6 +130,13 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	boolean bCurrMSAA = BVBSettings.bMultiSampleSpots;
 	
+	float [] prevViewAndOffset = new float[4];
+	
+	final FastCpuSplatSorter splatSorter = new FastCpuSplatSorter();
+	
+	private static final float ROTATION_THRESHOLD_SQ = 0.05f; // ~1.28 degrees change
+	private static final float TRANSLATION_THRESHOLD_SQ = 0.01f; // Adjust based on scene scale
+	
 	public VisSpots()
 	{
 
@@ -156,7 +163,7 @@ public class VisSpots extends AbstractClipTransformVis
 		vertices = new float [nSpotsN * 3]; //assume 3D
 	}
 	
-	void setVertices( ArrayList< RealPoint > points)
+	void setVertices( List< RealPoint > points)
 	{
 		int i,j;	
 		
@@ -176,7 +183,7 @@ public class VisSpots extends AbstractClipTransformVis
 
 	
 	/** any of the last two arguments can be null **/
-	public void setVertices( final ArrayList< RealPoint > points, final float [] spotSizes_, final float [] property_)
+	public void setVertices( final List< RealPoint > points, final float [] spotSizes_, final float [] property_)
 	{	
 		setVertices(points);
 
@@ -602,6 +609,16 @@ public class VisSpots extends AbstractClipTransformVis
 	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final int nTimePoint, final AlphaType alphaType)
 	{
 	
+		//sort spots via depth
+		if(BVBSettings.bSortSpotsAlphaMode && alphaType == AlphaType.ALPHA_OVER)
+		{
+			if(!viewVectorTheSame(vm))
+			{
+				splatSorter.sortBackToFront( nSpotsN, vertices, spotSizes, colors, prevViewAndOffset, colors != null, fSpotSize < 0.0f);
+				initialized = false;
+			}
+		}
+		
 		if ( !initialized )
 			init( gl );
 		
@@ -612,7 +629,7 @@ public class VisSpots extends AbstractClipTransformVis
 		{
 			try
 			{
-				Thread.sleep( 10 );
+				Thread.sleep( 1 );
 			}
 			catch ( InterruptedException exc )
 			{
@@ -636,6 +653,7 @@ public class VisSpots extends AbstractClipTransformVis
 			buildSpotsShader( alphaType );
 			bRebuildShader = false;
 		}
+		
 		if(nMapLUTMode > 0 && lutGPU != null)
 		{
 			if(!lutGPU.initTexture(gl))
@@ -643,6 +661,7 @@ public class VisSpots extends AbstractClipTransformVis
 				nMapLUTMode = 0;
 			}		
 		}
+
 		
 		//let's extract pure projection matrix
 		final Matrix4f pureProj = new Matrix4f(pvm);
@@ -770,5 +789,46 @@ public class VisSpots extends AbstractClipTransformVis
 		float trueScaleY = (float) Math.sqrt(cleanUx * cleanUx + cleanUy * cleanUy + cleanUz * cleanUz);
 		
 		return new Vector2f(trueZoomScale, trueScaleY);
+	}
+	
+	boolean viewVectorTheSame(final Matrix4fc vm)
+	{
+		float vX = vm.m02();
+	    float vY = vm.m12();
+	    float vZ = vm.m22();
+	    float vOffset = vm.m32();
+	    
+	    float lenSq = vX * vX + vY * vY + vZ * vZ;
+	    if (lenSq < 1e-8f) return false; // Guard against degenerate zero matrix
+
+	    float invLen = (float) (1.0 / Math.sqrt(lenSq));
+	 // 2. Normalized unit direction vector [-1, 1]
+	    vX *= invLen;
+	    vY *= invLen;
+	    vZ *= invLen;
+	    
+	    // Scale-normalized Z translation
+	    vOffset *= invLen;
+
+	    float dRotX = vX - prevViewAndOffset[0];
+	    float dRotY = vY - prevViewAndOffset[1];
+	    float dRotZ = vZ - prevViewAndOffset[2];
+	    float rotDiffSq = dRotX * dRotX + dRotY * dRotY + dRotZ * dRotZ;
+
+	    // 4. Normalized Translation Difference - Scale-Invariant
+	    float dTransZ = vOffset - prevViewAndOffset[3];
+	    float transDiffSq = dTransZ * dTransZ;
+	    System.out.println(Float.toString( transDiffSq ) + " "+Float.toString( rotDiffSq ));
+	    if (rotDiffSq > ROTATION_THRESHOLD_SQ || transDiffSq > TRANSLATION_THRESHOLD_SQ) {
+	    	prevViewAndOffset[0] = vX;
+	        prevViewAndOffset[1] = vY;
+	        prevViewAndOffset[2] = vZ;
+	        prevViewAndOffset[3] = vOffset;
+	        System.out.println("resort!");
+	        return false;
+	    }
+	    
+	    	
+	    return true;
 	}
 }

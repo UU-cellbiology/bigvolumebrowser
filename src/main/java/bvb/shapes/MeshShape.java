@@ -131,7 +131,7 @@ public class MeshShape extends AbstractClipTransformSingleShape implements Basic
 			{
 				mesh = PLYMeshIO.open( sFilename );				
 			}
-			catch ( IOException exc )
+			catch ( Exception exc )
 			{
 				exc.printStackTrace();
 				return null;
