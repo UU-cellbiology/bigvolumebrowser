@@ -13,6 +13,7 @@ import org.joml.Matrix4f;
 
 import bvb.shapes.BasicMeshShape;
 import bvb.shapes.BasicShape;
+import bvb.shapes.BasicShape.AlphaType;
 import bvb.shapes.BasicSpots;
 import bvvpg.core.offscreen.FlexibleFBO;
 import bvvpg.core.offscreen.OffScreenFrameBufferWithDepth;
@@ -59,7 +60,7 @@ public class RenderSorter
 		{
 			for(final BasicShape sh : shOpaqueRegular)
 			{
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, AlphaType.OPAQUE );
 			}
 		}
 		if(!shOpaqueMSAA.isEmpty())
@@ -69,7 +70,7 @@ public class RenderSorter
 
 			for(final BasicShape sh : shOpaqueMSAA)
 			{
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, AlphaType.OPAQUE );
 			}			
 			flexibleFBO.unbind( gl, false );
 			flexibleFBO.drawQuadColorDepth( gl );
@@ -82,7 +83,7 @@ public class RenderSorter
 
 			for(final BasicShape sh : shOpaqueEDL)
 			{
-				sh.draw( gl, pvm, vm, screen_size, nTimePoint, false );
+				sh.draw( gl, pvm, vm, screen_size, nTimePoint, AlphaType.OPAQUE );
 			}			
 			flexibleFBO.unbind( gl, false );
 			flexibleFBO.drawQuadEDL( gl, BVVSettings.fnratio, BVBSettings.fEDLRadius, BVBSettings.fEDLStrength );
@@ -106,7 +107,7 @@ public class RenderSorter
 			 				   final List<BasicShape> shapes,
 			 				   final boolean bDrawBoxes, final boolean bindMSAA)
 	{
-		if( BVBSettings.bWeightedOIT )
+		if( BVBSettings.transparentAlpha == AlphaType.OIT )
 		{
 			flexibleFBO.bind( gl );
 			gl.glDepthMask(true);
@@ -117,7 +118,11 @@ public class RenderSorter
 		else if (bindMSAA)
 		{
 			flexibleFBO.bind( gl );
-			sceneVolBuffer.drawQuadColorDepth( gl, true );
+			//sceneVolBuffer.drawQuadColorDepth( gl, true );
+			sceneVolBuffer.drawQuadOnlyDepth( gl, true );
+			gl.glDisable( GL.GL_SAMPLE_ALPHA_TO_COVERAGE );
+			gl.glEnable( GL.GL_BLEND );
+	        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
 		}
 		int shapeN = shapes.size();
 		//disable depth writing
@@ -125,21 +130,19 @@ public class RenderSorter
 		
 		if(bDrawBoxes)
 		{
-			bvb.volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+			bvb.volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.transparentAlpha );
 			//draw clip boxes
-			bvb.clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+			bvb.clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.transparentAlpha );
 		}
 		
 		for(int i = 0; i < shapeN; i++)
 		{
 			final BasicShape sh = shapes.get( i );			
-			sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.bWeightedOIT );
+			sh.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.transparentAlpha );
 		}
 
-
-	
 		gl.glDepthMask(true);
-		if(BVBSettings.bWeightedOIT)
+		if(BVBSettings.transparentAlpha == AlphaType.OIT)
 		{
 			flexibleFBO.unbind( gl, false );
 			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
@@ -150,8 +153,11 @@ public class RenderSorter
 		{
 			flexibleFBO.unbind( gl, false );
 			gl.glDisable( GL_DEPTH_TEST );
+			gl.glEnable( GL.GL_BLEND );
+	        gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
 			flexibleFBO.drawQuadColorDepth( gl );
-			//gl.glEnable( GL_DEPTH_TEST );
+			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+	        gl.glEnable( GL.GL_DEPTH_TEST );
 		}
 	}
 	

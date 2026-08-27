@@ -60,6 +60,7 @@ import bvb.scene.shader.SegmentTypeComposite;
 import bvb.scene.shader.SegmentTypeStatic;
 import bvb.scene.shader.SegmentsLibrary;
 import bvb.shapes.MeshProcessing;
+import bvb.shapes.BasicShape.AlphaType;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -457,7 +458,7 @@ public class VisMesh extends AbstractClipTransformVis
 	}
 
 	@Override
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final boolean bWeightedOIT)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final AlphaType alphaType)
 	{
 		
 		while (bLocked)
@@ -497,6 +498,7 @@ public class VisMesh extends AbstractClipTransformVis
 		
 		if(renderType == MESH)
 		{
+			boolean bWeightedOIT = alphaType == AlphaType.OIT; 
 			if(bWeightedOIT != bCurrentwOIT)
 			{
 				bRebuildShader = true;
@@ -597,7 +599,7 @@ public class VisMesh extends AbstractClipTransformVis
 				progPoints.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 			
-			progPoints.getUniform1i("wOIT").set(bWeightedOIT ? 1:0);
+			progPoints.getUniform1i("wOIT").set(bCurrentwOIT ? 1:0);
 			progPoints.setUniforms( context );			
 			progPoints.use( context );
 			

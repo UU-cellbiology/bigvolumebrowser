@@ -39,6 +39,7 @@ import bvb.scene.shader.SegmentTypeStatic;
 import bvb.scene.shader.SegmentsLibrary;
 import bvb.scene.shader.SpotsSegmentLibrary;
 import bvb.scene.shader.SpotsSegmentType;
+import bvb.shapes.BasicShape.AlphaType;
 
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -128,7 +129,7 @@ public class VisSpots extends AbstractClipTransformVis
 	
 	boolean reInitColors = false;
 	
-	boolean bCurrentwOIT = false;
+	AlphaType currentAlphaMode = AlphaType.OIT;
 	
 	boolean bCurrMSAA = BVBSettings.bMultiSampleSpots;
 	
@@ -344,7 +345,7 @@ public class VisSpots extends AbstractClipTransformVis
 		}
 		
 		//weighted OIT
-		if(bCurrentwOIT)
+		if(BVBSettings.transparentAlpha == AlphaType.OIT)
 		{
 			pointFp.insert( "preOIT", SegmentsLibrary.staticSegments.get( SegmentTypeStatic.preOIT ) );
 			pointFp.insert( "wOIT", SegmentsLibrary.staticSegments.get( SegmentTypeStatic.wOIT ) );
@@ -804,7 +805,7 @@ public class VisSpots extends AbstractClipTransformVis
 	}
 
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final int nTimePoint, final boolean bWeightedOIT)
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size , final int nTimePoint, final AlphaType alphaType)
 	{
 	
 		if ( !initialized )
@@ -824,11 +825,12 @@ public class VisSpots extends AbstractClipTransformVis
 				exc.printStackTrace();
 			}
 		}
-		if(bWeightedOIT != bCurrentwOIT)
+		if(alphaType != currentAlphaMode)
 		{
 			bRebuildShader = true;
-			bCurrentwOIT = bWeightedOIT;
+			currentAlphaMode = alphaType;
 		}
+		
 		if(bCurrMSAA != BVBSettings.bMultiSampleSpots)
 		{
 			bCurrMSAA = BVBSettings.bMultiSampleSpots;
@@ -869,7 +871,7 @@ public class VisSpots extends AbstractClipTransformVis
 		prog.getUniformMatrix4f( "vm" ).set( vtm );
 		prog.getUniformMatrix4f( "pm" ).set( pureProj );		
 		prog.getUniform2f( "pScale" ).set( pScale );
-		if(bWeightedOIT)
+		if(currentAlphaMode == AlphaType.OIT)
 		{
 			prog.getUniform1f( "depthDecay" ).set( BVBSettings.fOITDepthDecay );
 			prog.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
@@ -928,13 +930,7 @@ public class VisSpots extends AbstractClipTransformVis
 				gl.glBindTexture( GL_TEXTURE_2D, lutGPU.getTextureID() );
 			}
 		}
-		if(BVBSettings.bMultiSampleSpots && spotShape == SHAPE_ROUND && !bCurrentwOIT)
-		{
-			gl.glEnable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE);
-			gl.glEnable(GL.GL_SAMPLE_COVERAGE);
-			gl.glDisable(GL.GL_BLEND);
-		}
-
+		gl.glDisable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE);
 		gl.glBindVertexArray( vao );
 		gl.glDrawArraysInstanced( GL.GL_TRIANGLE_STRIP, 0, 4, nSpotsN );
 		gl.glBindVertexArray( 0 );		
@@ -943,12 +939,7 @@ public class VisSpots extends AbstractClipTransformVis
 			if(lutGPU.getTextureID() > 0)
 				gl.glBindTexture( GL_TEXTURE_2D, 0 );
 		}
-		if(BVBSettings.bMultiSampleSpots && spotShape == SHAPE_ROUND && !bCurrentwOIT)
-		{
-			gl.glDisable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE);
-			gl.glDisable(GL.GL_SAMPLE_COVERAGE);
-			gl.glEnable(GL.GL_BLEND);
-		}
+
 	}
 	
 	Vector2f getScaleFactorNoShear(final Matrix4f vtm)

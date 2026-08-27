@@ -42,8 +42,34 @@ public interface BasicShape extends Clippable3D
 	
 	public static final int TRANSPARENCY_THRESHOLD = 250;
 	
+	public enum AlphaType {
+		OPAQUE(0),        // max(sx, sy, sz)
+		OIT(1),        // mean (sx, sy, sz)
+		ALPHA_OVER(2);  // cbrt(sx * sy * sz) 
+		
+		private final int id;
+		
+		AlphaType(int id) {
+	        this.id = id;
+	    }
+
+	    public int getId() {
+	        return id;
+	    }
+	    
+		public static AlphaType fromId(int id) 
+		{
+		    for (AlphaType type : values()) {
+		        if (type.getId() == id) {
+		            return type;
+		        }
+		    }
+		    throw new IllegalArgumentException("Unknown RenderType ID: " + id);
+		}
+    }
+	
 	/** method to draw GPU primitives **/
-	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final boolean bWeightedOIT);
+	public void draw( final GL3 gl, final Matrix4fc pvm,  final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final AlphaType alphaType);
 
 	/** method required to reload GPU shader/primitives 
 	 * during BVV restart **/
@@ -73,5 +99,6 @@ public interface BasicShape extends Clippable3D
 	public void setTransform(final AffineTransform3D t);	
 	
 	public void setName(String sName_);
+
 
 }

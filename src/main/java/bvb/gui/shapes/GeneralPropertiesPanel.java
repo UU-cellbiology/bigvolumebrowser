@@ -44,6 +44,7 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.NumberField;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
+import bvb.shapes.BasicShape.AlphaType;
 import ij.Prefs;
 
 public class GeneralPropertiesPanel extends JPanel
@@ -137,9 +138,9 @@ public class GeneralPropertiesPanel extends JPanel
 
 	void updateBlending()
 	{
-		BVBSettings.bWeightedOIT = (cbBlending.getSelectedIndex()==0)?true:false;
+		BVBSettings.transparentAlpha  =  AlphaType.fromId( cbBlending.getSelectedIndex() + 1);
 		bvb.repaintBVV();
-		if(BVBSettings.bWeightedOIT)
+		if(BVBSettings.transparentAlpha == AlphaType.OIT)
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "weighted OIT", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
 		}

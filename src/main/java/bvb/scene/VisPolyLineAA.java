@@ -44,6 +44,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import bvb.core.BVBSettings;
+import bvb.shapes.BasicShape.AlphaType;
 import bvvpg.core.backend.jogl.JoglGpuContext;
 import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.Shader;
@@ -362,7 +363,7 @@ public class VisPolyLineAA
 		initialized = false;
 	}
 
-	public void draw( final GL3 gl, final Matrix4fc pvm, final boolean bWeightedOIT)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final AlphaType alphaType)
 	{
 		if ( !initialized )
 			init( gl );
@@ -376,17 +377,16 @@ public class VisPolyLineAA
 		gl.glGetIntegerv( GL.GL_VIEWPORT, sizeVP, noffset );
 		Vector2f viewPort =  new Vector2f(sizeVP[2], sizeVP[3]);
 		
-		prog.getUniform2f( "viewport" ).set(viewPort);
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );	
+		prog.getUniform2f( "viewport" ).set(viewPort);
 		prog.getUniform4f( "color" ).set(l_color);
 		prog.getUniform1f( "linelength" ).set( lineLength );
 		prog.getUniform1i( "dashed" ).set( bDashed ? 1:0);
 		prog.getUniform1f( "spacing" ).set( fDashSpacing );
 		prog.getUniform1f( "thickness" ).set( fLineThickness );
 		prog.getUniform1f( "antialias" ).set( fAntiAlias );
-		prog.getUniform1i("wOIT").set(bWeightedOIT ? 1:0);
-		
-		
+		prog.getUniform1i( "wOIT" ).set(alphaType == AlphaType.OIT ? 1:0);
+			
 		prog.setUniforms( context );
 		prog.use( context );			
 

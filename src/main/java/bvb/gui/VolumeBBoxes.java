@@ -83,7 +83,7 @@ public class VolumeBBoxes extends AbstractBasicShape
 	}
 
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_, final boolean bWeightedOIT)
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_, final AlphaType alphaType)
 	{
 		if(bVisible)
 		{
@@ -115,14 +115,14 @@ public class VolumeBBoxes extends AbstractBasicShape
 								vbox.setLineColor( BVBSettings.boxHighlightColor );
 								vbox.setLineThickness( SELECTED_WIDTH );
 								vbox.setAntiAlias( SELECTED_WIDTH );
-								vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+								vbox.draw( gl, pvm, vm, screen_size, -1, alphaType);
 								vbox.setAntiAlias(1.5f);
 								vbox.setLineColor(origColor );
 								vbox.setLineThickness( NOT_SELECTED_WIDTH );
 							}
 						}
 
-						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+						vbox.draw( gl, pvm, vm, screen_size, -1, alphaType);
 						
 					}
 				}
@@ -142,13 +142,13 @@ public class VolumeBBoxes extends AbstractBasicShape
 								vbox.setLineColor( BVBSettings.boxHighlightColor );
 								vbox.setLineThickness( SELECTED_WIDTH );
 								vbox.setAntiAlias(  SELECTED_WIDTH );
-								vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+								vbox.draw( gl, pvm, vm, screen_size, -1, alphaType);
 								vbox.setAntiAlias(1.5f);
 								vbox.setLineColor(origColor );
 								vbox.setLineThickness( NOT_SELECTED_WIDTH );
 							}
 						}
-						vbox.draw( gl, pvm, vm, screen_size, -1, bWeightedOIT);
+						vbox.draw( gl, pvm, vm, screen_size, -1, alphaType);
 						
 					}
 				}

@@ -30,6 +30,7 @@ package bvb.core;
 
 import java.awt.Color;
 
+import bvb.shapes.BasicShape.AlphaType;
 import ij.Prefs;
 
 public class BVBSettings
@@ -83,8 +84,8 @@ public class BVBSettings
 	
 	//3D rendering tweaks
 	
-	/** use weighted OIT for transparent part rendering **/
-	public static boolean bWeightedOIT = Prefs.get( "BVB.bWeightedOIT", true );
+	/** type of transparent shapes rendering **/
+	public static AlphaType transparentAlpha = AlphaType.fromId((int)Prefs.get( "BVB.transparentAlpha",  AlphaType.OIT.ordinal() ));
 	
 	/** wOIT depth decay parameter **/
 	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
