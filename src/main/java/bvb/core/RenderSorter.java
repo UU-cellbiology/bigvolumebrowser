@@ -121,7 +121,6 @@ public class RenderSorter
 			//sceneVolBuffer.drawQuadColorDepth( gl, true );
 			sceneVolBuffer.drawQuadOnlyDepth( gl, true );
 			gl.glDisable( GL.GL_SAMPLE_ALPHA_TO_COVERAGE );
-			gl.glEnable( GL.GL_BLEND );
 	        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
 		}
 		int shapeN = shapes.size();
@@ -153,7 +152,6 @@ public class RenderSorter
 		{
 			flexibleFBO.unbind( gl, false );
 			gl.glDisable( GL_DEPTH_TEST );
-			gl.glEnable( GL.GL_BLEND );
 	        gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
 			flexibleFBO.drawQuadColorDepth( gl );
 			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
