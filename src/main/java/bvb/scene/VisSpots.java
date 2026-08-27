@@ -832,7 +832,7 @@ public class VisSpots extends AbstractClipTransformVis
 		float zy = vm.m12();
 		float zz = vm.m22();
 		float zOffset = vm.m32();
-		splatSorter.sortBackToFront( nSpotsN, vertices, spotSizes, colors, zx, zy, zz, zOffset);
+		splatSorter.sortBackToFront( nSpotsN, vertices, spotSizes, colors, zx, zy, zz, zOffset, colors != null, fSpotSize < 0.0f);
 		initialized = false;
 		if ( !initialized )
 			init( gl );

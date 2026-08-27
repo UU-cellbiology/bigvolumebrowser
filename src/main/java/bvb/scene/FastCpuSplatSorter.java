@@ -23,7 +23,7 @@ public class FastCpuSplatSorter {
         float[] vertices, 
         float[] spotSizes, 
         float[] colors, 
-        float viewX, float viewY, float viewZ, float zOff
+        float viewX, float viewY, float viewZ, float zOff, boolean hasColors, boolean hasSizes
     ) {
        // allocate(N);
 
@@ -61,19 +61,27 @@ public class FastCpuSplatSorter {
             tmpVertices[i * 3 + 1] = vertices[origIdx * 3 + 1];
             tmpVertices[i * 3 + 2] = vertices[origIdx * 3 + 2];
 
-            // Copy Spot Size
-            tmpSizes[i] = spotSizes[origIdx];
-
-            // Copy RGBA Color
-            tmpColors[i * 4]     = colors[origIdx * 4];
-            tmpColors[i * 4 + 1] = colors[origIdx * 4 + 1];
-            tmpColors[i * 4 + 2] = colors[origIdx * 4 + 2];
-            tmpColors[i * 4 + 3] = colors[origIdx * 4 + 3];
+            if(hasSizes)
+            {
+	            // Copy Spot Size
+	            tmpSizes[i] = spotSizes[origIdx];
+            }
+            
+            if(hasColors)
+            {
+	            // Copy RGBA Color
+	            tmpColors[i * 4]     = colors[origIdx * 4];
+	            tmpColors[i * 4 + 1] = colors[origIdx * 4 + 1];
+	            tmpColors[i * 4 + 2] = colors[origIdx * 4 + 2];
+	            tmpColors[i * 4 + 3] = colors[origIdx * 4 + 3];
+            }
         }
 
         // 4. Copy back to source buffers (or upload tmp* buffers directly to GPU)
         System.arraycopy(tmpVertices, 0, vertices, 0, N * 3);
-        System.arraycopy(tmpSizes, 0, spotSizes, 0, N);
-        System.arraycopy(tmpColors, 0, colors, 0, N * 4);
+        if(hasSizes)
+        	System.arraycopy(tmpSizes, 0, spotSizes, 0, N);
+        if(hasColors)
+        	System.arraycopy(tmpColors, 0, colors, 0, N * 4);
     }
 }
