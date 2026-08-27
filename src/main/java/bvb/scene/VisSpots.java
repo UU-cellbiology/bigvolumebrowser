@@ -135,9 +135,9 @@ public class VisSpots extends AbstractClipTransformVis
 
 	}
 
-	void buildSpotsShader()
+	void buildSpotsShader(final AlphaType alphaType)
 	{
-		prog = ShaderSpots.buildSpotsShader(this);
+		prog = ShaderSpots.buildSpotsShader(this, alphaType);
 	}
 	
 	/** constructor with multiple vertices **/
@@ -633,7 +633,7 @@ public class VisSpots extends AbstractClipTransformVis
 		
 		if(bRebuildShader)
 		{
-			buildSpotsShader();
+			buildSpotsShader( alphaType );
 			bRebuildShader = false;
 		}
 		if(nMapLUTMode > 0 && lutGPU != null)

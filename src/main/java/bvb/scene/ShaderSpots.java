@@ -14,7 +14,7 @@ import bvvpg.core.shadergen.generate.SegmentedShaderBuilder;
 
 public class ShaderSpots
 {
-	public static Shader buildSpotsShader(final VisSpots visSpots)
+	public static Shader buildSpotsShader(final VisSpots visSpots, final AlphaType alphaType)
 	{
 		final SegmentedShaderBuilder builder = new SegmentedShaderBuilder();
 		//vertex
@@ -149,7 +149,7 @@ public class ShaderSpots
 		if(visSpots.getShape() == VisSpots.SHAPE_ROUND)
 		{
 			final Segment roundShape;
-			if(BVBSettings.bMultiSampleSpots)
+			if(BVBSettings.bMultiSampleSpots && alphaType != AlphaType.OPAQUE)
 			{
 				roundShape = ((SegmentTemplate)SpotsSegmentLibrary.spotSegments
 						.get( SpotsSegmentType.SpotsRoundMSAA )).instantiate();
@@ -186,7 +186,7 @@ public class ShaderSpots
 				}				
 				break;
 			case VisSpots.RENDER_OUTLINE:
-				if(BVBSettings.bMultiSampleSpots)
+				if(BVBSettings.bMultiSampleSpots && alphaType != AlphaType.OPAQUE)
 				{
 					roundShape.insert( "roundRenderType", (Segment)SpotsSegmentLibrary.spotSegments.
 							get( SpotsSegmentType.SpotsRoundOutlineMSAA));
