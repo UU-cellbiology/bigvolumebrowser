@@ -135,23 +135,25 @@ public class RenderSorter
 		else if (bindMSAA)
 		{
 			flexibleFBO.bind( gl );
-			gl.glDisable( GL.GL_DEPTH_TEST );
+			gl.glDepthFunc(GL.GL_ALWAYS);
 			sceneVolBuffer.drawQuadColorDepth( gl, true );
-			gl.glEnable( GL.GL_DEPTH_TEST );
+			gl.glDepthFunc(GL.GL_LESS);
 			gl.glDisable( GL.GL_SAMPLE_ALPHA_TO_COVERAGE );
 	        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-
 		}
-		int shapeN = shapes.size();
+		
 		//disable depth writing
 		gl.glDepthMask(false);
 		
+		//draw boxes to regular buffer
 		if(bDrawBoxes)
 		{
 			bvb.volumeBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.transparentAlpha );
 			//draw clip boxes
 			bvb.clipBoxes.draw( gl, pvm, vm, screen_size, nTimePoint, BVBSettings.transparentAlpha );
 		}
+		
+		final int shapeN = shapes.size();
 		
 		for(int i = 0; i < shapeN; i++)
 		{
