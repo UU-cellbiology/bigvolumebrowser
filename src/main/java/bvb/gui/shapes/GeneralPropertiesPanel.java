@@ -54,6 +54,8 @@ public class GeneralPropertiesPanel extends JPanel
 	final NumberField nfDepthDecay;
 	final JCheckBox cbMultiMesh;
 	final JCheckBox cbMultiSpots;
+	
+	final JCheckBox cbSpotsSorting;
 
 	
 	public GeneralPropertiesPanel(final BigVolumeBrowser bvb_)
@@ -93,6 +95,12 @@ public class GeneralPropertiesPanel extends JPanel
 		cbMultiSpots.setSelected( BVBSettings.bMultiSampleSpots );
 		cbMultiSpots.addItemListener( (e) -> updateMSAASpots() );
 		
+		cbSpotsSorting = new JCheckBox("");
+		cbSpotsSorting.setSelected( BVBSettings.bSortSpotsAlphaMode );
+		cbSpotsSorting.addItemListener( (e) -> updateSpotsSorting() );
+		if(BVBSettings.transparentAlpha == AlphaType.OIT)
+			{cbSpotsSorting.setEnabled( false );}
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		this.add( new JLabel("Transparency: "), gbc );
@@ -127,6 +135,11 @@ public class GeneralPropertiesPanel extends JPanel
 		gbc.gridwidth = 1;
 		gbc.insets = new Insets(0, 0, 0, 0);
 		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		this.add( new JLabel("Sort spots in alpha mode: "), gbc );
+		gbc.gridx++;
+		this.add( cbSpotsSorting, gbc);
 		//filler
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -139,15 +152,19 @@ public class GeneralPropertiesPanel extends JPanel
 	void updateBlending()
 	{
 		BVBSettings.transparentAlpha  =  AlphaType.fromId( cbBlending.getSelectedIndex() + 1);
-		bvb.repaintBVV();
 		if(BVBSettings.transparentAlpha == AlphaType.OIT)
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "weighted OIT", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			cbSpotsSorting.setEnabled( false );
+			BVBSettings.bSortSpotsAlphaMode = false;
 		}
 		else
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "alpha compositing", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			cbSpotsSorting.setEnabled( true );
+			updateSpotsSorting();
 		}
+		bvb.repaintBVV();
 	}
 	
 	void updateDepthDecay(final double v)
@@ -171,4 +188,10 @@ public class GeneralPropertiesPanel extends JPanel
 		bvb.repaintBVV();
 	}	
 	
+	void updateSpotsSorting()
+	{
+		BVBSettings.bSortSpotsAlphaMode = cbSpotsSorting.isSelected();		
+		Prefs.set("BVB.bSortSpotsAlphaMode", BVBSettings.bSortSpotsAlphaMode);
+		bvb.repaintBVV();
+	}
 }

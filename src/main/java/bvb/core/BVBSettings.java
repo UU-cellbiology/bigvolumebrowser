@@ -102,7 +102,7 @@ public class BVBSettings
 	/** strength for Eye Dome Lighting **/	
 	public static float fEDLStrength = (float)Prefs.get("BVB.fEDLStrength", 3.0);
 	
-	public static boolean bSortSpotsAlphaMode = Prefs.get( "BVB.bSortSpotsAlphaMode", true );
+	public static boolean bSortSpotsAlphaMode = Prefs.get( "BVB.bSortSpotsAlphaMode", false );
 	
 	public static String sIconPath = "/bvb/icons/";
 	

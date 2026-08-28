@@ -818,13 +818,13 @@ public class VisSpots extends AbstractClipTransformVis
 	    // 4. Normalized Translation Difference - Scale-Invariant
 	    float dTransZ = vOffset - prevViewAndOffset[3];
 	    float transDiffSq = dTransZ * dTransZ;
-	    System.out.println(Float.toString( transDiffSq ) + " "+Float.toString( rotDiffSq ));
+	    //System.out.println(Float.toString( transDiffSq ) + " "+Float.toString( rotDiffSq ));
 	    if (rotDiffSq > ROTATION_THRESHOLD_SQ || transDiffSq > TRANSLATION_THRESHOLD_SQ) {
 	    	prevViewAndOffset[0] = vX;
 	        prevViewAndOffset[1] = vY;
 	        prevViewAndOffset[2] = vZ;
 	        prevViewAndOffset[3] = vOffset;
-	        System.out.println("resort!");
+	        //System.out.println("resort!");
 	        return false;
 	    }
 	    
