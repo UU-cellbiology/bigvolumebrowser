@@ -52,6 +52,23 @@ public class RenderSorter
 		flexibleFBO = new FlexibleFBO(BVVSettings.renderWidth, BVVSettings.renderHeight, GL_RGBA8, false); 
 	}
 	
+	void initDrawState(final GL3 gl, final RenderData data)
+	{
+		//clear buffer with color
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+		gl.glDepthFunc(GL.GL_LESS);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		
+		//get viewport size and transform matrices 
+		screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
+		pvm = new Matrix4f( data.getPv() );
+		view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+		vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
+		
+		nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
+	}
+	
 	public void drawOpaque(final GL3 gl, final RenderData data)
 	{
 		initDrawState(gl, data);
@@ -107,10 +124,10 @@ public class RenderSorter
 			 				   final List<BasicShape> shapes,
 			 				   final boolean bDrawBoxes, final boolean bindMSAA)
 	{
+		gl.glDepthMask(true);
 		if( BVBSettings.transparentAlpha == AlphaType.OIT )
 		{
 			flexibleFBO.bind( gl );
-			gl.glDepthMask(true);
 			sceneVolBuffer.drawQuadOnlyDepth( gl, true );
 			gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE ); // Additive RGB + alpha
 			gl.glBlendEquation( GL.GL_FUNC_ADD );
@@ -118,10 +135,12 @@ public class RenderSorter
 		else if (bindMSAA)
 		{
 			flexibleFBO.bind( gl );
-			//sceneVolBuffer.drawQuadColorDepth( gl, true );
-			sceneVolBuffer.drawQuadOnlyDepth( gl, true );
+			gl.glDisable( GL.GL_DEPTH_TEST );
+			sceneVolBuffer.drawQuadColorDepth( gl, true );
+			gl.glEnable( GL.GL_DEPTH_TEST );
 			gl.glDisable( GL.GL_SAMPLE_ALPHA_TO_COVERAGE );
 	        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+
 		}
 		int shapeN = shapes.size();
 		//disable depth writing
@@ -141,22 +160,24 @@ public class RenderSorter
 		}
 
 		gl.glDepthMask(true);
+		gl.glDisable( GL_DEPTH_TEST );	
+		
 		if(BVBSettings.transparentAlpha == AlphaType.OIT)
 		{
 			flexibleFBO.unbind( gl, false );
 			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-			gl.glDisable( GL_DEPTH_TEST );	
 			flexibleFBO.drawQuadAlpha( gl );
-			gl.glEnable( GL_DEPTH_TEST );
+
 		}else if (bindMSAA)
 		{
 			flexibleFBO.unbind( gl, false );
-			gl.glDisable( GL_DEPTH_TEST );
-	        gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
-			flexibleFBO.drawQuadColorDepth( gl );
+	        gl.glDisable( GL.GL_BLEND );
+	        //mmm, depth is lost, but should be ok, it is the last drawing call
+			flexibleFBO.drawQuad( gl );
+			gl.glEnable( GL.GL_BLEND );
 			gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-	        gl.glEnable( GL.GL_DEPTH_TEST );
 		}
+		gl.glEnable( GL_DEPTH_TEST );
 	}
 	
 	public void sort()
@@ -259,20 +280,4 @@ public class RenderSorter
 		}
 	}
 	
-	void initDrawState(final GL3 gl, final RenderData data)
-	{
-		//clear buffer with color
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-		gl.glDepthFunc(GL.GL_LESS);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		
-		//get viewport size and transform matrices 
-		screen_size = new int [] {(int)data.getScreenWidth(), (int) data.getScreenHeight()};
-		pvm = new Matrix4f( data.getPv() );
-		view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-		vm = MatrixMath.screen( data.getDCam(), screen_size[0], screen_size[1], new Matrix4f() ).mul( view );
-		
-		nTimePoint = bvb.bvvViewer.state().getCurrentTimepoint();
-	}
 }
