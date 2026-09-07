@@ -128,7 +128,7 @@ public class RenderSorter
 		if( BVBSettings.transparentAlpha == AlphaType.OIT )
 		{
 			flexibleFBO.bind( gl );
-			sceneVolBuffer.drawQuadOnlyDepth( gl, true );
+			sceneVolBuffer.drawQuadDepth( gl, true );
 			gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE ); // Additive RGB + alpha
 			gl.glBlendEquation( GL.GL_FUNC_ADD );
 		}
