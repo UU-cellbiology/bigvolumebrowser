@@ -314,12 +314,12 @@ public class MultiBoxOverlayBVB
 		}
 
 		final IntervalAndTransform source = sources.get( 0 );
-		final double sX0 = source.getSourceInterval().realMin( 0 );
-		final double sY0 = source.getSourceInterval().realMin( 1 );
-		final double sZ0 = source.getSourceInterval().realMin( 2 );
-		final double sXl = source.getSourceInterval().realMax( 0 ) - sX0;
-		final double sYl = source.getSourceInterval().realMax( 1 ) - sY0;
-		final double sZl = source.getSourceInterval().realMax( 2 ) - sZ0;
+		final double sX0 = source.getSourceInterval().realMin( 0 ) - 0.5;
+		final double sY0 = source.getSourceInterval().realMin( 1 ) - 0.5;
+		final double sZ0 = source.getSourceInterval().realMin( 2 ) - 0.5;
+		final double sXl = ( source.getSourceInterval().realMax( 0 ) + 0.5 ) - sX0;
+		final double sYl = ( source.getSourceInterval().realMax( 1 ) + 0.5 ) - sY0;
+		final double sZl = ( source.getSourceInterval().realMax( 2 ) + 0.5 ) - sZ0;
 
 		final double[] px = new double[] { sX0 + sXl / 2, sY0, sZ0 };
 		final double[] py = new double[] { sX0, sY0 + sYl / 2, sZ0 };
@@ -342,12 +342,12 @@ public class MultiBoxOverlayBVB
 	
 	public void renderBoxReal( final RealInterval sourceInterval, final AffineTransform3D transform, final GeneralPath front, final GeneralPath back )
 	{
-		final double sX0 = sourceInterval.realMin( 0 );
-		final double sX1 = sourceInterval.realMax( 0 );
-		final double sY0 = sourceInterval.realMin( 1 );
-		final double sY1 = sourceInterval.realMax( 1 );
-		final double sZ0 = sourceInterval.realMin( 2 );
-		final double sZ1 = sourceInterval.realMax( 2 );
+		final double sX0 = sourceInterval.realMin( 0 ) - 0.5;
+		final double sX1 = sourceInterval.realMax( 0 ) + 0.5;
+		final double sY0 = sourceInterval.realMin( 1 ) - 0.5;
+		final double sY1 = sourceInterval.realMax( 1 ) + 0.5;
+		final double sZ0 = sourceInterval.realMin( 2 ) - 0.5;
+		final double sZ1 = sourceInterval.realMax( 2 ) + 0.5;
 
 		final double[] p000 = new double[] { sX0, sY0, sZ0 };
 		final double[] p100 = new double[] { sX1, sY0, sZ0 };
