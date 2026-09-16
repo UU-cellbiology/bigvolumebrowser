@@ -41,6 +41,7 @@ import bvvpg.vistools.BvvStackSource;
 import ome.zarr.fiji.PyramidalBdv;
 import ome.zarr.fiji.plugins.PyramidalService;
 import ome.zarr.fiji.util.BdvUtils;
+import ome.zarr.imglib2.metadata.Omero;
 
 /**
  * Shows an OME-Zarr resolution pyramid, read by the OME-Zarr Fiji plugin, in a
@@ -82,6 +83,58 @@ public class OmeZarrBVB
 		// it has logged why, but the caller still has to hear that nothing was shown.
 		if ( added == null )
 			throw new IllegalStateException( "BigVolumeBrowser cannot display this dataset, see the log for the reason." );
+		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero, added.getB() );
+	}
+
+	/**
+	 * Applies the OME-Zarr's OMERO display settings to the BVV sources.
+	 * <p>
+	 * Color, display range, per-channel visibility and the start timepoint are set
+	 * by {@link BdvUtils}, the same code the OME-Zarr plugin uses for
+	 * BigDataViewer, so a dataset looks the same in both viewers. That works
+	 * because {@code BvvHandle} exposes the same BigDataViewer core types a
+	 * {@code BdvHandle} does — {@link bdv.viewer.ConverterSetups} and
+	 * {@link bdv.viewer.ViewerState} — even though the two handles are otherwise
+	 * unrelated.
+	 */
+	private static void applyChannelProperties( final BigVolumeBrowser bvb, final Omero omero,
+			final List< BvvStackSource< ? > > bvvSources )
+	{
+		final List< SourceAndConverter< ? > > viewerSources = new ArrayList<>();
+		for ( final BvvStackSource< ? > bvvSource : bvvSources )
+			viewerSources.addAll( bvvSource.getSources() );
+		final List< Omero.Channel > omeroChannels = BdvUtils.omeroChannels( omero, viewerSources.size() );
+		BdvUtils.setTimepoint( omero, bvb.bvvViewer.state() );
+		BdvUtils.setChannelProperties( omeroChannels, viewerSources, bvb.bvvHandle.getConverterSetups(), bvb.bvvViewer.state() );
+		setBrightnessSliders( omeroChannels, bvvSources );
+	}
+
+	/**
+	 * Moves BVB's brightness sliders onto the already applied display range and
+	 * takes their travel from the OMERO window's min and max.
+	 * <p>
+	 * BVV keeps its own brightness state in {@code MinMaxGroup}s that only
+	 * {@link BvvStackSource} writes. Without this the sliders stay at BVB's
+	 * defaults. {@code MinMaxGroup.setRange} pulls the range inside the bounds, so
+	 * both checks matter: a missing min and max read as 0 and 0, and too-narrow
+	 * bounds would undo the range set just before.
+	 */
+	private static void setBrightnessSliders( final List< Omero.Channel > omeroChannels,
+			final List< BvvStackSource< ? > > bvvSources )
+	{
+		if ( omeroChannels.isEmpty() )
+			return;
+		for ( int channelNumber = 0; channelNumber < bvvSources.size(); channelNumber++ )
+		{
+			final Omero.Channel omeroChannel = omeroChannels.get( channelNumber );
+			if ( omeroChannel == null || omeroChannel.window == null )
+				continue;
+			final Omero.Channel.Window window = omeroChannel.window;
+			final BvvStackSource< ? > bvvSource = bvvSources.get( channelNumber );
+			bvvSource.setDisplayRange( window.start, window.end );
+			if ( window.max > window.min )
+				bvvSource.setDisplayRangeBounds( Math.min( window.min, window.start ), Math.max( window.max, window.end ) );
+		}
 	}
 
 	/**
