@@ -83,6 +83,7 @@
 		<bvv-playground.version>0.5.7</bvv-playground.version>
 		<bdv-loaders.version>0.10.0</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
+		<ome-zarr-fiji.version>0.9.0-SNAPSHOT</ome-zarr-fiji.version>
 		<laszip4j.version>0.20</laszip4j.version>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles> 
@@ -101,6 +102,13 @@
 			<artifactId>flatlaf</artifactId>
 		</dependency>
 		
+		<!-- OME-Zarr (brings ome-zarr-imglib2 transitively) -->
+		<dependency>
+			<groupId>ome.zarr</groupId>
+			<artifactId>ome-zarr-fiji</artifactId>
+			<version>${ome-zarr-fiji.version}</version>
+		</dependency>
+
 		<!-- BIOFORMATS -->
 		<dependency>
 			<groupId>ome</groupId>
