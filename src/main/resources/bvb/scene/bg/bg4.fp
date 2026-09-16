@@ -3,7 +3,7 @@ in vec2 posW;
 uniform float fTime;
 
 // taken from 
-// https://www.shadertoy.com/view/4l2cW1
+// https://www.shadertoy.com/view/4t2cDD
 
 void main()
 {

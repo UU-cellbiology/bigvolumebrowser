@@ -34,7 +34,14 @@ import com.jogamp.opengl.GL3;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
+
+import org.joml.Vector2f;
+
+import bdv.util.Affine3DHelpers;
 import bvb.core.BVBSettings;
+import bvb.core.BVVSettings;
 
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
@@ -42,12 +49,13 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
 
+import bvvpg.core.VolumeViewerPanel;
 import bvvpg.core.backend.jogl.JoglGpuContext;
 import bvvpg.core.shadergen.DefaultShader;
 import bvvpg.core.shadergen.generate.Segment;
 import bvvpg.core.shadergen.generate.SegmentTemplate;
 
-public class VisQuad
+public class VisQuadBG
 {
 	private DefaultShader progQuad = null;
 	
@@ -57,31 +65,43 @@ public class VisQuad
 	
 	private boolean quadInitialized;
 	
-	long fTimeIni  = 0;
+	public VolumeViewerPanel bvvViewer; 
+	
+	long fTimeIni = 0;
 
-	public VisQuad(final int nShaderN )
+	public VisQuadBG(final int nShaderN )
 	{
 		nBGShader = nShaderN;
 	
 		initShader();
 	}
+	
+	public void bindBVV(final VolumeViewerPanel bvvViewer_)
+	{
+		this.bvvViewer = bvvViewer_;
+	}
+	
+	
 	private void initShader()
 	{
-		final Segment quadvp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg.vp" ).instantiate();
+		final Segment quadvp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg.vp" ).instantiate();
 		Segment quadfp = null;
 		switch(nBGShader)
 		{
 		case 2:
-			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg2.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg2.fp" ).instantiate();
 			break;
 		case 3:
-			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg3.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg3.fp" ).instantiate();
 			break;
 		case 4:
-			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg4.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg4.fp" ).instantiate();
+			break;
+		case 5:
+			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg5.fp" ).instantiate();
 			break;
 		default:
-			quadfp = new SegmentTemplate( VisQuad.class, BVBSettings.sShaderPath + "bg/bg1.fp" ).instantiate();
+			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg1.fp" ).instantiate();
 		}
 		progQuad = new DefaultShader( quadvp.getCode(), quadfp.getCode() );
 	}
@@ -141,18 +161,23 @@ public class VisQuad
 		
 		JoglGpuContext context = JoglGpuContext.get( gl );
 
+		gl.glDepthFunc( GL.GL_ALWAYS);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
+		
 		//float fTime =  ( System.currentTimeMillis()%200)+1;
 		float fTime =  ( System.currentTimeMillis()- fTimeIni);
 		if(nBGShader == 1 && fTime > 2000)
 		{
 			fTimeIni = System.currentTimeMillis();
 		}
-
-		gl.glDepthFunc( GL.GL_ALWAYS);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
-		
-
+		if(nBGShader == 5)
+		{
+			setGizmoAlignedMatrix();
+		}
+		bvvViewer.state().getViewerTransform();
+		progQuad.getUniform2f( "u_renderSize" ).set( new Vector2f(BVVSettings.renderWidth, BVVSettings.renderHeight) );
+		progQuad.getUniform2f( "u_canvasSize" ).set( new Vector2f(bvvViewer.getWidth(), bvvViewer.getHeight()) );
 		progQuad.getUniform1f("fTime").set(fTime);
 		
 		progQuad.setUniforms( context );
@@ -163,5 +188,30 @@ public class VisQuad
 		gl.glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
 		//gl.glDepthFunc( GL.GL_LESS);
+	}
+	
+	void setGizmoAlignedMatrix()
+	{
+	    AffineTransform3D t = bvvViewer.state().getViewerTransform();
+	    
+	    // Extract normalized rotation components directly from the transform matrix
+	    // Row 0 = Right Vector (X)
+	    // Row 1 = Up Vector (Y)
+	    // Row 2 = Forward/Look Vector (Z)
+	    
+	    float m00 = (float) t.get(0, 0), m01 = (float) t.get(0, 1), m02 = (float) t.get(0, 2);
+	    float m10 = (float) t.get(1, 0), m11 = (float) t.get(1, 1), m12 = (float) t.get(1, 2);
+	    float m20 = (float) t.get(2, 0), m21 = (float) t.get(2, 1), m22 = (float) t.get(2, 2);
+
+	    // Normalize to strip out scale/zoom
+	    float lenX = (float) Math.sqrt(m00*m00 + m01*m01 + m02*m02);
+	    float lenY = (float) Math.sqrt(m10*m10 + m11*m11 + m12*m12);
+	    float lenZ = (float) Math.sqrt(m20*m20 + m21*m21 + m22*m22);
+
+	    // Upload basis vectors to GLSL
+	    progQuad.getUniform3f("u_uu").set(m00 / lenX, m01 / lenX, m02 / lenX); // Camera Right (X)
+	    progQuad.getUniform3f("u_vv").set(-m10 / lenY, -m11 / lenY, -m12 / lenY); // Camera Up (-Y to match GLSL UV)
+	    progQuad.getUniform3f("u_ww").set(m20 / lenZ, m21 / lenZ, m22 / lenZ); // Camera Look (Z)
+
 	}
 }

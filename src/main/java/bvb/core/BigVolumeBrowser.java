@@ -95,7 +95,7 @@ import bvb.registry.ObjectHashStorage;
 import bvb.registry.PropertyRegistry;
 import bvb.registry.ValueCodecRegistry;
 import bvb.scene.VisPolyLineAA;
-import bvb.scene.VisQuad;
+import bvb.scene.VisQuadBG;
 import bvb.shapes.BasicShape;
 import bvb.shapes.VolumeBox;
 import bvb.utils.MCUBVVControls;
@@ -174,8 +174,10 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	final private ArrayList< Listener > listeners = new ArrayList<>();
 	
 	boolean bShowBGShader = BVBSettings.bShowRandomShader;
-	
-	final VisQuad bgQuad = new VisQuad((int)Math.ceil(Math.random()*4.0));
+
+	final VisQuadBG bgQuad = new VisQuadBG(5);
+
+	//final VisQuadBG bgQuad = new VisQuadBG((int)Math.ceil(Math.random() * 5.0));
 	
 	public boolean bManualTransformMode;
 
@@ -307,6 +309,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 		
 		bvvViewer = bvvHandle.getViewerPanel();
 
+		bgQuad.bindBVV( bvvViewer );
 		renderSorter = new RenderSorter(this);
 		renderSorter.initBuffer();
 

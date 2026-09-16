@@ -169,8 +169,7 @@ public class TransformHandlerBVB
 			{
 				viewTransform.applyInverse( vXY[i], vXY[i]);
 				LinAlgHelpers.normalize( vXY[i] );
-			}
-			
+			}			
 		}
 
 		@Override
