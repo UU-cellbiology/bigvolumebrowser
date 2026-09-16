@@ -39,6 +39,8 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import bvb.core.BigVolumeBrowser;
 import bvvpg.vistools.BvvStackSource;
 import ome.zarr.fiji.PyramidalBdv;
+import ome.zarr.fiji.plugins.PyramidalService;
+import ome.zarr.fiji.util.BdvUtils;
 
 /**
  * Shows an OME-Zarr resolution pyramid, read by the OME-Zarr Fiji plugin, in a
@@ -59,6 +61,7 @@ public class OmeZarrBVB
 		final BigVolumeBrowser bvb = new BigVolumeBrowser();
 		bvb.startBVB( pyramidal.getName() );
 		addSources( bvb, pyramidal );
+		registerWindow( bvb, pyramidal );
 		return bvb;
 	}
 
@@ -79,5 +82,21 @@ public class OmeZarrBVB
 		// it has logged why, but the caller still has to hear that nothing was shown.
 		if ( added == null )
 			throw new IllegalStateException( "BigVolumeBrowser cannot display this dataset, see the log for the reason." );
+	}
+
+	/**
+	 * Makes the BVV frame known to {@link PyramidalService}, which tracks the window
+	 * last holding an OME-Zarr for the "open the current OME-Zarr in …" commands.
+	 * <p>
+	 * {@link BigVolumeBrowser#restartBVV()} builds a new frame, so the registration
+	 * is renewed on {@code bvbRestarted}. It and the old frame's
+	 * {@code windowClosed} may arrive in any order, and the reference count stays
+	 * balanced either way.
+	 */
+	static void registerWindow( final BigVolumeBrowser bvb, final PyramidalBdv< ? > pyramidal )
+	{
+		final PyramidalService pyramidalService = pyramidal.getContext().getService( PyramidalService.class );
+		BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService );
+		bvb.addBVBListener( () -> BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService ) ); // NB: a restart replaces the frame, and this call has to register the new one. bvb.bvvFrame needs to be read again.
 	}
 }
