@@ -28,7 +28,10 @@
  */
 package bvb.scijava;
 
+import java.awt.GraphicsEnvironment;
 import java.lang.invoke.MethodHandles;
+
+import javax.swing.JOptionPane;
 
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -43,7 +46,7 @@ import ome.zarr.fiji.PyramidalBdv;
 
 /**
  * Sends the OME-Zarr in the window the user last looked at — an ImageJ image,
- * a BigDataViewer or another BigVolumeBrowser — to a new BigVolumeBrowser,
+ * a BigDataViewer, or another BigVolumeBrowser — to a new BigVolumeBrowser,
  * without going reading the contents again.
  */
 @Plugin( type = Command.class, menuPath = "Plugins > OME-Zarr > Open Current OME-Zarr Image in BigVolumeBrowser" )
@@ -63,6 +66,13 @@ public class OpenInBVBCommand implements Command
 	@Override
 	public void run()
 	{
+		if ( !omeZarrInstalled() )
+		{
+			// NB: no @Parameter is injected in this case, not even uiService: SciJava
+			// cannot scan the Pyramidal field, so it finds no inputs at all.
+			showWithoutServices( "This needs the OME-Zarr update site, which is not activated." );
+			return;
+		}
 		if ( pyramidal == null )
 		{
 			final String message = "The active image is not an OME-Zarr dataset.";
@@ -82,5 +92,30 @@ public class OpenInBVBCommand implements Command
 			if ( uiService.isVisible() )
 				uiService.showDialog( e.getMessage(), TITLE );
 		}
+	}
+
+	/**
+	 * Whether the OME-Zarr plugin this command drives is installed. Looked up by
+	 * name, so that this class stays loadable without it.
+	 */
+	private static boolean omeZarrInstalled()
+	{
+		try
+		{
+			Class.forName( "ome.zarr.fiji.Pyramidal" );
+			return true;
+		}
+		catch ( final Throwable t )
+		{
+			return false;
+		}
+	}
+
+	private static void showWithoutServices( final String message )
+	{
+		if ( GraphicsEnvironment.isHeadless() )
+			logger.warn( message );
+		else
+			JOptionPane.showMessageDialog( null, message, TITLE, JOptionPane.WARNING_MESSAGE );
 	}
 }
