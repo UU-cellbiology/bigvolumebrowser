@@ -31,16 +31,13 @@ void main()
 
     float t = 0.2;
 
-    // 4. Raymarching loop (capped at 300 iterations)
-    for (int i = 0; i < 300; i++) 
+    // Raymarching loop
+    for (int i = 0; i < 1500; i++) 
     {
-        if (t <= 0.05) break;
+        if (t <= 0.1) break;
 
-        // Step forward along the BVV-controlled ray direction
-        if(u_ww.z > 0)
-        	p -= t * d;
-       	else
-       		p += t * d;
+        // Step along the BVV-controlled ray direction
+        p -= t * d;
         r = ceil(p / 3.0);
         
         // Pseudo-random heightmap calculation
@@ -50,7 +47,7 @@ void main()
         t = min(p.z - 8.0 * t * t, 0.2);
     }
 
-    // 5. Output depth/height-based terrain shading
+    // Output depth/height-based terrain shading
     O += p.z / 8.0;
     O.a = 1.0;
 

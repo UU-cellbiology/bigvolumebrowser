@@ -35,11 +35,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.util.LinAlgHelpers;
 
 import org.joml.Vector2f;
 
-import bdv.util.Affine3DHelpers;
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 
@@ -79,6 +77,12 @@ public class VisQuadBG
 	public void bindBVV(final VolumeViewerPanel bvvViewer_)
 	{
 		this.bvvViewer = bvvViewer_;
+		if(nBGShader == 3 || nBGShader == 4)
+		{
+		    final AffineTransform3D t = bvvViewer.state().getViewerTransform();
+		    t.rotate( 0, -Math.PI/2.5 );
+		    bvvViewer.state().setViewerTransform( t );
+		}
 	}
 	
 	
@@ -100,10 +104,15 @@ public class VisQuadBG
 		case 5:
 			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg5.fp" ).instantiate();
 			break;
+		case 6:
+			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg6.fp" ).instantiate();
+			break;
+
 		default:
 			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg1.fp" ).instantiate();
 		}
 		progQuad = new DefaultShader( quadvp.getCode(), quadfp.getCode() );
+
 	}
 	
 	public void reload()
@@ -171,11 +180,11 @@ public class VisQuadBG
 		{
 			fTimeIni = System.currentTimeMillis();
 		}
-		if(nBGShader == 5 || nBGShader == 3)
+		if(nBGShader >=3)
 		{
 			setGizmoAlignedMatrix();
 		}
-		bvvViewer.state().getViewerTransform();
+
 		progQuad.getUniform2f( "u_renderSize" ).set( new Vector2f(BVVSettings.renderWidth, BVVSettings.renderHeight) );
 		progQuad.getUniform2f( "u_canvasSize" ).set( new Vector2f(bvvViewer.getWidth(), bvvViewer.getHeight()) );
 		progQuad.getUniform1f("fTime").set(fTime);
@@ -192,7 +201,7 @@ public class VisQuadBG
 	
 	void setGizmoAlignedMatrix()
 	{
-	    AffineTransform3D t = bvvViewer.state().getViewerTransform();
+	    final AffineTransform3D t = bvvViewer.state().getViewerTransform();
 	    
 	    // Extract normalized rotation components directly from the transform matrix
 	    // Row 0 = Right Vector (X)
