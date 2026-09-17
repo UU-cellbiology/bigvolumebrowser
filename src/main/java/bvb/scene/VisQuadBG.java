@@ -207,20 +207,37 @@ public class VisQuadBG
 	    // Row 0 = Right Vector (X)
 	    // Row 1 = Up Vector (Y)
 	    // Row 2 = Forward/Look Vector (Z)
-	    
+	    double [][] matBVV = new double[3][4];
+	    t.toMatrix( matBVV);
 	    float m00 = (float) t.get(0, 0), m01 = (float) t.get(0, 1), m02 = (float) t.get(0, 2);
 	    float m10 = (float) t.get(1, 0), m11 = (float) t.get(1, 1), m12 = (float) t.get(1, 2);
 	    float m20 = (float) t.get(2, 0), m21 = (float) t.get(2, 1), m22 = (float) t.get(2, 2);
 
-	    // Normalize to strip out scale/zoom
-	    float lenX = (float) Math.sqrt(m00*m00 + m01*m01 + m02*m02);
-	    float lenY = (float) Math.sqrt(m10*m10 + m11*m11 + m12*m12);
-	    float lenZ = (float) Math.sqrt(m20*m20 + m21*m21 + m22*m22);
-
+	    double scaleD = 0.0;
+	    for(int d = 0; d < 3; d++)
+	    {
+	    	scaleD += matBVV[0][d]*matBVV[0][d];
+	    }
+	    
+	    // Get the scale/zoom
+	    float scale = ( float ) Math.sqrt( scaleD);
+	    
 	    // Upload basis vectors to GLSL
-	    progQuad.getUniform3f("u_uu").set(m00 / lenX, m01 / lenX, m02 / lenX); // Camera Right (X)
-	    progQuad.getUniform3f("u_vv").set(-m10 / lenY, -m11 / lenY, -m12 / lenY); // Camera Up (-Y to match GLSL UV)
-	    progQuad.getUniform3f("u_ww").set(m20 / lenZ, m21 / lenZ, m22 / lenZ); // Camera Look (Z)
+	    progQuad.getUniform3f("u_uu").set(m00 / scale, m01 / scale, m02 / scale); // Camera Right (X)
+	    progQuad.getUniform3f("u_vv").set(-m10 / scale, -m11 / scale, -m12 / scale); // Camera Up (-Y to match GLSL UV)
+	    progQuad.getUniform3f("u_ww").set(m20 / scale, m21 / scale, m22 / scale); // Camera Look (Z)
 
+	    //mandelbulb
+	    if(nBGShader == 6)
+	    {
+	    	//lock the scale
+	    	double scalefin = Math.min( Math.max( scale, 0.33f ), 2.37f);
+	    	progQuad.getUniform1f( "scale").set( (float)scalefin );
+	    	t.scale( scalefin/scale );
+	    	bvvViewer.state().setViewerTransform(t);
+//		    System.out.println("scale " + Float.toString( scale ));
+//		    progQuad.getUniform1f( "scale").set( (float)scale );    	
+	    }
+	    
 	}
 }
