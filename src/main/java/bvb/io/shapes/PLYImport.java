@@ -44,8 +44,8 @@ public class PLYImport extends SwingWorker<Void, String>
 		{
 			IJ.showProgress(Double.parseDouble( message.substring( 9, message.length() )));
 		}
-
     }
+	
 	@Override
 	protected Void doInBackground() throws Exception
 	{

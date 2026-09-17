@@ -1,8 +1,28 @@
 layout (location = 0) in vec3 aPos;
 out vec2 posW;
 
+uniform vec2 u_renderSize; // (renderWidth, renderHeight)
+uniform vec2 u_canvasSize; // (width, height)
+
 void main()
 {
-	gl_Position = vec4( aPos, 1.0 );
-	posW = 0.5*(aPos.xy+1);
+	float renderAspect = u_renderSize.x / u_renderSize.y;
+    float canvasAspect = u_canvasSize.x / u_canvasSize.y;
+
+    vec2 posScale = vec2(1.0);
+
+    // Cover / Crop mode via Geometry Scaling
+    if (canvasAspect > renderAspect) {
+        // Canvas is wider: stretch geometry height to keep aspect ratio
+        posScale.y = canvasAspect / renderAspect;
+    } else {
+        // Canvas is taller: stretch geometry width to keep aspect ratio
+        posScale.x = renderAspect / canvasAspect;
+    }
+
+    // Geometry handles screen scaling
+    gl_Position = vec4(aPos.xy * posScale, aPos.z, 1.0);
+
+    // UVs remain strictly inside [0.0, 1.0] range everywhere
+    posW = 0.5 * (aPos.xy + 1.0);
 }
