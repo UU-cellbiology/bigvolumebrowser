@@ -13,6 +13,17 @@ uniform vec3 u_vv; // Camera Up
 uniform vec3 u_ww; // Camera Forward
 uniform float scale;
 
+
+mat3 rotate(float phi) {
+	float c = cos(phi);
+    float s = sin(phi);
+    return mat3(
+        c,   0.0,  -s,   // Column 0
+        0.0, 1.0,   0.0, // Column 1
+        s,   0.0,   c    // Column 2
+    );
+}
+
 // https://iquilezles.org/articles/intersectors
 vec2 isphere( in vec4 sph, in vec3 ro, in vec3 rd )
 {
@@ -208,15 +219,22 @@ vec3 render( in vec2 p, in mat4 cam )
 }
 
 
-#define AA 1
-
 void main()
 {
-    //float time = fTime*.0001;
-    float time = .001;
+	float time = fTime * 0.0001;
+    float dist = -3.5;
 
-	float dist = -3.5;
-    vec3 ro = u_ww * scale * dist;
+    // 1. Calculate base camera position
+    vec3 base_ro = u_ww * scale * dist;
+
+    // 2. Rotate the POSITION around the world origin (0,0,0)
+    mat3 rotX = rotate(time);
+    vec3 ro = rotX * base_ro;
+
+    // 3. Rotate the DIRECTION vectors directly (NO translation/center shift)
+    vec3 cu = rotX * u_uu;
+    vec3 cv = rotX * u_vv;
+    vec3 cw = rotX * u_ww;
 
     // Explicit vec4 columns guarantee exact mat4 indexing
     // Column 0: Right vector (x,y,z) + ro.x in w
@@ -224,26 +242,24 @@ void main()
     // Column 2: Forward vector (x,y,z) + ro.z in w
     // Column 3: Homogeneous coordinate row
     mat4 cam = mat4(
-        vec4(u_uu, ro.x),
-        vec4(u_vv, ro.y),
-        vec4(u_ww, ro.z),
+        vec4(cu, ro.x),
+        vec4(cv, ro.y),
+        vec4(cw, ro.z),
         vec4(0.0, 0.0, 0.0, 1.0)
     );
 
     vec2 p = posW * u_renderSize;
     // render
-    #if AA<2
+
 	vec3 col = render(  p, cam );
-    #else
-    #define ZERO (min(iFrame,0))
-    vec3 col = vec3(0.0);
-    for( int j=ZERO; j<AA; j++ )
-    for( int i=ZERO; i<AA; i++ )
-    {
-	    col += render( p + (vec2(i,j)/float(AA)), cam );
-    }
-	col /= float(AA*AA);
-    #endif
+
+	//const vec3 W = vec3(0.2126, 0.7152, 0.0722);
+	
+	// grayscale 
+	//float gray = dot(col.rgb, W);
+	
+	// Output back as a vec3
+	//col.rgb = vec3(gray);
 
 	fragColor = vec4( col, 1.0 );	
 
