@@ -171,7 +171,7 @@ public class VisQuadBG
 		{
 			fTimeIni = System.currentTimeMillis();
 		}
-		if(nBGShader == 5)
+		if(nBGShader == 5 || nBGShader == 3)
 		{
 			setGizmoAlignedMatrix();
 		}
