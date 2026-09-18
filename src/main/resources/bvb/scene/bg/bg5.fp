@@ -10,9 +10,8 @@ uniform vec3 u_uu; // Right vector (X)
 uniform vec3 u_vv; // Up vector (Y)
 uniform vec3 u_ww; // Forward/Look vector (Z)
 
-// modified from 
-// https://www.shadertoy.com/view/MllcD7
-
+uniform float objSize;
+uniform int nMethod;
 
 // Signed distance function for a box/cube
 float sdBox(vec3 p, vec3 b)
@@ -24,12 +23,15 @@ float sdBox(vec3 p, vec3 b)
 float dist(vec3 p)
 {
     // Field of repeating coordinates (20-unit grid interval)
-    p = mod(p, 40.0) - 20.0;
+    p = mod(p, objSize) - objSize * 0.5;
     
-    //sphere 
-    return length(p)-10.;
-    // Render cubes with half-extent of 4.0 units (cube width/height/depth = 8.0)
-    //return sdBox(p, vec3(4.0));
+    if(nMethod == 0)
+    {
+    	//sphere 
+    	return length(p) - objSize * 0.25;
+    }
+    //cubes
+    return sdBox(p, vec3(objSize * 0.25));
 }
 
 void main()

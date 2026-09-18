@@ -66,6 +66,10 @@ public class VisQuadBG
 	public VolumeViewerPanel bvvViewer; 
 	
 	long fTimeIni = 0;
+	
+	float fObjectSize = 20;
+	
+	int nMethod = 0;
 
 	public VisQuadBG(final int nShaderN )
 	{
@@ -83,6 +87,14 @@ public class VisQuadBG
 		    t.rotate( 0, -Math.PI/2.5 );
 		    bvvViewer.state().setViewerTransform( t );
 		}
+		
+		if(nBGShader == 5)
+		{
+		    final AffineTransform3D t = bvvViewer.state().getViewerTransform();
+		    t.rotate( 1, -0.2 );
+		    bvvViewer.state().setViewerTransform( t );
+		}
+
 	}
 	
 	
@@ -104,15 +116,19 @@ public class VisQuadBG
 		case 5:
 			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg5.fp" ).instantiate();
 			break;
-		case 6:
-			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg6.fp" ).instantiate();
-			break;
+//		case 6:
+//			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg6.fp" ).instantiate();
+//			break;
 
 		default:
 			quadfp = new SegmentTemplate( VisQuadBG.class, BVBSettings.sShaderPath + "bg/bg1.fp" ).instantiate();
 		}
 		progQuad = new DefaultShader( quadvp.getCode(), quadfp.getCode() );
-
+		if(nBGShader == 5)
+		{
+			fObjectSize += Math.random() * 100;
+			nMethod = ( int ) Math.round( Math.random() );
+		}
 	}
 	
 	public void reload()
@@ -180,7 +196,7 @@ public class VisQuadBG
 		{
 			fTimeIni = System.currentTimeMillis();
 		}
-		if(nBGShader >=3)
+		if(nBGShader >=2)
 		{
 			setGizmoAlignedMatrix();
 		}
@@ -217,26 +233,35 @@ public class VisQuadBG
 	    for(int d = 0; d < 3; d++)
 	    {
 	    	scaleD += matBVV[0][d]*matBVV[0][d];
+	    	//reverse the angle of Y to match GLSL UV
+	    	matBVV[1][d] *= -1;
 	    }
 	    
 	    // Get the scale/zoom
 	    float scale = ( float ) Math.sqrt( scaleD);
 	    
-	    // Upload basis vectors to GLSL
-	    progQuad.getUniform3f("u_uu").set(m00 / scale, m01 / scale, m02 / scale); // Camera Right (X)
-	    progQuad.getUniform3f("u_vv").set(-m10 / scale, -m11 / scale, -m12 / scale); // Camera Up (-Y to match GLSL UV)
-	    progQuad.getUniform3f("u_ww").set(m20 / scale, m21 / scale, m22 / scale); // Camera Look (Z)
+	    String [] varNames = new String [] {"u_uu", "u_vv", "u_ww"};
+	    // Upload basis vectors to GLSL	    
+	    for(int d = 0; d < 3; d++)
+	    {
+	    	 progQuad.getUniform3f(varNames[d]).set((float) matBVV[d][0]/scale, (float)matBVV[d][1]/scale, (float)matBVV[d][2]/scale);
+	    }
 
-	    //mandelbulb
-	    if(nBGShader == 6)
+	    //BVB logo
+	    if(nBGShader == 2)
 	    {
 	    	//lock the scale
 	    	double scalefin = Math.min( Math.max( scale, 0.33f ), 2.37f);
-	    	progQuad.getUniform1f( "scale").set( (float)scalefin );
 	    	t.scale( scalefin/scale );
 	    	bvvViewer.state().setViewerTransform(t);
-//		    System.out.println("scale " + Float.toString( scale ));
-//		    progQuad.getUniform1f( "scale").set( (float)scale );    	
+	    	progQuad.getUniform1f( "scale").set( (float)scalefin );
+		    //System.out.println("scale " + Float.toString( scale )); 	
+	    }
+	    //infinite cubes
+	    if(nBGShader == 5)
+	    {
+	    	progQuad.getUniform1f( "objSize").set( fObjectSize );
+	    	progQuad.getUniform1i( "nMethod").set( nMethod );	
 	    }
 	    
 	}
