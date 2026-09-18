@@ -1,5 +1,7 @@
-// taken from 
-// https://www.shadertoy.com/view/4l2cW1
+// modified from 
+// The MIT License https://opensource.org/licenses/MIT
+// Copyright © 2017 Przemyslaw Zaworski
+// https://www.shadertoy.com/view/Xl2yWh
 out vec4 fragColor;
 in vec2 posW;
 

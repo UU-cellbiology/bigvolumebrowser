@@ -1,5 +1,5 @@
-// taken from 
-// https://www.shadertoy.com/view/4l2cW1
+// modified from FabriceNeyret2 (Fabrice Neyret http://evasion.imag.fr/Membres/Fabrice.Neyret/)
+// https://www.shadertoy.com/view/4t2cDD
 out vec4 fragColor;
 in vec2 posW;
 

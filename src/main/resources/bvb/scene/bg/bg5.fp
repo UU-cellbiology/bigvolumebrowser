@@ -1,3 +1,7 @@
+//modified from 
+//https://www.shadertoy.com/view/MllcD7
+// by fizzer (Edd Biddulph), https://fizzer.neocities.org/
+
 out vec4 fragColor;
 in vec2 posW;
 uniform float fTime;
