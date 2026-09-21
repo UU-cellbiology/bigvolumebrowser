@@ -220,19 +220,14 @@ public class VisQuadBG
 	    final AffineTransform3D t = bvvViewer.state().getViewerTransform();
 	    
 	    // Extract normalized rotation components directly from the transform matrix
-	    // Row 0 = Right Vector (X)
-	    // Row 1 = Up Vector (Y)
-	    // Row 2 = Forward/Look Vector (Z)
+
 	    double [][] matBVV = new double[3][4];
 	    t.toMatrix( matBVV);
-	    float m00 = (float) t.get(0, 0), m01 = (float) t.get(0, 1), m02 = (float) t.get(0, 2);
-	    float m10 = (float) t.get(1, 0), m11 = (float) t.get(1, 1), m12 = (float) t.get(1, 2);
-	    float m20 = (float) t.get(2, 0), m21 = (float) t.get(2, 1), m22 = (float) t.get(2, 2);
 
 	    double scaleD = 0.0;
 	    for(int d = 0; d < 3; d++)
 	    {
-	    	scaleD += matBVV[0][d]*matBVV[0][d];
+	    	scaleD += matBVV[0][d] * matBVV[0][d];
 	    	//reverse the angle of Y to match GLSL UV
 	    	matBVV[1][d] *= -1;
 	    }
@@ -241,7 +236,7 @@ public class VisQuadBG
 	    float scale = ( float ) Math.sqrt( scaleD);
 	    
 	    String [] varNames = new String [] {"u_uu", "u_vv", "u_ww"};
-	    // Upload basis vectors to GLSL	    
+	    // Upload basis camera vectors to GLSL	    
 	    for(int d = 0; d < 3; d++)
 	    {
 	    	 progQuad.getUniform3f(varNames[d]).set((float) matBVV[d][0]/scale, (float)matBVV[d][1]/scale, (float)matBVV[d][2]/scale);

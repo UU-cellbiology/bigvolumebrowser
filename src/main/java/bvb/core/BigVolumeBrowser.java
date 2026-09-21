@@ -38,7 +38,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -176,7 +175,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 	
 	boolean bShowBGShader = BVBSettings.bShowRandomShader;
 
-	final VisQuadBG bgQuad = new VisQuadBG(ThreadLocalRandom.current().nextInt(1, 6));
+	final VisQuadBG bgQuad = new VisQuadBG((int) (Math.random() * 5) + 1);
 	
 	public boolean bManualTransformMode;
 
@@ -883,6 +882,7 @@ public class BigVolumeBrowser implements PlugIn, TimePointListener
 
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.xml" );
 		//testBVB.loadBioFormats( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/ExM_MT.tif" );
+		testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/t1-head.xml" );
 
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BigTrace/BigTrace_data/2_channels.xml" );
 		//testBVB.loadBDVHDF5( "/home/eugene/Desktop/projects/BVB/HyperStack.xml" );
