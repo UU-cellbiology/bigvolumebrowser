@@ -110,6 +110,8 @@ public class BVBSettings
 	
 	public static String sUITheme = "";
 	
+	public static String sOMEZarrBackend = Prefs.get( "BVB.sOMEZarrBackend", "Undefined");
+	
 	//warnings
 	/** first start warning, set up BVB **/
 	public static boolean bFirstStart = Prefs.get( "BVB.bFirstStart", true );
@@ -119,6 +121,9 @@ public class BVBSettings
 	
 	/** loaded datset size warning **/	
 	public static boolean bShowFileSizeDialog = Prefs.get( "BVB.bShowFileSizeDialog", true );
+	
+	/** loaded datset size warning **/	
+	public static boolean bShowInformAboutOMEZarrJava = Prefs.get( "BVB.bShowInformAboutOMEZarrJava", true );
 
 	
 	public static Color getInvertedColor(Color color_in)

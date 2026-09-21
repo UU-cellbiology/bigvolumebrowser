@@ -89,7 +89,8 @@
 		<bvv-playground.version>0.6.0-SNAPSHOT</bvv-playground.version>
 		<bdv-loaders.version>0.23.3</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
-		<ome-zarr-fiji.version>0.9.0-SNAPSHOT</ome-zarr-fiji.version>
+		<ome-zarr-fiji.version>0.9.0</ome-zarr-fiji.version>
+		<ome-zarr-zarrjava.version>0.9.0</ome-zarr-zarrjava.version>
 		<laszip4j.version>0.20</laszip4j.version>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles> 
@@ -114,7 +115,11 @@
 			<artifactId>ome-zarr-fiji</artifactId>
 			<version>${ome-zarr-fiji.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>ome.zarr</groupId>
+			<artifactId>ome-zarr-zarrjava</artifactId>
+			<version>${ome-zarr-zarrjava.version}</version>
+		</dependency>
 		<!-- BIOFORMATS -->
 		<dependency>
 			<groupId>ome</groupId>

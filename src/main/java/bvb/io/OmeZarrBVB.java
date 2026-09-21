@@ -61,9 +61,14 @@ public class OmeZarrBVB
 	{
 		final BigVolumeBrowser bvb = new BigVolumeBrowser();
 		bvb.startBVB( pyramidal.getName() );
+		showInBVB(bvb, pyramidal);
+		return bvb;
+	}
+	
+	public static void showInBVB(final BigVolumeBrowser bvb, final PyramidalBdv< ? > pyramidal )
+	{
 		addSources( bvb, pyramidal );
 		registerWindow( bvb, pyramidal );
-		return bvb;
 	}
 
 	/**

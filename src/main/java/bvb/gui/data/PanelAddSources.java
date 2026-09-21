@@ -47,6 +47,7 @@ import java.util.concurrent.Executors;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -58,6 +59,11 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ValuePair;
+import ome.zarr.zarrjava.ZarrJavaPyramidBackend;
+import ome.zarr.fiji.PyramidalBdv;
+import ome.zarr.fiji.read.OmeZarr;
+
+import org.scijava.Context;
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
@@ -65,6 +71,8 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.io.N5OpenDialog;
+import bvb.io.OmeZarrBVB;
+import bvb.scijava.OpenInBVBCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -213,8 +221,108 @@ public class PanelAddSources extends JPanel
 	
 	public void loadZarrDialog()
 	{
-		final N5OpenDialog dialog = new N5OpenDialog();
-		dialog.openBVB(bvb);
+		String sBackEnd = "N5Reader";
+		if(!OpenInBVBCommand.omeZarrInstalled())
+		{
+			if( BVBSettings.bShowInformAboutOMEZarrJava)
+				showOmeZarrJavaInfo();			
+		}
+		else
+		{
+			if(BVBSettings.sOMEZarrBackend.equals( "Undefined" )  )
+			{
+				sBackEnd = showOMEZarrBackendSelectionDialog();
+				if(sBackEnd == null)
+					return;
+				BVBSettings.sOMEZarrBackend = sBackEnd;
+				Prefs.get( "BVB.sOMEZarrBackend", BVBSettings.sOMEZarrBackend);
+			}
+			else
+			{
+				sBackEnd = BVBSettings.sOMEZarrBackend;
+			}
+		}
+		if(sBackEnd.equals( "N5Reader" ))
+		{
+			final N5OpenDialog dialog = new N5OpenDialog();
+			dialog.openBVB(bvb);
+		}
+		//add dialog for disk browsing and/or paste URI, similar to N5 reader but more simple
+		
+		{
+			Context context = new Context();
+			URI uri = URI.create("https://livingobjects.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr");
+
+			OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
+			PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
+			OmeZarrBVB.showInBVB( bvb, pyramidal );
+
+		}
+		
+	}
+	
+	public void showOmeZarrJavaInfo()
+	{
+		JPanel pOMEZarrJavaInfo = new JPanel(new GridBagLayout());
+		JLabel infoLabel = new JLabel(
+			    "<html>Only N5Viewer library is available for opening OME-Zarr format.<br />" +
+			    "Alternatively, you can consider <a href=\"https://github.com/BioImageTools/ome-zarr-fiji-java\">" +
+			    "installing OME-Zarr Fiji java plugin</a></html>"
+			);
+		infoLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		infoLabel.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        try {
+		            Desktop.getDesktop().browse(new URI("https://github.com/BioImageTools/ome-zarr-fiji-java"));
+		        } catch (IOException | URISyntaxException exc) {
+		            exc.printStackTrace();
+		        }
+		    }
+		});
+		String[] options = {"OK"};
+		JCheckBox cbShowAgain = new JCheckBox("Do not show this message again");
+		cbShowAgain.setSelected( false );
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(8, 0, 8, 0);
+		gbc.anchor = GridBagConstraints.WEST;
+
+		// Add the single label containing the entire message
+		pOMEZarrJavaInfo.add(infoLabel, gbc);
+
+		gbc.gridy = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.anchor = GridBagConstraints.EAST;
+		pOMEZarrJavaInfo.add(cbShowAgain, gbc);
+		JOptionPane.showOptionDialog(null, pOMEZarrJavaInfo, "OME-Zarr opening library", 
+				JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		BVBSettings.bShowInformAboutOMEZarrJava = !cbShowAgain.isSelected();
+		Prefs.get( "BVB.bShowInformAboutOMEZarrJava", BVBSettings.bShowInformAboutOMEZarrJava );
+	}
+	
+	String showOMEZarrBackendSelectionDialog()
+	{
+		String [] sBackEnds = new String [] {"OME-Zarr Fiji java", "N5Reader"};
+		JPanel pOMEZarrBackend = new JPanel(new GridBagLayout());
+		JComboBox<String> cbBackEnds = new  JComboBox<>(sBackEnds);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pOMEZarrBackend.add( new JLabel("Please select OME-Zarr opening backend (library)"), gbc);
+		gbc.gridy ++;
+		pOMEZarrBackend.add( new JLabel("(it can be later changed in settings)"), gbc);
+		gbc.gridy ++;	
+		pOMEZarrBackend.add( cbBackEnds, gbc);
+		int reply = JOptionPane.showConfirmDialog(null, pOMEZarrBackend, "OME-Zarr reader library", 
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		if (reply == JOptionPane.OK_OPTION) 
+		{
+			return ( String ) cbBackEnds.getSelectedItem();
+		}
+		return null;
 	}
 	
 	public void loadImagePlus()
