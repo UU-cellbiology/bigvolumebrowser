@@ -88,7 +88,7 @@ public class BVBSettings
 	public static AlphaType transparentAlpha = AlphaType.fromId((int)Prefs.get( "BVB.transparentAlpha",  AlphaType.OIT.ordinal() ));
 	
 	/** wOIT depth decay parameter **/
-	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 2.5);
+	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 0.0);
 	
 	/** render meshes via multisample buffer **/
 	public static boolean bMultiSampleMesh = Prefs.get( "BVB.bMultiSampleMesh", true );

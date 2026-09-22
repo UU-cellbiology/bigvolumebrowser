@@ -77,14 +77,6 @@ public class DataTreeModel implements TreeModel
 	final ImageIcon iconMeshColor;
 	
 	final ImageIcon iconSpots;
-	
-	public enum SPIMDataType {
-		  BDV,
-		  BIOFORMATS,
-		  FIJI,
-		  MOBIE,
-		  SOURCE
-		}
 
 	public DataTreeModel()
 	{

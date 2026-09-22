@@ -28,10 +28,13 @@
  */
 package bvb.io;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.imglib2.util.ValuePair;
+
+import org.scijava.Context;
 
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -40,8 +43,10 @@ import bvb.core.BigVolumeBrowser;
 import bvvpg.vistools.BvvStackSource;
 import ome.zarr.fiji.PyramidalBdv;
 import ome.zarr.fiji.plugins.PyramidalService;
+import ome.zarr.fiji.read.OmeZarr;
 import ome.zarr.fiji.util.BdvUtils;
 import ome.zarr.imglib2.metadata.Omero;
+import ome.zarr.zarrjava.ZarrJavaPyramidBackend;
 
 /**
  * Shows an OME-Zarr resolution pyramid, read by the OME-Zarr Fiji plugin, in a
@@ -156,5 +161,13 @@ public class OmeZarrBVB
 		final PyramidalService pyramidalService = pyramidal.getContext().getService( PyramidalService.class );
 		BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService );
 		bvb.addBVBListener( () -> BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService ) ); // NB: a restart replaces the frame, and this call has to register the new one. bvb.bvvFrame needs to be read again.
+	}
+	
+	public static void openURIZarrJavaBackend(final BigVolumeBrowser bvb, final URI uri)
+	{
+		Context context = new Context();
+		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
+		PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
+		OmeZarrBVB.showInBVB( bvb, pyramidal );	
 	}
 }

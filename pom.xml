@@ -86,7 +86,7 @@
         <!-- Use older versions of dependencies to stay compatible with FIJI stable / Java 8. -->
         <bigdataviewer-core.version>10.6.8</bigdataviewer-core.version>
         <scifio.version>0.48.0</scifio.version>
-		<bvv-playground.version>0.6.0-SNAPSHOT</bvv-playground.version>
+		<bvv-playground.version>0.6.0</bvv-playground.version>
 		<bdv-loaders.version>0.23.3</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
 		<ome-zarr-fiji.version>0.9.0</ome-zarr-fiji.version>

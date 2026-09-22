@@ -59,12 +59,8 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ValuePair;
-import ome.zarr.zarrjava.ZarrJavaPyramidBackend;
-import ome.zarr.fiji.PyramidalBdv;
-import ome.zarr.fiji.read.OmeZarr;
 import ome.zarr.imglib2.ZarrUtils;
 
-import org.scijava.Context;
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
@@ -283,10 +279,7 @@ public class PanelAddSources extends JPanel
 			return ;
 		}
 
-		Context context = new Context();
-		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
-		PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
-		OmeZarrBVB.showInBVB( bvb, pyramidal );	
+		OmeZarrBVB.openURIZarrJavaBackend( bvb, uri);
 	}
 	
 	public void showOmeZarrJavaInfo()
