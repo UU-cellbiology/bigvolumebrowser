@@ -159,7 +159,8 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
 		actions.runnableAction(() -> bvb.bvbCards.animationPanel.makeSnapshot(), "make snapshot", "ctrl S" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
-		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
+		actions.runnableAction(() -> bvb.bvbCards.viewPanel.dialSettings(), "BVB settings", "F9" );
+		actions.runnableAction(() -> runSettingsCommand(), "BVV settings", "F10" );
 		
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigVolumeBrowser actions" );
 		

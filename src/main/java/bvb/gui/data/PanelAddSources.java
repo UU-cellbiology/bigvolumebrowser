@@ -62,6 +62,7 @@ import net.imglib2.util.ValuePair;
 import ome.zarr.zarrjava.ZarrJavaPyramidBackend;
 import ome.zarr.fiji.PyramidalBdv;
 import ome.zarr.fiji.read.OmeZarr;
+import ome.zarr.imglib2.ZarrUtils;
 
 import org.scijava.Context;
 
@@ -72,6 +73,7 @@ import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.io.N5OpenDialog;
 import bvb.io.OmeZarrBVB;
+import bvb.io.OmeZarrSelectionDialog;
 import bvb.scijava.OpenInBVBCommand;
 import ij.IJ;
 import ij.ImagePlus;
@@ -229,36 +231,62 @@ public class PanelAddSources extends JPanel
 		}
 		else
 		{
-			if(BVBSettings.sOMEZarrBackend.equals( "Undefined" )  )
+			if(BVBSettings.sOMEZarrBackend.equals( "Show dialog" )  )
 			{
 				sBackEnd = showOMEZarrBackendSelectionDialog();
 				if(sBackEnd == null)
 					return;
-				BVBSettings.sOMEZarrBackend = sBackEnd;
-				Prefs.get( "BVB.sOMEZarrBackend", BVBSettings.sOMEZarrBackend);
 			}
 			else
 			{
 				sBackEnd = BVBSettings.sOMEZarrBackend;
 			}
 		}
+		
 		if(sBackEnd.equals( "N5Reader" ))
 		{
 			final N5OpenDialog dialog = new N5OpenDialog();
 			dialog.openBVB(bvb);
+			return;
 		}
-		//add dialog for disk browsing and/or paste URI, similar to N5 reader but more simple
+		// OME-Zarr FIJI plugin zarr-java backend
 		
+		// dialog for disk browsing and/or paste URI, similar to N5 reader but more simple
+		OmeZarrSelectionDialog dialogURI = new OmeZarrSelectionDialog ();
+		
+		dialogURI.show();
+		String location = dialogURI.finalURI;
+		if(location == null  || location.isEmpty())
 		{
-			Context context = new Context();
-			URI uri = URI.create("https://livingobjects.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr");
-
-			OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
-			PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
-			OmeZarrBVB.showInBVB( bvb, pyramidal );
-
+			return;
 		}
-		
+		URI uri = null;
+		try
+		{
+			if (location.startsWith("http://") || location.startsWith("https://") || location.startsWith("file://")) {
+				// Already a network URI or file URI
+				uri = URI.create(location);
+			} else {
+				// It's a local file system path -> convert to file URI
+				uri = new File(location).toURI();
+			}
+		}
+		catch(Exception c)
+		{
+			IJ.error( "The given location does not appear to be an OME-Zarr dataset:\n" + location );
+		}
+		if ( uri == null )
+		      return ;
+		if ( !ZarrUtils.isZarr( uri ) )
+		{
+			IJ.error( "The given location does not appear to be an OME-Zarr dataset:\n" + uri  );
+			return ;
+		}
+
+		Context context = new Context();
+		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
+		PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
+		OmeZarrBVB.showInBVB( bvb, pyramidal );	
 	}
 	
 	public void showOmeZarrJavaInfo()
@@ -309,17 +337,31 @@ public class PanelAddSources extends JPanel
 		JPanel pOMEZarrBackend = new JPanel(new GridBagLayout());
 		JComboBox<String> cbBackEnds = new  JComboBox<>(sBackEnds);
 		GridBagConstraints gbc = new GridBagConstraints();
+		
+		JCheckBox cbShowAgain = new JCheckBox("Do not show this dialog again");
+		cbShowAgain.setSelected( false );
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		gbc.insets = new Insets( 4, 0, 4, 0);
 		pOMEZarrBackend.add( new JLabel("Please select OME-Zarr opening backend (library)"), gbc);
 		gbc.gridy ++;
-		pOMEZarrBackend.add( new JLabel("(it can be later changed in settings)"), gbc);
+		pOMEZarrBackend.add( new JLabel("You can change it in the settings [F9]"), gbc);
 		gbc.gridy ++;	
 		pOMEZarrBackend.add( cbBackEnds, gbc);
+		gbc.gridy ++;
+		gbc.anchor = GridBagConstraints.WEST;
+		pOMEZarrBackend.add( cbShowAgain, gbc);
+
 		int reply = JOptionPane.showConfirmDialog(null, pOMEZarrBackend, "OME-Zarr reader library", 
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (reply == JOptionPane.OK_OPTION) 
 		{
+			String sBackend = ( String ) cbBackEnds.getSelectedItem();
+			if( cbShowAgain.isSelected())
+			{
+				BVBSettings.sOMEZarrBackend = sBackend ;
+				Prefs.get( "BVB.sOMEZarrBackend", BVBSettings.sOMEZarrBackend);
+			}
 			return ( String ) cbBackEnds.getSelectedItem();
 		}
 		return null;
@@ -413,7 +455,6 @@ public class PanelAddSources extends JPanel
 
 				}
 			});
-
 			
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(8,0,8,0);

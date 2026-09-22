@@ -63,6 +63,8 @@ public class VisQuadBG
 	
 	private boolean quadInitialized;
 	
+	final int nTotShadersN = 5;
+	
 	public VolumeViewerPanel bvvViewer; 
 	
 	long fTimeIni = 0;
@@ -71,9 +73,9 @@ public class VisQuadBG
 	
 	int nMethod = 0;
 
-	public VisQuadBG(final int nShaderN )
+	public VisQuadBG()
 	{
-		nBGShader = nShaderN;
+		nBGShader = (int) (Math.random() * nTotShadersN) + 1;
 	
 		initShader();
 	}

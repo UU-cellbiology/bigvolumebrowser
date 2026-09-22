@@ -110,7 +110,7 @@ public class BVBSettings
 	
 	public static String sUITheme = "";
 	
-	public static String sOMEZarrBackend = Prefs.get( "BVB.sOMEZarrBackend", "Undefined");
+	public static String sOMEZarrBackend = Prefs.get( "BVB.sOMEZarrBackend", "Show dialog");
 	
 	//warnings
 	/** first start warning, set up BVB **/
@@ -122,7 +122,7 @@ public class BVBSettings
 	/** loaded datset size warning **/	
 	public static boolean bShowFileSizeDialog = Prefs.get( "BVB.bShowFileSizeDialog", true );
 	
-	/** loaded datset size warning **/	
+	/** info about OMEZarr **/	
 	public static boolean bShowInformAboutOMEZarrJava = Prefs.get( "BVB.bShowInformAboutOMEZarrJava", true );
 
 	
