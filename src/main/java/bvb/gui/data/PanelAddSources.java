@@ -279,7 +279,17 @@ public class PanelAddSources extends JPanel
 			return ;
 		}
 
-		OmeZarrBVB.openURIZarrJavaBackend( bvb, uri);
+		try 
+		{
+			OmeZarrBVB.openURIZarrJavaBackend( bvb, uri);
+		}
+		catch(Exception e)
+		{
+			IJ.error("An error occured during OME-Zarr opening of " + uri.toString() + " via zarr-java backend.\n"
+					+ "See console output for details.");
+			System.err.println(e.toString());
+		}
+		
 	}
 	
 	public void showOmeZarrJavaInfo()
