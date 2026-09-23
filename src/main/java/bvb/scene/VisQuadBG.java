@@ -84,9 +84,9 @@ public class VisQuadBG
 
 	public VisQuadBG()
 	{
-		///nBGShader = (int) (Math.random() * nTotShadersN) + 1
+		nBGShader = (int) (Math.random() * nTotShadersN) + 1;
 		//debug
-		nBGShader = 7;
+		//nBGShader = 7;
 	
 		initShader();
 	}
@@ -107,9 +107,7 @@ public class VisQuadBG
 		    t.rotate( 1, -0.2 );
 		    bvvViewer.state().setViewerTransform( t );
 		}
-
 	}
-	
 	
 	private void initShader()
 	{
