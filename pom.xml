@@ -34,6 +34,8 @@
         <developer>
             <id>ekatrukha</id>
             <name>Eugene Katrukha</name>
+   			<organization>Utrecht University</organization>
+			<organizationUrl>https://www.uu.nl/</organizationUrl>
             <url>https://imagej.net/people/ekatrukha</url>
             <roles>
        			<role>founder</role>
@@ -45,6 +47,18 @@
 				<role>maintainer</role>
             </roles>
         </developer>
+        <developer>
+			<id>stefanhahmann</id>
+			<name>Stefan Hahmann</name>
+			<email>hahmann@mpi-cbg.de</email>
+			<url>https://imagej.net/people/stefanhahmann</url>
+			<organization>MPI CBG</organization>
+			<organizationUrl>https://www.mpi-cbg.de/</organizationUrl>
+			<roles>
+				<role>developer</role>
+				<role>reviewer</role>
+			</roles>
+		</developer>
     </developers>
     
   	<contributors>
