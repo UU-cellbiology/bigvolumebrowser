@@ -50,20 +50,22 @@ public class AnimationSnapshot extends SwingWorker<Void, String>
 {
 	final BigVolumeBrowser bvb;
 	final AnimationPanel aPanel;
+	final RenderSettings renderParams;
 	public JPanel glass = null;
 	
 	public AnimationSnapshot(final BigVolumeBrowser bvb_, AnimationPanel aPanel_)
 	{
 		this.bvb = bvb_;
 		this.aPanel = aPanel_;
+		this.renderParams = aPanel.renderSettings;
 	}
 	@Override
 	protected Void doInBackground() throws Exception
 	{
-		bvb.multiBoxOverlayBVB.setEnabled( aPanel.bRenderMultiBox );
-		Prefs.showScaleBar(aPanel.bRenderScaleBar);
-		Prefs.showScaleBarInMovie( aPanel.bRenderScaleBar );
-		bvb.axisOverlay.setEnabled( aPanel.bRenderAxesGizmo );
+		bvb.multiBoxOverlayBVB.setEnabled( renderParams.bRenderMultiBox );
+		Prefs.showScaleBar(renderParams.bRenderScaleBar);
+		Prefs.showScaleBarInMovie( renderParams.bRenderScaleBar );
+		bvb.axisOverlay.setEnabled( renderParams.bRenderAxesGizmo );
 		bvb.bvvViewer.setRenderMode( true );
 
 		Prefs.showTextOverlay(false);
@@ -96,7 +98,7 @@ public class AnimationSnapshot extends SwingWorker<Void, String>
 		
 		long nTotalTime = 0;
 		final long nWaitTime = 30;
-		final long nTimeLimitmS = aPanel.nRenderFrameTimeLimit * 1000;
+		final long nTimeLimitmS = renderParams.nRenderFrameTimeLimit * 1000;
 		boolean bWait = (bvb.bvvViewer.getRepaintStatus() != RepaintType.NONE);
 		
 		while(bWait)

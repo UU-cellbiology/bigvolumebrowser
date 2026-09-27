@@ -30,8 +30,11 @@ package bvb.gui.shapes;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.List;
+import java.awt.Insets;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,17 +44,19 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.NumberField;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
-import bvb.shapes.BasicMeshShape;
-import bvb.shapes.BasicShape;
+import bvb.shapes.BasicShape.AlphaType;
+import ij.Prefs;
 
 public class GeneralPropertiesPanel extends JPanel
 {
 	final BigVolumeBrowser bvb;
 	final JComboBox<String> cbBlending;
-	final NumberField nfSilhouetteDecay;
-	final NumberField nfWireLineWidth;
-	final NumberField nfCartesianStep;
-	final NumberField nfCartesianFraction;
+	final NumberField nfDepthDecay;
+	final JCheckBox cbMultiMesh;
+	final JCheckBox cbMultiSpots;
+	
+	final JCheckBox cbSpotsSorting;
+
 	
 	public GeneralPropertiesPanel(final BigVolumeBrowser bvb_)
 	{
@@ -62,7 +67,10 @@ public class GeneralPropertiesPanel extends JPanel
 		int nDigitsFloatTextField = 4;
 		
 		setLayout(new GridBagLayout());
-		
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
+
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		
@@ -72,72 +80,68 @@ public class GeneralPropertiesPanel extends JPanel
 			updateBlending();				
 			});
 
-		nfSilhouetteDecay = new NumberField(nDigitsFloatTextField);		
-		nfSilhouetteDecay.setText( "1.00" );
-		nfSilhouetteDecay.setLimits( 0.0, Double.MAX_VALUE );
-		nfSilhouetteDecay.addListener( (v)->
+		nfDepthDecay = new NumberField(nDigitsFloatTextField);		
+		nfDepthDecay.setText( df3.format( BVBSettings.fOITDepthDecay ) );
+		nfDepthDecay.setLimits( 0.0, Double.MAX_VALUE );
+		nfDepthDecay.addListener( (v)->
 		{
-			updateSilhouetteDecay(Math.abs( v ));
+			updateDepthDecay(Math.abs( v ));
 		} );
 		
-		nfWireLineWidth = new NumberField(3);
-		nfWireLineWidth.setIntegersOnly( true );
-		nfWireLineWidth.setText( "1.0" );
-		nfWireLineWidth.setLimits( 0.0, Double.MAX_VALUE );
-		nfWireLineWidth.addListener( (v)->
-		{
-			updateWireLineWidth();
-		} );
+		cbMultiMesh = new JCheckBox("Meshes");
+		cbMultiMesh.setSelected( BVBSettings.bMultiSampleMesh );
+		cbMultiMesh.addItemListener( (e) -> updateMSAAMeshes() );
+		cbMultiSpots = new JCheckBox("Spots");
+		cbMultiSpots.setSelected( BVBSettings.bMultiSampleSpots );
+		cbMultiSpots.addItemListener( (e) -> updateMSAASpots() );
 		
-		nfCartesianStep = new NumberField(nDigitsFloatTextField);		
-		nfCartesianStep.setText( "2.0" );
-		nfCartesianStep.setLimits( 0.0, Double.MAX_VALUE );
-		nfCartesianStep.addListener( (v)->
-		{
-			updateCartesianGrid();
-		} );
-		
-		nfCartesianFraction = new NumberField(nDigitsFloatTextField);		
-		nfCartesianFraction.setText( "0.2" );
-		nfCartesianFraction.setLimits( 0.0, Double.MAX_VALUE );
-		nfCartesianFraction.addListener( (v)->
-		{
-			updateCartesianGrid();
-		} );
+		cbSpotsSorting = new JCheckBox("");
+		cbSpotsSorting.setSelected( BVBSettings.bSortSpotsAlphaMode );
+		cbSpotsSorting.addItemListener( (e) -> updateSpotsSorting() );
+		if(BVBSettings.transparentAlpha == AlphaType.OIT)
+			{cbSpotsSorting.setEnabled( false );}
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		this.add( new JLabel("Transparency: "), gbc );
 		gbc.gridx++;
 		this.add( cbBlending, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		this.add( new JLabel("Weighted OIT depth decay: "), gbc );
+		gbc.gridx++;
+		this.add( nfDepthDecay, gbc);
+		
+		JPanel pMSAA = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc2 = new GridBagConstraints();
+		gbc2.gridx = 0;
+		gbc2.gridy = 0;
+		gbc2.insets = new Insets(0, 2, 0, 2);
+		
+		final JLabel lMSAA = new JLabel("MSAA: ");
+		lMSAA.setToolTipText( "Multisample Anti-Aliasing" ); 
+		pMSAA.add( lMSAA, gbc2 );
+		gbc2.gridx ++;
+		pMSAA.add(cbMultiMesh, gbc2 );
+		gbc2.gridx++;
+		pMSAA.add( cbMultiSpots, gbc2);
 
+		gbc.gridwidth = 2;
+		gbc.insets = new Insets(10, 0, 5, 0);
 		gbc.gridx = 0;
 		gbc.gridy++;
-		this.add( new JLabel("Mesh silhouette decay: "), gbc );
-		gbc.gridx++;
-		this.add( nfSilhouetteDecay, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add( new JLabel("Mesh wire line width: "), gbc );
-		gbc.gridx++;
-		this.add( nfWireLineWidth, gbc);
+		this.add( pMSAA, gbc );
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
-		this.add( new JLabel("Mesh cartesian step: "), gbc );
+		this.add( new JLabel("Sort spots in alpha mode: "), gbc );
 		gbc.gridx++;
-		this.add( nfCartesianStep, gbc);
-		
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		this.add( new JLabel("Mesh cartesian fraction: "), gbc );
-		gbc.gridx++;
-		this.add( nfCartesianFraction, gbc);
-		
+		this.add( cbSpotsSorting, gbc);
 		//filler
-		gbc.gridx=0;
+		gbc.gridx = 0;
 		gbc.gridy++;
 		gbc.weightx = 0.01;
 		gbc.weighty = 0.01;
@@ -147,64 +151,47 @@ public class GeneralPropertiesPanel extends JPanel
 
 	void updateBlending()
 	{
-		BVBSettings.bWeightedOIT = (cbBlending.getSelectedIndex()==0)?true:false;
-		bvb.repaintBVV();
-		if(BVBSettings.bWeightedOIT)
+		BVBSettings.transparentAlpha  =  AlphaType.fromId( cbBlending.getSelectedIndex() + 1);
+		if(BVBSettings.transparentAlpha == AlphaType.OIT)
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "weighted OIT", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
+			cbSpotsSorting.setEnabled( false );
+			BVBSettings.bSortSpotsAlphaMode = false;
 		}
 		else
 		{
 			bvb.bvvViewer.addOverlayAnimator( new ColorTextOverlayAnimator( "alpha compositing", 800, TextPosition.BOTTOM_RIGHT, BVBSettings.canvasOverlayColor )  );
-		}
-	}
-	
-	synchronized void updateSilhouetteDecay(final double v)
-	{
-
-		final float fv = (float)v;
-		final List< BasicShape> shapeList = bvb.shapes;
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				((BasicMeshShape)sh).setSilhouetteDecay( fv );
-			}
+			cbSpotsSorting.setEnabled( true );
+			updateSpotsSorting();
 		}
 		bvb.repaintBVV();
-
 	}
 	
-	synchronized void updateWireLineWidth()
+	void updateDepthDecay(final double v)
 	{
-		final List< BasicShape> shapeList = bvb.shapes;
-		final float valWidth = Math.abs(Float.parseFloat( nfWireLineWidth.getText()));
-		
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				((BasicMeshShape)sh).setWireLineWidth( valWidth );
-			}
-		}
+		BVBSettings.fOITDepthDecay = (float)Math.max( 0.01, Math.abs( v ));		
+		Prefs.set("BVB.fOITDepthDecay", BVBSettings.fOITDepthDecay);
 		bvb.repaintBVV();
-
 	}
 	
-	synchronized void updateCartesianGrid()
+	void updateMSAAMeshes()
 	{
-		final List< BasicShape> shapeList = bvb.shapes;
-		final float valFr = Math.max(Math.min(Math.abs(Float.parseFloat( nfCartesianFraction.getText())),1.0f), 0.0f);
-		final float valStep = Math.abs(Float.parseFloat(nfCartesianStep.getText()));
-		
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				((BasicMeshShape)sh).setCartesianGrid( valStep,valFr );
-			}
-		}
+		BVBSettings.bMultiSampleMesh = cbMultiMesh.isSelected();		
+		Prefs.set("BVB.bMultiSampleMesh", BVBSettings.bMultiSampleMesh);
 		bvb.repaintBVV();
-
+	}	
+	
+	void updateMSAASpots()
+	{
+		BVBSettings.bMultiSampleSpots = cbMultiSpots.isSelected();		
+		Prefs.set("BVB.bMultiSampleSpots", BVBSettings.bMultiSampleSpots);
+		bvb.repaintBVV();
+	}	
+	
+	void updateSpotsSorting()
+	{
+		BVBSettings.bSortSpotsAlphaMode = cbSpotsSorting.isSelected();		
+		Prefs.set("BVB.bSortSpotsAlphaMode", BVBSettings.bSortSpotsAlphaMode);
+		bvb.repaintBVV();
 	}
 }

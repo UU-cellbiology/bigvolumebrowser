@@ -98,7 +98,7 @@ public class OpenInBVBCommand implements Command
 	 * Whether the OME-Zarr plugin this command drives is installed. Looked up by
 	 * name, so that this class stays loadable without it.
 	 */
-	private static boolean omeZarrInstalled()
+	public static boolean omeZarrInstalled()
 	{
 		try
 		{

@@ -63,6 +63,7 @@ import bvb.gui.GBCHelper;
 import bvb.gui.NumberField;
 import bvb.io.shapes.GltfImporter;
 import bvb.io.shapes.LASImport;
+import bvb.io.shapes.PLYImport;
 import bvb.io.shapes.SpotsParser;
 import bvb.io.shapes.WRLParser;
 import bvb.shapes.BasicShape;
@@ -121,16 +122,21 @@ public class PanelAddShapes extends JPanel
 		//get the values
 		if(dialSpots.bAllSuccess)
 		{
-			if(!dialSpots.bLAZfile)
-			{
-				parseSpots(dialSpots);
-			}
-			else
+			if(dialSpots.bLAZfile)
 			{
 				importLAS(dialSpots.fileSpots);
 			}
+			else if(dialSpots.bPLYfile)
+			{
+				importPLY(dialSpots.fileSpots);
+			}
+			else
+			{
+				parseSpots(dialSpots);				
+			}
 		}
 	}
+	
 	void importLAS (final File filein)
 	{
 		//show spots size dialog
@@ -177,6 +183,30 @@ public class PanelAddShapes extends JPanel
 			importLAS.execute();
 			
 		}
+	}
+	
+	void importPLY (final File filein)
+	{
+
+		PLYImport importPLY = new PLYImport();
+		
+		//TODO: ADD DIALOG FOR RADIUS MAPPING
+		
+		importPLY.filein = filein;
+		importPLY.addPropertyChangeListener( (e)->
+		{			
+			if(importPLY.getState() == StateValue.DONE)
+			{
+				if(!importPLY.bSpotsRead )
+				{
+					importPLY.bSpotsRead = true; 
+					final Spots importedSpots = importPLY.spotsPLY;
+					importedSpots.setName( Misc.getSourceStyleName( filein ) );
+					bvb.addShape( importedSpots );
+				}
+			}
+		});
+		importPLY.execute();
 	}
 	
 	void parseSpots(final SpotsLoadDialog dialSpots)

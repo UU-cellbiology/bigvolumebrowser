@@ -165,14 +165,14 @@ public class VolumeBox extends AbstractBasicShape
 	}
 	
 	@Override
-	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size, final int nTimePoint_, final boolean bWeightedOIT_) 
+	public void draw(final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size, final int nTimePoint_, final AlphaType alphaType) 
 	{
 	
 		if(edgesVis != null)
 		{
 			for (final VisPolyLineAA edge : edgesVis)
 			{
-				edge.draw(gl, pvm, bWeightedOIT_);
+				edge.draw(gl, pvm, alphaType);
 			}
 		}
 	}

@@ -30,12 +30,13 @@ package bvb.core;
 
 import java.awt.Color;
 
+import bvb.shapes.BasicShape.AlphaType;
 import ij.Prefs;
 
 public class BVBSettings
 {
 	
-	public static String sVersion = "0.1.4";
+	public static String sVersion = "0.2.0";
 	
 	/** background color of BVV canvas **/
 	public static Color canvasBGColor = new Color((int)Prefs.get( "BVB.canvasBGColor", Color.BLACK.getRGB() ));
@@ -75,22 +76,42 @@ public class BVBSettings
 	/** highlight color of boxes/clipboxes **/
 	public static Color boxHighlightColor = new Color((int)Prefs.get( "BVB.boxHighlightColor", new Color(0,153,255,255).getRGB() ));
 	
-	/** angle for lattice-light sheet data deskew in degrees**/
-	public static double dLLSAngle = Prefs.get("BVB.dLLSAngle", 30.);
-	
 	public static int nDefaultWidthControlPanel = 400;
 	
 	public static int nDefaultHeightControlPanel = 600;
 	
 	public static int nAddedRAINumber = 1;
 	
-	public static boolean bWeightedOIT = Prefs.get( "BVB.bWeightedOIT", true );
+	//3D rendering tweaks
+	
+	/** type of transparent shapes rendering **/
+	public static AlphaType transparentAlpha = AlphaType.fromId((int)Prefs.get( "BVB.transparentAlpha",  AlphaType.OIT.ordinal() ));
+	
+	/** wOIT depth decay parameter **/
+	public static float fOITDepthDecay = (float)Prefs.get("BVB.fOITDepthDecay", 0.0);
+	
+	/** render meshes via multisample buffer **/
+	public static boolean bMultiSampleMesh = Prefs.get( "BVB.bMultiSampleMesh", true );
+
+	/** render spots via multisample buffer **/
+	public static boolean bMultiSampleSpots = Prefs.get( "BVB.bMultiSampleSpots", true );
+
+	/** radius for Eye Dome Lighting **/
+	public static float fEDLRadius = (float)Prefs.get("BVB.fEDLRadius", 5.0);
+	
+	/** strength for Eye Dome Lighting **/	
+	public static float fEDLStrength = (float)Prefs.get("BVB.fEDLStrength", 3.0);
+	
+	public static boolean bSortSpotsAlphaMode = Prefs.get( "BVB.bSortSpotsAlphaMode", false );
 	
 	public static String sIconPath = "/bvb/icons/";
 	
 	public static String sShaderPath = "/bvb/scene/";
 	
 	public static String sUITheme = "";
+	
+	public static String sOMEZarrBackend = Prefs.get( "BVB.sOMEZarrBackend", "Show dialog");
+	
 	//warnings
 	/** first start warning, set up BVB **/
 	public static boolean bFirstStart = Prefs.get( "BVB.bFirstStart", true );
@@ -100,6 +121,9 @@ public class BVBSettings
 	
 	/** loaded datset size warning **/	
 	public static boolean bShowFileSizeDialog = Prefs.get( "BVB.bShowFileSizeDialog", true );
+	
+	/** info about OMEZarr **/	
+	public static boolean bShowInformAboutOMEZarrJava = Prefs.get( "BVB.bShowInformAboutOMEZarrJava", true );
 
 	
 	public static Color getInvertedColor(Color color_in)

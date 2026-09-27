@@ -182,19 +182,6 @@ public class MultiMeshShape extends AbstractClipTransformMulti implements BasicM
 	}
 	
 	@Override
-	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
-	{
-		if(visRendersTimeMap.size()>0 )
-		{
-			final List<AbstractClipTransformVis> visRenders = new ArrayList<>(visRendersTimeMap.keySet());
-			for(final AbstractClipTransformVis visRender:visRenders)
-			{
-				((VisMesh)visRender).setCartesianGrid( cartesianGridStep_, cartesianFraction_ );
-			}
-		}
-	}
-	
-	@Override
 	public void setColor(final Color colorin)
 	{
 		if(visRendersTimeMap.size()>0 )

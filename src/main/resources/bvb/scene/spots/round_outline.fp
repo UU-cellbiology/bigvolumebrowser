@@ -1,0 +1,1 @@
+    if ( r2 < 0.16) discard;

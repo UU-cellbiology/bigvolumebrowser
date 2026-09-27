@@ -161,7 +161,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 	}
 	
 	@Override
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_, final boolean bWeightedOIT_)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int[] screen_size , final int nTimePoint_, final AlphaType alphaType)
 	{
 		if(bVisible)
 		{
@@ -171,7 +171,7 @@ public abstract class AbstractClipTransformMulti extends AbstractBasicShape
 				final int nTP = visRendersTimeMap.get( visRender );
 				if(nTP < 0 || nTP == nTimePoint_)
 				{
-					visRender.draw( gl, pvm, vm, screen_size, nTimePoint_, bWeightedOIT_ );
+					visRender.draw( gl, pvm, vm, screen_size, nTimePoint_, alphaType );
 				}
 			}
 		}

@@ -111,6 +111,8 @@ public class SpotsLoadDialog
     
 	public boolean bLAZfile = false;
 	
+	public boolean bPLYfile = false;
+	
 	public SpotsLoadDialog(BigVolumeBrowser bvb_)
 	{
 		bvb = bvb_;
@@ -511,7 +513,7 @@ public class SpotsLoadDialog
 				bLAZfile = true;
 				jStatus.setText( "Ready to load LAS/LAZ dataset");
 				butOk.setEnabled( true );
-				for(int i = 0; i<cbColumnsAssign.size(); i++ )
+				for(int i = 0; i < cbColumnsAssign.size(); i++ )
 				{
 					cbColumnsAssign.get( i).setEnabled( false );	
 				}
@@ -521,9 +523,27 @@ public class SpotsLoadDialog
 				cbSeparator.setEnabled( false );
 				cbUnits.setEnabled( false );
 				cbSize.setEnabled( false );
-			}
-			else
+			} else if(fileName.toLowerCase().endsWith( "ply" ))
 			{
+				bPLYfile = true;
+				jStatus.setText( "Ready to load PLY dataset");
+				butOk.setEnabled( true );
+				for(int i = 0; i < cbColumnsAssign.size(); i++ )
+				{
+					cbColumnsAssign.get( i ).setEnabled( false );	
+				}
+				table.setEnabled( false );
+				table.setModel(dummyTableModel());
+				cbHasHeader.setEnabled( false );
+				cbSeparator.setEnabled( false );
+				cbUnits.setEnabled( false );
+				cbSize.setEnabled( false );
+			}
+			
+			if(!bLAZfile && !bPLYfile )
+			{
+				bLAZfile = false;
+				bPLYfile = false;
 				cbHasHeader.setEnabled( true );
 				cbSeparator.setEnabled( true );
 				cbUnits.setEnabled( true );
@@ -658,10 +678,10 @@ public class SpotsLoadDialog
 
 		for(int i = 0; i < 3; i++)
 		{
-			columnNames[i] = "Column"+Integer.toString( i+1 );
+			columnNames[i] = "Column" + Integer.toString( i+1 );
 			for(int j = 0; j < 3; j++)
 			{
-				data[i][j] = new Float(0.0f);
+				data[i][j] = Float.valueOf( 0.0f );
 			}
 		}
 		DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) 

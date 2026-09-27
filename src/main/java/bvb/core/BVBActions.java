@@ -159,7 +159,8 @@ public class BVBActions
 		actions.runnableAction(() -> rotate(2, false), "rotate 90 z axis wrld", ROTATE_Z_AXIS_WORLD);
 		actions.runnableAction(() -> bvb.bvbCards.animationPanel.makeSnapshot(), "make snapshot", "ctrl S" );
 		actions.runnableAction(() -> showHelpWindow(), "help", "F1" );
-		actions.runnableAction(() -> runSettingsCommand(), "settings", "F10" );
+		actions.runnableAction(() -> bvb.bvbCards.viewPanel.dialSettings(), "BVB settings", "F9" );
+		actions.runnableAction(() -> runSettingsCommand(), "BVV settings", "F10" );
 		
 		actions.install( bvb.bvvHandle.getKeybindings(), "BigVolumeBrowser actions" );
 		
@@ -211,10 +212,10 @@ public class BVBActions
 		slNumDitherSamples.setToolTipText( "Pixels are interpolated from this many nearest neighbors when dithering. This is not very expensive, it's fine to turn it up to 8." );
 		slNumDitherSamples.setMinorTickSpacing(1);
 		Hashtable< Integer, JLabel > labelTable = new Hashtable<>();
-		labelTable.put( new Integer( 1 ), new JLabel("1") );
+		labelTable.put( Integer.valueOf( 1 ), new JLabel("1") );
 		for(int i = 1; i <= 4; i++)
 		{
-			labelTable.put( new Integer( i * 2 ), new JLabel(Integer.toString( i * 2 )) );
+			labelTable.put( Integer.valueOf( i * 2 ), new JLabel(Integer.toString( i * 2 )) );
 			
 		}
 		slNumDitherSamples.setLabelTable( labelTable );
@@ -248,7 +249,7 @@ public class BVBActions
 		dClipNear.addChangeListener( (e)->
 		{
 			int currNear =  ((Double)dClipNear.getValue()).intValue();
-			((SpinnerNumberModel)dCam.getModel()).setMinimum( new Double(currNear+5) );
+			((SpinnerNumberModel)dCam.getModel()).setMinimum( Double.valueOf( currNear + 5) );
 			if(currNear > ((Double)dCam.getValue()).intValue())
 			{
 				dCam.setValue( currNear + 5 );
@@ -354,6 +355,8 @@ public class BVBActions
 			Prefs.set("BVB.dClipFar", BVVSettings.dClipFar);
 			BVVSettings.dClipNear = ((Double)dClipNear.getValue()).doubleValue();
 			Prefs.set("BVB.dClipNear", BVVSettings.dClipNear);
+			
+			BVVSettings.setFNratio();
 			
 			int nTempInt =  ((Integer)renderWidth.getValue()).intValue();
 			if(BVVSettings.renderWidth != nTempInt)

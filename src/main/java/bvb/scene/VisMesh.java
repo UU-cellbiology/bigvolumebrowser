@@ -56,6 +56,7 @@ import org.joml.Vector4f;
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
 import bvb.shapes.MeshProcessing;
+import bvb.shapes.BasicShape.AlphaType;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -104,19 +105,13 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	int surfaceRender = SURFACE_SHADE;
 	
-	static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 
-	
-	int silhouetteRender = silhouette_TRANSPARENT;	
+	static final int silhouette_TRANSPARENT = 0, silhouette_CULLED = 1; 	
 
 	float silhouetteDecay = 1.0f;
 	
-	public static final int GRID_FILLED = 0, GRID_WIRE = 1, GRID_CARTESIAN = 2;
+	public static final int GRID_FILLED = 0, GRID_WIRE = 1;
 	
 	int gridType = GRID_FILLED;
-	
-	float cartesianGridStep = 2.0f;
-	
-	float cartesianFraction = 0.2f;
 	
 	float fWireLineWidth = 1.0f;
 	
@@ -126,21 +121,23 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	boolean bUseTexture = false;  
 	
+	boolean bCurrentwOIT = false;
 	
 	public VisMesh()
 	{
-		initShader();
+		initSpotShader();
 	}
 	
-	void initShader()
+	void buildMeshShader()
 	{
-		final Segment pointVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "scaled_point.vp" ).instantiate();
-		final Segment pointFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "scaled_point.fp" ).instantiate();		
+		progMesh = ShaderMesh.buildMeshShader(this, bCurrentwOIT);
+	}
+	
+	void initSpotShader()
+	{
+		final Segment pointVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh/scaled_point.vp" ).instantiate();
+		final Segment pointFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh/scaled_point.fp" ).instantiate();		
 		progPoints = new DefaultShader( pointVp.getCode(), pointFp.getCode() );
-			
-		final Segment meshVp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh.vp" ).instantiate();
-		final Segment meshFp = new SegmentTemplate( VisMesh.class, BVBSettings.sShaderPath + "mesh.fp" ).instantiate();
-		progMesh = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
 	}
 	
 	public VisMesh(final Mesh meshin)
@@ -161,7 +158,7 @@ public class VisMesh extends AbstractClipTransformVis
 	public VisMesh(final BufferedImage imageTexture)
 	{
 		this.imageTexture = imageTexture;
-		initShader();
+		initSpotShader();
 	}
 	
 	public Color getColor()
@@ -184,6 +181,7 @@ public class VisMesh extends AbstractClipTransformVis
 		if(bHasTexture)
 		{
 			bUseTexture = bUseTexture_;
+			requestShaderRebuild();
 		}
 	}
 	
@@ -204,7 +202,8 @@ public class VisMesh extends AbstractClipTransformVis
 	
 	public void setSurfaceRenderType(final int surfaceRender_)
 	{
-		surfaceRender = surfaceRender_;		
+		surfaceRender = surfaceRender_;
+		requestShaderRebuild();
 	}
 	
 	public int getSurfaceRenderType()
@@ -230,12 +229,6 @@ public class VisMesh extends AbstractClipTransformVis
 	public float getWireLineWidth()
 	{
 		return fWireLineWidth;
-	}
-	
-	public void setCartesianGrid(final float cartesianGridStep_, final float cartesianFraction_)
-	{
-		cartesianGridStep = cartesianGridStep_;		
-		cartesianFraction = cartesianFraction_;
 	}
 	
 	public void setPointsSize(final float fPointSize_)
@@ -379,12 +372,13 @@ public class VisMesh extends AbstractClipTransformVis
 	@Override
 	public void reload()
 	{
-		initShader();		
+		initSpotShader();	
+		bRebuildShader = true;
 		initialized = false;
 	}
 
 	@Override
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final boolean bWeightedOIT)
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final int [] screen_size, final int nTimePoint, final AlphaType alphaType)
 	{
 		
 		while (bLocked)
@@ -414,8 +408,6 @@ public class VisMesh extends AbstractClipTransformVis
 
 		JoglGpuContext context = JoglGpuContext.get( gl );
 
-		//gl.glDepthFunc( GL.GL_LESS);
-
 		//add transform
 		final Matrix4f trM = MatrixMath.affine( transform, new Matrix4f() );
 		final Matrix4f pvtm = new Matrix4f();
@@ -424,42 +416,49 @@ public class VisMesh extends AbstractClipTransformVis
 		pvm.mul( trM, pvtm );
 		vm.mul( trM, vtm );
 		
-
 		if(renderType == MESH)
 		{
+			boolean bWeightedOIT = alphaType == AlphaType.OIT; 
+			if(bWeightedOIT != bCurrentwOIT)
+			{
+				bRebuildShader = true;
+				bCurrentwOIT = bWeightedOIT;
+			}
+			if(bRebuildShader)
+			{
+				buildMeshShader();
+				bRebuildShader = false;
+			}
 			final Matrix4f itvm = vtm.invert( new Matrix4f() ).transpose();
 			
 			progMesh.getUniformMatrix4f( "pvm" ).set( pvtm );
 			progMesh.getUniformMatrix4f( "vm" ).set( vtm );
 			progMesh.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
-			progMesh.getUniform4f("colorMesh").set(l_color);
-			progMesh.getUniform1i("surfaceRender").set(surfaceRender);
-			progMesh.getUniform1i("gridType").set(gridType);
-			progMesh.getUniform1f("cartesianGridStep").set(cartesianGridStep);
-			progMesh.getUniform1f("cartesianFraction").set(cartesianFraction);
 			
-			progMesh.getUniform1i("silType").set(silhouetteRender);
+			progMesh.getUniform4f("colorMesh").set(l_color);
+			
+			//progMesh.getUniform1i("silType").set(silhouetteRender);
 			progMesh.getUniform1f("silDecay").set(silhouetteDecay);
-			progMesh.getUniform1i("clipactive").set(0);
+
 			if(clipState !=0 && clipInt != null)
 			{
+				progMesh.getUniform1i("clipactive").set(0);
 				progMesh.getUniform1i("clipactive").set(clipState);
 				progMesh.getUniform3f("clipmin").set(clipInt,bvvpg.core.shadergen.MinMax.MIN);
 				progMesh.getUniform3f("clipmax").set(clipInt,bvvpg.core.shadergen.MinMax.MAX);
 				final AffineTransform3D t = new AffineTransform3D();
 				t.set( transform );
 				t.preConcatenate( clipTransform.inverse() );
-				//t.set( clipTransform.inverse() );
 		
 				progMesh.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
-			progMesh.getUniform1i("wOIT").set(bWeightedOIT?1:0);
-			progMesh.getUniform1i("bUseTexture").set(bUseTexture?1:0);
+			if(bWeightedOIT)
+			{
+				progMesh.getUniform1f( "fnratio" ).set( BVVSettings.fnratio );
+				progMesh.getUniform1f("depthDecay").set( BVBSettings.fOITDepthDecay );
+			}
 			progMesh.setUniforms( context );
 			progMesh.use( context );
-
-//			gl.glEnable(GL.GL_BLEND);
-//			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			
 			if(bHasTexture && bUseTexture)
 			{
@@ -488,7 +487,8 @@ public class VisMesh extends AbstractClipTransformVis
 		}
 		else
 		{
-
+			gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+			//older code, just for convenience
 			Vector2f window_sizef =  new Vector2f (screen_size[0], screen_size[1]);
 			
 			Vector2f ellipse_axes = new Vector2f((float)screen_size[0]/(float)BVVSettings.renderWidth, (float)screen_size[1]/(float)BVVSettings.renderHeight);
@@ -519,7 +519,7 @@ public class VisMesh extends AbstractClipTransformVis
 				progPoints.getUniformMatrix4f( "cliptransform" ).set( MatrixMath.affine(t, new Matrix4f()) );
 			}
 			
-			progPoints.getUniform1i("wOIT").set(bWeightedOIT?1:0);
+			progPoints.getUniform1i("wOIT").set(bCurrentwOIT ? 1:0);
 			progPoints.setUniforms( context );			
 			progPoints.use( context );
 			
@@ -528,7 +528,6 @@ public class VisMesh extends AbstractClipTransformVis
 			gl.glBindVertexArray( 0 );
 
 		}
-
 	}
 	
 	public static int[] IntBuffertoArray(IntBuffer b) {

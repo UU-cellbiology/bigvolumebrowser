@@ -43,6 +43,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -58,7 +59,7 @@ import bvb.core.BVBSettings;
 import bvb.core.BigVolumeBrowser;
 import bvb.io.dto.SceneStateDTO;
 import bvb.io.dto.SerializationIO;
-
+import bvb.scijava.OpenInBVBCommand;
 import ij.IJ;
 import ij.Prefs;
 import ij.io.SaveDialog;
@@ -311,15 +312,15 @@ public class ViewPanel extends JPanel
 	
 	public void dialSettings()
 	{
-		JPanel pViewSettings = new JPanel(new GridBagLayout());
+		final JPanel pViewSettings = new JPanel(new GridBagLayout());
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
-		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 		symbols.setDecimalSeparator('.');
-		DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
+		final DecimalFormat df3 = new DecimalFormat ("#.##", symbols);
 		
-		JButton butCanvasBGColor = new JButton( new ColorIcon( BVBSettings.canvasBGColor ) );	
+		final JButton butCanvasBGColor = new JButton( new ColorIcon( BVBSettings.canvasBGColor ) );	
 		butCanvasBGColor.addActionListener( e -> {
 			Color newColor = JColorChooser.showDialog(pViewSettings, "Choose background color", BVBSettings.canvasBGColor );
 			if (newColor != null)
@@ -330,26 +331,26 @@ public class ViewPanel extends JPanel
 			
 		});
 		
-		NumberField nfAnimationDuration = new NumberField(5);
+		final NumberField nfAnimationDuration = new NumberField(5);
 		nfAnimationDuration.setIntegersOnly(true);
 		nfAnimationDuration.setText(Integer.toString(BVBSettings.nTransformAnimationDuration));
 		
-		NumberField nfFocusScreenFraction = new NumberField(4);
+		final NumberField nfFocusScreenFraction = new NumberField(4);
 		nfFocusScreenFraction.setText( df3.format( BVBSettings.dFocusScreenFraction ) );
 		
-		JCheckBox cbZoomLoad = new JCheckBox();
+		final JCheckBox cbZoomLoad = new JCheckBox();
 		cbZoomLoad.setSelected(BVBSettings.bFocusOnSourcesOnLoad);		
 		
-		JCheckBox cbShowScaleBar = new JCheckBox();
+		final JCheckBox cbShowScaleBar = new JCheckBox();
 		cbShowScaleBar.setSelected(BVBSettings.bShowScaleBar);
 		
-		JCheckBox cbShowMultiBox = new JCheckBox();
+		final JCheckBox cbShowMultiBox = new JCheckBox();
 		cbShowMultiBox.setSelected(BVBSettings.bShowMultiBox);
 		
-		JCheckBox cbHighLightBox = new JCheckBox();
+		final JCheckBox cbHighLightBox = new JCheckBox();
 		cbHighLightBox.setSelected(BVBSettings.bHighlightSelectedBoxes);
 		
-		JButton butHighLightColor = new JButton( new ColorIcon( BVBSettings.boxHighlightColor) );	
+		final JButton butHighLightColor = new JButton( new ColorIcon( BVBSettings.boxHighlightColor) );	
 		butHighLightColor.addActionListener( e -> {
 			Color newColor = JColorChooser.showDialog(pViewSettings, "Choose highlight color", BVBSettings.boxHighlightColor );
 			if (newColor != null)
@@ -359,15 +360,33 @@ public class ViewPanel extends JPanel
 			}			
 		});
 		
-		JCheckBox cbPyramidize = new JCheckBox();
+		final JCheckBox cbPyramidize = new JCheckBox();
 		cbPyramidize.setSelected(BVBSettings.bLoadPyramidize);
 		
-		JCheckBox cbBGShader = new JCheckBox();
+		final JCheckBox cbBGShader = new JCheckBox();
 		cbBGShader.setSelected(BVBSettings.bShowRandomShader);
 		
-		JCheckBox cbMeshNormals = new JCheckBox();
+		final JCheckBox cbMeshNormals = new JCheckBox();
 		cbMeshNormals.setSelected(BVBSettings.bShowMeshNormalsDialog);	
 				
+		
+		JComboBox<String> cbOMEZarrBackEnds;
+		if(!OpenInBVBCommand.omeZarrInstalled())
+		{
+			cbOMEZarrBackEnds = new  JComboBox<>(new String [] {"N5Reader"});
+			cbOMEZarrBackEnds.setEnabled (false);
+			BVBSettings.sOMEZarrBackend = "Show dialog";
+			Prefs.set( "BVB.sOMEZarrBackend", BVBSettings.sOMEZarrBackend );
+		}
+		else
+		{
+			String [] sChoices = new String [] {"Show dialog", "OME-Zarr Fiji java", "N5Reader"};
+			cbOMEZarrBackEnds = new JComboBox<>(sChoices);
+			cbOMEZarrBackEnds.setEnabled (true);
+			cbOMEZarrBackEnds.setSelectedItem( BVBSettings.sOMEZarrBackend );
+		}
+		
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;	
 		GBCHelper.alighLoose(gbc);
@@ -424,6 +443,12 @@ public class ViewPanel extends JPanel
 		pViewSettings.add(new JLabel("Pyramidize loaded sources "), gbc);
 		gbc.gridx++;
 		pViewSettings.add(cbPyramidize, gbc);
+		
+		gbc.gridx=0;
+		gbc.gridy++;
+		pViewSettings.add(new JLabel("OME-Zarr loader "), gbc);
+		gbc.gridx++;
+		pViewSettings.add(cbOMEZarrBackEnds, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -486,7 +511,12 @@ public class ViewPanel extends JPanel
 
 			BVBSettings.bShowMeshNormalsDialog = cbMeshNormals.isSelected();
 			Prefs.set("BVB.bShowMeshNormalsDialog", BVBSettings.bShowMeshNormalsDialog);
-
+			
+			if(OpenInBVBCommand.omeZarrInstalled())
+			{
+				BVBSettings.sOMEZarrBackend = (String) cbOMEZarrBackEnds.getSelectedItem();
+				Prefs.set( "BVB.sOMEZarrBackend", BVBSettings.sOMEZarrBackend );
+			}
 			if(bRepaintBVV)
 			{
 				bvb.repaintBVV();

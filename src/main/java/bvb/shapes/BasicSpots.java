@@ -49,9 +49,9 @@ public interface BasicSpots
 	public void setExtraAlphaCoefficient(float dCoeff);
 	public float getExtraAlphaCoefficient();
 	
-	/** 0 - filled, 1 - outline **/
+	/** 0 - filled, 1 - outline, 2 - gaussian **/
 	public void setRenderType(int nRenderType);
-	/** 0 - filled, 1 - outline **/
+	/** 0 - filled, 1 - outline, 2 - gaussian **/
 	public int getRenderType();
 	
 	/** 0 - round, 1 - square **/
@@ -60,10 +60,10 @@ public interface BasicSpots
 	public int getPointShape();
 	
 	/** only for round filled spots 
-	 * 0 - plain, 1 - shaded **/
+	 * 0 - plain, 1 - shaded, 2 - Eye Dome Lighting (EDL)**/
 	public void setPointShade(int nShade);
 	/** only for round filled spots 
-	 * 0 - plain, 1 - shaded **/
+	 * 0 - plain, 1 - shaded, 2 - Eye Dome Lighting (EDL) **/
 	public int getPointShade();
 	
 	/** LUT Mapping: 0 - no mapping, use color,
@@ -108,7 +108,5 @@ public interface BasicSpots
 	
 	/** returns null if spots do not have set property**/	
 	public float [] getPropertyRange();
-	
-
 	
 }

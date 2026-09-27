@@ -63,6 +63,7 @@ public class MeshesPropertiesPanel extends JPanel
 	final JPanelConsistent pPointSize;
 	final JPanelConsistent pSurface;
 	final JPanelConsistent pGrid;
+	final JPanelConsistent pSilDecay;
 	
 	final JComboBox<String> cbRender;
 	final NumberField nfMeshPointSize;
@@ -70,6 +71,7 @@ public class MeshesPropertiesPanel extends JPanel
 	final JCheckBox cbTexture;
 	final JComboBox<String> cbSurface;	
 	final JComboBox<String> cbGrid;
+	final NumberField nfSilDecay;
 	
 	final ArrayList<Component> allComp = new ArrayList<>();
 	
@@ -111,7 +113,7 @@ public class MeshesPropertiesPanel extends JPanel
 		pTexture = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pTexture.add( new JLabel("Texture"), gbc );
+		pTexture.add( new JLabel("  Texture"), gbc );
 		gbc.gridx++;
 		pTexture.add( cbTexture, gbc );
 
@@ -155,7 +157,7 @@ public class MeshesPropertiesPanel extends JPanel
 		gbc.gridx++;
 		pSurface.add( cbSurface, gbc );
 		
-		String[] sGrid = {"Filled", "Wire", "Cartesian"};
+		String[] sGrid = {"Solid", "Wireframe"};
 		cbGrid = new JComboBox< >(sGrid);
 		cbGrid.addActionListener( (e)->{
 			updateGrid();				
@@ -163,9 +165,21 @@ public class MeshesPropertiesPanel extends JPanel
 		pGrid = new JPanelConsistent(new GridBagLayout());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		pGrid.add( new JLabel("Grid: "), gbc );
+		pGrid.add( cbGrid, gbc );	
+
+		
+		nfSilDecay = new NumberField(5);		
+		nfSilDecay.setText( "0.0" );
+		nfSilDecay.addListener( (v)->
+		{
+			updateSilhouetteDecay(v);
+		} );
+		pSilDecay = new JPanelConsistent(new GridBagLayout());
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		pSilDecay.add( new JLabel("Silhouette decay: "), gbc );
 		gbc.gridx++;
-		pGrid.add( cbGrid, gbc );		
+		pSilDecay.add( nfSilDecay, gbc );
 		
 		allComp.add( butColor );
 		allComp.add( cbTexture );
@@ -173,6 +187,7 @@ public class MeshesPropertiesPanel extends JPanel
 		allComp.add( cbGrid );
 		allComp.add( cbRender );
 		allComp.add( nfMeshPointSize );
+		allComp.add( nfSilDecay );
 
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -183,19 +198,27 @@ public class MeshesPropertiesPanel extends JPanel
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		this.add( pColor, gbc );
 
-		gbc.gridy ++;	
+		gbc.gridx ++;	
 		this.add( pTexture, gbc );
+		gbc.gridx = 0;
 		gbc.gridy ++;	
+		gbc.gridwidth = 2;
 		this.add( pRender, gbc );
-
+		
 		gbc.gridy ++;	
 		this.add( pPointSize, gbc );
 		
+		gbc.gridwidth = 1;
 		gbc.gridy ++;	
 		this.add( pSurface, gbc );
 		
-		gbc.gridy ++;	
+		gbc.gridx ++;	
 		this.add( pGrid, gbc );
+		
+		gbc.gridx = 0;
+		gbc.gridy ++;	
+		gbc.gridwidth = 2;
+		this.add( pSilDecay, gbc );
 
 	}
 	
@@ -216,6 +239,10 @@ public class MeshesPropertiesPanel extends JPanel
 		boolean bPointSizeSame = true;
 		boolean bGridSame = true;
 		boolean bSurfaceSame = true;
+		
+		boolean bSilRenderPresent = false;
+		boolean bSilDecaySame = true;
+		float fSilDecay = 1.0f;
 		
 		Boolean bTextureSame = null;
 		boolean bTextureActive = false;
@@ -252,6 +279,11 @@ public class MeshesPropertiesPanel extends JPanel
 					fPointSize = meshShape.getPointSize();
 					nSurface = meshShape.getSurfaceRender();
 					nGrid = meshShape.getSurfaceGrid();
+					if(nSurface == VisMesh.SURFACE_SILHOUETTE)
+					{
+						bSilRenderPresent = true;
+						fSilDecay = meshShape.getSilhouetteDecay();
+					}
 					bFirstMesh = false;
 				}
 				else
@@ -260,7 +292,16 @@ public class MeshesPropertiesPanel extends JPanel
 					bSurfaceSame &= (nSurface == meshShape.getSurfaceRender());
 					bGridSame &= (nGrid == meshShape.getSurfaceGrid());
 					bColorSame &= currColor.equals( meshShape.getColor() );
-					bPointSizeSame &= Math.abs( fPointSize - meshShape.getPointSize())<0.0001;
+					bPointSizeSame &= Math.abs( fPointSize - meshShape.getPointSize()) < 0.0001;
+					if(meshShape.getSurfaceRender() == VisMesh.SURFACE_SILHOUETTE && !bSilRenderPresent)
+					{
+						bSilRenderPresent = true;
+						fSilDecay = meshShape.getSilhouetteDecay();
+					}
+					else
+					{
+						bSilDecaySame &= Math.abs(fSilDecay - meshShape.getSilhouetteDecay()) < 0.001;
+					}
 				}
 			}
 		}
@@ -278,6 +319,10 @@ public class MeshesPropertiesPanel extends JPanel
 		final boolean bPointSizeSameFin = bPointSizeSame;
 		final boolean bSurfaceSameFin = bSurfaceSame;
 		final boolean bGridSameFin = bGridSame;
+		final boolean bSilDecaySameFin = bSilDecaySame; 
+		final boolean bSilRenderPresentFin = bSilRenderPresent; 
+		final float fSilDecayFin = fSilDecay;
+
 
 		blockUpdates = true;
 		
@@ -307,8 +352,8 @@ public class MeshesPropertiesPanel extends JPanel
 			if(bRenderSameFin)
 			{
 				cbRender.setSelectedIndex( nRenderFin );
-				//only shapes render
-				if(nRenderFin == 0)
+				//only points render
+				if(nRenderFin == VisMesh.MESH)
 				{
 					pPointSize.setConsistent( true );	
 					nfMeshPointSize.setEnabled( false );	
@@ -340,6 +385,18 @@ public class MeshesPropertiesPanel extends JPanel
 			if(bGridSameFin)
 			{
 				cbGrid.setSelectedIndex( nGridFin );
+			}
+			
+			nfSilDecay.setEnabled( bSilRenderPresentFin );
+			if(!bSilRenderPresentFin )
+			{
+				pSilDecay.setConsistent( true );
+			}
+			else
+			{
+				pSilDecay.setConsistent( bSilDecaySameFin);
+				if(bSilDecaySameFin)
+					nfSilDecay.setText( String.format("%.2f", fSilDecayFin));
 			}
 		}
 		finally
@@ -429,26 +486,6 @@ public class MeshesPropertiesPanel extends JPanel
 		
 	}
 	
-	void updatePointSize(final double v)
-	{
-		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
-			return;
-		final float fv = (float)v;
-		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
-		for ( final BasicShape sh: shapeList)
-		{
-			if(sh instanceof BasicMeshShape)
-			{
-				if(((BasicMeshShape)sh).getRenderType() == VisMesh.POINTS)
-				{
-					((BasicMeshShape)sh).setPointSize( fv );
-				}
-			}
-		}
-		bvb.repaintBVV();
-		updateGUI();
-	}
-	
 	void updateSurface()
 	{
 		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
@@ -483,6 +520,46 @@ public class MeshesPropertiesPanel extends JPanel
 				if(((BasicMeshShape)sh).getRenderType() == VisMesh.MESH)
 				{
 					((BasicMeshShape)sh).setSurfaceGrid( nGridType );
+				}
+			}
+		}
+		bvb.repaintBVV();
+		updateGUI();
+	}
+	
+	void updatePointSize(final double v)
+	{
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final float fv = (float)v;
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
+		{
+			if(sh instanceof BasicMeshShape)
+			{
+				if(((BasicMeshShape)sh).getRenderType() == VisMesh.POINTS)
+				{
+					((BasicMeshShape)sh).setPointSize( fv );
+				}
+			}
+		}
+		bvb.repaintBVV();
+		updateGUI();
+	}
+	
+	void updateSilhouetteDecay(final double v)
+	{
+		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+			return;
+		final float fv = (float)Math.abs( v );
+		final List< BasicShape> shapeList = bvb.selectedObjects.getSelectedShapes();
+		for ( final BasicShape sh: shapeList)
+		{
+			if(sh instanceof BasicMeshShape)
+			{
+				if(((BasicMeshShape)sh).getSurfaceRender() == VisMesh.SURFACE_SILHOUETTE)
+				{
+					((BasicMeshShape)sh).setSilhouetteDecay( fv );
 				}
 			}
 		}

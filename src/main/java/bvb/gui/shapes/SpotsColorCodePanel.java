@@ -109,6 +109,7 @@ public class SpotsColorCodePanel extends JPanel
 		lutGammaPanel = new BoundedValuePanelPG(new BoundedValueDouble(0.01,5.0,1.0) );
 		lutGammaPanel.changeListeners().add(  () -> updateLUTMapGamma() );
 		lutGammaPanel.setToolTipText( "LUT mapping gamma" );
+		
 		gbc.weighty = 0.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;

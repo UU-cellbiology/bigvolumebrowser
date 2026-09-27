@@ -30,7 +30,7 @@ package bvb.shapes;
 
 import java.awt.Color;
 import java.awt.image.IndexColorModel;
-import java.util.ArrayList;
+import java.util.List;
 
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -84,7 +84,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		defineTransparency();
 	}
 
-	public void setPoints(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float[] spotProperty)
+	public void setPoints(final List<RealPoint> vertices, final float[] spotSizes, final float[] spotProperty)
 	{
 		if(visRender == null)
 		{
@@ -122,7 +122,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 
 	
 	/** spotSizes argument can be null **/
-	void setBoundingBox(final ArrayList<RealPoint> vertices, final float[] spotSizes)
+	void setBoundingBox(final List<RealPoint> vertices, final float[] spotSizes)
 	{		
 		boundBox =  getBBoxSpots(vertices, spotSizes, pointSize, 1.0f);		
 		sizeMinMax = getMinMax(spotSizes);
@@ -145,7 +145,7 @@ public class Spots extends AbstractClipTransformSingleShape implements BasicSpot
 		return valuesMinMax;
 	}
 	
-	public static FinalRealInterval getBBoxSpots(final ArrayList<RealPoint> vertices, final float[] spotSizes, final float pointSize_, final float sizeScale)
+	public static FinalRealInterval getBBoxSpots(final List<RealPoint> vertices, final float[] spotSizes, final float pointSize_, final float sizeScale)
 	{
 		final double[] boundingBox = new double[] { Double.POSITIVE_INFINITY,
 				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,

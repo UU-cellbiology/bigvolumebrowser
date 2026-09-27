@@ -10,17 +10,12 @@ out vec3 posW;
 uniform mat4 pvm;
 uniform mat4 vm;
 uniform mat3 itvm;
-uniform int bUseTexture;
 
 void main()
 {
-	gl_Position = pvm * vec4( aPos, 1.0 );
-	FragPos = vec3(vm * vec4( aPos, 1.0 ));
-	Normal = itvm * aNormal;
-	texCoord = vec2( 0, 0 );
-	if(bUseTexture > 0)
-	{
-		texCoord = vec2( aTexCoord.x, aTexCoord.y );
-	}
-	posW = aPos;
+    gl_Position = pvm * vec4( aPos, 1.0 );
+    FragPos = vec3(vm * vec4( aPos, 1.0 ));
+    Normal = itvm * aNormal;   
+//$insert{useTexture}    
+    posW = aPos;
 }

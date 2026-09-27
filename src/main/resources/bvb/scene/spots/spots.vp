@@ -1,0 +1,45 @@
+layout (location = 0) in vec2 aQuadVertex;
+layout (location = 1) in vec3 aPos;
+layout (location = 2) in float fDiam;
+layout (location = 3) in float fProperty;
+layout (location = 4) in vec4 fColors;
+
+uniform float pointSizeReal;
+uniform mat4 vm;
+uniform mat4 pm;
+uniform float fSizeScale;
+uniform vec2 pScale;
+out vec3 posW;
+out float fDiamfp;
+out float fPropertyfp;
+out vec4 fColorsfp;
+out vec2 vTexCoord;
+out float scaledPointSize;
+out vec4 vViewSpaceCenter;
+
+void main()
+{
+
+//$insert{spotsScaling}
+ 	
+    //transform center view
+    vec4 viewSpaceCenter = vm * vec4(aPos, 1.0);
+ 	
+    //scale point size
+    vec2 vScaledPointSize = fDiamfp * pScale;
+ 	
+    scaledPointSize = 0.5 * (vScaledPointSize.x + vScaledPointSize.y);
+ 	
+    vec4 viewSpacePos = viewSpaceCenter;
+ 	
+    //add width now (avoids shearing, if present)
+    viewSpacePos.xy += (aQuadVertex.xy) * vScaledPointSize;
+    vViewSpaceCenter = viewSpacePos;
+ 	
+    gl_Position = pm * viewSpacePos;
+	    
+    posW = aPos;
+    fPropertyfp = fProperty;
+    fColorsfp = fColors;
+    vTexCoord = aQuadVertex;
+}

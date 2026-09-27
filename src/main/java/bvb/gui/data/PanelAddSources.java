@@ -47,6 +47,7 @@ import java.util.concurrent.Executors;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -58,6 +59,8 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ValuePair;
+import ome.zarr.imglib2.ZarrUtils;
+
 
 import bvb.core.BVBSettings;
 import bvb.core.BVVSettings;
@@ -65,6 +68,9 @@ import bvb.core.BigVolumeBrowser;
 import bvb.gui.ColorTextOverlayAnimator;
 import bvb.gui.ColorTextOverlayAnimator.TextPosition;
 import bvb.io.N5OpenDialog;
+import bvb.io.OmeZarrBVB;
+import bvb.io.OmeZarrSelectionDialog;
+import bvb.scijava.OpenInBVBCommand;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -92,7 +98,7 @@ public class PanelAddSources extends JPanel
 		//this.setBorder(new PanelTitle(" Add data "));
 	    GridBagConstraints gbc = new GridBagConstraints();
 	    
-		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + "bioformats.png");
+		URL icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "bvb.png");
 	    ImageIcon tabIcon = new ImageIcon(icon_path);
 	    butBioFormats = new JButton(tabIcon);
 	    butBioFormats.setToolTipText("Load TIF/BioFormats");
@@ -111,27 +117,27 @@ public class PanelAddSources extends JPanel
 	    butBDVXML.setToolTipText("Load BDV XML/HDF5");
 	    butBDVXML.addActionListener( (e) ->	loadBDVXMLDialog());	
 	    
-		icon_path = this.getClass().getResource(BVBSettings.sIconPath + "zarr-logo.png");
+		icon_path = this.getClass().getResource(BVBSettings.sIconPath + BVBSettings.sUITheme + "zarr-logo.png");
 	    tabIcon = new ImageIcon(icon_path);
 	    butZarr = new JButton(tabIcon);
 	    butZarr.setToolTipText("Load N5/Zarr/OME-NGFF");
-	    butZarr.addActionListener( (e) ->	loadZarrDialog());	
+	    butZarr.addActionListener( (e) -> loadZarrDialog());	
 	    
-	    gbc.insets = new Insets(4,3,4,3);
+	    gbc.insets = new Insets(4, 3, 4, 3);
 
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
 
-	    this.add( butBioFormats,gbc);
+	    this.add(butBioFormats, gbc);
 
 	    gbc.gridx++;
-	    this.add( butFIJI,gbc);
-
-	    gbc.gridx++;
-	    this.add( butBDVXML,gbc);
+	    this.add(butBDVXML, gbc);
 	    
 	    gbc.gridx++;
-	    this.add( butZarr,gbc);
+	    this.add(butFIJI, gbc);
+	    
+	    gbc.gridx++;
+	    this.add(butZarr, gbc);
 
 	    
 	}
@@ -213,8 +219,155 @@ public class PanelAddSources extends JPanel
 	
 	public void loadZarrDialog()
 	{
-		final N5OpenDialog dialog = new N5OpenDialog();
-		dialog.openBVB(bvb);
+		String sBackEnd = "N5Reader";
+		if(!OpenInBVBCommand.omeZarrInstalled())
+		{
+			if( BVBSettings.bShowInformAboutOMEZarrJava)
+				showOmeZarrJavaInfo();			
+		}
+		else
+		{
+			if(BVBSettings.sOMEZarrBackend.equals( "Show dialog" )  )
+			{
+				sBackEnd = showOMEZarrBackendSelectionDialog();
+				if(sBackEnd == null)
+					return;
+			}
+			else
+			{
+				sBackEnd = BVBSettings.sOMEZarrBackend;
+			}
+		}
+		
+		if(sBackEnd.equals( "N5Reader" ))
+		{
+			final N5OpenDialog dialog = new N5OpenDialog();
+			dialog.openBVB(bvb);
+			return;
+		}
+		// OME-Zarr FIJI plugin zarr-java backend
+		
+		// dialog for disk browsing and/or paste URI, similar to N5 reader but more simple
+		OmeZarrSelectionDialog dialogURI = new OmeZarrSelectionDialog ();
+		
+		dialogURI.show();
+		String location = dialogURI.finalURI;
+		if(location == null  || location.isEmpty())
+		{
+			return;
+		}
+		URI uri = null;
+		try
+		{
+			if (location.startsWith("http://") || location.startsWith("https://") || location.startsWith("file://")) {
+				// Already a network URI or file URI
+				uri = URI.create(location);
+			} else {
+				// It's a local file system path -> convert to file URI
+				uri = new File(location).toURI();
+			}
+		}
+		catch(Exception c)
+		{
+			IJ.error( "The given location does not appear to be an OME-Zarr dataset:\n" + location );
+		}
+		if ( uri == null )
+		      return ;
+		if ( !ZarrUtils.isZarr( uri ) )
+		{
+			IJ.error( "The given location does not appear to be an OME-Zarr dataset:\n" + uri  );
+			return ;
+		}
+
+		try 
+		{
+			OmeZarrBVB.openURIZarrJavaBackend( bvb, uri);
+		}
+		catch(Exception e)
+		{
+			IJ.error("An error occured during OME-Zarr opening of " + uri.toString() + " via zarr-java backend.\n"
+					+ "See console output for details.");
+			System.err.println(e.toString());
+		}
+		
+	}
+	
+	public void showOmeZarrJavaInfo()
+	{
+		JPanel pOMEZarrJavaInfo = new JPanel(new GridBagLayout());
+		JLabel infoLabel = new JLabel(
+			    "<html>Only N5Viewer library is available for opening OME-Zarr format.<br />" +
+			    "Alternatively, you can consider <a href=\"https://github.com/BioImageTools/ome-zarr-fiji-java\">" +
+			    "installing OME-Zarr Fiji java plugin</a></html>"
+			);
+		infoLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		infoLabel.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        try {
+		            Desktop.getDesktop().browse(new URI("https://github.com/BioImageTools/ome-zarr-fiji-java"));
+		        } catch (IOException | URISyntaxException exc) {
+		            exc.printStackTrace();
+		        }
+		    }
+		});
+		String[] options = {"OK"};
+		JCheckBox cbShowAgain = new JCheckBox("Do not show this message again");
+		cbShowAgain.setSelected( false );
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(8, 0, 8, 0);
+		gbc.anchor = GridBagConstraints.WEST;
+
+		// Add the single label containing the entire message
+		pOMEZarrJavaInfo.add(infoLabel, gbc);
+
+		gbc.gridy = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.anchor = GridBagConstraints.EAST;
+		pOMEZarrJavaInfo.add(cbShowAgain, gbc);
+		JOptionPane.showOptionDialog(null, pOMEZarrJavaInfo, "OME-Zarr opening library", 
+				JOptionPane.PLAIN_MESSAGE, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		BVBSettings.bShowInformAboutOMEZarrJava = !cbShowAgain.isSelected();
+		Prefs.get( "BVB.bShowInformAboutOMEZarrJava", BVBSettings.bShowInformAboutOMEZarrJava );
+	}
+	
+	String showOMEZarrBackendSelectionDialog()
+	{
+		String [] sBackEnds = new String [] {"OME-Zarr Fiji java", "N5Reader"};
+		JPanel pOMEZarrBackend = new JPanel(new GridBagLayout());
+		JComboBox<String> cbBackEnds = new  JComboBox<>(sBackEnds);
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		JCheckBox cbShowAgain = new JCheckBox("Do not show this dialog again");
+		cbShowAgain.setSelected( false );
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets( 4, 0, 4, 0);
+		pOMEZarrBackend.add( new JLabel("Please select OME-Zarr opening backend (library)"), gbc);
+		gbc.gridy ++;
+		pOMEZarrBackend.add( new JLabel("You can change it in the settings [F9]"), gbc);
+		gbc.gridy ++;	
+		pOMEZarrBackend.add( cbBackEnds, gbc);
+		gbc.gridy ++;
+		gbc.anchor = GridBagConstraints.WEST;
+		pOMEZarrBackend.add( cbShowAgain, gbc);
+
+		int reply = JOptionPane.showConfirmDialog(null, pOMEZarrBackend, "OME-Zarr reader library", 
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		if (reply == JOptionPane.OK_OPTION) 
+		{
+			String sBackend = ( String ) cbBackEnds.getSelectedItem();
+			if( cbShowAgain.isSelected())
+			{
+				BVBSettings.sOMEZarrBackend = sBackend ;
+				Prefs.get( "BVB.sOMEZarrBackend", BVBSettings.sOMEZarrBackend);
+			}
+			return ( String ) cbBackEnds.getSelectedItem();
+		}
+		return null;
 	}
 	
 	public void loadImagePlus()
@@ -305,7 +458,6 @@ public class PanelAddSources extends JPanel
 
 				}
 			});
-
 			
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(8,0,8,0);

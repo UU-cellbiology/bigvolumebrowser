@@ -31,7 +31,6 @@ package bvb.gui.shapes;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -128,14 +127,13 @@ public class SpotsOpacityPanel extends JPanel
 		} );
 		
 		pExtraAlpha = new JPanelConsistent(new GridBagLayout());
+		gbc.weighty = 0.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		pExtraAlpha.add( new JLabel(" Extra α coefficient: "), gbc );
 		gbc.gridx++;
-		pExtraAlpha.add( nfExtraAlpha, gbc );
-		
-		
-		gbc.weighty = 0.0;
+		pExtraAlpha.add( nfExtraAlpha, gbc );			
+
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		pMapAlpha.add( new JLabel("α mapping: "), gbc );
@@ -157,16 +155,19 @@ public class SpotsOpacityPanel extends JPanel
 		butResetToDefault.addActionListener( (e)->resetAlphaMapRangeBounds() );   
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.gridwidth = 2;
+		gbc.gridwidth = 2;		
 		this.add(pExtraAlpha, gbc);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridy++;
 		gbc.gridwidth = 1;
-		gbc.insets = new Insets(0,3,0,0);
+		gbc.weightx = 0.0;
 		this.add( pMapAlpha, gbc );
+		
 		gbc.gridx++;
-		gbc.insets = new Insets(0,0,0,0);
+		gbc.fill = GridBagConstraints.NONE;
 		this.add( pMapInverted, gbc );		
-			
+		
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridwidth = 2;
 		

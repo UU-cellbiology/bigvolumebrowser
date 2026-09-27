@@ -46,14 +46,14 @@ public class TransformDeskew
 		Double outD =  objToAngles.get( obj );
 		if(outD == null)
 		{
-			setAngle(obj, Math.PI*0.5);
-			return Math.PI*0.5;
+			setAngle(obj, Math.PI * 0.5);
+			return Math.PI * 0.5;
 		}
 		return outD.doubleValue();
 	}
 	
 	public void setAngle( final Object obj, final double angle)
 	{
-		objToAngles.put( obj, new Double(angle) );
+		objToAngles.put( obj, Double.valueOf( angle ) );
 	}
 }

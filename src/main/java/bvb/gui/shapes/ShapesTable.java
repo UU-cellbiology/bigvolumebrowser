@@ -189,7 +189,7 @@ public class ShapesTable extends JTable
 		{
 			//for now
 			final int nIndex = bvb.shapes.indexOf( sh );
-			selectedIndices.add( new Integer ( nIndex ));
+			selectedIndices.add( Integer.valueOf( nIndex ));
 		}
 		
 		for(int i = 0; i < selectedIndices.size(); i++)

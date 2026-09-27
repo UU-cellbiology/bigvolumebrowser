@@ -223,7 +223,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "transform_center" ))
 		{
-	    	final Property<double []> pTrCenter = new Property<double []>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<double []> pTrCenter = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -244,7 +245,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "transform_rotation" ))
 		{
-	    	final Property<double []> pTrRotation = new Property<double []>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<double []> pTrRotation = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -265,7 +267,8 @@ public class PropertyRegistry
 		}
 		if (propertyName.equals( "transform_scale" ))
 		{
-	    	final Property<double []> pTrScale = new Property<double []>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<double []> pTrScale = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -286,7 +289,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "transform_deskew" ))
 		{
-	    	final Property<Double> pTrDeskew = new Property<Double>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Double> pTrDeskew = new Property<Double>() {
 			    @Override
 				public Double get() { return transformSetups.transformDeskew.getAngle( obj ); }
 			    @Override
@@ -302,7 +306,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "clip_type" ))
 		{
-	    	final Property<Integer> pClipType = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pClipType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return obj.getClipState(); }
 			    @Override
@@ -316,7 +321,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "clip_range" ))
 		{
-	    	final Property<RealInterval> pClipRange = new Property<RealInterval>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<RealInterval> pClipRange = new Property<RealInterval>() {
 			    @Override
 				public RealInterval get() { 
 				    	RealInterval interval = obj.getClipInterval();
@@ -340,7 +346,8 @@ public class PropertyRegistry
 		}
 		if (propertyName.equals( "clip_center" ))
 		{
-	    	final Property<double []> pClipCenter = new Property<double []>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<double []> pClipCenter = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -361,7 +368,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "clip_rotation" ))
 		{
-	    	final Property<double []> pClipRotation = new Property<double []>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<double []> pClipRotation = new Property<double []>() {
 			    @Override
 				public double [] get() { 
 			    	{
@@ -381,7 +389,7 @@ public class PropertyRegistry
 		return null;
 	}
 	
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings( { "unchecked", "unused" } )
 	public <T> PropertyBinding<T> getPropertyCS(final GammaConverterSetup cs, String propertyName) 
 	{
 		
@@ -596,7 +604,8 @@ public class PropertyRegistry
 	{
 		if (propertyName.equals( "bs_visible" ))
 		{
-	    	final Property<Boolean> pVisible = new Property<Boolean>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Boolean> pVisible = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isVisible(); }
 			    @Override
@@ -624,7 +633,8 @@ public class PropertyRegistry
 	{
 		if (propertyName.equals( "mesh_color" ))
 		{
-	    	final Property<Color> pColor = new Property<Color>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Color> pColor = new Property<Color>() {
 			    @Override
 				public Color get() { return shape.getColor(); }
 			    @Override
@@ -638,7 +648,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_useTexture" ))
 		{
-	    	final Property<Boolean> pTexture = new Property<Boolean>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Boolean> pTexture = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isTextureUsed(); }
 			    @Override
@@ -652,7 +663,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_renderType" ))
 		{
-	    	final Property<Integer> pRenderType = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getRenderType(); }
 			    @Override
@@ -666,7 +678,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_pointSize" ))
 		{
-	    	final Property<Float> pPointSize = new Property<Float>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Float> pPointSize = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getPointSize(); }
 			    @Override
@@ -680,7 +693,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_surfaceRenderType" ))
 		{
-	    	final Property<Integer> pSurfaceRenderType = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pSurfaceRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getSurfaceRender(); }
 			    @Override
@@ -694,7 +708,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_surfaceGrid" ))
 		{
-	    	final Property<Integer> pSurfaceGrid = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pSurfaceGrid = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getSurfaceGrid(); }
 			    @Override
@@ -708,7 +723,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_wireWidth" ))
 		{
-	    	final Property<Float> pWireWidth = new Property<Float>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Float> pWireWidth = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getWireLineWidth(); }
 			    @Override
@@ -722,7 +738,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "mesh_silDecay" ))
 		{
-	    	final Property<Float> pSilhouetteDecay = new Property<Float>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Float> pSilhouetteDecay = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getSilhouetteDecay(); }
 			    @Override
@@ -742,7 +759,8 @@ public class PropertyRegistry
 	{
 		if (propertyName.equals( "spots_pointSize" ))
 		{
-        	final Property<Float> pPointSize = new Property<Float>() {
+        	@SuppressWarnings( "unused" )
+			final Property<Float> pPointSize = new Property<Float>() {
     		    @Override
     			public Float get() { return shape.getPointSize(); }
     		    @Override
@@ -756,7 +774,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_pointSizeScale" ))
 		{
-        	final Property<Float> pPointScale = new Property<Float>() {
+        	@SuppressWarnings( "unused" )
+			final Property<Float> pPointScale = new Property<Float>() {
     		    @Override
     			public Float get() { return shape.getSizeScale(); }
     		    @Override
@@ -770,7 +789,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_color" ))
 		{
-        	final Property<Color> pSpotColor = new Property<Color>() {
+        	@SuppressWarnings( "unused" )
+			final Property<Color> pSpotColor = new Property<Color>() {
     		    @Override
     			public Color get() { return shape.getColor(); }
     		    @Override
@@ -784,7 +804,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_extraAlpha" ))
 		{
-	    	final Property<Float> pExtraAlpha = new Property<Float>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Float> pExtraAlpha = new Property<Float>() {
 			    @Override
 				public Float get() { return shape.getExtraAlphaCoefficient(); }
 			    @Override
@@ -798,7 +819,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_renderType" ))
 		{
-	    	final Property<Integer> pRenderType = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pRenderType = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getRenderType(); }
 			    @Override
@@ -812,7 +834,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_shape" ))
 		{
-	    	final Property<Integer> pShape = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pShape = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getPointShape(); }
 			    @Override
@@ -826,7 +849,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_shade" ))
 		{
-	    	final Property<Integer> pShade = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pShade = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getPointShade(); }
 			    @Override
@@ -840,7 +864,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_mapLUTMode" ))
 		{
-	    	final Property<Integer> pLUTMapMode = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pLUTMapMode = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getMapLUTMode(); }
 			    @Override
@@ -854,7 +879,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUT" ))
 		{
-	    	final Property<String> pLUT = new Property<String>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<String> pLUT = new Property<String>() {
 			    @Override
 				public String get() { return shape.getLUTName(); }
 			    @Override
@@ -868,7 +894,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUTInverse" ))
 		{
-	    	final Property<Boolean> pLUTInv = new Property<Boolean>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Boolean> pLUTInv = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isInvertedLUT(); }
 			    @Override
@@ -882,7 +909,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_LUTRange" ))
 		{
-	    	final Property<float[][]> pLUTRange = new Property<float[][]>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<float[][]> pLUTRange = new Property<float[][]>() {
 			    @Override
 				public float[][] get() { 
 			    	final float [][] range = spotsMapSetups.getMapAllFloat( shape );
@@ -909,7 +937,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_alphaMapMode" ))
 		{
-	    	final Property<Integer> pAlphaMapMode = new Property<Integer>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Integer> pAlphaMapMode = new Property<Integer>() {
 			    @Override
 				public Integer get() { return shape.getMapAlphaMode(); }
 			    @Override
@@ -923,7 +952,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_alphaInverse" ))
 		{
-	    	final Property<Boolean> pAlphaInv = new Property<Boolean>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<Boolean> pAlphaInv = new Property<Boolean>() {
 			    @Override
 				public Boolean get() { return shape.isInvertedAlpha(); }
 			    @Override
@@ -937,7 +967,8 @@ public class PropertyRegistry
 		
 		if (propertyName.equals( "spots_alphaRange" ))
 		{
-	    	final Property<float[][]> pLUTRange = new Property<float[][]>() {
+	    	@SuppressWarnings( "unused" )
+			final Property<float[][]> pLUTRange = new Property<float[][]>() {
 			    @Override
 				public float[][] get() { 
 			    	final float [][] range = spotsAlphaSetup.getMapAllFloat( shape );
