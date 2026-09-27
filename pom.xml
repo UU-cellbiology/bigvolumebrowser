@@ -89,7 +89,7 @@
 		<bvv-playground.version>0.6.1</bvv-playground.version>
 		<bdv-loaders.version>0.23.3</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
-		<ome-zarr-fiji.version>0.9.0</ome-zarr-fiji.version>
+		<ome-zarr-fiji.version>0.9.1</ome-zarr-fiji.version>
 		<laszip4j.version>0.20</laszip4j.version>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles> 
