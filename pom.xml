@@ -77,7 +77,7 @@
     <scm>
         <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
         <developerConnection>scm:git:git@github.com:UU-cellbiology/bigvolumebrowser</developerConnection>
-        <tag>bigvolumebrowser-0.2.0</tag>
+        <tag>bigvolumebrowser-0.2.1</tag>
         <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
@@ -100,7 +100,7 @@
         <!-- Use older versions of dependencies to stay compatible with FIJI stable / Java 8. -->
         <bigdataviewer-core.version>10.6.8</bigdataviewer-core.version>
         <scifio.version>0.48.0</scifio.version>
-		<bvv-playground.version>0.6.1</bvv-playground.version>
+		<bvv-playground.version>0.6.2</bvv-playground.version>
 		<bdv-loaders.version>0.23.3</bdv-loaders.version>
 		<jgltf.version>2.0.4</jgltf.version>
 		<ome-zarr-fiji.version>0.9.1</ome-zarr-fiji.version>

@@ -191,6 +191,8 @@ public class AnimationRender extends SwingWorker<Void, String>
 
 		if(glass != null)
 		{
+			glass.setOpaque(false);
+		    glass.setBackground(new Color(0, 0, 0, 0));
 			bvb.bvvFrame.setGlassPane( glass );
 			glass.setVisible(true);
 			glass.requestFocusInWindow();
@@ -262,10 +264,15 @@ public class AnimationRender extends SwingWorker<Void, String>
 					return null;	
 				}	
 			}
-	        component.paint(bi.getGraphics());
-	        //Img< FloatType > img = bvb.bvvViewer.getOffscreenIMG();
-	        //ImageJFunctions.show( Views.hyperSlice( img, 0, 2 ));
+			
+			SwingUtilities.invokeAndWait(() -> {
+			    Graphics2D g2 = bi.createGraphics();
+			    component.paint(g2);
+			    g2.dispose();
+			});
+
 	        BufferedImage biOut;
+	        
 	        if(!bResize)
 	        {
 	        	biOut = bi;
@@ -274,6 +281,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 	        {
 	        	biOut = resizeCenterCrop(bi, renderParams.nRenderWidth, renderParams.nRenderHeight);
 	        }	
+	        
 	        if(renderParams.nRenderOutput == 0)
 	        {
 	        	copyFrameToStack(biOut, animStack, nFr);
@@ -291,7 +299,6 @@ public class AnimationRender extends SwingWorker<Void, String>
 		
 		return null;
 	}
-	
 	
     @Override
     public void done() 
@@ -420,6 +427,7 @@ public class AnimationRender extends SwingWorker<Void, String>
 
         return canvas;
     }
+    
     public static BufferedImage resizeCenterCrop(
             BufferedImage original,
             int targetWidth,
