@@ -77,7 +77,7 @@
     <scm>
         <connection>scm:git:git://github.com/UU-cellbiology/bigvolumebrowser</connection>
         <developerConnection>scm:git:git@github.com:UU-cellbiology/bigvolumebrowser</developerConnection>
-        <tag>bigvolumebrowser-0.2.1</tag>
+        <tag>bigvolumebrowser-0.2.2</tag>
         <url>https://github.com/UU-cellbiology/bigvolumebrowser</url>
     </scm>
     <issueManagement>
