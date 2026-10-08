@@ -305,8 +305,17 @@ public class SpotsPropertiesPanel extends JPanel
 	        return;
 	    }
 	    
-		if(!bvb.selectedObjects.areShapesSelected() || blockUpdates)
+		if(blockUpdates)
 			return;
+		
+		if(!bvb.selectedObjects.areShapesSelected())
+		{
+			for (final Component nC : allComp)
+	        {
+	            nC.setEnabled(false);
+	        }
+	        return;
+		}
 		boolean bFirstMesh = true;
 		
 		boolean bColorSame = true;
