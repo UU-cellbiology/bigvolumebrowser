@@ -348,14 +348,8 @@ public class AnimationRender extends SwingWorker<Void, String>
 		Prefs.showTextOverlay(true);
 		if(renderParams.nRenderOutput == 0 && animStack != null)
 		{
-			//imagej ordered stack
-			IntervalView< ARGBType > out = Views.permute(
-						Views.addDimension(  Views.addDimension(animStack, 0, 0), 0, 0),
-						2, 4);
-			final ImagePlus imp = ImageJFunctions.show( out, "BVB_Animation_" + SerializationIO.getTimestamp() );
-			imp.getCalibration().fps = renderParams.nRenderFPS;
-			imp.getCalibration().frameInterval = 1./renderParams.nRenderFPS;
-			imp.getCalibration().setTimeUnit( "sec" );
+		    // Now safely display the stack
+		    displayAndRegisterCleanup();
 		}
 
     	IJ.log( "BVB: rendering is finished." );
@@ -363,8 +357,7 @@ public class AnimationRender extends SwingWorker<Void, String>
     	if(!renderParams.bRenderCurrentWindowSize)
         	bvvWindowState.restoreBvvWindowState();
     	else
-        	bvvWindowState.setViewerTransformAfterResizeIsDone();
-    	
+        	bvvWindowState.setViewerTransformAfterResizeIsDone();   	
 
     	//unlock user interaction
 //    	bt.bInputLock = false;
@@ -500,10 +493,11 @@ public class AnimationRender extends SwingWorker<Void, String>
     public void displayAndRegisterCleanup()
     {
     	//imagej ordered stack
-    	IntervalView< ARGBType > out = Views.permute(
-    			Views.addDimension(  Views.addDimension(animStack, 0, 0), 0, 0),
-    			2, 4);
-    	final ImagePlus imp = ImageJFunctions.show( out, "BVB_Animation_" + SerializationIO.getTimestamp() );
+//    	IntervalView< ARGBType > out = Views.permute(
+//    			Views.addDimension(  Views.addDimension(animStack, 0, 0), 0, 0),
+//    			2, 4);
+    	final ImagePlus imp = ImageJFunctions.show( animStack, "BVB_Animation_" + SerializationIO.getTimestamp() );
+    	imp.setDimensions( 1, 1, (int)animStack.dimension( 2 ) );
     	imp.getCalibration().fps = renderParams.nRenderFPS;
     	imp.getCalibration().frameInterval = 1./renderParams.nRenderFPS;
     	imp.getCalibration().setTimeUnit( "sec" );
