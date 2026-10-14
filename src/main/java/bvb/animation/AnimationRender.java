@@ -57,7 +57,6 @@ import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import bdv.ui.splitpanel.SplitPanel;
