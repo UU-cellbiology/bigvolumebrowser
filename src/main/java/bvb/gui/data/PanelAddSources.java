@@ -59,7 +59,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ValuePair;
-import ome.zarr.imglib2.ZarrUtils;
+import ome.zarr.imglib2.util.ZarrUtils;
 
 
 import bvb.core.BVBSettings;

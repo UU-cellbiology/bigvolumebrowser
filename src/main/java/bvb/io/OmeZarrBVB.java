@@ -93,7 +93,7 @@ public class OmeZarrBVB
 		// it has logged why, but the caller still has to hear that nothing was shown.
 		if ( added == null )
 			throw new IllegalStateException( "BigVolumeBrowser cannot display this dataset, see the log for the reason." );
-		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero, added.getB() );
+		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero(), added.getB() );
 	}
 
 	/**
@@ -137,36 +137,38 @@ public class OmeZarrBVB
 		for ( int channelNumber = 0; channelNumber < bvvSources.size(); channelNumber++ )
 		{
 			final Omero.Channel omeroChannel = omeroChannels.get( channelNumber );
-			if ( omeroChannel == null || omeroChannel.window == null )
+			if ( omeroChannel == null || omeroChannel.window() == null )
 				continue;
-			final Omero.Channel.Window window = omeroChannel.window;
+			final Omero.Channel.Window window = omeroChannel.window();
 			final BvvStackSource< ? > bvvSource = bvvSources.get( channelNumber );
-			bvvSource.setDisplayRange( window.start, window.end );
-			if ( window.max > window.min )
-				bvvSource.setDisplayRangeBounds( Math.min( window.min, window.start ), Math.max( window.max, window.end ) );
+			bvvSource.setDisplayRange( window.start(), window.end() );
+			if ( window.max() > window.min() )
+				bvvSource.setDisplayRangeBounds( Math.min( window.min(), window.start() ), Math.max( window.max(), window.end() ) );
 		}
 	}
 
 	/**
 	 * Makes the BVV frame known to {@link PyramidalService}, which tracks the window
 	 * last holding an OME-Zarr for the "open the current OME-Zarr in …" commands.
+	 * The frame maps to this OME-Zarr whenever one of its sources is the viewer's
+	 * current source.
 	 * <p>
-	 * {@link BigVolumeBrowser#restartBVV()} builds a new frame, so the registration
-	 * is renewed on {@code bvbRestarted}. It and the old frame's
+	 * {@link BigVolumeBrowser#restartBVV()} builds a new viewer and frame, so the
+	 * registration is renewed on {@code bvbRestarted}. It and the old frame's
 	 * {@code windowClosed} may arrive in any order, and the reference count stays
 	 * balanced either way.
 	 */
 	static void registerWindow( final BigVolumeBrowser bvb, final PyramidalBdv< ? > pyramidal )
 	{
 		final PyramidalService pyramidalService = pyramidal.getContext().getService( PyramidalService.class );
-		BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService );
-		bvb.addBVBListener( () -> BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService ) ); // NB: a restart replaces the frame, and this call has to register the new one. bvb.bvvFrame needs to be read again.
+		BdvUtils.registerViewer( pyramidal, bvb.bvvViewer, pyramidalService );
+		bvb.addBVBListener( () -> BdvUtils.registerViewer( pyramidal, bvb.bvvViewer, pyramidalService ) ); // NB: a restart replaces the viewer, and this call has to register the new one. bvb.bvvViewer needs to be read again.
 	}
 	
 	public static void openURIZarrJavaBackend(final BigVolumeBrowser bvb, final URI uri)
 	{
 		Context context = new Context();
-		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
+		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend() );
 		PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
 		OmeZarrBVB.showInBVB( bvb, pyramidal );	
 	}
