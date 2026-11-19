@@ -93,7 +93,7 @@ public class OmeZarrBVB
 		// it has logged why, but the caller still has to hear that nothing was shown.
 		if ( added == null )
 			throw new IllegalStateException( "BigVolumeBrowser cannot display this dataset, see the log for the reason." );
-		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero, added.getB() );
+		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero(), added.getB() );
 	}
 
 	/**
@@ -137,13 +137,13 @@ public class OmeZarrBVB
 		for ( int channelNumber = 0; channelNumber < bvvSources.size(); channelNumber++ )
 		{
 			final Omero.Channel omeroChannel = omeroChannels.get( channelNumber );
-			if ( omeroChannel == null || omeroChannel.window == null )
+			if ( omeroChannel == null || omeroChannel.window() == null )
 				continue;
-			final Omero.Channel.Window window = omeroChannel.window;
+			final Omero.Channel.Window window = omeroChannel.window();
 			final BvvStackSource< ? > bvvSource = bvvSources.get( channelNumber );
-			bvvSource.setDisplayRange( window.start, window.end );
-			if ( window.max > window.min )
-				bvvSource.setDisplayRangeBounds( Math.min( window.min, window.start ), Math.max( window.max, window.end ) );
+			bvvSource.setDisplayRange( window.start(), window.end() );
+			if ( window.max() > window.min() )
+				bvvSource.setDisplayRangeBounds( Math.min( window.min(), window.start() ), Math.max( window.max(), window.end() ) );
 		}
 	}
 
