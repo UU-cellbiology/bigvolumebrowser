@@ -41,9 +41,9 @@ import bdv.viewer.SourceAndConverter;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import bvb.core.BigVolumeBrowser;
 import bvvpg.vistools.BvvStackSource;
+import ome.zarr.fiji.bdv.OmeroDisplay;
 import ome.zarr.fiji.bdv.PyramidalBdv;
 import ome.zarr.fiji.read.OmeZarr;
-import ome.zarr.fiji.util.BdvUtils;
 import ome.zarr.imglib2.metadata.Omero;
 import ome.zarr.zarrjava.ZarrJavaPyramidBackend;
 
@@ -99,7 +99,7 @@ public class OmeZarrBVB
 	 * Applies the OME-Zarr's OMERO display settings to the BVV sources.
 	 * <p>
 	 * Color, display range, per-channel visibility and the start timepoint are set
-	 * by {@link BdvUtils}, the same code the OME-Zarr plugin uses for
+	 * by {@link OmeroDisplay}, the same code the OME-Zarr plugin uses for
 	 * BigDataViewer, so a dataset looks the same in both viewers. That works
 	 * because {@code BvvHandle} exposes the same BigDataViewer core types a
 	 * {@code BdvHandle} does — {@link bdv.viewer.ConverterSetups} and
@@ -112,9 +112,9 @@ public class OmeZarrBVB
 		final List< SourceAndConverter< ? > > viewerSources = new ArrayList<>();
 		for ( final BvvStackSource< ? > bvvSource : bvvSources )
 			viewerSources.addAll( bvvSource.getSources() );
-		final List< Omero.Channel > omeroChannels = BdvUtils.omeroChannels( omero, viewerSources.size() );
-		BdvUtils.setTimepoint( omero, bvb.bvvViewer.state() );
-		BdvUtils.setChannelProperties( omeroChannels, viewerSources, bvb.bvvHandle.getConverterSetups(), bvb.bvvViewer.state() );
+		final List< Omero.Channel > omeroChannels = OmeroDisplay.channels( omero, viewerSources.size() );
+		OmeroDisplay.setTimepoint( omero, bvb.bvvViewer.state() );
+		OmeroDisplay.apply( omeroChannels, viewerSources, bvb.bvvHandle.getConverterSetups(), bvb.bvvViewer.state() );
 		setBrightnessSliders( omeroChannels, bvvSources );
 	}
 
