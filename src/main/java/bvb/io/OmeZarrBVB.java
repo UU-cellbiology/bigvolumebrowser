@@ -166,7 +166,7 @@ public class OmeZarrBVB
 	public static void openURIZarrJavaBackend(final BigVolumeBrowser bvb, final URI uri)
 	{
 		Context context = new Context();
-		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
+		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend() );
 		PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
 		OmeZarrBVB.showInBVB( bvb, pyramidal );	
 	}
