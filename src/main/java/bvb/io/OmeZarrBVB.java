@@ -41,7 +41,7 @@ import bdv.viewer.SourceAndConverter;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import bvb.core.BigVolumeBrowser;
 import bvvpg.vistools.BvvStackSource;
-import ome.zarr.fiji.PyramidalBdv;
+import ome.zarr.fiji.bdv.PyramidalBdv;
 import ome.zarr.fiji.plugins.PyramidalService;
 import ome.zarr.fiji.read.OmeZarr;
 import ome.zarr.fiji.util.BdvUtils;

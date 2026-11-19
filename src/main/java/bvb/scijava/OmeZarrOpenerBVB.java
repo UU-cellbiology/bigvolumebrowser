@@ -32,7 +32,7 @@ import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import bvb.io.OmeZarrBVB;
-import ome.zarr.fiji.PyramidalBdv;
+import ome.zarr.fiji.bdv.PyramidalBdv;
 import ome.zarr.fiji.open.OmeZarrOpener;
 import ome.zarr.fiji.read.OmeZarr;
 
