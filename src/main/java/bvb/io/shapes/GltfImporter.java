@@ -142,6 +142,8 @@ public class GltfImporter
 				}
 
 				final int [] indices = readIndices(meshPrimitiveModel);
+				if(indices == null)
+					continue;
 				for(int i = 0; i < indices.length; i++)
 				{
 					if((i+1)%3 == 0)

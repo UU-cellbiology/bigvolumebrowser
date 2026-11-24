@@ -32,7 +32,6 @@ import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
@@ -52,6 +51,7 @@ import net.imglib2.converter.Converters;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -67,6 +67,7 @@ import bdv.ViewerImgLoader;
 
 import bdv.cache.CacheControl;
 import bdv.cache.SharedQueue;
+import bdv.img.cache.VolatileCachedCellImg;
 import bdv.util.volatiles.VolatileViews;
 import bdv.viewer.Source;
 import bvb.core.BVVSettings;
@@ -170,6 +171,12 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		public RandomAccessibleInterval< V > getVolatileImage(final int timepointId,
 															final int level, final ImgLoaderHint... hints)
 		{
+			final AbstractCellImg< T, ?, ?, ? > cellImg = prepareCachedImage(timepointId, level);
+			if(cellImg instanceof VolatileCachedCellImg)
+			{
+				return Cast.unchecked( cellImg );
+			}
+			
 			return VolatileViews.wrapAsVolatile( prepareCachedImage(timepointId, level), queue);
 		}
 		
@@ -187,20 +194,15 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 		}
 
 	
-		protected CachedCellImg< T, ? >
+		protected AbstractCellImg< T, ?, ?,? >
 		prepareCachedImage(final int timepointId, final int level)
 		{
 			final RandomAccessibleInterval< T > rai = Cast.unchecked( src.getSource( timepointId, level ));
 		   
-			if(rai instanceof CachedCellImg)
+			//already properly organized
+			if(rai instanceof AbstractCellImg && convertMode == ConvertMode.NO )
 			{
-				//not sure if this will ever work
-				final CachedCellImg< T, ? > raiCached = Cast.unchecked( rai);
-				final Set< AccessFlags > flags = AccessFlags.ofAccess( raiCached );
-				if ( flags.contains( VOLATILE ) )
-				{
-					return ( CachedCellImg< T, ? > ) rai;
-				}
+				return (AbstractCellImg< T, ?, ?,? >)rai;
 			}
 			
 			final long[] dimensions =
@@ -246,14 +248,14 @@ public class SourcesImgLoaderBvv < T extends RealType< T > & NativeType< T >,
 			        grid,
 			        cellLoader,
 			        type,
-			        AccessFlags.setOf(AccessFlags.VOLATILE)
+			        AccessFlags.setOf( VOLATILE )
 			);
 	        
 	        return new CachedCellImg<>(
 	                grid,
 	                type,
 	                cache.withLoader(backingLoader),
-	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( AccessFlags.VOLATILE))
+	                ArrayDataAccessFactory.get(type, AccessFlags.setOf( VOLATILE ))
 	        );
 		}
 		
