@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import bvb.io.OmeZarrBVB;
 import ome.zarr.fiji.Pyramidal;
-import ome.zarr.fiji.PyramidalBdv;
+import ome.zarr.fiji.bdv.PyramidalBdv;
 
 /**
  * Sends the OME-Zarr in the window the user last looked at — an ImageJ image,

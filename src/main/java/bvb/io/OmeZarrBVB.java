@@ -41,10 +41,9 @@ import bdv.viewer.SourceAndConverter;
 import mpicbg.spim.data.generic.AbstractSpimData;
 import bvb.core.BigVolumeBrowser;
 import bvvpg.vistools.BvvStackSource;
-import ome.zarr.fiji.PyramidalBdv;
-import ome.zarr.fiji.plugins.PyramidalService;
+import ome.zarr.fiji.bdv.OmeroDisplay;
+import ome.zarr.fiji.bdv.PyramidalBdv;
 import ome.zarr.fiji.read.OmeZarr;
-import ome.zarr.fiji.util.BdvUtils;
 import ome.zarr.imglib2.metadata.Omero;
 import ome.zarr.zarrjava.ZarrJavaPyramidBackend;
 
@@ -93,14 +92,14 @@ public class OmeZarrBVB
 		// it has logged why, but the caller still has to hear that nothing was shown.
 		if ( added == null )
 			throw new IllegalStateException( "BigVolumeBrowser cannot display this dataset, see the log for the reason." );
-		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero, added.getB() );
+		applyChannelProperties( bvb, pyramidal.getPyramidContents().omero(), added.getB() );
 	}
 
 	/**
 	 * Applies the OME-Zarr's OMERO display settings to the BVV sources.
 	 * <p>
 	 * Color, display range, per-channel visibility and the start timepoint are set
-	 * by {@link BdvUtils}, the same code the OME-Zarr plugin uses for
+	 * by {@link OmeroDisplay}, the same code the OME-Zarr plugin uses for
 	 * BigDataViewer, so a dataset looks the same in both viewers. That works
 	 * because {@code BvvHandle} exposes the same BigDataViewer core types a
 	 * {@code BdvHandle} does — {@link bdv.viewer.ConverterSetups} and
@@ -113,9 +112,9 @@ public class OmeZarrBVB
 		final List< SourceAndConverter< ? > > viewerSources = new ArrayList<>();
 		for ( final BvvStackSource< ? > bvvSource : bvvSources )
 			viewerSources.addAll( bvvSource.getSources() );
-		final List< Omero.Channel > omeroChannels = BdvUtils.omeroChannels( omero, viewerSources.size() );
-		BdvUtils.setTimepoint( omero, bvb.bvvViewer.state() );
-		BdvUtils.setChannelProperties( omeroChannels, viewerSources, bvb.bvvHandle.getConverterSetups(), bvb.bvvViewer.state() );
+		final List< Omero.Channel > omeroChannels = OmeroDisplay.channels( omero, viewerSources.size() );
+		OmeroDisplay.setTimepoint( omero, bvb.bvvViewer.state() );
+		OmeroDisplay.apply( omeroChannels, viewerSources, bvb.bvvHandle.getConverterSetups(), bvb.bvvViewer.state() );
 		setBrightnessSliders( omeroChannels, bvvSources );
 	}
 
@@ -137,36 +136,37 @@ public class OmeZarrBVB
 		for ( int channelNumber = 0; channelNumber < bvvSources.size(); channelNumber++ )
 		{
 			final Omero.Channel omeroChannel = omeroChannels.get( channelNumber );
-			if ( omeroChannel == null || omeroChannel.window == null )
+			if ( omeroChannel == null || omeroChannel.window() == null )
 				continue;
-			final Omero.Channel.Window window = omeroChannel.window;
+			final Omero.Channel.Window window = omeroChannel.window();
 			final BvvStackSource< ? > bvvSource = bvvSources.get( channelNumber );
-			bvvSource.setDisplayRange( window.start, window.end );
-			if ( window.max > window.min )
-				bvvSource.setDisplayRangeBounds( Math.min( window.min, window.start ), Math.max( window.max, window.end ) );
+			bvvSource.setDisplayRange( window.start(), window.end() );
+			if ( window.max() > window.min() )
+				bvvSource.setDisplayRangeBounds( Math.min( window.min(), window.start() ), Math.max( window.max(), window.end() ) );
 		}
 	}
 
 	/**
-	 * Makes the BVV frame known to {@link PyramidalService}, which tracks the window
+	 * Makes the BVV frame known to the OME-Zarr plugin, which tracks the window
 	 * last holding an OME-Zarr for the "open the current OME-Zarr in …" commands.
+	 * The frame maps to this OME-Zarr whenever one of its sources is the viewer's
+	 * current source.
 	 * <p>
-	 * {@link BigVolumeBrowser#restartBVV()} builds a new frame, so the registration
-	 * is renewed on {@code bvbRestarted}. It and the old frame's
+	 * {@link BigVolumeBrowser#restartBVV()} builds a new viewer and frame, so the
+	 * registration is renewed on {@code bvbRestarted}. It and the old frame's
 	 * {@code windowClosed} may arrive in any order, and the reference count stays
 	 * balanced either way.
 	 */
 	static void registerWindow( final BigVolumeBrowser bvb, final PyramidalBdv< ? > pyramidal )
 	{
-		final PyramidalService pyramidalService = pyramidal.getContext().getService( PyramidalService.class );
-		BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService );
-		bvb.addBVBListener( () -> BdvUtils.registerBdvWindow( pyramidal, bvb.bvvFrame, pyramidalService ) ); // NB: a restart replaces the frame, and this call has to register the new one. bvb.bvvFrame needs to be read again.
+		pyramidal.registerViewer( bvb.bvvViewer );
+		bvb.addBVBListener( () -> pyramidal.registerViewer( bvb.bvvViewer ) ); // NB: a restart replaces the viewer, and this call has to register the new one. bvb.bvvViewer needs to be read again.
 	}
 	
 	public static void openURIZarrJavaBackend(final BigVolumeBrowser bvb, final URI uri)
 	{
 		Context context = new Context();
-		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend(), null );
+		OmeZarr omeZarr = new OmeZarr( uri, context, new ZarrJavaPyramidBackend() );
 		PyramidalBdv< ? > pyramidal = new PyramidalBdv<>( context, omeZarr.readContents() );
 		OmeZarrBVB.showInBVB( bvb, pyramidal );	
 	}
